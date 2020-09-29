@@ -2,10 +2,10 @@
 #include "Application.h"
 #include "Globals.h"
 
-#include "Libs/SDL/include/SDL.h"
-#include "Libs/ImGui/imgui.h"
-#pragma comment( lib, "Libs/SDL/libx86/SDL2.lib" )
-#pragma comment( lib, "Libs/SDL/libx86/SDL2main.lib" )
+#include "SDL/include/SDL.h"
+#include "ImGui/imgui.h"
+#pragma comment( lib, "SDL/libx86/SDL2.lib" )
+#pragma comment( lib, "SDL/libx86/SDL2main.lib" )
 
 enum main_states
 {
