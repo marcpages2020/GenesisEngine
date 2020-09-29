@@ -1,13 +1,13 @@
 #include "Globals.h"
 #include "Editor.h"
 
-/*
-#include "External Libraries/GL/gl3w.h"
+#include <Windows.h>
+#include "Libs/GL/gl3w.h"
 
-#include "External Libraries/ImGui/imgui.h"
-#include "External Libraries/ImGui/imgui_impl_sdl.h"
-#include "External Libraries/ImGui/imgui_impl_opengl3.h"
-*/
+#include "Libs/ImGui/imgui.h"
+#include "Libs/ImGui/imgui_impl_sdl.h"
+#include "Libs/ImGui/imgui_impl_opengl3.h"
+
 
 Editor::Editor(Application* app, bool start_enabled) : Module(app, start_enabled)
 {

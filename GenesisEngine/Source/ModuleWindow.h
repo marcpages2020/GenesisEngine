@@ -2,7 +2,7 @@
 #define __ModuleWindow_H__
 
 #include "Module.h"
-#include "External Libraries/SDL/include/SDL.h"
+#include "Libs/SDL/include/SDL.h"
 
 class Application;
 
