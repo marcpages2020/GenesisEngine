@@ -42,13 +42,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
-    <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
-    <LibraryPath>G:\Github\GenesisEngine\GenesisEngine;$(LibraryPath)</LibraryPath>
+    <IntDir>$(Configuration)\</IntDir>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
-    <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
-    <LibraryPath>G:\Github\GenesisEngine\GenesisEngine;$(LibraryPath)</LibraryPath>
+    <IntDir>$(Configuration)\</IntDir>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -58,7 +58,8 @@
       <ExceptionHandling>false</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalIncludeDirectories>G:\Github\GenesisEngine\GenesisEngine\Source\Libs;C:\Users\marcpf5\Documents\GitHub\GenesisEngine\GenesisEngine\Source\Libs\GL;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalUsingDirectories>G:\Github\GenesisEngine\GenesisEngine\Source\Libs;%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
+      <AdditionalUsingDirectories>
+      </AdditionalUsingDirectories>
       <StructMemberAlignment>Default</StructMemberAlignment>
     </ClCompile>
     <Link>
@@ -78,7 +79,8 @@
       <ExceptionHandling>false</ExceptionHandling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalIncludeDirectories>G:\Github\GenesisEngine\GenesisEngine\Source\Libs;</AdditionalIncludeDirectories>
-      <AdditionalUsingDirectories>G:\Github\GenesisEngine\GenesisEngine\Source\Libs;%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
+      <AdditionalUsingDirectories>
+      </AdditionalUsingDirectories>
       <StructMemberAlignment>Default</StructMemberAlignment>
     </ClCompile>
     <Link>

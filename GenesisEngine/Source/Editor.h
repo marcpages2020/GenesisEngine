@@ -16,7 +16,8 @@ public:
 	bool CleanUp();
 
 private:
-	bool demo = false;
+	bool show_demo_window;
+	bool show_another_window;
 };
 
 #endif // !_EDITOR_H_

@@ -1,11 +1,9 @@
 
 #include "Globals.h"
-#include <gl/GL.h>
-#include <gl/GLU.h>
 #include "Primitive.h"
 #include "glew/include/glew.h"
 
-#pragma comment (lib, "glew/glew32.lib")
+#pragma comment (lib, "glew/libx86/glew32.lib")
 
 // ------------------------------------------------------------
 Primitive::Primitive() : transform(IdentityMatrix), color(White), wire(false), axis(false), type(PrimitiveTypes::Primitive_Point)
@@ -170,7 +168,7 @@ Sphere::Sphere(float radius) : Primitive(), radius(radius)
 
 void Sphere::InnerRender() const
 {
-	glutSolidSphere(radius, 25, 25);
+	//glutSolidSphere(radius, 25, 25);
 }
 
 

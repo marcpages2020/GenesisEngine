@@ -66,6 +66,7 @@ void Application::PrepareUpdate()
 // ---------------------------------------------
 void Application::FinishUpdate()
 {
+
 }
 
 // Call PreUpdate, Update and PostUpdate on all modules
@@ -76,17 +77,17 @@ update_status Application::Update()
 	
 	for (int i = 0; i < modules_vector.size() && ret == UPDATE_CONTINUE; i++)
 	{
-		modules_vector[i]->PreUpdate(dt);
+		ret = modules_vector[i]->PreUpdate(dt);
 	}
 
 	for (int i = 0; i < modules_vector.size() && ret == UPDATE_CONTINUE; i++)
 	{
-		modules_vector[i]->Update(dt);
+		ret = modules_vector[i]->Update(dt);
 	}
 
 	for (int i = 0; i < modules_vector.size() && ret == UPDATE_CONTINUE; i++)
 	{
-		modules_vector[i]->PostUpdate(dt);
+		ret = modules_vector[i]->PostUpdate(dt);
 	}
 
 	FinishUpdate();
@@ -96,7 +97,7 @@ update_status Application::Update()
 bool Application::CleanUp()
 {
 	bool ret = true;
-	for (int i = modules_vector.size(); i > 0 && ret == UPDATE_CONTINUE; i--)
+	for (int i = modules_vector.size() -1; i > 0; i--)
 	{
 		modules_vector[i]->CleanUp();
 	}
