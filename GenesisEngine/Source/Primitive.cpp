@@ -3,9 +3,9 @@
 #include <gl/GL.h>
 #include <gl/GLU.h>
 #include "Primitive.h"
-#include "glut/glut.h"
+#include "glew/include/glew.h"
 
-#pragma comment (lib, "glut/glut32.lib")
+#pragma comment (lib, "glew/glew32.lib")
 
 // ------------------------------------------------------------
 Primitive::Primitive() : transform(IdentityMatrix), color(White), wire(false), axis(false), type(PrimitiveTypes::Primitive_Point)

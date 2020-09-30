@@ -1,19 +1,14 @@
 #include "Globals.h"
-#include "Editor.h"
 #include "Application.h"
 
-#include <Windows.h>
-//#include "Libs/GL/gl3w.h"
-#include "glew/include/glew.h"
-#include "SDL/include/SDL_opengl.h"
-#include <gl/GL.h>
-#include <gl/GLU.h>
+#include "ModuleWindow.h"
+#include "ModuleRenderer3D.h"
 
 #include "ImGui/imgui.h"
-#include "ImGui/imgui_internal.h"
 #include "ImGui/imgui_impl_sdl.h"
 #include "ImGui/imgui_impl_opengl3.h"
 
+#include "Editor.h"
 
 Editor::Editor(Application* app, bool start_enabled) : Module(app, start_enabled)
 {
@@ -28,42 +23,46 @@ bool Editor::Init()
 {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO();
-	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-	io.ConfigViewportsNoDecoration = false;
-	io.ConfigViewportsNoAutoMerge = true;
-	io.ConfigWindowsMoveFromTitleBarOnly = true;
-	io.ConfigDockingTransparentPayload = true;
-
-	ImGuiStyle& style = ImGui::GetStyle();
-	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-	{
-		style.WindowRounding = 0.0f;
-		style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-	}
-	style.Colors[ImGuiCol_DragDropTarget] = ImVec4(0.0f, 1.0f, 1.0f, 1.0f);
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	ImGui::StyleColorsDark();
 
 	ImGui_ImplSDL2_InitForOpenGL(App->window->window, App->renderer3D->context);
 	ImGui_ImplOpenGL3_Init();
 
-	/*
-	io.IniFilename = "Engine/imgui.ini";
-	io.MouseDrawCursor = false;
-
-	int screen_width = GetSystemMetrics(SM_CXSCREEN);
-	int screen_height = GetSystemMetrics(SM_CYSCREEN);
-	*/
 	return true;
 }
 
-update_status Editor::PreUpdate(float dt) 
+update_status Editor::Update(float dt) 
 {
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplSDL2_NewFrame(App->window->window);
+	ImGui::NewFrame();
+
+	if (ImGui::BeginMainMenuBar())
+	{
+		if (ImGui::BeginMenu("File"))
+		{
+			if (ImGui::MenuItem("Exit")) { return UPDATE_STOP; }
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu("Demo"))
+		{
+			ImGui::Checkbox("Demo Window", &demo);
+			ImGui::EndMenu();
+		}
+		ImGui::EndMainMenuBar();
+	}
+	if (demo)
+		ImGui::ShowDemoWindow(&demo);
+
 	return UPDATE_CONTINUE;
 }
 
 update_status Editor::PostUpdate(float dt)
 {
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
 	return UPDATE_CONTINUE;
 }
 

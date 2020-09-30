@@ -16,9 +16,6 @@
     <ClCompile Include="ModuleRenderer3D.cpp">
       <Filter>Modules</Filter>
     </ClCompile>
-    <ClCompile Include="ModuleSceneIntro.cpp">
-      <Filter>Modules</Filter>
-    </ClCompile>
     <ClCompile Include="ModuleWindow.cpp">
       <Filter>Modules</Filter>
     </ClCompile>
@@ -76,9 +73,6 @@
     <ClInclude Include="ModuleRenderer3D.h">
       <Filter>Modules</Filter>
     </ClInclude>
-    <ClInclude Include="ModuleSceneIntro.h">
-      <Filter>Modules</Filter>
-    </ClInclude>
     <ClInclude Include="ModuleWindow.h">
       <Filter>Modules</Filter>
     </ClInclude>
@@ -124,6 +118,18 @@
     <ClInclude Include="Libs\ImGui\imstb_truetype.h">
       <Filter>ImGui</Filter>
     </ClInclude>
+    <ClInclude Include="Libs\glew\include\eglew.h">
+      <Filter>Libs</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\glew\include\glew.h">
+      <Filter>Libs</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\glew\include\glxew.h">
+      <Filter>Libs</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\glew\include\wglew.h">
+      <Filter>Libs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Modules">
@@ -134,6 +140,9 @@
     </Filter>
     <Filter Include="ImGui">
       <UniqueIdentifier>{472dfa5b-faef-4416-b34b-af9d15805a90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libs">
+      <UniqueIdentifier>{e5b92709-b597-4c4b-bf07-c6d0682bb2af}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

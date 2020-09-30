@@ -5,7 +5,6 @@ Application::Application()
 	window = new ModuleWindow(this);
 	input = new ModuleInput(this);
 	audio = new ModuleAudio(this, true);
-	scene_intro = new ModuleSceneIntro(this);
 	renderer3D = new ModuleRenderer3D(this);
 	camera = new ModuleCamera3D(this);
 	editor = new Editor(this);
@@ -20,9 +19,6 @@ Application::Application()
 	AddModule(input);
 	AddModule(audio);
 	AddModule(editor);
-	
-	// Scenes
-	AddModule(scene_intro);
 
 	// Renderer last!
 	AddModule(renderer3D);
@@ -44,16 +40,16 @@ bool Application::Init()
 	bool ret = true;
 
 	// Call Init() in all modules
-	for (int i = 0; i < modules_vector.size(); i++)
+	for (int i = 0; i < modules_vector.size() && ret == true; i++)
 	{
-		modules_vector[i]->Init();
+		ret = modules_vector[i]->Init();
 	}
 
 	// After all Init calls we call Start() in all modules
 	LOG("Application Start --------------");
-	for (int i = 0; i < modules_vector.size(); i++)
+	for (int i = 0; i < modules_vector.size() && ret == true; i++)
 	{
-		modules_vector[i]->Start();
+		ret = modules_vector[i]->Start();
 	}
 	
 	ms_timer.Start();
@@ -100,7 +96,7 @@ update_status Application::Update()
 bool Application::CleanUp()
 {
 	bool ret = true;
-	for (int i = 0; i < modules_vector.size() && ret == UPDATE_CONTINUE; i++)
+	for (int i = modules_vector.size(); i > 0 && ret == UPDATE_CONTINUE; i--)
 	{
 		modules_vector[i]->CleanUp();
 	}

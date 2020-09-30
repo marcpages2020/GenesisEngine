@@ -99,13 +99,13 @@
 //  Helper libraries are often used for this purpose! Here we are supporting a few common ones (gl3w, glew, glad).
 //  You may use another loader/header of your choice (glext, glLoadGen, etc.), or chose to manually implement your own.
 #if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
-#include "Glew/include/glew.h"               // Needs to be initialized with gl3wInit() in user's code
+#include "glew/include/glew.h"
 #elif defined(IMGUI_IMPL_OPENGL_LOADER_GLEW)
-#include <GL/glew.h>            // Needs to be initialized with glewInit() in user's code.
+#include <GL/glew.h>    // Needs to be initialized with glewInit() in user's code          // Needs to be initialized with glewInit() in user's code.
 #elif defined(IMGUI_IMPL_OPENGL_LOADER_GLAD)
 #include <glad/glad.h>          // Needs to be initialized with gladLoadGL() in user's code.
 #elif defined(IMGUI_IMPL_OPENGL_LOADER_GLAD2)
-#include "glew/include/glew.h"   // Needs to be initialized with gladLoadGL(...) or gladLoaderLoadGL() in user's code.
+#include <glad/gl.h>      // Needs to be initialized with gladLoadGL(...) or gladLoaderLoadGL() in user's code.
 #elif defined(IMGUI_IMPL_OPENGL_LOADER_GLBINDING2)
 #ifndef GLFW_INCLUDE_NONE
 #define GLFW_INCLUDE_NONE       // GLFW including OpenGL headers causes ambiguity or multiple definition errors.
@@ -151,16 +151,6 @@ static void ImGui_ImplOpenGL3_ShutdownPlatformInterface();
 // Functions
 bool    ImGui_ImplOpenGL3_Init(const char* glsl_version)
 {
-    // Query for GL version (e.g. 320 for GL 3.2)
-#if !defined(IMGUI_IMPL_OPENGL_ES2)
-    GLint major, minor;
-    glGetIntegerv(GL_MAJOR_VERSION, &major);
-    glGetIntegerv(GL_MINOR_VERSION, &minor);
-    g_GlVersion = (GLuint)(major * 100 + minor * 10);
-#else
-    g_GlVersion = 200; // GLES 2
-#endif
-
     // Setup back-end capabilities flags
     ImGuiIO& io = ImGui::GetIO();
     io.BackendRendererName = "imgui_impl_opengl3";

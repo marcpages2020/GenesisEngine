@@ -2,10 +2,14 @@
 #include "Application.h"
 #include "ModuleWindow.h"
 
+#include "SDL/include/SDL_video.h"
+
 ModuleWindow::ModuleWindow(Application* app, bool start_enabled) : Module(app, start_enabled)
 {
 	window = NULL;
 	screen_surface = NULL;
+
+	context = nullptr;
 }
 
 // Destructor
@@ -32,7 +36,7 @@ bool ModuleWindow::Init()
 		Uint32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
 
 		//Use OpenGL 2.1
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 
 		if(WIN_FULLSCREEN == true)
@@ -66,6 +70,8 @@ bool ModuleWindow::Init()
 		{
 			//Get window surface
 			screen_surface = SDL_GetWindowSurface(window);
+
+			context = SDL_GL_CreateContext(window);
 		}
 	}
 
@@ -76,6 +82,8 @@ bool ModuleWindow::Init()
 bool ModuleWindow::CleanUp()
 {
 	LOG("Destroying SDL window and quitting all SDL systems");
+
+	SDL_GL_DeleteContext(context);
 
 	//Destroy window
 	if(window != NULL)
