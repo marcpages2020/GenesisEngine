@@ -16,8 +16,14 @@ public:
 	bool CleanUp();
 
 private:
+	update_status ShowDockSpace(bool* p_open);
+
+private:
 	bool show_demo_window;
 	bool show_another_window;
+
+	//menus
+	bool* open_dockspace;
 };
 
 #endif // !_EDITOR_H_
