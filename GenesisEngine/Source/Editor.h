@@ -4,6 +4,9 @@
 #include "Module.h"
 #include "Globals.h"
 
+#include <stdio.h>
+#include <string>
+
 class Editor : public Module 
 {
 public:
@@ -17,13 +20,20 @@ public:
 
 private:
 	update_status ShowDockSpace(bool* p_open);
+	void ChangeTheme(std::string theme);
 
 private:
-	bool show_demo_window;
-	bool show_another_window;
+	bool show_inspector_window;
+	bool show_project_window;
+	bool show_console_window;
+
+	//edit subwindows
+	bool show_preferences_window;
 
 	//menus
 	bool* open_dockspace;
+
+	int current_theme;
 };
 
 #endif // !_EDITOR_H_

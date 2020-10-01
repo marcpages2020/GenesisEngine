@@ -9,8 +9,13 @@
 
 Editor::Editor(Application* app, bool start_enabled) : Module(app, start_enabled)
 {
-	show_demo_window = true;
-	show_another_window = true;
+	show_inspector_window = true;
+	show_project_window = true;
+	show_console_window = false;
+
+	show_preferences_window = false;
+
+	current_theme = 1;
 }
 
 Editor::~Editor() {
@@ -28,7 +33,7 @@ bool Editor::Init()
 
 	ImGui_ImplSDL2_InitForOpenGL(App->window->window, App->renderer3D->context);
 	ImGui_ImplOpenGL3_Init();
-
+	
 	return true;
 }
 
@@ -42,39 +47,45 @@ update_status Editor::Update(float dt)
 
 	ret = ShowDockSpace(open_dockspace);
 
-	//demo window
+	//inspector window
 	{
-		static float f = 0.0f;
-		static int counter = 0;
-		ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
-		ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
-
-		ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-		ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-		ImGui::Checkbox("Project", &show_another_window);
-
-		ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-		ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-		if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-			counter++;
-		ImGui::SameLine();
-		ImGui::Text("counter = %d", counter);
-
-		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		ImGui::Begin("Inspector");                      
 		ImGui::End();
 	}
 
-	//another window
-	if (show_another_window)
+	//project window
+	if (show_project_window)
 	{
-		ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-		ImGui::Text("Hello from another window!");
-		if (ImGui::Button("Close Me"))
-			show_another_window = false;
+		ImGui::Begin("Project", &show_project_window); 
 		ImGui::End();
 	}	
+
+	//project window
+	if (show_console_window)
+	{
+		ImGui::Begin("Console", &show_console_window);
+		ImGui::End();
+	}
+
+	//preferences
+	if (show_preferences_window)
+	{
+		ImGui::Begin("Preferences", &show_preferences_window);
+
+		//Style
+		{
+			// Using the _simplified_ one-liner Combo() api here
+			// See "Combo" section for examples of how to use the more complete BeginCombo()/EndCombo() api.
+			const char* items[] = { "Classic", "Dark", "Light"};
+			if (ImGui::Combo("Interface Style", &current_theme, items, IM_ARRAYSIZE(items))) 
+			{
+				ChangeTheme(std::string(items[current_theme]));
+			}
+			ImGui::SameLine();
+		}
+
+		ImGui::End();
+	}
 
 	return ret;
 }
@@ -162,7 +173,7 @@ update_status Editor::ShowDockSpace(bool* p_open) {
 		{
 			if (ImGui::MenuItem("Save"))
 			{
-				ret = UPDATE_STOP;
+				
 			}
 			else if (ImGui::MenuItem("Exit"))
 			{
@@ -171,19 +182,24 @@ update_status Editor::ShowDockSpace(bool* p_open) {
 			ImGui::EndMenu();
 		}
 
+
 		if (ImGui::BeginMenu("Edit"))
 		{
-			if (ImGui::MenuItem("Undo   Ctrl+Z"))
+			if (ImGui::MenuItem("Undo   Ctrl+Z")) {	}
+			else if (ImGui::MenuItem("Redo   Ctrl+Y")) { }
+			else if (ImGui::MenuItem("Preferences"))
 			{
-			}
-			else if (ImGui::MenuItem("Redo   Ctrl+Y"))
-			{
+				show_preferences_window = true;
 			}
 			ImGui::EndMenu();
 		}
 
 		if (ImGui::BeginMenu("Window"))
 		{
+			if (ImGui::MenuItem("Console"))
+			{
+				show_console_window = true;
+			}
 			ImGui::EndMenu();
 		}
 
@@ -201,4 +217,19 @@ update_status Editor::ShowDockSpace(bool* p_open) {
 	ImGui::End();
 
 	return ret;
+}
+
+void Editor::ChangeTheme(std::string theme) {
+	if (theme == "Dark")
+	{
+		ImGui::StyleColorsDark();
+	}
+	else if (theme == "Classic") 
+	{
+		ImGui::StyleColorsClassic();
+	}
+	else if (theme == "Light")
+	{
+		ImGui::StyleColorsLight();
+	}
 }
