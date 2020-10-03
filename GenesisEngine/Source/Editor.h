@@ -4,8 +4,8 @@
 #include "Module.h"
 #include "Globals.h"
 
-#include <stdio.h>
 #include <string>
+#include <vector>
 
 class Editor : public Module 
 {
@@ -19,13 +19,21 @@ public:
 	bool CleanUp();
 
 private:
+	//Dock Space
 	update_status ShowDockSpace(bool* p_open);
+	bool CreateMainMenuBar();
+
+	//Windows
+	void ShowConfigurationWindow();
+
 	void ChangeTheme(std::string theme);
 
 private:
 	bool show_inspector_window;
 	bool show_project_window;
 	bool show_console_window;
+	bool show_scene_window;
+	bool show_configuration_window;
 
 	//edit subwindows
 	bool show_preferences_window;
@@ -34,6 +42,9 @@ private:
 	bool* open_dockspace;
 
 	int current_theme;
+
+	std::vector<float> fps_log;
+	std::vector<float> ms_log;
 };
 
 #endif // !_EDITOR_H_

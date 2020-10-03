@@ -9,6 +9,14 @@ ModuleWindow::ModuleWindow(Application* app, bool start_enabled) : Module(app, s
 	window = NULL;
 	screen_surface = NULL;
 
+	fullscreen = false;
+	fullscreen_desktop = false;
+	resizable = true;
+	borderless = false;
+
+	width = 1600;
+	height = 900;
+
 	context = nullptr;
 }
 
@@ -31,15 +39,15 @@ bool ModuleWindow::Init()
 	else
 	{
 		//Create window
-		int width = SCREEN_WIDTH * SCREEN_SIZE;
-		int height = SCREEN_HEIGHT * SCREEN_SIZE;
+		//int width = SCREEN_WIDTH * SCREEN_SIZE;
+		//int height = SCREEN_HEIGHT * SCREEN_SIZE;
 		Uint32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
 
 		//Use OpenGL 2.1
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 
-		if(WIN_FULLSCREEN == true)
+		if(fullscreen == true)
 		{
 			flags |= SDL_WINDOW_FULLSCREEN;
 		}
@@ -54,7 +62,7 @@ bool ModuleWindow::Init()
 			flags |= SDL_WINDOW_BORDERLESS;
 		}
 
-		if(WIN_FULLSCREEN_DESKTOP == true)
+		if(fullscreen_desktop == true)
 		{
 			flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 		}
@@ -96,7 +104,49 @@ bool ModuleWindow::CleanUp()
 	return true;
 }
 
+void ModuleWindow::GetSize(int& g_width, int& g_height)
+{
+	SDL_GetWindowSize(window, &g_width, &g_height);
+}
+
+void ModuleWindow::SetSize(int g_width, int g_height)
+{
+	SDL_SetWindowSize(window, g_width, g_height);
+}
+
 void ModuleWindow::SetTitle(const char* title)
 {
 	SDL_SetWindowTitle(window, title);
+}
+
+void ModuleWindow::SetFullscreen(bool setFullscreen)
+{
+	if (setFullscreen)
+		SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+	else 
+		SDL_SetWindowFullscreen(window, 0);
+}
+
+void ModuleWindow::SetFullscreenDesktop(bool setFullscreenDesktop)
+{
+	if (setFullscreenDesktop)
+		SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+	else
+		SDL_SetWindowFullscreen(window, 0);
+}
+
+void ModuleWindow::SetResizable(bool setResizable)
+{
+	if (setResizable)
+		SDL_SetWindowResizable(window, SDL_TRUE);
+	else 
+		SDL_SetWindowResizable(window, SDL_FALSE);
+}
+
+void ModuleWindow::SetBorderless(bool setBorderless)
+{
+	if (setBorderless)
+		SDL_SetWindowBordered(window, SDL_FALSE);
+	else
+		SDL_SetWindowBordered(window, SDL_TRUE);
 }

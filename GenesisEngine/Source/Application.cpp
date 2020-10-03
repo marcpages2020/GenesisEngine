@@ -7,6 +7,7 @@ Application::Application()
 	audio = new ModuleAudio(this, true);
 	renderer3D = new ModuleRenderer3D(this);
 	camera = new ModuleCamera3D(this);
+	scene = new ModuleSceneIntro(this);
 	editor = new Editor(this);
 
 	// The order of calls is very important!
@@ -18,10 +19,15 @@ Application::Application()
 	AddModule(camera);
 	AddModule(input);
 	AddModule(audio);
+
+	//AddModule(scene);
 	AddModule(editor);
 
 	// Renderer last!
 	AddModule(renderer3D);
+
+	int cap = 60;
+	capped_ms = 1000 / cap;
 }
 
 Application::~Application()
@@ -59,14 +65,20 @@ bool Application::Init()
 // ---------------------------------------------
 void Application::PrepareUpdate()
 {
-	dt = (float)ms_timer.Read() / 1000.0f;
+	dt = (float)ms_timer.Read() / 1000;
+	fps = 1.0f / dt;
 	ms_timer.Start();
 }
 
 // ---------------------------------------------
 void Application::FinishUpdate()
 {
+	Uint32 last_frame_ms = ms_timer.Read();
 
+	if (last_frame_ms < capped_ms)
+	{
+		SDL_Delay(capped_ms - last_frame_ms);
+	}
 }
 
 // Call PreUpdate, Update and PostUpdate on all modules
@@ -108,4 +120,25 @@ bool Application::CleanUp()
 void Application::AddModule(Module* mod)
 {
 	modules_vector.push_back(mod);
+}
+
+float Application::GetFPS() { return fps; }
+
+float Application::GetLastDt() { return ms_timer.Read() * 10; }
+
+int Application::GetFPSCap()
+{
+	return 1000 / capped_ms;
+}
+
+void Application::SetFPSCap(int fps_cap)
+{
+	capped_ms = 1000 / fps_cap;
+}
+
+void Application::GetHardware(int& CPUs, int& cache, int& RAM)
+{
+	CPUs = SDL_GetCPUCount();
+	cache = SDL_GetCPUCacheLineSize();
+	RAM = SDL_GetSystemRAM();
 }

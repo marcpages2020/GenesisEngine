@@ -9,6 +9,7 @@
 #include "ModuleAudio.h"
 #include "ModuleRenderer3D.h"
 #include "ModuleCamera3D.h"
+#include "ModuleSceneIntro.h"
 #include "Editor.h"
 
 class Application
@@ -17,14 +18,16 @@ public:
 	ModuleWindow* window;
 	ModuleInput* input;
 	ModuleAudio* audio;
-	ModuleRenderer3D* renderer3D;
 	ModuleCamera3D* camera;
+	ModuleSceneIntro* scene;
 	Editor* editor;
+	ModuleRenderer3D* renderer3D;
 
 private:
-
 	Timer	ms_timer;
 	float	dt;
+	float	fps;
+	float	capped_ms;
 	std::vector<Module*> modules_vector;
 
 public:
@@ -35,6 +38,14 @@ public:
 	bool Init();
 	update_status Update();
 	bool CleanUp();
+
+public:
+	float GetFPS();
+	float GetLastDt();
+	int GetFPSCap();
+	void SetFPSCap(int fps_cap);
+
+	void GetHardware(int& CPUs, int&cache, int& RAM);
 
 private:
 
