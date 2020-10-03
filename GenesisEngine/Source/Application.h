@@ -12,6 +12,34 @@
 #include "ModuleSceneIntro.h"
 #include "Editor.h"
 
+#include <string>
+
+struct HardwareSpecs
+{
+	int cpu_count;
+	int cache;
+	float ram;
+	const char* gpu;
+	const char* gpu_vendor;
+	float vram_budget;
+	float vram_usage;
+	float vram_available;
+	float vram_reserved;
+
+	bool RDTSC;
+	bool MMX;
+	bool SSE;
+	bool SSE2;
+	bool SSE3;
+	bool SSE41;
+	bool SSE42;
+	bool AVX;
+	bool AVX2;
+	bool AltiVec;
+
+	std::string caps;
+};
+
 class Application
 {
 public:
@@ -22,13 +50,6 @@ public:
 	ModuleSceneIntro* scene;
 	Editor* editor;
 	ModuleRenderer3D* renderer3D;
-
-private:
-	Timer	ms_timer;
-	float	dt;
-	float	fps;
-	float	capped_ms;
-	std::vector<Module*> modules_vector;
 
 public:
 
@@ -45,11 +66,21 @@ public:
 	int GetFPSCap();
 	void SetFPSCap(int fps_cap);
 
-	void GetHardware(int& CPUs, int&cache, int& RAM);
+	HardwareSpecs GetHardware();
+	void GetEngineVersion(int& major, int& minor);
 
 private:
 
 	void AddModule(Module* mod);
 	void PrepareUpdate();
 	void FinishUpdate();
+
+private:
+	Timer	ms_timer;
+	float	dt;
+	float	fps;
+	float	capped_ms;
+	std::vector<Module*> modules_vector;
+	int version_major;
+	int version_minor;
 };

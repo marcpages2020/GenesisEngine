@@ -1,4 +1,5 @@
 #include "Application.h"
+#include "glew/include/glew.h"
 
 Application::Application()
 {
@@ -28,6 +29,9 @@ Application::Application()
 
 	int cap = 60;
 	capped_ms = 1000 / cap;
+
+	version_major = 0;
+	version_minor = 1;
 }
 
 Application::~Application()
@@ -136,9 +140,53 @@ void Application::SetFPSCap(int fps_cap)
 	capped_ms = 1000 / fps_cap;
 }
 
-void Application::GetHardware(int& CPUs, int& cache, int& RAM)
+HardwareSpecs Application::GetHardware()
 {
-	CPUs = SDL_GetCPUCount();
-	cache = SDL_GetCPUCacheLineSize();
-	RAM = SDL_GetSystemRAM();
+	HardwareSpecs specs;
+
+	//CPU
+	specs.cpu_count = SDL_GetCPUCount();
+	specs.cache = SDL_GetCPUCacheLineSize();
+
+	//RAM
+	specs.ram = SDL_GetSystemRAM() / 1000;
+	
+	//Caps
+	specs.RDTSC = SDL_HasRDTSC();
+	specs.MMX = SDL_HasMMX();
+	specs.SSE = SDL_HasSSE();
+	specs.SSE2 = SDL_HasSSE2();
+	specs.SSE3 = SDL_HasSSE3();
+	specs.SSE41 = SDL_HasSSE41();
+	specs.SSE42 = SDL_HasSSE42();
+	specs.AVX = SDL_HasAVX();
+	specs.AVX2 = SDL_HasAVX2();
+	specs.AltiVec = SDL_HasAltiVec();
+
+	if (specs.RDTSC) { specs.caps += "SDTSC"; }
+	if (specs.MMX) { specs.caps += ", MMX"; }
+	if (specs.SSE) { specs.caps += ", SSE"; }
+	if (specs.SSE2) { specs.caps += ", SSE2"; }
+	if (specs.SSE3) { specs.caps += ", SSE3"; }
+	if (specs.SSE41) { specs.caps += ", SSE41"; }
+	if (specs.SSE42) { specs.caps += ", SSE42"; }
+	if (specs.AVX) { specs.caps += ", AVX2"; }
+	if (specs.AltiVec) { specs.caps += ", AltiVec"; }
+
+	//GPU
+	specs.gpu_vendor = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
+	specs.gpu = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
+
+	//specs.vram_budget;
+	//specs.vram_usage;
+	//specs.vram_available;
+	//specs.vram_reserved;
+
+	return specs;
+}
+
+void Application::GetEngineVersion(int& g_major, int& g_minor)
+{
+	g_major = version_major;
+	g_minor = version_minor;
 }

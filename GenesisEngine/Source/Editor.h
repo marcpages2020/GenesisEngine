@@ -18,6 +18,8 @@ public:
 	update_status PostUpdate(float dt);
 	bool CleanUp();
 
+	void AddConsoleLog(const char* log);
+	
 private:
 	//Dock Space
 	update_status ShowDockSpace(bool* p_open);
@@ -31,9 +33,11 @@ private:
 private:
 	bool show_inspector_window;
 	bool show_project_window;
+	bool show_hierachy_window;
 	bool show_console_window;
 	bool show_scene_window;
 	bool show_configuration_window;
+	bool show_about_window;
 
 	//edit subwindows
 	bool show_preferences_window;
@@ -45,6 +49,8 @@ private:
 
 	std::vector<float> fps_log;
 	std::vector<float> ms_log;
+
+	std::vector<const char*> console_log;
 };
 
 #endif // !_EDITOR_H_

@@ -1,6 +1,7 @@
 #include "Application.h"
 #include "Editor.h"
 
+#include "glew/include/glew.h"
 #include "ImGui/imgui.h"
 #include "ImGui/imgui_impl_sdl.h"
 #include "ImGui/imgui_impl_opengl3.h"
@@ -13,11 +14,13 @@ Editor::Editor(Application* app, bool start_enabled) : Module(app, start_enabled
 	//*open_dockspace = true;
 	show_scene_window = true;
 	show_inspector_window = true;
+	show_hierachy_window = true;
 	show_project_window = true;
-	show_console_window = false;
+	show_console_window = true;
 	show_configuration_window = true;
 
 	show_preferences_window = false;
+	show_about_window = false;
 
 	current_theme = 1;
 
@@ -61,28 +64,40 @@ update_status Editor::Update(float dt)
 		ImGui::End();
 	}
 
-	//inspector window
+	//Inspector
 	if(show_inspector_window)
 	{
 		ImGui::Begin("Inspector", &show_inspector_window);                      
 		ImGui::End();
 	}
 
-	//project window
+	//Project 
 	if (show_project_window)
 	{
 		ImGui::Begin("Project", &show_project_window); 
 		ImGui::End();
 	}	
 
-	//project window
+	//Hieracy
+	if (show_hierachy_window)
+	{
+		ImGui::Begin("Hierachy", &show_hierachy_window);
+		ImGui::End();
+	}
+		
+
+	//Console
 	if (show_console_window)
 	{
 		ImGui::Begin("Console", &show_console_window);
+		for (int i = 0; i < console_log.size(); i++)
+		{
+			ImGui::Text(console_log[i]);
+		}
 		ImGui::End();
 	}
 
-	//preferences
+	//Preferences
 	if (show_preferences_window)
 	{
 		ImGui::Begin("Preferences", &show_preferences_window);
@@ -102,10 +117,45 @@ update_status Editor::Update(float dt)
 		ImGui::End();
 	}
 
-	//configuration
+	//Configuration
 	if (show_configuration_window)
 	{
 		ShowConfigurationWindow();
+	}
+
+	//About
+	if (show_about_window)
+	{
+		if (ImGui::Begin("About", &show_about_window))
+		{
+			int version_major, version_minor;
+			App->GetEngineVersion(version_major, version_minor);
+
+			ImGui::Text("Genesis Engine v%d.%d", version_major, version_minor);
+			ImGui::Text("Made by Marc Pages Francesch");
+
+			ImGui::Separator();
+
+			ImGui::Text("External Libraries: ");
+
+			static SDL_version version;
+			SDL_GetVersion(&version);
+			ImGui::BulletText("SDL %d.%d.%d", version.major, version.minor, version.patch);
+
+			static GLint openGL_major = -1;
+			static GLint openGL_minor = -1;
+			
+			if(openGL_major == -1)
+				glGetIntegerv(GL_MAJOR_VERSION, &openGL_major);
+			if(openGL_minor == -1)
+				glGetIntegerv(GL_MINOR_VERSION, &openGL_minor);
+
+			ImGui::BulletText("OpenGL %d.%d", openGL_major, openGL_minor);
+
+			ImGui::Text("License: ");
+
+			ImGui::End();
+		}
 	}
 
 	return ret;
@@ -126,6 +176,11 @@ bool Editor::CleanUp()
 	ImGui::DestroyContext();
 
 	return true;
+}
+
+void Editor::AddConsoleLog(const char* log)
+{
+	console_log.push_back(log);
 }
 
 update_status Editor::ShowDockSpace(bool* p_open) {
@@ -220,11 +275,7 @@ bool Editor::CreateMainMenuBar() {
 	{
 		if (ImGui::BeginMenu("File"))
 		{
-			if (ImGui::MenuItem("Save"))
-			{
-
-			}
-			else if (ImGui::MenuItem("Exit"))
+			if (ImGui::MenuItem("Exit"))
 			{
 				ret = false;
 			}
@@ -234,10 +285,7 @@ bool Editor::CreateMainMenuBar() {
 
 		if (ImGui::BeginMenu("Edit"))
 		{
-			if (ImGui::MenuItem("Undo   Ctrl+Z")) {}
-			else if (ImGui::MenuItem("Redo   Ctrl+Y")) 
-			{}
-			else if (ImGui::MenuItem("Configuration"))
+			if (ImGui::MenuItem("Configuration"))
 			{
 				show_configuration_window = true;
 			}
@@ -282,6 +330,9 @@ bool Editor::CreateMainMenuBar() {
 
 			if (ImGui::MenuItem("View on GitHub"))
 				ShellExecuteA(NULL, "open", "https://github.com/marcpages2020/GenesisEngine", NULL, NULL, SW_SHOWNORMAL);
+
+			if (ImGui::MenuItem("About"))
+				show_about_window = true;
 
 			ImGui::EndMenu();
 		}
@@ -355,9 +406,42 @@ void Editor::ShowConfigurationWindow()
 
 	if (ImGui::CollapsingHeader("Hardware"))
 	{
+		ImVec4 values_color(1.0f, 1.0f, 0.0f, 1.0f);
+
+		//SDL Version
 		SDL_version version;
 		SDL_GetVersion(&version);
-		ImGui::Text("SDL Version: %d.%d.%d", version.major, version.minor, version.patch);
+		ImGui::Text("SDL Version:");
+		ImGui::SameLine(); 
+		ImGui::TextColored(values_color, "%d.%d.%d", version.major, version.minor, version.patch);
+
+		ImGui::Separator();
+
+		//Hardware
+		static HardwareSpecs specs = App->GetHardware();
+		//CPU
+		ImGui::Text("CPUs:");
+		ImGui::SameLine();
+		ImGui::TextColored(values_color, "%d (Cache: %dkb)", specs.cpu_count, specs.cache);	
+		//RAM
+		ImGui::Text("System RAM:");
+		ImGui::SameLine();
+		ImGui::TextColored(values_color, "%.1f Gb", specs.ram);
+		//Caps
+		ImGui::Text("Caps:");
+		ImGui::SameLine();
+		ImGui::TextColored(values_color, "%s", specs.caps.c_str());
+
+		ImGui::Separator();
+
+		
+		ImGui::Text("GPU:");
+		ImGui::SameLine();
+		ImGui::TextColored(values_color, "%s", specs.gpu);
+
+		ImGui::Text("Vendor:");
+		ImGui::SameLine();
+		ImGui::TextColored(values_color, "%s", specs.gpu_vendor);
 	}
 
 	ImGui::End();
