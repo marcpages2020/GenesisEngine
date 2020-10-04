@@ -15,6 +15,9 @@
 
 #include <string>
 
+struct json_value_t;
+typedef json_value_t JSON_Value;
+
 struct HardwareSpecs
 {
 	int cpu_count;
@@ -76,6 +79,8 @@ private:
 	void PrepareUpdate();
 	void FinishUpdate();
 
+	JSON_Value* PrepareConfig();
+
 private:
 	int	   argc;
 	char** args;
@@ -88,6 +93,8 @@ private:
 
 	int version_major;
 	int version_minor;
+
+	const char* config_path;
 };
 
 extern Application* App;

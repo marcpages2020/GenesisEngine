@@ -5,7 +5,9 @@
 #pragma comment( lib, "SDL_mixer/libx86/SDL2_mixer.lib" )
 
 ModuleAudio::ModuleAudio(bool start_enabled) : Module(start_enabled), music(NULL)
-{}
+{
+	name = "audio";
+}
 
 // Destructor
 ModuleAudio::~ModuleAudio()

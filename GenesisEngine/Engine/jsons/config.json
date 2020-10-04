@@ -1,0 +1,17 @@
+{
+  "config": [
+
+  ],
+  "modules": [
+    {
+      "name": "renderer"
+    },
+    {
+      "name":  "window"
+    },
+    {
+      "name": "editor"
+    }
+  ]
+
+}

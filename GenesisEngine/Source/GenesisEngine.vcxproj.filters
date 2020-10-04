@@ -58,6 +58,9 @@
     <ClCompile Include="ModuleSceneIntro.cpp">
       <Filter>Modules</Filter>
     </ClCompile>
+    <ClCompile Include="Libs\parson\parson.c">
+      <Filter>Tools\parson</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
@@ -141,6 +144,9 @@
     <ClInclude Include="Libs\MathGeoLib\include\MathGeoLib.h">
       <Filter>Libs</Filter>
     </ClInclude>
+    <ClInclude Include="Libs\parson\parson.h">
+      <Filter>Tools\parson</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Modules">
@@ -161,5 +167,11 @@
     <Filter Include="Libs\SDL">
       <UniqueIdentifier>{7bb8c861-6eba-490b-baff-8ddadc448f17}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Tools\parson">
+      <UniqueIdentifier>{03cd38a1-3ea2-4234-89ff-3f9057e2f643}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Engine\jsons\config.json" />
   </ItemGroup>
 </Project>

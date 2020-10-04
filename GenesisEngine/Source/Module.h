@@ -2,10 +2,18 @@
 
 class Application;
 
+#include <string>
+
+//struct json_array_t;
+//typedef struct json_array_t JSON_Array;
+
 class Module
 {
 private :
 	bool enabled;
+
+public: 
+	std::string name;
 
 public:
 

@@ -4,6 +4,7 @@
 
 ModuleCamera3D::ModuleCamera3D(bool start_enabled) : Module(start_enabled)
 {
+	name = "camera";
 	CalculateViewMatrix();
 
 	X = vec3(1.0f, 0.0f, 0.0f);

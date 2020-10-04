@@ -1,6 +1,8 @@
 #include "Application.h"
 #include "glew/include/glew.h"
 
+#include "parson/parson.h"
+
 Application::Application(int argc, char* args[]) : argc(argc), args(args)
 {
 	window = new ModuleWindow(true);
@@ -32,6 +34,8 @@ Application::Application(int argc, char* args[]) : argc(argc), args(args)
 
 	version_major = 0;
 	version_minor = 1;
+
+	config_path = "jsons";
 }
 
 Application::~Application()
@@ -48,6 +52,10 @@ Application::~Application()
 bool Application::Init()
 {
 	bool ret = true;
+
+	//JSON_Value* root = PrepareConfig();
+	//JSON_Array* config = json_value_get_array(root);
+	JSON_Array* array = nullptr;
 
 	// Call Init() in all modules
 	for (int i = 0; i < modules_vector.size() && ret == true; i++)
@@ -190,4 +198,24 @@ void Application::GetEngineVersion(int& g_major, int& g_minor)
 {
 	g_major = version_major;
 	g_minor = version_minor;
+}
+
+JSON_Value* Application::PrepareConfig()
+{
+	static char path[2048] = { 0 };
+	memset(path, 0, sizeof(path));
+	sprintf(path, "%s/%s", config_path, "config.json");
+
+	JSON_Value* config_json = json_parse_file(path);
+
+	if (config_json == NULL) 
+	{
+		LOG("Error config file");
+	}
+	else
+	{
+		json_value_free(config_json);
+	}
+
+	return config_json;
 }

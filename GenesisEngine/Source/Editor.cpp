@@ -11,6 +11,7 @@
 
 Editor::Editor(bool start_enabled) : Module(start_enabled)
 {
+	name = "editor";
 	//*open_dockspace = true;
 	show_scene_window = true;
 	show_inspector_window = true;
@@ -20,7 +21,7 @@ Editor::Editor(bool start_enabled) : Module(start_enabled)
 	show_configuration_window = true;
 
 	show_preferences_window = false;
-	show_about_window = false;
+	show_about_window = true;
 
 	current_theme = 1;
 
@@ -480,10 +481,12 @@ void Editor::ShowAboutWindow()
 		App->GetEngineVersion(version_major, version_minor);
 
 		ImGui::Text("Genesis Engine v%d.%d", version_major, version_minor);
+		ImGui::Text("The first chapter of your creation");
+		ImGui::Spacing();
 
 		ImGui::Text("Made by: ");
 		ImGui::SameLine();
-		if (ImGui::Button("Marc Pages Francesch"))
+		if (ImGui::SmallButton("Marc Pages Francesch"))
 			ShellExecuteA(NULL, "open", "https://github.com/marcpages2020", NULL, NULL, SW_SHOWNORMAL);
 
 
@@ -494,9 +497,7 @@ void Editor::ShowAboutWindow()
 		ImGui::Text("External libraries used: ");
 
 		//SDL Version
-		static SDL_version version;
-		SDL_GetVersion(&version);
-		ImGui::BulletText("SDL %d.%d.%d", version.major, version.minor, version.patch);
+		ImGui::BulletText("SDL %d.%d.%d", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL);
 
 		//OpenGL Version
 		static GLint openGL_major = -1;
