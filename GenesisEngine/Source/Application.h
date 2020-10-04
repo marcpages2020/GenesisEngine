@@ -15,8 +15,14 @@
 
 #include <string>
 
+struct json_array_t;
+typedef json_array_t JSON_Array;
+
 struct json_value_t;
 typedef json_value_t JSON_Value;
+
+struct json_object_t;
+typedef json_object_t JSON_Object;
 
 struct HardwareSpecs
 {
@@ -24,7 +30,7 @@ struct HardwareSpecs
 	int cache;
 	float ram;
 	const char* gpu;
-	const char* gpu_vendor;
+	const char* gpu_brand;
 	float vram_budget;
 	float vram_usage;
 	float vram_available;
@@ -79,7 +85,8 @@ private:
 	void PrepareUpdate();
 	void FinishUpdate();
 
-	JSON_Value* PrepareConfig();
+	JSON_Array* PrepareConfig();
+	JSON_Object* GetJSONObjectByName(const char* name, JSON_Array* modules_array);
 
 private:
 	int	   argc;
@@ -95,6 +102,7 @@ private:
 	int version_minor;
 
 	const char* config_path;
+	JSON_Value* config_root;
 };
 
 extern Application* App;

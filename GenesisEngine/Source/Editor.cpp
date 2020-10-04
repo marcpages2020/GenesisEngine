@@ -33,7 +33,7 @@ Editor::~Editor() {
 
 }
 
-bool Editor::Init() 
+bool Editor::Init(JSON_Object* object)
 {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -439,16 +439,16 @@ void Editor::ShowConfigurationWindow()
 		ImGui::SameLine();
 		ImGui::TextColored(values_color, "%s", specs.gpu);
 
-		ImGui::Text("Vendor:");
+		ImGui::Text("Brand:");
 		ImGui::SameLine();
-		ImGui::TextColored(values_color, "%s", specs.gpu_vendor);
+		ImGui::TextColored(values_color, "%s", specs.gpu_brand);
 
 		GLint vram_budget;
 		GLint vram_usage;
 		GLint vram_available;
 		GLint vram_reserved;
 
-		GetMemoryStatistics(specs.gpu_vendor, vram_budget, vram_usage, vram_available, vram_reserved);
+		GetMemoryStatistics(specs.gpu_brand, vram_budget, vram_usage, vram_available, vram_reserved);
 
 		ImGui::Text("VRAM Budget:");
 		ImGui::SameLine();

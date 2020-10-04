@@ -2,10 +2,8 @@
 
 class Application;
 
-#include <string>
-
-//struct json_array_t;
-//typedef struct json_array_t JSON_Array;
+struct json_object_t;
+typedef struct json_object_t JSON_Object;
 
 class Module
 {
@@ -13,7 +11,7 @@ private :
 	bool enabled;
 
 public: 
-	std::string name;
+	const char* name;
 
 public:
 
@@ -25,7 +23,7 @@ public:
 	virtual ~Module()
 	{}
 
-	virtual bool Init() 
+	virtual bool Init(JSON_Object* object) 
 	{
 		return true; 
 	}

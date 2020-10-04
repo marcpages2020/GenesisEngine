@@ -53,14 +53,15 @@ bool Application::Init()
 {
 	bool ret = true;
 
-	//JSON_Value* root = PrepareConfig();
-	//JSON_Array* config = json_value_get_array(root);
-	JSON_Array* array = nullptr;
+	JSON_Array* modules_array = PrepareConfig();
+	//json_array_get_object(modules_array);
 
 	// Call Init() in all modules
 	for (int i = 0; i < modules_vector.size() && ret == true; i++)
 	{
-		ret = modules_vector[i]->Init();
+		JSON_Object* module_object = GetJSONObjectByName(modules_vector[i]->name, modules_array);
+
+		ret = modules_vector[i]->Init(module_object);
 	}
 
 	// After all Init calls we call Start() in all modules
@@ -184,7 +185,7 @@ HardwareSpecs Application::GetHardware()
 	//GPU
 	//GLubyte* vendor = 
 	specs.gpu = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
-	specs.gpu_vendor = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
+	specs.gpu_brand = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
 
 	//specs.vram_budget;
 	//specs.vram_usage;
@@ -200,13 +201,15 @@ void Application::GetEngineVersion(int& g_major, int& g_minor)
 	g_minor = version_minor;
 }
 
-JSON_Value* Application::PrepareConfig()
+JSON_Array* Application::PrepareConfig()
 {
 	static char path[2048] = { 0 };
 	memset(path, 0, sizeof(path));
-	sprintf(path, "%s/%s", config_path, "config.json");
+	sprintf_s(path, "%s/%s", config_path, "config.json");
 
 	JSON_Value* config_json = json_parse_file(path);
+	JSON_Object* config_root = json_value_get_object(config_json);
+	JSON_Array* modules = json_object_get_array(config_root,"modules"); //json_value_get_array(config_json);
 
 	if (config_json == NULL) 
 	{
@@ -214,8 +217,25 @@ JSON_Value* Application::PrepareConfig()
 	}
 	else
 	{
-		json_value_free(config_json);
+		//json_value_free(config_json);
 	}
 
-	return config_json;
+	return modules;
 }
+
+JSON_Object* Application::GetJSONObjectByName(const char* name, JSON_Array* modules_array)
+{
+	int modules = json_array_get_count(modules_array);
+	
+	for (size_t i = 0; i < modules; i++)
+	{
+		JSON_Object* object = json_array_get_object(modules_array, i);
+		if (strcmp(name, json_object_get_string(object, "name")) == 0)
+			return object;
+	}
+
+	LOG("JSON object could not be found in the file");
+	return NULL;
+}
+
+

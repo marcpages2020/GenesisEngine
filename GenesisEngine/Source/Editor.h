@@ -15,7 +15,7 @@ public:
 	Editor(bool start_enabled = true);
 	~Editor();
 
-	bool Init();
+	bool Init(JSON_Object* object);
 	update_status Update(float dt);
 	update_status PostUpdate(float dt);
 	bool CleanUp();

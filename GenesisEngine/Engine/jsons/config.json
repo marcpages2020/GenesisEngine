@@ -1,17 +1,10 @@
 {
-  "config": [
-
-  ],
   "modules": [
-    {
-      "name": "renderer"
-    },
-    {
-      "name":  "window"
-    },
-    {
-      "name": "editor"
-    }
+    { "name": "window" },
+    { "name": "editor" },
+    { "name": "input" },
+    { "name": "audio" },
+    { "name": "renderer" }
   ]
-
 }
+ 
