@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _APPLICATION_H_
+#define _APPLICATION_H_
 
 #include "Globals.h"
 #include <vector>
@@ -53,7 +54,7 @@ public:
 
 public:
 
-	Application();
+	Application(int argc, char* args[]);
 	~Application();
 
 	bool Init();
@@ -76,11 +77,19 @@ private:
 	void FinishUpdate();
 
 private:
+	int	   argc;
+	char** args;
+
 	Timer	ms_timer;
 	float	dt;
 	float	fps;
 	float	capped_ms;
 	std::vector<Module*> modules_vector;
+
 	int version_major;
 	int version_minor;
 };
+
+extern Application* App;
+
+#endif 

@@ -9,7 +9,7 @@
 #include "MathGeoLib/include/MathGeoLib.h"
 
 
-Editor::Editor(Application* app, bool start_enabled) : Module(app, start_enabled)
+Editor::Editor(bool start_enabled) : Module(start_enabled)
 {
 	//*open_dockspace = true;
 	show_scene_window = true;
@@ -92,7 +92,7 @@ update_status Editor::Update(float dt)
 		ImGui::Begin("Console", &show_console_window);
 		for (int i = 0; i < console_log.size(); i++)
 		{
-			ImGui::Text(console_log[i]);
+			ImGui::Text(console_log[i].c_str());
 		}
 		ImGui::End();
 	}
@@ -180,7 +180,7 @@ bool Editor::CleanUp()
 
 void Editor::AddConsoleLog(const char* log)
 {
-	console_log.push_back(log);
+	console_log.push_back(std::string(log));
 }
 
 update_status Editor::ShowDockSpace(bool* p_open) {
@@ -375,12 +375,21 @@ void Editor::ShowConfigurationWindow()
 	}
 
 	if (ImGui::CollapsingHeader("Window"))
-	{
-		static bool fullscreen = false;
-		static bool fullscreen_desktop = false;
-		static bool resizable = true;
-		static bool borderless = false;
-	
+	{	
+		static float brightness = App->window->GetBrightness();
+		if (ImGui::SliderFloat("Brightness", &brightness, 0.0f, 1.0f))
+			App->window->SetBrightness(brightness);
+
+		static int width, height;
+		App->window->GetSize(width, height);
+
+		if ((ImGui::SliderInt("Width", &width, 640, 3840) || ImGui::SliderInt("Height", &height, 360, 2160)))
+			App->window->SetSize(width, height);
+
+		static bool fullscreen = App->window->fullscreen;
+		static bool fullscreen_desktop = App->window->fullscreen_desktop;
+		static bool resizable = App->window->resizable;
+		static bool borderless = App->window->borderless;
 
 		if (ImGui::Checkbox("Fullscreen", &fullscreen))
 			App->window->SetFullscreen(fullscreen);
@@ -396,12 +405,6 @@ void Editor::ShowConfigurationWindow()
 		if (ImGui::Checkbox("Fullscreen Desktop", &fullscreen_desktop))
 			App->window->SetFullscreenDesktop(fullscreen_desktop);		
 		
-
-		int width, height;
-		App->window->GetSize(width, height);
-
-		if ((ImGui::SliderInt("Width", &width, 640, 3840) || ImGui::SliderInt("Height", &height, 360, 2160)))
-			App->window->SetSize(width, height);
 	}
 
 	if (ImGui::CollapsingHeader("Hardware"))

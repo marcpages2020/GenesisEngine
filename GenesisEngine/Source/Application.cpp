@@ -1,15 +1,15 @@
 #include "Application.h"
 #include "glew/include/glew.h"
 
-Application::Application()
+Application::Application(int argc, char* args[]) : argc(argc), args(args)
 {
-	window = new ModuleWindow(this);
-	input = new ModuleInput(this);
-	audio = new ModuleAudio(this, true);
-	renderer3D = new ModuleRenderer3D(this);
-	camera = new ModuleCamera3D(this);
-	scene = new ModuleSceneIntro(this);
-	editor = new Editor(this);
+	window = new ModuleWindow(true);
+	input = new ModuleInput(true);
+	audio = new ModuleAudio(true);
+	renderer3D = new ModuleRenderer3D(true);
+	camera = new ModuleCamera3D(true);
+	scene = new ModuleSceneIntro(true);
+	editor = new Editor(true);
 
 	// The order of calls is very important!
 	// Modules will Init() Start() and Update in this order
@@ -174,8 +174,9 @@ HardwareSpecs Application::GetHardware()
 	if (specs.AltiVec) { specs.caps += ", AltiVec"; }
 
 	//GPU
-	specs.gpu_vendor = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
+	//GLubyte* vendor = 
 	specs.gpu = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
+	specs.gpu_vendor = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
 
 	//specs.vram_budget;
 	//specs.vram_usage;

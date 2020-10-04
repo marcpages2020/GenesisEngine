@@ -10,7 +10,7 @@
 class Editor : public Module 
 {
 public:
-	Editor(Application* app, bool start_enabled = true);
+	Editor(bool start_enabled = true);
 	~Editor();
 
 	bool Init();
@@ -50,7 +50,7 @@ private:
 	std::vector<float> fps_log;
 	std::vector<float> ms_log;
 
-	std::vector<const char*> console_log;
+	std::vector<std::string> console_log;
 };
 
 #endif // !_EDITOR_H_

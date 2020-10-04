@@ -10,7 +10,7 @@ class ModuleWindow : public Module
 {
 public:
 
-	ModuleWindow(Application* app, bool start_enabled = true);
+	ModuleWindow(bool start_enabled = true);
 
 	// Destructor
 	virtual ~ModuleWindow();
@@ -21,6 +21,9 @@ public:
 	void GetSize(int& width, int& height);
 	void SetSize(int width, int height);
 
+	float GetBrightness();
+	void SetBrightness(float brightness);
+
 	void SetTitle(const char* title);
 	void SetFullscreen(bool setFullscreen);
 	void SetFullscreenDesktop(bool setFullscreenDesktop);
@@ -28,13 +31,10 @@ public:
 	void SetBorderless(bool setBorderless);
 
 private:
-	bool fullscreen;
-	bool fullscreen_desktop;
-	bool resizable;
-	bool borderless;
-
 	int width;
 	int height;
+
+	float brightness;
 
 public:
 	//The window we'll be rendering to
@@ -44,6 +44,11 @@ public:
 	SDL_Surface* screen_surface;
 
 	SDL_GLContext context;
+
+	bool fullscreen;
+	bool fullscreen_desktop;
+	bool resizable;
+	bool borderless;
 };
 
 #endif // __ModuleWindow_H__

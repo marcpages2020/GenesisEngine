@@ -4,7 +4,7 @@
 
 #include "SDL/include/SDL_video.h"
 
-ModuleWindow::ModuleWindow(Application* app, bool start_enabled) : Module(app, start_enabled)
+ModuleWindow::ModuleWindow(bool start_enabled) : Module(start_enabled)
 {
 	window = NULL;
 	screen_surface = NULL;
@@ -81,6 +81,8 @@ bool ModuleWindow::Init()
 
 			context = SDL_GL_CreateContext(window);
 		}
+
+		brightness = SDL_GetWindowBrightness(window);
 	}
 
 	return ret;
@@ -112,6 +114,18 @@ void ModuleWindow::GetSize(int& g_width, int& g_height)
 void ModuleWindow::SetSize(int g_width, int g_height)
 {
 	SDL_SetWindowSize(window, g_width, g_height);
+}
+
+float ModuleWindow::GetBrightness()
+{
+	return brightness;
+}
+
+void ModuleWindow::SetBrightness(float g_brightness)
+{
+	brightness = g_brightness;
+	if (SDL_SetWindowBrightness(window, brightness) != 0)
+		LOG("Error changing window brightness %s", SDL_GetError());
 }
 
 void ModuleWindow::SetTitle(const char* title)
