@@ -126,36 +126,7 @@ update_status Editor::Update(float dt)
 	//About
 	if (show_about_window)
 	{
-		if (ImGui::Begin("About", &show_about_window))
-		{
-			int version_major, version_minor;
-			App->GetEngineVersion(version_major, version_minor);
-
-			ImGui::Text("Genesis Engine v%d.%d", version_major, version_minor);
-			ImGui::Text("Made by Marc Pages Francesch");
-
-			ImGui::Separator();
-
-			ImGui::Text("External Libraries: ");
-
-			static SDL_version version;
-			SDL_GetVersion(&version);
-			ImGui::BulletText("SDL %d.%d.%d", version.major, version.minor, version.patch);
-
-			static GLint openGL_major = -1;
-			static GLint openGL_minor = -1;
-			
-			if(openGL_major == -1)
-				glGetIntegerv(GL_MAJOR_VERSION, &openGL_major);
-			if(openGL_minor == -1)
-				glGetIntegerv(GL_MINOR_VERSION, &openGL_minor);
-
-			ImGui::BulletText("OpenGL %d.%d", openGL_major, openGL_minor);
-
-			ImGui::Text("License: ");
-
-			ImGui::End();
-		}
+		ShowAboutWindow();
 	}
 
 	return ret;
@@ -265,6 +236,27 @@ void Editor::ChangeTheme(std::string theme)
 	else if (theme == "Light")
 	{
 		ImGui::StyleColorsLight();
+	}
+}
+
+void Editor::GetMemoryStatistics(const char* gpu_brand, GLint& vram_budget, GLint& vram_usage, GLint& vram_available, GLint& vram_reserved)
+{
+	if (strcmp(gpu_brand, "NVIDIA Corporation") == 0)
+	{
+		glGetIntegerv(GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &vram_budget);
+		glGetIntegerv(GL_GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX, &vram_usage);
+		glGetIntegerv(GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &vram_available);
+		glGetIntegerv(GL_GPU_MEMORY_INFO_EVICTED_MEMORY_NVX, &vram_reserved);
+	}
+	else if (strcmp(gpu_brand, "ATI Technologies") == 0)
+	{
+		//glGetIntegerv(GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &vram_budget);
+		vram_budget = -1;
+		//glGetIntegerv(GL_GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX, &vram_usage);
+		vram_usage = -1;
+		glGetIntegerv(GL_VBO_FREE_MEMORY_ATI, &vram_available);
+		//glGetIntegerv(GL_GPU_MEMORY_INFO_EVICTED_MEMORY_NVX, &vram_reserved);
+		vram_reserved = -1;
 	}
 }
 
@@ -418,7 +410,9 @@ void Editor::ShowConfigurationWindow()
 		ImGui::SameLine(); 
 		ImGui::TextColored(values_color, "%d.%d.%d", version.major, version.minor, version.patch);
 
+		ImGui::Spacing();
 		ImGui::Separator();
+		ImGui::Spacing();
 
 		//Hardware
 		static HardwareSpecs specs = App->GetHardware();
@@ -435,9 +429,11 @@ void Editor::ShowConfigurationWindow()
 		ImGui::SameLine();
 		ImGui::TextColored(values_color, "%s", specs.caps.c_str());
 
+		ImGui::Spacing();
 		ImGui::Separator();
+		ImGui::Spacing();
 
-		
+		//GPU
 		ImGui::Text("GPU:");
 		ImGui::SameLine();
 		ImGui::TextColored(values_color, "%s", specs.gpu);
@@ -445,7 +441,118 @@ void Editor::ShowConfigurationWindow()
 		ImGui::Text("Vendor:");
 		ImGui::SameLine();
 		ImGui::TextColored(values_color, "%s", specs.gpu_vendor);
+
+		GLint vram_budget;
+		GLint vram_usage;
+		GLint vram_available;
+		GLint vram_reserved;
+
+		GetMemoryStatistics(specs.gpu_vendor, vram_budget, vram_usage, vram_available, vram_reserved);
+
+		ImGui::Text("VRAM Budget:");
+		ImGui::SameLine();
+		ImGui::TextColored(values_color, "%.1f Mb", vram_budget * 0.001f);
+
+		ImGui::Text("VRAM Usage:");
+		ImGui::SameLine();
+		ImGui::TextColored(values_color, "%.1f Mb", vram_usage * 0.001f);
+
+		ImGui::Text("VRAM Available:");
+		ImGui::SameLine();
+		ImGui::TextColored(values_color, "%.1f Mb", vram_available * 0.001f);
+
+		ImGui::Text("VRAM Reserved:");
+		ImGui::SameLine();
+		ImGui::TextColored(values_color, "%.1f Mb", vram_reserved * 0.001f);
+
+		//VRAM
+
 	}
 
 	ImGui::End();
+}
+
+void Editor::ShowAboutWindow()
+{
+	if (ImGui::Begin("About", &show_about_window))
+	{
+		int version_major, version_minor;
+		App->GetEngineVersion(version_major, version_minor);
+
+		ImGui::Text("Genesis Engine v%d.%d", version_major, version_minor);
+
+		ImGui::Text("Made by: ");
+		ImGui::SameLine();
+		if (ImGui::Button("Marc Pages Francesch"))
+			ShellExecuteA(NULL, "open", "https://github.com/marcpages2020", NULL, NULL, SW_SHOWNORMAL);
+
+
+		ImGui::Spacing();
+		ImGui::Separator();
+		ImGui::Spacing();
+
+		ImGui::Text("External libraries used: ");
+
+		//SDL Version
+		static SDL_version version;
+		SDL_GetVersion(&version);
+		ImGui::BulletText("SDL %d.%d.%d", version.major, version.minor, version.patch);
+
+		//OpenGL Version
+		static GLint openGL_major = -1;
+		static GLint openGL_minor = -1;
+
+		if (openGL_major == -1)
+			glGetIntegerv(GL_MAJOR_VERSION, &openGL_major);
+		if (openGL_minor == -1)
+			glGetIntegerv(GL_MINOR_VERSION, &openGL_minor);
+
+		ImGui::BulletText("OpenGL %d.%d", openGL_major, openGL_minor);
+
+		//MathGeoLib
+		ImGui::BulletText("MathGeoLib 1.5");
+
+		//ImGui
+		static const char* imgui_version = { ImGui::GetVersion() };
+		ImGui::BulletText("ImGui %s", imgui_version);
+
+		//Glew
+		ImGui::BulletText("Glew %d.%d.%d", GLEW_VERSION_MAJOR, GLEW_VERSION_MINOR, GLEW_VERSION_MICRO);
+
+		ImGui::Spacing();
+		ImGui::Separator();
+		ImGui::Spacing();
+
+		ImGui::Text("License: ");
+		ImGui::Spacing();
+
+		ImGui::Text("MIT License");
+		ImGui::Spacing();
+
+		ImGui::TextWrapped("Copyright (c) 2020 Marc Pages Francesch");
+		ImGui::Spacing();
+		ImGui::TextWrapped(
+			"Permission is hereby granted, free of charge, to any person obtaining a copy"
+			"of this software and associated documentation files Genesis Engine, to deal"
+			"in the Software without restriction, including without limitation the rights"
+			"to use, copy, modify, merge, publish, distribute, sublicense, and /or sell"
+			"copies of the Software, and to permit persons to whom the Software is"
+			"furnished to do so, subject to the following conditions : ");
+		ImGui::Spacing();
+
+		ImGui::TextWrapped(
+			"The above copyright notice and this permission notice shall be included in all"
+			"copies or substantial portions of the Software.");
+		ImGui::Spacing();
+
+		ImGui::TextWrapped(
+			"THE SOFTWARE IS PROVIDED 'AS I', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR"
+			"IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,"
+			"FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE"
+			"AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER"
+			"LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,"
+			"OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE"
+			"SOFTWARE.");
+		ImGui::End();
+	}
 }

@@ -120,20 +120,26 @@
     <ClInclude Include="Libs\ImGui\imstb_truetype.h">
       <Filter>ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="Libs\glew\include\eglew.h">
-      <Filter>Libs</Filter>
-    </ClInclude>
-    <ClInclude Include="Libs\glew\include\glew.h">
-      <Filter>Libs</Filter>
-    </ClInclude>
-    <ClInclude Include="Libs\glew\include\glxew.h">
-      <Filter>Libs</Filter>
-    </ClInclude>
-    <ClInclude Include="Libs\glew\include\wglew.h">
-      <Filter>Libs</Filter>
-    </ClInclude>
     <ClInclude Include="ModuleSceneIntro.h">
       <Filter>Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\glew\include\wglew.h">
+      <Filter>Libs\Glew</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\glew\include\eglew.h">
+      <Filter>Libs\Glew</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\glew\include\glew.h">
+      <Filter>Libs\Glew</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\glew\include\glxew.h">
+      <Filter>Libs\Glew</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\SDL\include\SDL.h">
+      <Filter>Libs\SDL</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\MathGeoLib\include\MathGeoLib.h">
+      <Filter>Libs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -148,6 +154,12 @@
     </Filter>
     <Filter Include="Libs">
       <UniqueIdentifier>{e5b92709-b597-4c4b-bf07-c6d0682bb2af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libs\Glew">
+      <UniqueIdentifier>{2e4c5722-ce7d-4d13-b63c-42035faf7849}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libs\SDL">
+      <UniqueIdentifier>{7bb8c861-6eba-490b-baff-8ddadc448f17}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

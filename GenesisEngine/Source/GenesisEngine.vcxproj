@@ -110,6 +110,8 @@
     <ClInclude Include="Libs\ImGui\imstb_rectpack.h" />
     <ClInclude Include="Libs\ImGui\imstb_textedit.h" />
     <ClInclude Include="Libs\ImGui\imstb_truetype.h" />
+    <ClInclude Include="Libs\MathGeoLib\include\MathGeoLib.h" />
+    <ClInclude Include="Libs\SDL\include\SDL.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="ModuleCamera3D.h" />
     <ClInclude Include="ModuleRenderer3D.h" />

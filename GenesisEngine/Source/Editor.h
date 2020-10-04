@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+typedef int GLint;
+
 class Editor : public Module 
 {
 public:
@@ -27,8 +29,10 @@ private:
 
 	//Windows
 	void ShowConfigurationWindow();
+	void ShowAboutWindow();
 
 	void ChangeTheme(std::string theme);
+	void GetMemoryStatistics(const char* gpu_brand, GLint& vram_budget, GLint& vram_usage, GLint& vram_available, GLint& vram_reserved);
 
 private:
 	bool show_inspector_window;

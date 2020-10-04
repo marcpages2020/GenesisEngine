@@ -23627,10 +23627,12 @@ GLEW_VAR_EXPORT GLboolean __GLEW_WIN_swap_hint;
 #define GLEW_ERROR_NO_GLX_DISPLAY 4  /* Need GLX display for GLX support */
 
 /* string codes */
+/*
 #define GLEW_VERSION 1
 #define GLEW_VERSION_MAJOR 2
 #define GLEW_VERSION_MINOR 3
 #define GLEW_VERSION_MICRO 4
+*/
 
 /* ------------------------------------------------------------------------- */
 
@@ -23642,6 +23644,12 @@ VERSION_MAJOR 2
 VERSION_MINOR 1
 VERSION_MICRO 0
 */
+
+//Glew version corrected
+#define GLEW_VERSION 2.1.0
+#define GLEW_VERSION_MAJOR 2
+#define GLEW_VERSION_MINOR 1
+#define GLEW_VERSION_MICRO 0
 
 /* API */
 GLEWAPI GLenum GLEWAPIENTRY glewInit (void);
