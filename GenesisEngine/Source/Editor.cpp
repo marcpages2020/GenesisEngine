@@ -443,6 +443,7 @@ void Editor::ShowConfigurationWindow()
 		ImGui::SameLine();
 		ImGui::TextColored(values_color, "%s", specs.gpu_brand);
 
+		//VRAM
 		GLint vram_budget;
 		GLint vram_usage;
 		GLint vram_available;
@@ -454,19 +455,19 @@ void Editor::ShowConfigurationWindow()
 		ImGui::SameLine();
 		ImGui::TextColored(values_color, "%.1f Mb", vram_budget * 0.001f);
 
-		ImGui::Text("VRAM Usage:");
-		ImGui::SameLine();
-		ImGui::TextColored(values_color, "%.1f Mb", vram_usage * 0.001f);
-
 		ImGui::Text("VRAM Available:");
 		ImGui::SameLine();
 		ImGui::TextColored(values_color, "%.1f Mb", vram_available * 0.001f);
 
+		/*
+		ImGui::Text("VRAM Usage:");
+		ImGui::SameLine();
+		ImGui::TextColored(values_color, "%.1f Mb", vram_usage * 0.001f);
+
 		ImGui::Text("VRAM Reserved:");
 		ImGui::SameLine();
 		ImGui::TextColored(values_color, "%.1f Mb", vram_reserved * 0.001f);
-
-		//VRAM
+		*/
 
 	}
 
