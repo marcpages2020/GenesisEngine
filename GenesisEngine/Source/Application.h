@@ -61,6 +61,8 @@ public:
 	Editor* editor;
 	ModuleRenderer3D* renderer3D;
 
+	const char* engine_name;
+
 public:
 
 	Application(int argc, char* args[]);
@@ -77,7 +79,7 @@ public:
 	void SetFPSCap(int fps_cap);
 
 	HardwareSpecs GetHardware();
-	void GetEngineVersion(int& major, int& minor);
+	const char* GetEngineVersion();
 
 private:
 
@@ -98,8 +100,7 @@ private:
 	float	capped_ms;
 	std::vector<Module*> modules_vector;
 
-	int version_major;
-	int version_minor;
+	const char* version;
 
 	const char* config_path;
 	JSON_Value* config_root;

@@ -1,5 +1,6 @@
 #include "Application.h"
 #include "glew/include/glew.h"
+#include "Globals.h"
 
 #include "parson/parson.h"
 
@@ -22,6 +23,7 @@ Application::Application(int argc, char* args[]) : argc(argc), args(args)
 	AddModule(camera);
 	AddModule(input);
 	AddModule(audio);
+	AddModule(scene);
 
 	//AddModule(scene);
 	AddModule(editor);
@@ -31,9 +33,6 @@ Application::Application(int argc, char* args[]) : argc(argc), args(args)
 
 	int cap = 60;
 	capped_ms = 1000 / cap;
-
-	version_major = 0;
-	version_minor = 1;
 
 	config_path = "jsons";
 }
@@ -54,7 +53,7 @@ bool Application::Init()
 	bool ret = true;
 
 	JSON_Array* modules_array = PrepareConfig();
-	//json_array_get_object(modules_array);
+	
 
 	// Call Init() in all modules
 	for (int i = 0; i < modules_vector.size() && ret == true; i++)
@@ -137,7 +136,7 @@ void Application::AddModule(Module* mod)
 
 float Application::GetFPS() { return fps; }
 
-float Application::GetLastDt() { return ms_timer.Read() * 10; }
+float Application::GetLastDt() { return dt; }
 
 int Application::GetFPSCap()
 {
@@ -187,18 +186,12 @@ HardwareSpecs Application::GetHardware()
 	specs.gpu = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
 	specs.gpu_brand = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
 
-	//specs.vram_budget;
-	//specs.vram_usage;
-	//specs.vram_available;
-	//specs.vram_reserved;
-
 	return specs;
 }
 
-void Application::GetEngineVersion(int& g_major, int& g_minor)
+const char* Application::GetEngineVersion()
 {
-	g_major = version_major;
-	g_minor = version_minor;
+	return version;
 }
 
 JSON_Array* Application::PrepareConfig()
@@ -220,6 +213,10 @@ JSON_Array* Application::PrepareConfig()
 		//json_value_free(config_json);
 	}
 
+	JSON_Object* app_data = GetJSONObjectByName("app", modules);
+	engine_name = json_object_get_string(app_data, "engine name");
+	version = json_object_get_string(app_data, "version");
+
 	return modules;
 }
 
@@ -234,7 +231,7 @@ JSON_Object* Application::GetJSONObjectByName(const char* name, JSON_Array* modu
 			return object;
 	}
 
-	LOG("JSON object could not be found in the file");
+	LOG_ERROR("JSON object %s could not be found", name);
 	return NULL;
 }
 

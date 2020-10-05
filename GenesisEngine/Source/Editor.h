@@ -9,6 +9,11 @@
 
 typedef int GLint;
 
+struct log_message {
+	std::string log_text;
+	bool error;
+};
+
 class Editor : public Module 
 {
 public:
@@ -20,7 +25,7 @@ public:
 	update_status PostUpdate(float dt);
 	bool CleanUp();
 
-	void AddConsoleLog(const char* log);
+	void AddConsoleLog(const char* log, bool error = false);
 	
 private:
 	//Dock Space
@@ -54,7 +59,7 @@ private:
 	std::vector<float> fps_log;
 	std::vector<float> ms_log;
 
-	std::vector<std::string> console_log;
+	std::vector<log_message> console_log;
 };
 
 #endif // !_EDITOR_H_

@@ -18,10 +18,10 @@ Editor::Editor(bool start_enabled) : Module(start_enabled)
 	show_hierachy_window = true;
 	show_project_window = true;
 	show_console_window = true;
-	show_configuration_window = true;
+	show_configuration_window = false;
 
 	show_preferences_window = false;
-	show_about_window = true;
+	show_about_window = false;
 
 	current_theme = 1;
 
@@ -61,7 +61,7 @@ update_status Editor::Update(float dt)
 	//scene window
 	if (show_scene_window)
 	{
-		ImGui::Begin("Scene", &show_scene_window);
+		ImGui::Begin("Scene", &show_scene_window, ImGuiWindowFlags_NoBackground);
 		ImGui::End();
 	}
 
@@ -93,7 +93,11 @@ update_status Editor::Update(float dt)
 		ImGui::Begin("Console", &show_console_window);
 		for (int i = 0; i < console_log.size(); i++)
 		{
-			ImGui::Text(console_log[i].c_str());
+			if (console_log[i].error) {
+				ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), console_log[i].log_text.c_str());
+			}
+			else 
+				ImGui::Text(console_log[i].log_text.c_str());
 		}
 		ImGui::End();
 	}
@@ -150,9 +154,10 @@ bool Editor::CleanUp()
 	return true;
 }
 
-void Editor::AddConsoleLog(const char* log)
+void Editor::AddConsoleLog(const char* log, bool error)
 {
-	console_log.push_back(std::string(log));
+	log_message message = { log, error };
+	console_log.push_back(message);
 }
 
 update_status Editor::ShowDockSpace(bool* p_open) {
@@ -160,10 +165,8 @@ update_status Editor::ShowDockSpace(bool* p_open) {
 
 	static bool opt_fullscreen = true;
 	static bool opt_padding = false;
-	static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+	static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_PassthruCentralNode;
 
-	// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
-	// because it would be confusing to have two docking targets within each others.
 	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking;
 
 	if (opt_fullscreen)
@@ -175,27 +178,18 @@ update_status Editor::ShowDockSpace(bool* p_open) {
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground;
 	}
 	else
 	{
 		dockspace_flags &= ~ImGuiDockNodeFlags_PassthruCentralNode;
 	}
 
-	// When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background
-	// and handle the pass-thru hole, so we ask Begin() to not render a background.
-	
-	if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
-		window_flags |= ImGuiWindowFlags_NoBackground;
-
-	// Important: note that we proceed even if Begin() returns false (aka window is collapsed).
-	// This is because we want to keep our DockSpace() active. If a DockSpace() is inactive,
-	// all active windows docked into it will lose their parent and become undocked.
-	// We cannot preserve the docking relationship between an active window and an inactive docking, otherwise
-	// any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
 	if (!opt_padding)
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-	ImGui::Begin("DockSpace Demo", p_open, window_flags);
+
+	ImGui::Begin("DockSpace", p_open, window_flags);
+
 	if (!opt_padding)
 		ImGui::PopStyleVar();
 
@@ -203,16 +197,11 @@ update_status Editor::ShowDockSpace(bool* p_open) {
 		ImGui::PopStyleVar(2);
 	
 	// DockSpace
-	
 	ImGuiIO& io = ImGui::GetIO();
 	if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
 	{
 		ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
 		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
-	}
-	else
-	{
-		//ShowDockingDisabledMessage();
 	}
 	
 	//main bar
@@ -339,138 +328,135 @@ bool Editor::CreateMainMenuBar() {
 
 void Editor::ShowConfigurationWindow() 
 {
-	ImGui::Begin("Configuration", &show_configuration_window);
-
-	if (ImGui::CollapsingHeader("Application")) 
+	if (ImGui::Begin("Configuration", &show_configuration_window))
 	{
-		static int fps_cap = App->GetFPSCap();
-		if (ImGui::SliderInt("Max FPS", &fps_cap, 10, 120)) {
-			App->SetFPSCap(fps_cap);
+		if (ImGui::CollapsingHeader("Application"))
+		{
+			static int fps_cap = App->GetFPSCap();
+			if (ImGui::SliderInt("Max FPS", &fps_cap, 10, 120)) {
+				App->SetFPSCap(fps_cap);
+			}
+
+			char title[25];
+
+			//FPS graph
+			fps_log.erase(fps_log.begin());
+			fps_log.push_back(App->GetFPS());
+			//if (fps_log[fps_log.size() - 1] != 0) {
+			sprintf_s(title, 25, "Framerate %.1f", fps_log[fps_log.size() - 1]);
+			ImGui::PlotHistogram("##framerate", &fps_log[0], fps_log.size(), 0, title, 0.0f, 100.0f, ImVec2(310, 100));
+			//}
+
+			//Ms graph
+			ms_log.erase(ms_log.begin());
+			ms_log.push_back(App->GetLastDt() * 1000);
+			//if(ms_log[ms_log.size() - 1] != 0){
+			sprintf_s(title, 25, "Milliseconds %.1f", ms_log[ms_log.size() - 1]);
+			ImGui::PlotHistogram("##milliseconds", &ms_log[0], ms_log.size(), 0, title, 0.0f, 40.0f, ImVec2(310, 100));
+			//}
 		}
 
-		char title[25];
+		if (ImGui::CollapsingHeader("Window"))
+		{
+			static float brightness = App->window->GetBrightness();
+			if (ImGui::SliderFloat("Brightness", &brightness, 0.0f, 1.0f))
+				App->window->SetBrightness(brightness);
 
-		//FPS graph
-		fps_log.erase(fps_log.begin());
-		fps_log.push_back(App->GetFPS());
-		//if (fps_log[fps_log.size() - 1] != 0) {
-		sprintf_s(title, 25, "Framerate %.1f", fps_log[fps_log.size() - 1]);
-		ImGui::PlotHistogram("##framerate", &fps_log[0], fps_log.size(), 0, title, 0.0f, 100.0f, ImVec2(310, 100));
-		//}
+			static int width, height;
+			App->window->GetSize(width, height);
 
-		//Ms graph
-		ms_log.erase(ms_log.begin());
-		ms_log.push_back(App->GetLastDt());
-		//if(ms_log[ms_log.size() - 1] != 0){
-		sprintf_s(title, 25, "Milliseconds %.1f", ms_log[ms_log.size() - 1]);
-		ImGui::PlotHistogram("##milliseconds", &ms_log[0], ms_log.size(), 0, title, 0.0f, 40.0f, ImVec2(310, 100));
-		//}
+			if ((ImGui::SliderInt("Width", &width, 640, 3840) || ImGui::SliderInt("Height", &height, 360, 2160)))
+				App->window->SetSize(width, height);
+
+			static bool fullscreen = App->window->fullscreen;
+			static bool fullscreen_desktop = App->window->fullscreen_desktop;
+			static bool resizable = App->window->resizable;
+			static bool borderless = App->window->borderless;
+
+			if (ImGui::Checkbox("Fullscreen", &fullscreen))
+				App->window->SetFullscreen(fullscreen);
+
+			ImGui::SameLine();
+			if (ImGui::Checkbox("Resizable", &resizable))
+				App->window->SetResizable(resizable);
+
+			if (ImGui::Checkbox("Borderless", &borderless))
+				App->window->SetBorderless(borderless);
+
+			ImGui::SameLine();
+			if (ImGui::Checkbox("Fullscreen Desktop", &fullscreen_desktop))
+				App->window->SetFullscreenDesktop(fullscreen_desktop);
+
+		}
+
+		if (ImGui::CollapsingHeader("Hardware"))
+		{
+			ImVec4 values_color(1.0f, 1.0f, 0.0f, 1.0f);
+
+			//SDL Version
+			SDL_version version;
+			SDL_GetVersion(&version);
+			ImGui::Text("SDL Version:");
+			ImGui::SameLine();
+			ImGui::TextColored(values_color, "%d.%d.%d", version.major, version.minor, version.patch);
+
+			ImGui::Spacing();
+			ImGui::Separator();
+			ImGui::Spacing();
+
+			//Hardware
+			static HardwareSpecs specs = App->GetHardware();
+			//CPU
+			ImGui::Text("CPUs:");
+			ImGui::SameLine();
+			ImGui::TextColored(values_color, "%d (Cache: %dkb)", specs.cpu_count, specs.cache);
+			//RAM
+			ImGui::Text("System RAM:");
+			ImGui::SameLine();
+			ImGui::TextColored(values_color, "%.1f Gb", specs.ram);
+			//Caps
+			ImGui::Text("Caps:");
+			ImGui::SameLine();
+			ImGui::TextColored(values_color, "%s", specs.caps.c_str());
+
+			ImGui::Spacing();
+			ImGui::Separator();
+			ImGui::Spacing();
+
+			//GPU
+			ImGui::Text("GPU:");
+			ImGui::SameLine();
+			ImGui::TextColored(values_color, "%s", specs.gpu);
+
+			ImGui::Text("Brand:");
+			ImGui::SameLine();
+			ImGui::TextColored(values_color, "%s", specs.gpu_brand);
+
+			//VRAM
+			GLint vram_budget, vram_usage, vram_available, vram_reserved;
+
+			GetMemoryStatistics(specs.gpu_brand, vram_budget, vram_usage, vram_available, vram_reserved);
+
+			ImGui::Text("VRAM Budget:");
+			ImGui::SameLine();
+			ImGui::TextColored(values_color, "%.1f Mb", vram_budget * 0.001f);
+
+			ImGui::Text("VRAM Available:");
+			ImGui::SameLine();
+			ImGui::TextColored(values_color, "%.1f Mb", vram_available * 0.001f);
+
+			/*
+			ImGui::Text("VRAM Usage:");
+			ImGui::SameLine();
+			ImGui::TextColored(values_color, "%.1f Mb", vram_usage * 0.001f);
+
+			ImGui::Text("VRAM Reserved:");
+			ImGui::SameLine();
+			ImGui::TextColored(values_color, "%.1f Mb", vram_reserved * 0.001f);
+			*/
+
+		}
 	}
-
-	if (ImGui::CollapsingHeader("Window"))
-	{	
-		static float brightness = App->window->GetBrightness();
-		if (ImGui::SliderFloat("Brightness", &brightness, 0.0f, 1.0f))
-			App->window->SetBrightness(brightness);
-
-		static int width, height;
-		App->window->GetSize(width, height);
-
-		if ((ImGui::SliderInt("Width", &width, 640, 3840) || ImGui::SliderInt("Height", &height, 360, 2160)))
-			App->window->SetSize(width, height);
-
-		static bool fullscreen = App->window->fullscreen;
-		static bool fullscreen_desktop = App->window->fullscreen_desktop;
-		static bool resizable = App->window->resizable;
-		static bool borderless = App->window->borderless;
-
-		if (ImGui::Checkbox("Fullscreen", &fullscreen))
-			App->window->SetFullscreen(fullscreen);
-		
-		ImGui::SameLine();
-		if (ImGui::Checkbox("Resizable", &resizable))
-			App->window->SetResizable(resizable);
-
-		if (ImGui::Checkbox("Borderless", &borderless))
-			App->window->SetBorderless(borderless);
-		
-		ImGui::SameLine();
-		if (ImGui::Checkbox("Fullscreen Desktop", &fullscreen_desktop))
-			App->window->SetFullscreenDesktop(fullscreen_desktop);		
-		
-	}
-
-	if (ImGui::CollapsingHeader("Hardware"))
-	{
-		ImVec4 values_color(1.0f, 1.0f, 0.0f, 1.0f);
-
-		//SDL Version
-		SDL_version version;
-		SDL_GetVersion(&version);
-		ImGui::Text("SDL Version:");
-		ImGui::SameLine(); 
-		ImGui::TextColored(values_color, "%d.%d.%d", version.major, version.minor, version.patch);
-
-		ImGui::Spacing();
-		ImGui::Separator();
-		ImGui::Spacing();
-
-		//Hardware
-		static HardwareSpecs specs = App->GetHardware();
-		//CPU
-		ImGui::Text("CPUs:");
-		ImGui::SameLine();
-		ImGui::TextColored(values_color, "%d (Cache: %dkb)", specs.cpu_count, specs.cache);	
-		//RAM
-		ImGui::Text("System RAM:");
-		ImGui::SameLine();
-		ImGui::TextColored(values_color, "%.1f Gb", specs.ram);
-		//Caps
-		ImGui::Text("Caps:");
-		ImGui::SameLine();
-		ImGui::TextColored(values_color, "%s", specs.caps.c_str());
-
-		ImGui::Spacing();
-		ImGui::Separator();
-		ImGui::Spacing();
-
-		//GPU
-		ImGui::Text("GPU:");
-		ImGui::SameLine();
-		ImGui::TextColored(values_color, "%s", specs.gpu);
-
-		ImGui::Text("Brand:");
-		ImGui::SameLine();
-		ImGui::TextColored(values_color, "%s", specs.gpu_brand);
-
-		//VRAM
-		GLint vram_budget;
-		GLint vram_usage;
-		GLint vram_available;
-		GLint vram_reserved;
-
-		GetMemoryStatistics(specs.gpu_brand, vram_budget, vram_usage, vram_available, vram_reserved);
-
-		ImGui::Text("VRAM Budget:");
-		ImGui::SameLine();
-		ImGui::TextColored(values_color, "%.1f Mb", vram_budget * 0.001f);
-
-		ImGui::Text("VRAM Available:");
-		ImGui::SameLine();
-		ImGui::TextColored(values_color, "%.1f Mb", vram_available * 0.001f);
-
-		/*
-		ImGui::Text("VRAM Usage:");
-		ImGui::SameLine();
-		ImGui::TextColored(values_color, "%.1f Mb", vram_usage * 0.001f);
-
-		ImGui::Text("VRAM Reserved:");
-		ImGui::SameLine();
-		ImGui::TextColored(values_color, "%.1f Mb", vram_reserved * 0.001f);
-		*/
-
-	}
-
 	ImGui::End();
 }
 
@@ -478,10 +464,8 @@ void Editor::ShowAboutWindow()
 {
 	if (ImGui::Begin("About", &show_about_window))
 	{
-		int version_major, version_minor;
-		App->GetEngineVersion(version_major, version_minor);
-
-		ImGui::Text("Genesis Engine v%d.%d", version_major, version_minor);
+		static const char* engine_version = App->GetEngineVersion();
+		ImGui::Text("%s v%s", App->engine_name, engine_version);
 		ImGui::Text("The first chapter of your creation");
 		ImGui::Spacing();
 
@@ -555,6 +539,6 @@ void Editor::ShowAboutWindow()
 			"LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,"
 			"OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE"
 			"SOFTWARE.");
-		ImGui::End();
 	}
+	ImGui::End();
 }

@@ -1,5 +1,6 @@
 {
   "modules": [
+    { "name": "app", "engine name" : "Genesis Engine", "version" :  "0.1"},
     { "name": "window" },
     { "name": "editor" },
     { "name": "input" },
