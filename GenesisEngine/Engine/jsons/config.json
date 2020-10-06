@@ -1,7 +1,15 @@
 {
   "modules": [
-    { "name": "app", "engine name" : "Genesis Engine", "version" :  "0.1"},
-    { "name": "window", "width" :  1600, "height" :  900},
+    {
+      "name": "app",
+      "engine name": "Genesis Engine",
+      "version": "0.1"
+    },
+    {
+      "name": "window",
+      "width": 1600,
+      "height": 900
+    },
     { "name": "editor" },
     { "name": "input" },
     { "name": "audio" },

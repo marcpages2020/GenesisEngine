@@ -33,9 +33,15 @@ bool ModuleSceneIntro::CleanUp()
 // Update: draw background
 update_status ModuleSceneIntro::Update(float dt)
 {
+	bool wired = (App->renderer3D->GetDisplayMode() == WIREFRAME);
+
 	Plane p(0, 1, 0, 0);
-	p.axis = true;
-	p.Render();
+	//p.axis = true;
+	p.Render(wired);
+
+	Cube cube(1.0f, 1.0f, 1.0f);
+	cube.wire = true;
+	cube.Render(wired);
 
 	return UPDATE_CONTINUE;
 }

@@ -1,6 +1,7 @@
 #include "Globals.h"
 #include "Application.h"
 #include "ModuleWindow.h"
+#include "parson/parson.h"
 
 #include "SDL/include/SDL_video.h"
 
@@ -14,9 +15,6 @@ ModuleWindow::ModuleWindow(bool start_enabled) : Module(start_enabled)
 	fullscreen_desktop = false;
 	resizable = true;
 	borderless = false;
-
-	width = 1600;
-	height = 900;
 
 	context = nullptr;
 }
@@ -32,7 +30,11 @@ bool ModuleWindow::Init(JSON_Object* object)
 	LOG("Init SDL window & surface");
 	bool ret = true;
 
-	if(SDL_Init(SDL_INIT_VIDEO) < 0)
+	//Get Json attributes
+	width = json_object_get_number(object, "width");
+	height = json_object_get_number(object, "height");
+
+	if (SDL_Init(SDL_INIT_VIDEO) < 0)
 	{
 		LOG("SDL_VIDEO could not initialize! SDL_Error: %s\n", SDL_GetError());
 		ret = false;
@@ -52,29 +54,29 @@ bool ModuleWindow::Init(JSON_Object* object)
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 
-		if(fullscreen == true)
+		if (fullscreen == true)
 		{
 			flags |= SDL_WINDOW_FULLSCREEN;
 		}
 
-		if(WIN_RESIZABLE == true)
+		if (WIN_RESIZABLE == true)
 		{
 			flags |= SDL_WINDOW_RESIZABLE;
 		}
 
-		if(WIN_BORDERLESS == true)
+		if (WIN_BORDERLESS == true)
 		{
 			flags |= SDL_WINDOW_BORDERLESS;
 		}
 
-		if(fullscreen_desktop == true)
+		if (fullscreen_desktop == true)
 		{
 			flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 		}
 
 		window = SDL_CreateWindow(TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, flags);
 
-		if(window == NULL)
+		if (window == NULL)
 		{
 			LOG("Window could not be created! SDL_Error: %s\n", SDL_GetError());
 			ret = false;
@@ -101,7 +103,7 @@ bool ModuleWindow::CleanUp()
 	SDL_GL_DeleteContext(context);
 
 	//Destroy window
-	if(window != NULL)
+	if (window != NULL)
 	{
 		SDL_DestroyWindow(window);
 	}
@@ -142,7 +144,7 @@ void ModuleWindow::SetFullscreen(bool setFullscreen)
 {
 	if (setFullscreen)
 		SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
-	else 
+	else
 		SDL_SetWindowFullscreen(window, 0);
 }
 
@@ -158,7 +160,7 @@ void ModuleWindow::SetResizable(bool setResizable)
 {
 	if (setResizable)
 		SDL_SetWindowResizable(window, SDL_TRUE);
-	else 
+	else
 		SDL_SetWindowResizable(window, SDL_FALSE);
 }
 

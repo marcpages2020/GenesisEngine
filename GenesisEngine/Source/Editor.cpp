@@ -25,8 +25,8 @@ Editor::Editor(bool start_enabled) : Module(start_enabled)
 
 	current_theme = 1;
 
-	fps_log.resize(100,0);
-	ms_log.resize(100,0);
+	fps_log.resize(100, 0);
+	ms_log.resize(100, 0);
 }
 
 Editor::~Editor() {
@@ -48,7 +48,7 @@ bool Editor::Init(JSON_Object* object)
 	return true;
 }
 
-update_status Editor::Update(float dt) 
+update_status Editor::Update(float dt)
 {
 	update_status ret = UPDATE_CONTINUE;
 	//Update the frames
@@ -62,22 +62,28 @@ update_status Editor::Update(float dt)
 	if (show_scene_window)
 	{
 		ImGui::Begin("Scene", &show_scene_window, ImGuiWindowFlags_NoBackground);
+		const char* items[] = { "Solid", "Wireframe" };
+		static int current_display = App->renderer3D->GetDisplayMode();
+		if (ImGui::Combo("Display Mode", &current_display, items, IM_ARRAYSIZE(items)))
+		{
+			App->renderer3D->SetDisplayMode((DisplayMode)current_display);
+		}
 		ImGui::End();
 	}
 
 	//Inspector
-	if(show_inspector_window)
+	if (show_inspector_window)
 	{
-		ImGui::Begin("Inspector", &show_inspector_window);                      
+		ImGui::Begin("Inspector", &show_inspector_window);
 		ImGui::End();
 	}
 
 	//Project 
 	if (show_project_window)
 	{
-		ImGui::Begin("Project", &show_project_window); 
+		ImGui::Begin("Project", &show_project_window);
 		ImGui::End();
-	}	
+	}
 
 	//Hieracy
 	if (show_hierachy_window)
@@ -85,7 +91,7 @@ update_status Editor::Update(float dt)
 		ImGui::Begin("Hierachy", &show_hierachy_window);
 		ImGui::End();
 	}
-		
+
 
 	//Console
 	if (show_console_window)
@@ -96,7 +102,7 @@ update_status Editor::Update(float dt)
 			if (console_log[i].error) {
 				ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), console_log[i].log_text.c_str());
 			}
-			else 
+			else
 				ImGui::Text(console_log[i].log_text.c_str());
 		}
 		ImGui::End();
@@ -109,10 +115,8 @@ update_status Editor::Update(float dt)
 
 		//Style
 		{
-			// Using the _simplified_ one-liner Combo() api here
-			// See "Combo" section for examples of how to use the more complete BeginCombo()/EndCombo() api.
-			const char* items[] = { "Classic", "Dark", "Light"};
-			if (ImGui::Combo("Interface Style", &current_theme, items, IM_ARRAYSIZE(items))) 
+			const char* items[] = { "Classic", "Dark", "Light" };
+			if (ImGui::Combo("Interface Style", &current_theme, items, IM_ARRAYSIZE(items)))
 			{
 				ChangeTheme(std::string(items[current_theme]));
 			}
@@ -150,6 +154,10 @@ bool Editor::CleanUp()
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplSDL2_Shutdown();
 	ImGui::DestroyContext();
+
+	fps_log.clear();
+	ms_log.clear();
+	console_log.clear();
 
 	return true;
 }
@@ -195,7 +203,7 @@ update_status Editor::ShowDockSpace(bool* p_open) {
 
 	if (opt_fullscreen)
 		ImGui::PopStyleVar(2);
-	
+
 	// DockSpace
 	ImGuiIO& io = ImGui::GetIO();
 	if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
@@ -203,7 +211,7 @@ update_status Editor::ShowDockSpace(bool* p_open) {
 		ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
 		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 	}
-	
+
 	//main bar
 	if (CreateMainMenuBar())
 		ret = UPDATE_CONTINUE;
@@ -213,13 +221,13 @@ update_status Editor::ShowDockSpace(bool* p_open) {
 	return ret;
 }
 
-void Editor::ChangeTheme(std::string theme) 
+void Editor::ChangeTheme(std::string theme)
 {
 	if (theme == "Dark")
 	{
 		ImGui::StyleColorsDark();
 	}
-	else if (theme == "Classic") 
+	else if (theme == "Classic")
 	{
 		ImGui::StyleColorsClassic();
 	}
@@ -326,7 +334,7 @@ bool Editor::CreateMainMenuBar() {
 	return ret;
 }
 
-void Editor::ShowConfigurationWindow() 
+void Editor::ShowConfigurationWindow()
 {
 	if (ImGui::Begin("Configuration", &show_configuration_window))
 	{
@@ -387,6 +395,45 @@ void Editor::ShowConfigurationWindow()
 			if (ImGui::Checkbox("Fullscreen Desktop", &fullscreen_desktop))
 				App->window->SetFullscreenDesktop(fullscreen_desktop);
 
+		}
+
+
+		if (ImGui::CollapsingHeader("Renderer"))
+		{
+			static bool depth_test = glIsEnabled(GL_DEPTH_TEST);
+			static bool cull_face = glIsEnabled(GL_CULL_FACE);
+			static bool lighting = glIsEnabled(GL_LIGHTING);
+			static bool color_material = glIsEnabled(GL_COLOR_MATERIAL);
+			static bool texture_2D = glIsEnabled(GL_TEXTURE_2D);
+
+			if (ImGui::Checkbox("Depth Test", &depth_test))
+				App->renderer3D->SetCapActive(GL_DEPTH_TEST, depth_test);
+
+			ImGui::SameLine();
+			if (ImGui::Checkbox("Cull Face", &cull_face))
+				App->renderer3D->SetCapActive(GL_CULL_FACE, cull_face);
+
+			if (ImGui::Checkbox("Texture 2D", &texture_2D))
+				App->renderer3D->SetCapActive(GL_TEXTURE_2D, texture_2D);
+
+			ImGui::SameLine();
+			if (ImGui::Checkbox("Lighting", &lighting))
+				App->renderer3D->SetCapActive(GL_LIGHTING, lighting);
+
+
+			if (ImGui::Checkbox("Color Material", &color_material))
+				App->renderer3D->SetCapActive(GL_COLOR_MATERIAL, color_material);
+
+			//TODO:	Add two more enables
+		}
+
+		if (ImGui::CollapsingHeader("Camera")) {
+			//static ImVec4 color = ImVec4(114.0f / 255.0f, 144.0f / 255.0f, 154.0f / 255.0f, 200.0f / 255.0f);
+			static ImVec4 color = ImVec4(App->camera->background.r, App->camera->background.g, App->camera->background.b, App->camera->background.a);
+
+			if (ImGui::ColorEdit3("Background Color##1", (float*)&color)) {
+				App->camera->SetBackgroundColor(color.x, color.y, color.z, color.w);
+			}
 		}
 
 		if (ImGui::CollapsingHeader("Hardware"))

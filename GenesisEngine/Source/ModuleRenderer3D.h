@@ -6,6 +6,14 @@
 
 #define MAX_LIGHTS 8
 
+typedef unsigned int GLenum;
+
+enum DisplayMode
+{
+	SOLID,
+	WIREFRAME
+};
+
 class ModuleRenderer3D : public Module
 {
 public:
@@ -19,10 +27,22 @@ public:
 
 	void OnResize(int width, int height);
 
-public:
+	DisplayMode GetDisplayMode();
+	void SetDisplayMode(DisplayMode display);
 
+	void SetCapActive(GLenum cap, bool active);
+
+private:
+	void BeginDebugDraw();
+	void EndDebugDraw();
+
+public:
 	Light lights[MAX_LIGHTS];
 	SDL_GLContext context;
 	mat3x3 NormalMatrix;
 	mat4x4 ModelMatrix, ViewMatrix, ProjectionMatrix;
+	DisplayMode display_mode;
+
+private:
+	bool debug;
 };
