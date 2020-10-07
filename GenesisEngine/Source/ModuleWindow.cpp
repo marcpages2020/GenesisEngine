@@ -11,11 +11,6 @@ ModuleWindow::ModuleWindow(bool start_enabled) : Module(start_enabled)
 	window = NULL;
 	screen_surface = NULL;
 
-	fullscreen = false;
-	fullscreen_desktop = false;
-	resizable = true;
-	borderless = false;
-
 	context = nullptr;
 }
 
@@ -33,6 +28,11 @@ bool ModuleWindow::Init(JSON_Object* object)
 	//Get Json attributes
 	width = json_object_get_number(object, "width");
 	height = json_object_get_number(object, "height");
+
+	fullscreen = json_object_get_boolean(object, "fullscreen");
+	fullscreen_desktop = json_object_get_boolean(object, "fullscreen_desktop");
+	resizable = json_object_get_boolean(object, "resizable");
+	borderless = json_object_get_boolean(object, "borderless");
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
 	{

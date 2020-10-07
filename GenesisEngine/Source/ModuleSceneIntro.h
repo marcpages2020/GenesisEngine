@@ -9,8 +9,10 @@ public:
 	~ModuleSceneIntro();
 
 	bool Start();
+	bool Init(JSON_Object* object);
 	update_status Update(float dt);
 	bool CleanUp();
 
 public:
+	bool show_grid;
 };

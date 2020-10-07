@@ -1,5 +1,6 @@
 #include "Application.h"
 #include "Editor.h"
+#include "parson/parson.h"
 
 #include "glew/include/glew.h"
 #include "ImGui/imgui.h"
@@ -35,6 +36,8 @@ Editor::~Editor() {
 
 bool Editor::Init(JSON_Object* object)
 {
+	LoadConfig(object);
+
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
@@ -68,6 +71,11 @@ update_status Editor::Update(float dt)
 		{
 			App->renderer3D->SetDisplayMode((DisplayMode)current_display);
 		}
+
+		static bool show_grid = App->scene->show_grid;
+		if (ImGui::Checkbox("Show Grid", &show_grid))
+			App->scene->show_grid = show_grid;
+
 		ImGui::End();
 	}
 
@@ -158,6 +166,37 @@ bool Editor::CleanUp()
 	fps_log.clear();
 	ms_log.clear();
 	console_log.clear();
+
+	return true;
+}
+
+bool Editor::LoadConfig(JSON_Object* object)
+{
+	JSON_Array* windows = json_object_get_array(object, "windows");
+	
+	JSON_Object* window = json_array_get_object_by_name(windows, "scene");
+	show_scene_window = json_object_get_boolean(window, "visible");
+
+	window = json_array_get_object_by_name(windows, "inspector");
+	show_inspector_window = json_object_get_boolean(window, "visible");
+
+	window = json_array_get_object_by_name(windows, "hierachy");
+	show_hierachy_window = json_object_get_boolean(window, "visible");
+
+	window = json_array_get_object_by_name(windows, "project");
+	show_project_window = json_object_get_boolean(window, "visible");
+
+	window = json_array_get_object_by_name(windows, "console");
+	show_console_window = json_object_get_boolean(window, "visible");
+
+	window = json_array_get_object_by_name(windows, "configuration");
+	show_configuration_window = json_object_get_boolean(window, "visible");
+
+	window = json_array_get_object_by_name(windows, "preferences");
+	show_preferences_window = json_object_get_boolean(window, "visible");
+
+	window = json_array_get_object_by_name(windows, "about");
+	show_about_window = json_object_get_boolean(window, "visible");
 
 	return true;
 }

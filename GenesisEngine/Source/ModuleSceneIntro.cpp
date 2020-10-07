@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "ModuleSceneIntro.h"
 #include "Primitive.h"
+#include "parson/parson.h"
 
 ModuleSceneIntro::ModuleSceneIntro(bool start_enabled) : Module(start_enabled)
 {
@@ -22,6 +23,12 @@ bool ModuleSceneIntro::Start()
 	return ret;
 }
 
+bool ModuleSceneIntro::Init(JSON_Object* object)
+{
+	show_grid = json_object_get_boolean(object, "show_grid");
+	return true;
+}
+
 // Load assets
 bool ModuleSceneIntro::CleanUp()
 {
@@ -35,9 +42,12 @@ update_status ModuleSceneIntro::Update(float dt)
 {
 	bool wired = (App->renderer3D->GetDisplayMode() == WIREFRAME);
 
-	Plane p(0, 1, 0, 0);
-	//p.axis = true;
-	p.Render(wired);
+	if (show_grid) 
+	{
+		Plane p(0, 1, 0, 0);
+		//p.axis = true;
+		p.Render(wired);
+	}
 
 	Cube cube(1.0f, 1.0f, 1.0f);
 	cube.wire = true;

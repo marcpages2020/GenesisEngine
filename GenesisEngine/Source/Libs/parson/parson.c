@@ -1291,6 +1291,17 @@ JSON_Object * json_array_get_object(const JSON_Array *array, size_t index) {
     return json_value_get_object(json_array_get_value(array, index));
 }
 
+JSON_Object* json_array_get_object_by_name(const JSON_Array* array, const char* name) {
+    for (int i = 0; i < array->count; i++)
+    {
+        JSON_Object* object = json_array_get_object(array, i);
+        if (strcmp(name, json_object_get_string(object, "name")) == 0)
+            return object;
+    }
+
+    return NULL;
+}
+
 JSON_Array * json_array_get_array(const JSON_Array *array, size_t index) {
     return json_value_get_array(json_array_get_value(array, index));
 }

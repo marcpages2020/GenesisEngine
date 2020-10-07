@@ -25,6 +25,7 @@ public:
 	update_status PostUpdate(float dt);
 	bool CleanUp();
 
+	bool LoadConfig(JSON_Object* object);
 	void AddConsoleLog(const char* log, bool error = false);
 	
 private:

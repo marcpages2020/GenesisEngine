@@ -28,6 +28,11 @@ public:
 		return true; 
 	}
 
+	virtual bool LoadConfig(JSON_Object* object)
+	{
+		return true;
+	}
+
 	virtual bool Start()
 	{
 		return true;

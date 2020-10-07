@@ -1,6 +1,8 @@
 #include "Globals.h"
 #include "Application.h"
 
+#include "parson/parson.h"
+
 #include "ModuleWindow.h"
 #include "ModuleRenderer3D.h"
 
@@ -17,7 +19,6 @@ ModuleRenderer3D::ModuleRenderer3D(bool start_enabled) : Module(start_enabled)
 {
 	name = "renderer";
 	context = nullptr;
-	debug = false;
 
 	display_mode = SOLID;
 }
@@ -31,6 +32,8 @@ bool ModuleRenderer3D::Init(JSON_Object* object)
 {
 	LOG("Creating 3D Renderer context");
 	bool ret = true;
+
+	debug = json_object_get_string(object, "debug");
 
 	//Create context
 	context = SDL_GL_CreateContext(App->window->window);
