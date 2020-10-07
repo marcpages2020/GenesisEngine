@@ -126,6 +126,8 @@ bool Application::CleanUp()
 		modules_vector[i]->CleanUp();
 	}
 
+	json_value_free(config_root);
+
 	return ret;
 }
 
@@ -200,17 +202,13 @@ JSON_Array* Application::PrepareConfig()
 	memset(path, 0, sizeof(path));
 	sprintf_s(path, "%s/%s", config_path, "config.json");
 
-	JSON_Value* config_json = json_parse_file(path);
-	JSON_Object* config_root = json_value_get_object(config_json);
-	JSON_Array* modules = json_object_get_array(config_root,"modules"); //json_value_get_array(config_json);
+	config_root = json_parse_file(path);
+	JSON_Object* config_object = json_value_get_object(config_root);
+	JSON_Array* modules = json_object_get_array(config_object,"modules"); //json_value_get_array(config_json);
 
-	if (config_json == NULL) 
+	if (config_root == NULL) 
 	{
 		LOG("Error config file");
-	}
-	else
-	{
-		//json_value_free(config_json);
 	}
 
 	JSON_Object* app_data = GetJSONObjectByName("app", modules);
