@@ -59,12 +59,12 @@ bool ModuleWindow::Init(JSON_Object* object)
 			flags |= SDL_WINDOW_FULLSCREEN;
 		}
 
-		if (WIN_RESIZABLE == true)
+		if (resizable == true)
 		{
 			flags |= SDL_WINDOW_RESIZABLE;
 		}
 
-		if (WIN_BORDERLESS == true)
+		if (borderless == true)
 		{
 			flags |= SDL_WINDOW_BORDERLESS;
 		}

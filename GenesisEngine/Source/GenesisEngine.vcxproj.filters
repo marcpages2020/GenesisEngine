@@ -25,9 +25,6 @@
     <ClCompile Include="Light.cpp">
       <Filter>Tools</Filter>
     </ClCompile>
-    <ClCompile Include="Primitive.cpp">
-      <Filter>Tools</Filter>
-    </ClCompile>
     <ClCompile Include="Timer.cpp">
       <Filter>Tools</Filter>
     </ClCompile>
@@ -61,6 +58,9 @@
     <ClCompile Include="Libs\parson\parson.c">
       <Filter>Tools\parson</Filter>
     </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
@@ -85,9 +85,6 @@
       <Filter>Tools</Filter>
     </ClInclude>
     <ClInclude Include="Light.h">
-      <Filter>Tools</Filter>
-    </ClInclude>
-    <ClInclude Include="Primitive.h">
       <Filter>Tools</Filter>
     </ClInclude>
     <ClInclude Include="Timer.h">
@@ -146,6 +143,9 @@
     </ClInclude>
     <ClInclude Include="Libs\parson\parson.h">
       <Filter>Tools\parson</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Tools</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
