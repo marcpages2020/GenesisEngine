@@ -1,6 +1,11 @@
 #pragma once
 #include "Globals.h"
 
+#include <vector>;
+
+typedef float GLfloat;
+typedef unsigned short GLushort;
+
 class Mesh {
 public:
 	Mesh();
@@ -37,5 +42,48 @@ public:
 	~Pyramid();
 
 	void Render();
+};
+
+class Sphere : public Mesh {
+public:
+	Sphere();
+	~Sphere();
+
+	void Render();
+
+private: 
+	std::vector<GLfloat> vertices;
+	std::vector<GLushort> indices;
+};
+
+class Cylinder : public Mesh {
+public:
+	Cylinder();
+	Cylinder(float radius, float height, int sides);
+	~Cylinder();
+	
+	void CalculateGeometry();
+	void Render();
+private:
+	float radius;
+	float height;
+	unsigned int sides;
+
+	float* vertices;
+	int vertices_amount;
+
+	uint* indices;
+	int indices_amount;
+};
+
+class Grid {
+public:
+	Grid(int size);
+	~Grid();
+
+	void Render();
+
+private:
+	int size;
 };
 

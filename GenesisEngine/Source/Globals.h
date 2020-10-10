@@ -19,6 +19,8 @@ void log_error(const char file[], int line, const char* format, ...);
 #define RADTODEG 57.295779513082320876f
 #define HAVE_M_PI
 
+const float M_PI = 3.14159265359f;
+
 
 typedef unsigned int uint;
 

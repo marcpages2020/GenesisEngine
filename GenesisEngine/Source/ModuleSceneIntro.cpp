@@ -59,19 +59,26 @@ update_status ModuleSceneIntro::Update(float dt)
 	cube.Render(wired);
 	*/
 
+	Grid grid(10);
+	grid.Render();
+
 	//Cube cube;
 	//cube.Render();
 
 	//Pyramid pyramid;
 	//pyramid.Render();
 
-	SimplePlane plane;
-	plane.Render();
+	//SimplePlane plane;
+	//plane.Render();
+
+	//Sphere sphere;
+	//sphere.Render();
+
+	Cylinder cylinder(1, 2, 12);
+	cylinder.Render();
+
 
 	return UPDATE_CONTINUE;
 }
 
-void ModuleSceneIntro::PracticeOpenGL()
-{
-}
 
