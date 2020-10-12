@@ -41,6 +41,7 @@ private:
 
 public:
 	GLuint texColorBuffer;
+	GLuint renderBuffer;
 
 	Light lights[MAX_LIGHTS];
 	SDL_GLContext context;

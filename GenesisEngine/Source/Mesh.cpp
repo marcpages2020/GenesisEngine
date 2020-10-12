@@ -3,8 +3,7 @@
 
 // Mesh ===================================== 
 
-Mesh::Mesh() {
-}
+Mesh::Mesh() {}
 
 Mesh::~Mesh(){}
 
@@ -26,6 +25,8 @@ void Mesh::FullRender(float vertices[], int vertices_amount, uint indices[], int
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
 	glDrawElements(GL_TRIANGLES, indices_amount, GL_UNSIGNED_INT, NULL);
+
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
@@ -80,9 +81,7 @@ void Cube::Render()
 
 SimplePlane::SimplePlane() : Mesh() {}
 
-SimplePlane::~SimplePlane()
-{
-}
+SimplePlane::~SimplePlane() {}
 
 void SimplePlane::Render()
 {
@@ -193,6 +192,7 @@ void Sphere::Render()
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer(3, GL_FLOAT, 0, &vertices[0]);
 	glDrawElements(GL_QUADS, indices.size() , GL_UNSIGNED_SHORT, &indices[0]);
+	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 // ------------------------------------------
@@ -231,7 +231,7 @@ void Cylinder::CalculateGeometry()
 	for (int i = 0; i < sides; i++)
 	{
 		vertices_vector.push_back(radius * cos(current_angle));//x
-		vertices_vector.push_back(height * 0.5f);				//y
+		vertices_vector.push_back(height * 0.5f);		       //y
 		vertices_vector.push_back(radius * sin(current_angle));//z
 
 		//anticlockwise
@@ -249,7 +249,7 @@ void Cylinder::CalculateGeometry()
 	for (int i = 0; i < sides; i++)
 	{
 		vertices_vector.push_back(radius * cos(current_angle)); //x
-		vertices_vector.push_back(-height * 0.5f);			     //y
+		vertices_vector.push_back(-height * 0.5f);			    //y
 		vertices_vector.push_back(radius * sin(current_angle)); //z
 
 		//clockwise
@@ -351,7 +351,7 @@ void Grid::Render()
 
 	//Vertical Lines
 	for (float x = -size * 0.5f; x <= size * 0.5f; x++)
-	{
+	{	
 		glVertex3f(x, 0, -size * 0.5f);
 		glVertex3f(x, 0, size * 0.5f);
 	}

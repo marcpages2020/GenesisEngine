@@ -62,8 +62,8 @@ update_status ModuleSceneIntro::Update(float dt)
 	cube.Render(wired);
 	*/
 
-	Cube cube;
-	cube.Render();
+	//Cube cube;
+	//cube.Render();
 
 	//Pyramid pyramid;
 	//pyramid.Render();
@@ -74,9 +74,8 @@ update_status ModuleSceneIntro::Update(float dt)
 	//Sphere sphere;
 	//sphere.Render();
 
-	//Cylinder cylinder(1, 2, 12);
+	//Cylinder cylinder(1, 2, 66);
 	//cylinder.Render();
-
 
 	return UPDATE_CONTINUE;
 }

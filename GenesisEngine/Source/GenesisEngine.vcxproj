@@ -57,7 +57,7 @@
       <SDLCheck>false</SDLCheck>
       <ExceptionHandling>false</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalIncludeDirectories>C:\Users\ADMIN\Documents\GitHub\GenesisEngine\GenesisEngine\Source\Libs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>G:\Github\GenesisEngine\GenesisEngine\Source\Libs;C:\Users\ADMIN\Documents\GitHub\GenesisEngine\GenesisEngine\Source\Libs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalUsingDirectories>
       </AdditionalUsingDirectories>
       <StructMemberAlignment>Default</StructMemberAlignment>
@@ -78,7 +78,7 @@
       <SDLCheck>false</SDLCheck>
       <ExceptionHandling>false</ExceptionHandling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>G:\Github\GenesisEngine\GenesisEngine\Source\Libs;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>G:\Github\GenesisEngine\GenesisEngine\Source\Libs;G:\Github\GenesisEngine\GenesisEngine\Source\Libs;</AdditionalIncludeDirectories>
       <AdditionalUsingDirectories>
       </AdditionalUsingDirectories>
       <StructMemberAlignment>Default</StructMemberAlignment>
