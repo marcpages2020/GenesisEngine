@@ -61,24 +61,6 @@ update_status Editor::Update(float dt)
 
 	ret = ShowDockSpace(open_dockspace);
 
-	//scene window
-	if (show_scene_window)
-	{
-		ImGui::Begin("Scene", &show_scene_window, ImGuiWindowFlags_NoBackground);
-		const char* items[] = { "Solid", "Wireframe" };
-		static int current_display = App->renderer3D->GetDisplayMode();
-		if (ImGui::Combo("Display Mode", &current_display, items, IM_ARRAYSIZE(items)))
-		{
-			App->renderer3D->SetDisplayMode((DisplayMode)current_display);
-		}
-
-		static bool show_grid = App->scene->show_grid;
-		if (ImGui::Checkbox("Show Grid", &show_grid))
-			App->scene->show_grid = show_grid;
-
-		ImGui::End();
-	}
-
 	//Inspector
 	if (show_inspector_window)
 	{
@@ -149,9 +131,33 @@ update_status Editor::Update(float dt)
 	return ret;
 }
 
-update_status Editor::PostUpdate(float dt)
+update_status Editor::Draw()
 {
+	//scene window
+	if (show_scene_window)
+	{
+		ImGui::Begin("Scene", &show_scene_window);
+		ImVec2 windowSize = ImGui::GetWindowSize();
+
+		ImGui::Image((ImTextureID)App->renderer3D->texColorBuffer,
+			ImVec2(windowSize.x, windowSize.y), ImVec2(0, 1), ImVec2(1, 0));
+		/*
+		const char* items[] = { "Solid", "Wireframe" };
+		static int current_display = App->renderer3D->GetDisplayMode();
+		if (ImGui::Combo("Display Mode", &current_display, items, IM_ARRAYSIZE(items)))
+		{
+			App->renderer3D->SetDisplayMode((DisplayMode)current_display);
+		}
+
+		static bool show_grid = App->scene->show_grid;
+		if (ImGui::Checkbox("Show Grid", &show_grid))
+			App->scene->show_grid = show_grid;
+		*/
+		ImGui::End();
+	}
+
 	ImGui::Render();
+
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 	return UPDATE_CONTINUE;
@@ -225,7 +231,7 @@ update_status Editor::ShowDockSpace(bool* p_open) {
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground;
+		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 	}
 	else
 	{
@@ -410,7 +416,7 @@ void Editor::ShowConfigurationWindow()
 				App->window->SetBrightness(brightness);
 
 			static int width, height;
-			App->window->GetSize(width, height);
+				App->window->GetSize(width, height);
 
 			if ((ImGui::SliderInt("Width", &width, 640, 3840) || ImGui::SliderInt("Height", &height, 360, 2160)))
 				App->window->SetSize(width, height);

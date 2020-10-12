@@ -17,6 +17,9 @@ ModuleWindow::ModuleWindow(bool start_enabled) : Module(start_enabled)
 // Destructor
 ModuleWindow::~ModuleWindow()
 {
+	window = NULL;
+	screen_surface = nullptr;
+	context = nullptr;
 }
 
 // Called before render is available
@@ -170,4 +173,10 @@ void ModuleWindow::SetBorderless(bool setBorderless)
 		SDL_SetWindowBordered(window, SDL_FALSE);
 	else
 		SDL_SetWindowBordered(window, SDL_TRUE);
+}
+
+void ModuleWindow::OnResize(int g_width, int g_height)
+{
+	width = g_width;
+	height = g_height;
 }

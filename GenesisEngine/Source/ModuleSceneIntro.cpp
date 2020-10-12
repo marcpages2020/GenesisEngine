@@ -50,6 +50,9 @@ update_status ModuleSceneIntro::Update(float dt)
 		//Plane p(0, 1, 0, 0);
 		//p.axis = true;
 		//p.Render(wired);
+
+		Grid grid(10);
+		grid.Render();
 	}
 	
 	/*
@@ -59,11 +62,8 @@ update_status ModuleSceneIntro::Update(float dt)
 	cube.Render(wired);
 	*/
 
-	Grid grid(10);
-	grid.Render();
-
-	//Cube cube;
-	//cube.Render();
+	Cube cube;
+	cube.Render();
 
 	//Pyramid pyramid;
 	//pyramid.Render();
@@ -74,8 +74,8 @@ update_status ModuleSceneIntro::Update(float dt)
 	//Sphere sphere;
 	//sphere.Render();
 
-	Cylinder cylinder(1, 2, 12);
-	cylinder.Render();
+	//Cylinder cylinder(1, 2, 12);
+	//cylinder.Render();
 
 
 	return UPDATE_CONTINUE;

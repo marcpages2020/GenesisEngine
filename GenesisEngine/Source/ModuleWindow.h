@@ -29,16 +29,17 @@ public:
 	void SetFullscreenDesktop(bool setFullscreenDesktop);
 	void SetResizable(bool setResizable);
 	void SetBorderless(bool setBorderless);
+	void OnResize(int width, int height);
 
 private:
-	int width;
-	int height;
-
 	float brightness;
 
 public:
 	//The window we'll be rendering to
 	SDL_Window* window;
+
+	int width;
+	int height;
 
 	//The surface contained by the window
 	SDL_Surface* screen_surface;

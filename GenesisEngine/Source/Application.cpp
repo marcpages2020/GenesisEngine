@@ -25,7 +25,6 @@ Application::Application(int argc, char* args[]) : argc(argc), args(args)
 	AddModule(audio);
 	AddModule(scene);
 
-	//AddModule(scene);
 	AddModule(editor);
 
 	// Renderer last!

@@ -133,17 +133,34 @@ bool ModuleRenderer3D::Init(JSON_Object* object)
 	App->window->GetSize(width, height);
 	OnResize(width, height);
 
+	//Generate buffers
+	glGenFramebuffers(1, &frameBuffer);
+
+	glGenTextures(1, &texColorBuffer);
+	glBindTexture(GL_TEXTURE_2D, texColorBuffer);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, App->window->width, App->window->height, 0, GL_RGB, GL_UNSIGNED_INT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
 	return ret;
 }
 
 // PreUpdate: clear buffer
 update_status ModuleRenderer3D::PreUpdate(float dt)
 {
+	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+
 	Color c = App->camera->background;
 	glClearColor(c.r, c.g, c.b, c.a);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
+
+	glBegin(GL_LINES);
+		glVertex3f(0,0,0);
+		glVertex3f(1,0,0);
+	glEnd();
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadMatrixf(App->camera->GetViewMatrix());
@@ -160,8 +177,14 @@ update_status ModuleRenderer3D::PreUpdate(float dt)
 // PostUpdate present buffer to screen
 update_status ModuleRenderer3D::PostUpdate(float dt)
 {
-	//App->editor->Draw(dt);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texColorBuffer, 0);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	App->editor->Draw();
+
 	SDL_GL_SwapWindow(App->window->window);
+
 	return UPDATE_CONTINUE;
 }
 
@@ -169,6 +192,9 @@ update_status ModuleRenderer3D::PostUpdate(float dt)
 bool ModuleRenderer3D::CleanUp()
 {
 	LOG("Destroying 3D Renderer");
+
+	glDeleteFramebuffers(1, &frameBuffer);
+	glDeleteTextures(1, &texColorBuffer);
 
 	SDL_GL_DeleteContext(context);
 

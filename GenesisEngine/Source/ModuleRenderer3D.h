@@ -6,6 +6,7 @@
 
 #define MAX_LIGHTS 8
 
+typedef unsigned int GLuint;
 typedef unsigned int GLenum;
 
 enum DisplayMode
@@ -36,7 +37,11 @@ private:
 	void BeginDebugDraw();
 	void EndDebugDraw();
 
+	GLuint frameBuffer;
+
 public:
+	GLuint texColorBuffer;
+
 	Light lights[MAX_LIGHTS];
 	SDL_GLContext context;
 	mat3x3 NormalMatrix;

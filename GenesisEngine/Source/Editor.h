@@ -22,7 +22,7 @@ public:
 
 	bool Init(JSON_Object* object);
 	update_status Update(float dt);
-	update_status PostUpdate(float dt);
+	update_status Draw();
 	bool CleanUp();
 
 	bool LoadConfig(JSON_Object* object);
