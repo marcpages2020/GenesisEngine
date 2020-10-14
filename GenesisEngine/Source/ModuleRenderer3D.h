@@ -8,6 +8,7 @@
 
 typedef unsigned int GLuint;
 typedef unsigned int GLenum;
+typedef void* SDL_GLContext;
 
 enum DisplayMode
 {
@@ -51,4 +52,5 @@ public:
 
 private:
 	bool debug;
+	bool vsync;
 };

@@ -23,6 +23,7 @@ bool ModuleSceneIntro::Start()
 	App->camera->Move(vec3(1.0f, 1.0f, 0.0f));
 
 	App->camera->LookAt(vec3(0, 0, 0));
+
 	return ret;
 }
 
@@ -62,8 +63,8 @@ update_status ModuleSceneIntro::Update(float dt)
 	cube.Render(wired);
 	*/
 
-	//Cube cube;
-	//cube.Render();
+	Cube cube;
+	cube.Render();
 
 	//Pyramid pyramid;
 	//pyramid.Render();
@@ -74,8 +75,11 @@ update_status ModuleSceneIntro::Update(float dt)
 	//Sphere sphere;
 	//sphere.Render();
 
-	//Cylinder cylinder(1, 2, 66);
+	//Cylinder cylinder(1, 2, 12);
 	//cylinder.Render();
+
+	//Cone cone(1, 1.5, 12);
+	//cone.Render();
 
 	return UPDATE_CONTINUE;
 }

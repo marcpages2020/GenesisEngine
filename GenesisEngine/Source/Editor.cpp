@@ -75,13 +75,12 @@ update_status Editor::Update(float dt)
 		ImGui::End();
 	}
 
-	//Hieracy
+	//Hierachy
 	if (show_hierachy_window)
 	{
 		ImGui::Begin("Hierachy", &show_hierachy_window);
 		ImGui::End();
 	}
-
 
 	//Console
 	if (show_console_window)
@@ -89,11 +88,17 @@ update_status Editor::Update(float dt)
 		ImGui::Begin("Console", &show_console_window);
 		for (int i = 0; i < console_log.size(); i++)
 		{
-			if (console_log[i].error) {
+			
+			if (console_log[i].warning_level == 0) //Normal log
+			{
+				ImGui::Text(console_log[i].log_text.c_str());
+			}
+			else if(console_log[i].warning_level == 1) //Warning
+			{
 				ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), console_log[i].log_text.c_str());
 			}
-			else
-				ImGui::Text(console_log[i].log_text.c_str());
+			else //Error
+				ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), console_log[i].log_text.c_str());
 		}
 		ImGui::End();
 	}
@@ -136,23 +141,49 @@ update_status Editor::Draw()
 	//scene window
 	if (show_scene_window)
 	{
-		ImGui::Begin("Scene", &show_scene_window);
-		ImVec2 windowSize = ImGui::GetWindowSize();
-
-		ImGui::Image((ImTextureID)App->renderer3D->texColorBuffer,
-			ImVec2(windowSize.x, windowSize.y), ImVec2(0, 1), ImVec2(1, 0));
-		/*
-		const char* items[] = { "Solid", "Wireframe" };
-		static int current_display = App->renderer3D->GetDisplayMode();
-		if (ImGui::Combo("Display Mode", &current_display, items, IM_ARRAYSIZE(items)))
+		if(ImGui::Begin("Scene", &show_scene_window, ImGuiWindowFlags_MenuBar))
 		{
-			App->renderer3D->SetDisplayMode((DisplayMode)current_display);
-		}
+			if (ImGui::BeginMenuBar())
+			{
+				if (ImGui::BeginMenu("Display"))
+				{
+					if (ImGui::BeginMenu("Shading Mode"))
+					{
+						if (ImGui::MenuItem("Solid"))App->renderer3D->SetDisplayMode(DisplayMode::SOLID);
+						if (ImGui::MenuItem("Wireframe"))App->renderer3D->SetDisplayMode(DisplayMode::WIREFRAME);
+						ImGui::EndMenu();
+					}
 
-		static bool show_grid = App->scene->show_grid;
-		if (ImGui::Checkbox("Show Grid", &show_grid))
-			App->scene->show_grid = show_grid;
-		*/
+					/*
+					ImGui::MenuItem("Display");
+					const char* items[] = { "Solid", "Wireframe" };
+					static int current_display = App->renderer3D->GetDisplayMode();
+					if (ImGui::Combo("Display Mode", &current_display, items, IM_ARRAYSIZE(items)))
+					{
+						App->renderer3D->SetDisplayMode((DisplayMode)current_display);
+					}
+					*/
+
+					ImGui::EndMenu();
+				}
+
+				static bool lighting = glIsEnabled(GL_LIGHTING);
+				if (ImGui::Checkbox("Lighting", &lighting))
+					App->renderer3D->SetCapActive(GL_LIGHTING, lighting);
+
+				ImGui::EndMenuBar();
+			}
+
+			ImVec2 windowSize = ImGui::GetWindowSize();
+			ImGui::Image((ImTextureID)App->renderer3D->texColorBuffer, ImVec2(windowSize.x, windowSize.y), ImVec2(0, 1), ImVec2(1, 0));
+		
+
+			/*
+			static bool show_grid = App->scene->show_grid;
+			if (ImGui::Checkbox("Show Grid", &show_grid))
+				App->scene->show_grid = show_grid;
+			*/
+		}
 		ImGui::End();
 	}
 
@@ -207,9 +238,9 @@ bool Editor::LoadConfig(JSON_Object* object)
 	return true;
 }
 
-void Editor::AddConsoleLog(const char* log, bool error)
+void Editor::AddConsoleLog(const char* log, int warning_level)
 {
-	log_message message = { log, error };
+	log_message message = { log, warning_level };
 	console_log.push_back(message);
 }
 

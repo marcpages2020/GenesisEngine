@@ -77,7 +77,11 @@ bool ModuleWindow::Init(JSON_Object* object)
 			flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 		}
 
-		window = SDL_CreateWindow(TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, flags);
+		static char title[2048] = { 0 };
+		memset(title, 0, sizeof(title));
+		sprintf_s(title, "%s v%s", App->engine_name, App->GetEngineVersion());
+
+		window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, flags);
 
 		if (window == NULL)
 		{

@@ -1,6 +1,5 @@
 #pragma once
 #include "Globals.h"
-
 #include <vector>;
 
 typedef float GLfloat;
@@ -87,3 +86,29 @@ private:
 	int size;
 };
 
+class Cone : public Mesh {
+public:
+	Cone();
+	Cone(float radius, float height, int sides);
+	~Cone();
+
+	void CalculateGeometry(int sides);
+	void Render();
+
+private: 
+	float radius;
+	float height;
+
+	float* vertices;
+	int vertices_amount;
+
+	uint* indices;
+	uint indices_amount;
+};
+
+/*
+class Frustum : public Mesh {
+public:
+private:
+};
+*/

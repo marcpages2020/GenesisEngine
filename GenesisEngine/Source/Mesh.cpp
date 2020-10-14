@@ -1,6 +1,9 @@
 #include "Mesh.h"
 #include "glew/include/glew.h"
 
+#include "Application.h"
+#include "ModuleRenderer3D.h"
+
 // Mesh ===================================== 
 
 Mesh::Mesh() {}
@@ -24,9 +27,11 @@ void Mesh::FullRender(float vertices[], int vertices_amount, uint indices[], int
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * indices_amount, indices, GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
-	glDrawElements(GL_TRIANGLES, indices_amount, GL_UNSIGNED_INT, NULL);
 
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	DisplayMode display = App->renderer3D->GetDisplayMode();
+
+	if (display == SOLID) { glDrawElements(GL_TRIANGLES, indices_amount, GL_UNSIGNED_INT, NULL);}
+	else if(display == WIREFRAME) { glDrawElements(GL_LINE_STRIP, indices_amount, GL_UNSIGNED_INT, NULL); }
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
@@ -169,14 +174,14 @@ Sphere::Sphere() : Mesh()
 	indices.resize(rings * sectors * 4);
 	std::vector<GLushort>::iterator i = indices.begin();
 
-	for (r = 0; r < rings; r++)
+	for (r = 0; r < rings -1; r++)
 	{
-		for (s = 0; s < sectors; s++)
+		for (s = 0; s < sectors -1; s++)
 		{
-			*i++ = r * sectors + s;
-			*i++ = r * sectors + (s + 1);
-			*i++ = (r + 1) * sectors + (s + 1);
 			*i++ = (r + 1) * sectors + s;
+			*i++ = (r + 1) * sectors + (s + 1);
+			*i++ = r * sectors + (s + 1);
+			*i++ = r * sectors + s;
 		}
 	}
 }
@@ -364,4 +369,101 @@ void Grid::Render()
 	}
 
 	glEnd();
+}
+
+Cone::Cone() : Mesh(), radius(1), height(1) 
+{
+	CalculateGeometry(8);
+}
+
+Cone::Cone(float g_radius, float g_height, int sides) : Mesh(), radius(g_radius) , height(g_height)
+{
+	CalculateGeometry(sides);
+}
+
+Cone::~Cone() {}
+
+void Cone::CalculateGeometry(int sides) 
+{
+	//Verices -------------------------------------------------------
+	std::vector<GLfloat> vertices_vector;
+
+	//Top vertex
+	vertices_vector.push_back(0);
+	vertices_vector.push_back(height * 0.5f);
+	vertices_vector.push_back(0);
+
+	float current_angle = 0;
+	float angle_increment = 2 * M_PI / sides;
+
+	//Circle vertices
+	for (size_t i = 0; i < sides; i++)
+	{
+		vertices_vector.push_back(radius * cos(current_angle)); //x
+		vertices_vector.push_back(-height * 0.5f);			    //y
+		vertices_vector.push_back(radius * sin(current_angle)); //z
+
+		//clockwise
+		current_angle -= angle_increment;
+	}
+
+	//Circle center Vertex
+	vertices_vector.push_back(0);
+	vertices_vector.push_back(-height * 0.5f);
+	vertices_vector.push_back(0);
+
+	//Indices -------------------------------------------------------
+
+	std::vector<GLuint> indices_vector;
+
+	//Sides
+	for (size_t i = 0; i < sides; i++)
+	{
+		indices_vector.push_back(0);
+		indices_vector.push_back(i);
+		indices_vector.push_back(i + 1);
+	}
+	//Last Side
+	indices_vector.push_back(0);
+	indices_vector.push_back(sides);
+	indices_vector.push_back(1);
+
+	//Bottom Face
+	for (size_t i = 1; i < sides; i++)
+	{
+		indices_vector.push_back(i + 1);
+		indices_vector.push_back(i);
+		indices_vector.push_back(sides + 1);
+	}
+
+	indices_vector.push_back(1);
+	indices_vector.push_back(sides);
+	indices_vector.push_back(sides + 1);
+
+	//Copy into default class containers
+
+	//vertices
+	vertices_amount = vertices_vector.size();
+	vertices = new float[vertices_amount]();
+
+	for (size_t i = 0; i < vertices_amount; i++)
+	{
+		vertices[i] = vertices_vector[i];
+	}
+
+	indices_amount = indices_vector.size();
+	indices = new uint[indices_amount]();
+
+	for (size_t i = 0; i < indices_amount; i++)
+	{
+		indices[i] = indices_vector[i];
+	}
+
+	vertices_vector.clear();
+	indices_vector.clear();
+}
+
+void Cone::Render()
+{
+	FullRender(vertices, vertices_amount, indices, indices_amount);
 }

@@ -34,12 +34,13 @@ bool ModuleRenderer3D::Init(JSON_Object* object)
 	bool ret = true;
 
 	debug = json_object_get_string(object, "debug");
+	vsync = json_object_get_boolean(object, "vsync");
 
 	//Create context
 	context = SDL_GL_CreateContext(App->window->window);
 	if (context == NULL)
 	{
-		LOG("OpenGL context could not be created! SDL_Error: %s\n", SDL_GetError());
+		LOG_ERROR("OpenGL context could not be created! SDL_Error: %s\n", SDL_GetError());
 		ret = false;
 	}
 
@@ -47,7 +48,7 @@ bool ModuleRenderer3D::Init(JSON_Object* object)
 
 	if (error != GL_NO_ERROR)
 	{
-		LOG("Error initializing glew library! %s", SDL_GetError());
+		LOG_ERROR("Error initializing glew library! %s", SDL_GetError());
 		ret = false;
 	}
 	else
@@ -58,8 +59,8 @@ bool ModuleRenderer3D::Init(JSON_Object* object)
 	if (ret == true)
 	{
 		//Use Vsync
-		if (VSYNC && SDL_GL_SetSwapInterval(1) < 0)
-			LOG("Warning: Unable to set VSync! SDL Error: %s\n", SDL_GetError());
+		if (vsync && SDL_GL_SetSwapInterval(1) < 0)
+			LOG_ERROR("Warning: Unable to set VSync! SDL Error: %s\n", SDL_GetError());
 
 		//Initialize Projection Matrix
 		glMatrixMode(GL_PROJECTION);
@@ -69,7 +70,7 @@ bool ModuleRenderer3D::Init(JSON_Object* object)
 		GLenum error = glGetError();
 		if (error != GL_NO_ERROR)
 		{
-			LOG("Error initializing OpenGL! %s\n", gluErrorString(error));
+			LOG_ERROR("Error initializing OpenGL! %s\n", gluErrorString(error));
 			ret = false;
 		}
 
@@ -81,7 +82,7 @@ bool ModuleRenderer3D::Init(JSON_Object* object)
 		error = glGetError();
 		if (error != GL_NO_ERROR)
 		{
-			LOG("Error initializing OpenGL! %s\n", gluErrorString(error));
+			LOG_ERROR("Error initializing OpenGL! %s\n", gluErrorString(error));
 			ret = false;
 		}
 
@@ -95,7 +96,7 @@ bool ModuleRenderer3D::Init(JSON_Object* object)
 		error = glGetError();
 		if (error != GL_NO_ERROR)
 		{
-			LOG("Error initializing OpenGL! %s\n", gluErrorString(error));
+			LOG_ERROR("Error initializing OpenGL! %s\n", gluErrorString(error));
 			ret = false;
 		}
 
@@ -118,7 +119,7 @@ bool ModuleRenderer3D::Init(JSON_Object* object)
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_COLOR_MATERIAL);
-		//glEnable(GL_TEXTURE_2D);
+		glEnable(GL_TEXTURE_2D);
 		glEnable(GL_POLYGON_SMOOTH);
 		glEnable(GL_LIGHTING);
 		lights[0].Active(true);
@@ -135,15 +136,14 @@ bool ModuleRenderer3D::Init(JSON_Object* object)
 	OnResize(width, height);
 
 	//Generate buffers
-	glGenFramebuffers(1, &frameBuffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 
 	//FrameBuffer
+	glGenFramebuffers(1, &frameBuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+	//Texture Buffer
 	glGenTextures(1, &texColorBuffer);
 	glBindTexture(GL_TEXTURE_2D, texColorBuffer);
-
-	//Texture Buffer
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, App->window->width, App->window->height, 0, GL_RGB, GL_UNSIGNED_INT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, App->window->width, App->window->height, 0, GL_RGBA, GL_UNSIGNED_INT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texColorBuffer, 0);
@@ -166,10 +166,10 @@ bool ModuleRenderer3D::Init(JSON_Object* object)
 update_status ModuleRenderer3D::PreUpdate(float dt)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+	glBindTexture(GL_TEXTURE_2D, 0);
 
 	Color c = App->camera->background;
 	glClearColor(c.r, c.g, c.b, c.a);
-	//glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glLoadIdentity();
@@ -191,8 +191,6 @@ update_status ModuleRenderer3D::PostUpdate(float dt)
 {
 	glBindVertexArray(0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	//glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 	glClear(GL_COLOR_BUFFER_BIT);
 	glBindTexture(GL_TEXTURE_2D, texColorBuffer);

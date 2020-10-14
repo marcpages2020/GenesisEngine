@@ -11,7 +11,7 @@ typedef int GLint;
 
 struct log_message {
 	std::string log_text;
-	bool error;
+	int warning_level;
 };
 
 class Editor : public Module 
@@ -26,7 +26,7 @@ public:
 	bool CleanUp();
 
 	bool LoadConfig(JSON_Object* object);
-	void AddConsoleLog(const char* log, bool error = false);
+	void AddConsoleLog(const char* log, int warning_level);
 	
 private:
 	//Dock Space

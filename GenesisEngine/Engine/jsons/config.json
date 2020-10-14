@@ -66,7 +66,8 @@
     },
     {
       "name": "renderer",
-      "debug": false
+      "debug": false,
+      "vsync" :  false
     }
   ]
 }
