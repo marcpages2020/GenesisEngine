@@ -10,28 +10,30 @@ Mesh::Mesh() {}
 
 Mesh::~Mesh(){}
 
-void Mesh::FullRender(float vertices[], int vertices_amount, uint indices[], int indices_amount)
+void Mesh::GenerateBuffers(float vertices[], int vertices_amount, uint indices[])
 {
-	uint vertices_buffer = 0;
+	vertices_buffer = 0;
 	glGenBuffers(1, (GLuint*)&(vertices_buffer));
 	glBindBuffer(GL_ARRAY_BUFFER, vertices_buffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices_amount * 3, vertices, GL_STATIC_DRAW);
 
-	glEnableClientState(GL_VERTEX_ARRAY);
 	glBindBuffer(GL_ARRAY_BUFFER, vertices_buffer);
 	glVertexPointer(3, GL_FLOAT, 0, NULL);
 
-	uint indices_buffer = 0;
+	indices_buffer = 0;
 	glGenBuffers(1, (GLuint*)&(indices_buffer));
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * indices_amount, indices, GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
 
-	DisplayMode display = App->renderer3D->GetDisplayMode();
+}
 
-	if (display == SOLID) { glDrawElements(GL_TRIANGLES, indices_amount, GL_UNSIGNED_INT, NULL);}
-	else if(display == WIREFRAME) { glDrawElements(GL_LINE_STRIP, indices_amount, GL_UNSIGNED_INT, NULL); }
+void Mesh::Render()
+{
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
+	glDrawElements(GL_TRIANGLES, indices_amount, GL_UNSIGNED_INT, NULL);
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
@@ -40,13 +42,7 @@ void Mesh::FullRender(float vertices[], int vertices_amount, uint indices[], int
 
 // Cube ===================================== 
 
-Cube::Cube() : Mesh() {}
-
-Cube::Cube(float g_x, float g_y, float g_z) {}
-
-Cube::~Cube(){}
-
-void Cube::Render()
+Cube::Cube() : Mesh() 
 {
 	float vertices[24] = {
 		//Bottom Vertices
@@ -59,7 +55,7 @@ void Cube::Render()
 		0.0f, 1.0f, 0.0f,
 		1.0f, 1.0f, 0.0f,
 		1.0f, 1.0f, 1.0f,
-		0.0f, 1.0f, 1.0f  
+		0.0f, 1.0f, 1.0f
 	};
 
 	uint indices[36] = {
@@ -77,24 +73,24 @@ void Cube::Render()
 		4,7,6, 6,5,4
 	};
 
-	FullRender(vertices, 24, indices, 36);
+	indices_amount = 36;
+
+	GenerateBuffers(vertices, 24, indices);
 }
+
+Cube::~Cube(){}
 
 // ------------------------------------------
 
 // Plane ====================================
 
-SimplePlane::SimplePlane() : Mesh() {}
-
-SimplePlane::~SimplePlane() {}
-
-void SimplePlane::Render()
+Plane::Plane() : Mesh() 
 {
 	float vertices[12] = {
-		0.0f ,0.0f, 0.0f,
-		1.0f ,0.0f, 0.0f,
-		1.0f ,0.0f, 1.0f,
-		0.0f ,0.0f, 1.0f,
+	0.0f ,0.0f, 0.0f,
+	1.0f ,0.0f, 0.0f,
+	1.0f ,0.0f, 1.0f,
+	0.0f ,0.0f, 1.0f,
 	};
 
 	uint indices[6]{
@@ -102,43 +98,46 @@ void SimplePlane::Render()
 		2, 1 ,0
 	};
 
-	FullRender(vertices, 12, indices, 6);
+	indices_amount = 6;
+
+	GenerateBuffers(vertices, 12, indices);
 }
+
+Plane::~Plane() {}
+
 
 // ------------------------------------------
 
 // Pyramid ==================================
 
-Pyramid::Pyramid() : Mesh() {}
-
-Pyramid::~Pyramid() {}
-
-void Pyramid::Render()
+Pyramid::Pyramid() : Mesh() 
 {
 	float vertices[15] = {
+		//Top
+		0.5f, 0.85f, 0.5f,
+
 		//Bottom 
 		0.0f ,0.0f, 0.0f,
 		1.0f ,0.0f, 0.0f,
 		1.0f ,0.0f, 1.0f,
-		0.0f ,0.0f, 1.0f,
-
-		//Top
-		0.5f, 0.85f, 0.5f
+		0.0f ,0.0f, 1.0f
 	};
 
-	uint indices[20]{
-		//Bottom
-		0, 1, 2,
-		2, 3, 0,
+	uint indices[18]{
+		0, 4, 3, // Front
+		0, 3, 2, // Left
+		0, 2, 1, // Right
+		0, 1, 4,  // Back
 
-		3, 2, 4, // Front
-		0, 3, 4, // Left
-		2, 1, 3, // Right
-		1, 0, 4  // Back
+		1, 3, 4,  1, 2, 3 //Bottom
 	};
 
-	FullRender(vertices, 15, indices, 18);
+	indices_amount = 18;
+
+	GenerateBuffers(vertices, 15, indices);
 }
+
+Pyramid::~Pyramid() {}
 
 // ------------------------------------------
 
@@ -212,11 +211,7 @@ Cylinder::Cylinder(float g_radius, float g_height, int g_sides) : Mesh(), radius
 	CalculateGeometry();
 }
 
-Cylinder::~Cylinder() 
-{
-	delete[] vertices;
-	delete[] indices;
-}
+Cylinder::~Cylinder() {}
 
 void Cylinder::CalculateGeometry()
 {
@@ -312,8 +307,8 @@ void Cylinder::CalculateGeometry()
 	indices_vector.push_back(sides + 2);
 	indices_vector.push_back(2 * sides + 1);
 
-	vertices_amount = vertices_vector.size();
-	vertices = new float[vertices_amount]();
+	int vertices_amount = vertices_vector.size();
+	float* vertices = new float[vertices_amount]();
 
 	for (size_t i = 0; i < vertices_amount; i++)
 	{
@@ -321,7 +316,7 @@ void Cylinder::CalculateGeometry()
 	}
 
 	indices_amount = indices_vector.size();
-	indices = new uint[indices_amount]();
+	uint* indices = new uint[indices_amount]();
 
 	for (size_t i = 0; i < indices_amount; i++)
 	{
@@ -330,11 +325,8 @@ void Cylinder::CalculateGeometry()
 
 	vertices_vector.clear();
 	indices_vector.clear();
-}
 
-void Cylinder::Render()
-{
-	FullRender(vertices, vertices_amount, indices, indices_amount);
+	GenerateBuffers(vertices, vertices_amount, indices);
 }
 
 // ------------------------------------------
@@ -443,8 +435,8 @@ void Cone::CalculateGeometry(int sides)
 	//Copy into default class containers
 
 	//vertices
-	vertices_amount = vertices_vector.size();
-	vertices = new float[vertices_amount]();
+	int vertices_amount = vertices_vector.size();
+	float* vertices = new float[vertices_amount]();
 
 	for (size_t i = 0; i < vertices_amount; i++)
 	{
@@ -452,7 +444,7 @@ void Cone::CalculateGeometry(int sides)
 	}
 
 	indices_amount = indices_vector.size();
-	indices = new uint[indices_amount]();
+	uint* indices = new uint[indices_amount]();
 
 	for (size_t i = 0; i < indices_amount; i++)
 	{
@@ -461,9 +453,7 @@ void Cone::CalculateGeometry(int sides)
 
 	vertices_vector.clear();
 	indices_vector.clear();
+
+	GenerateBuffers(vertices, vertices_amount, indices);
 }
 
-void Cone::Render()
-{
-	FullRender(vertices, vertices_amount, indices, indices_amount);
-}

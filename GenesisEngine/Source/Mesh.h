@@ -10,37 +10,34 @@ public:
 	Mesh();
 	virtual ~Mesh();
 
-	virtual void Render() = 0;
+	virtual void Render();
 
 public: 
 
 protected: 
-	void FullRender(float vertices[], int vertices_amount, uint indices[], int indices_amount);
+	void GenerateBuffers(float vertices[], int vertices_amount, uint indices[]);
+
+	uint vertices_buffer = 0;
+	uint indices_buffer = 0;
+	int indices_amount = 0;
 };
 
 class Cube : public Mesh {
 public:
 	Cube();
-	Cube(float x, float y, float z);
 	~Cube();
-
-	void Render();
 };
 
-class SimplePlane : public Mesh {
+class Plane : public Mesh {
 public:
-	SimplePlane();
-	~SimplePlane();
-
-	void Render();
+	Plane();
+	~Plane();
 };
 
 class Pyramid : public Mesh {
 public:
 	Pyramid();
 	~Pyramid();
-
-	void Render();
 };
 
 class Sphere : public Mesh {
@@ -62,17 +59,10 @@ public:
 	~Cylinder();
 	
 	void CalculateGeometry();
-	void Render();
 private:
 	float radius;
 	float height;
 	unsigned int sides;
-
-	float* vertices;
-	int vertices_amount;
-
-	uint* indices;
-	int indices_amount;
 };
 
 class Grid {
@@ -93,17 +83,10 @@ public:
 	~Cone();
 
 	void CalculateGeometry(int sides);
-	void Render();
 
 private: 
 	float radius;
 	float height;
-
-	float* vertices;
-	int vertices_amount;
-
-	uint* indices;
-	uint indices_amount;
 };
 
 /*

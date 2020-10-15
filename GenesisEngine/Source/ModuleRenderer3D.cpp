@@ -231,7 +231,23 @@ void ModuleRenderer3D::OnResize(int width, int height)
 
 DisplayMode ModuleRenderer3D::GetDisplayMode() { return display_mode; }
 
-void ModuleRenderer3D::SetDisplayMode(DisplayMode display) { display_mode = display; }
+void ModuleRenderer3D::SetDisplayMode(DisplayMode display) 
+{ 
+	GLenum face = GL_FRONT;
+
+	if (!glIsEnabled(GL_CULL_FACE_MODE))
+		face = GL_FRONT_AND_BACK;
+
+	//display_mode = display;
+	if (display == SOLID) 
+	{
+		glPolygonMode(face, GL_FILL);
+	}
+	else if (display == WIREFRAME)
+	{
+		glPolygonMode(face, GL_LINE);
+	}
+}
 
 void ModuleRenderer3D::SetCapActive(GLenum cap, bool active)
 {

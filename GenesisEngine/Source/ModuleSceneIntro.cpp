@@ -48,38 +48,27 @@ update_status ModuleSceneIntro::Update(float dt)
 
 	if (show_grid) 
 	{
-		//Plane p(0, 1, 0, 0);
-		//p.axis = true;
-		//p.Render(wired);
-
 		Grid grid(10);
 		grid.Render();
 	}
-	
-	/*
-	Cube cube(1.0f, 1.0f, 1.0f);
-	cube.color = Color(255, 0, 0, 255);
-	cube.wire = true;
-	cube.Render(wired);
-	*/
 
-	Cube cube;
-	cube.Render();
+	//Cube cube;
+	//cube.Render();
 
 	//Pyramid pyramid;
 	//pyramid.Render();
 
-	//SimplePlane plane;
+	//Plane plane;
 	//plane.Render();
 
 	//Sphere sphere;
 	//sphere.Render();
 
-	//Cylinder cylinder(1, 2, 12);
+	//Cylinder cylinder(1, 2, 32);
 	//cylinder.Render();
 
-	//Cone cone(1, 1.5, 12);
-	//cone.Render();
+	Cone cone(1, 1.5, 12);
+	cone.Render();
 
 	return UPDATE_CONTINUE;
 }
