@@ -3,7 +3,7 @@
 #include "parson/parson.h"
 
 #include "glew/include/glew.h"
-#include "ImGui/imgui.h"
+
 #include "ImGui/imgui_impl_sdl.h"
 #include "ImGui/imgui_impl_opengl3.h"
 
@@ -28,10 +28,14 @@ Editor::Editor(bool start_enabled) : Module(start_enabled)
 
 	fps_log.resize(100, 0);
 	ms_log.resize(100, 0);
+
+	image_size = { 0,0 };
 }
 
-Editor::~Editor() {
-
+Editor::~Editor() 
+{
+	fps_log.clear();
+	ms_log.clear();
 }
 
 bool Editor::Init(JSON_Object* object)
@@ -61,6 +65,11 @@ update_status Editor::Update(float dt)
 
 	ret = ShowDockSpace(open_dockspace);
 
+	return ret;
+}
+
+update_status Editor::Draw()
+{
 	//Inspector
 	if (show_inspector_window)
 	{
@@ -82,18 +91,24 @@ update_status Editor::Update(float dt)
 		ImGui::End();
 	}
 
+	//scene window
+	if (show_scene_window)
+	{
+		ShowSceneWindow();
+	}
+
 	//Console
 	if (show_console_window)
 	{
 		ImGui::Begin("Console", &show_console_window);
 		for (int i = 0; i < console_log.size(); i++)
 		{
-			
+
 			if (console_log[i].warning_level == 0) //Normal log
 			{
 				ImGui::Text(console_log[i].log_text.c_str());
 			}
-			else if(console_log[i].warning_level == 1) //Warning
+			else if (console_log[i].warning_level == 1) //Warning
 			{
 				ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), console_log[i].log_text.c_str());
 			}
@@ -131,60 +146,6 @@ update_status Editor::Update(float dt)
 	if (show_about_window)
 	{
 		ShowAboutWindow();
-	}
-
-	return ret;
-}
-
-update_status Editor::Draw()
-{
-	//scene window
-	if (show_scene_window)
-	{
-		if(ImGui::Begin("Scene", &show_scene_window, ImGuiWindowFlags_MenuBar))
-		{
-			if (ImGui::BeginMenuBar())
-			{
-				if (ImGui::BeginMenu("Display"))
-				{
-					if (ImGui::BeginMenu("Shading Mode"))
-					{
-						if (ImGui::MenuItem("Solid"))App->renderer3D->SetDisplayMode(DisplayMode::SOLID);
-						if (ImGui::MenuItem("Wireframe"))App->renderer3D->SetDisplayMode(DisplayMode::WIREFRAME);
-						ImGui::EndMenu();
-					}
-
-					/*
-					ImGui::MenuItem("Display");
-					const char* items[] = { "Solid", "Wireframe" };
-					static int current_display = App->renderer3D->GetDisplayMode();
-					if (ImGui::Combo("Display Mode", &current_display, items, IM_ARRAYSIZE(items)))
-					{
-						App->renderer3D->SetDisplayMode((DisplayMode)current_display);
-					}
-					*/
-
-					ImGui::EndMenu();
-				}
-
-				static bool lighting = glIsEnabled(GL_LIGHTING);
-				if (ImGui::Checkbox("Lighting", &lighting))
-					App->renderer3D->SetCapActive(GL_LIGHTING, lighting);
-
-				ImGui::EndMenuBar();
-			}
-
-			ImVec2 windowSize = ImGui::GetWindowSize();
-			ImGui::Image((ImTextureID)App->renderer3D->texColorBuffer, ImVec2(windowSize.x, windowSize.y), ImVec2(0, 1), ImVec2(1, 0));
-		
-
-			/*
-			static bool show_grid = App->scene->show_grid;
-			if (ImGui::Checkbox("Show Grid", &show_grid))
-				App->scene->show_grid = show_grid;
-			*/
-		}
-		ImGui::End();
 	}
 
 	ImGui::Render();
@@ -334,6 +295,14 @@ void Editor::GetMemoryStatistics(const char* gpu_brand, GLint& vram_budget, GLin
 	}
 }
 
+void Editor::ResizeSceneImage(float window_width)
+{
+	float size_proportion = (float)App->window->width / (float)App->window->height;
+
+	image_size.x = window_width;
+	image_size.y = image_size.x / size_proportion;
+}
+
 bool Editor::CreateMainMenuBar() {
 	bool ret = true;
 
@@ -408,6 +377,55 @@ bool Editor::CreateMainMenuBar() {
 	ImGui::End();
 
 	return ret;
+}
+
+//Windows
+void Editor::ShowSceneWindow()
+{
+	if (ImGui::Begin("Scene", &show_scene_window, ImGuiWindowFlags_MenuBar))
+	{
+		if (ImGui::BeginMenuBar())
+		{
+			if (ImGui::BeginMenu("Display"))
+			{
+				if (ImGui::BeginMenu("Shading Mode"))
+				{
+					if (ImGui::MenuItem("Solid"))App->renderer3D->SetDisplayMode(DisplayMode::SOLID);
+					if (ImGui::MenuItem("Wireframe"))App->renderer3D->SetDisplayMode(DisplayMode::WIREFRAME);
+					ImGui::EndMenu();
+				}
+
+				/*
+				ImGui::MenuItem("Display");
+				const char* items[] = { "Solid", "Wireframe" };
+				static int current_display = App->renderer3D->GetDisplayMode();
+				if (ImGui::Combo("Display Mode", &current_display, items, IM_ARRAYSIZE(items)))
+				{
+					App->renderer3D->SetDisplayMode((DisplayMode)current_display);
+				}
+				*/
+
+				ImGui::EndMenu();
+			}
+
+			static bool lighting = glIsEnabled(GL_LIGHTING);
+			if (ImGui::Checkbox("Lighting", &lighting))
+				App->renderer3D->SetCapActive(GL_LIGHTING, lighting);
+
+			static bool show_grid = App->scene->show_grid;
+			if (ImGui::Checkbox("Show Grid", &show_grid))
+				App->scene->show_grid = show_grid;
+
+			ImGui::EndMenuBar();
+		}
+
+		ImVec2 windowSize = ImGui::GetWindowSize();
+		if (image_size.x != windowSize.x)
+			ResizeSceneImage(windowSize.x);
+
+		ImGui::Image((ImTextureID)App->renderer3D->texColorBuffer, image_size, ImVec2(0, 1), ImVec2(1, 0));
+	}
+	ImGui::End();
 }
 
 void Editor::ShowConfigurationWindow()

@@ -9,6 +9,7 @@
 typedef unsigned int GLuint;
 typedef unsigned int GLenum;
 typedef void* SDL_GLContext;
+class Mesh;
 
 enum DisplayMode
 {
@@ -26,6 +27,9 @@ public:
 	update_status PreUpdate(float dt);
 	update_status PostUpdate(float dt);
 	bool CleanUp();
+	
+	void AddMesh(std::vector<Mesh*> mesh);
+	void DrawMeshes();
 
 	void OnResize(int width, int height);
 
@@ -49,6 +53,8 @@ public:
 	mat3x3 NormalMatrix;
 	mat4x4 ModelMatrix, ViewMatrix, ProjectionMatrix;
 	DisplayMode display_mode;
+
+	std::vector<std::vector<Mesh*>> meshes;
 
 private:
 	bool debug;

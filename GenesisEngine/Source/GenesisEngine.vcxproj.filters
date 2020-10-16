@@ -35,22 +35,22 @@
       <Filter>Tools</Filter>
     </ClCompile>
     <ClCompile Include="Libs\ImGui\imgui.cpp">
-      <Filter>ImGui</Filter>
+      <Filter>Libs\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="Libs\ImGui\imgui_demo.cpp">
-      <Filter>ImGui</Filter>
+      <Filter>Libs\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="Libs\ImGui\imgui_draw.cpp">
-      <Filter>ImGui</Filter>
+      <Filter>Libs\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="Libs\ImGui\imgui_impl_opengl3.cpp">
-      <Filter>ImGui</Filter>
+      <Filter>Libs\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="Libs\ImGui\imgui_impl_sdl.cpp">
-      <Filter>ImGui</Filter>
+      <Filter>Libs\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="Libs\ImGui\imgui_widgets.cpp">
-      <Filter>ImGui</Filter>
+      <Filter>Libs\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="ModuleSceneIntro.cpp">
       <Filter>Modules</Filter>
@@ -59,6 +59,9 @@
       <Filter>Tools\parson</Filter>
     </ClCompile>
     <ClCompile Include="Mesh.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="FileSystem.cpp">
       <Filter>Tools</Filter>
     </ClCompile>
   </ItemGroup>
@@ -97,28 +100,28 @@
       <Filter>Modules</Filter>
     </ClInclude>
     <ClInclude Include="Libs\ImGui\imconfig.h">
-      <Filter>ImGui</Filter>
+      <Filter>Libs\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="Libs\ImGui\imgui.h">
-      <Filter>ImGui</Filter>
+      <Filter>Libs\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="Libs\ImGui\imgui_impl_opengl3.h">
-      <Filter>ImGui</Filter>
+      <Filter>Libs\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="Libs\ImGui\imgui_impl_sdl.h">
-      <Filter>ImGui</Filter>
+      <Filter>Libs\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="Libs\ImGui\imgui_internal.h">
-      <Filter>ImGui</Filter>
+      <Filter>Libs\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="Libs\ImGui\imstb_rectpack.h">
-      <Filter>ImGui</Filter>
+      <Filter>Libs\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="Libs\ImGui\imstb_textedit.h">
-      <Filter>ImGui</Filter>
+      <Filter>Libs\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="Libs\ImGui\imstb_truetype.h">
-      <Filter>ImGui</Filter>
+      <Filter>Libs\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="ModuleSceneIntro.h">
       <Filter>Modules</Filter>
@@ -147,6 +150,9 @@
     <ClInclude Include="Mesh.h">
       <Filter>Tools</Filter>
     </ClInclude>
+    <ClInclude Include="FileSystem.h">
+      <Filter>Tools</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Modules">
@@ -154,9 +160,6 @@
     </Filter>
     <Filter Include="Tools">
       <UniqueIdentifier>{9f9adada-2e42-48c8-9b71-3e4c015f0821}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ImGui">
-      <UniqueIdentifier>{472dfa5b-faef-4416-b34b-af9d15805a90}</UniqueIdentifier>
     </Filter>
     <Filter Include="Libs">
       <UniqueIdentifier>{e5b92709-b597-4c4b-bf07-c6d0682bb2af}</UniqueIdentifier>
@@ -169,6 +172,9 @@
     </Filter>
     <Filter Include="Tools\parson">
       <UniqueIdentifier>{03cd38a1-3ea2-4234-89ff-3f9057e2f643}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libs\ImGui">
+      <UniqueIdentifier>{472dfa5b-faef-4416-b34b-af9d15805a90}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

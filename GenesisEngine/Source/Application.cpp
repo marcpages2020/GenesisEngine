@@ -1,6 +1,7 @@
 #include "Application.h"
 #include "glew/include/glew.h"
 #include "Globals.h"
+#include "FileSystem.h"
 
 #include "parson/parson.h"
 
@@ -50,6 +51,8 @@ Application::~Application()
 bool Application::Init()
 {
 	bool ret = true;
+
+	FileSystem::Init();
 
 	JSON_Array* modules_array = PrepareConfig();
 	

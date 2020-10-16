@@ -1,6 +1,10 @@
 #include "Globals.h"
 #include "Application.h"
 
+#include "Mesh.h"
+#include <vector>
+#include "FileSystem.h"
+
 #include "parson/parson.h"
 
 #include "ModuleWindow.h"
@@ -12,8 +16,8 @@
 #include <gl/GLU.h>
 
 #pragma comment (lib, "glu32.lib")      /* link OpenGL Utility lib     */
-#pragma comment (lib, "opengl32.lib")    /* link Microsoft OpenGL lib   */
-#pragma comment (lib, "glew/libx86/glew32.lib")		   /*link glew lib*/
+#pragma comment (lib, "opengl32.lib")   /* link Microsoft OpenGL lib   */
+#pragma comment (lib, "glew/libx86/glew32.lib")		  /* link glew lib */
 
 ModuleRenderer3D::ModuleRenderer3D(bool start_enabled) : Module(start_enabled)
 {
@@ -143,7 +147,7 @@ bool ModuleRenderer3D::Init(JSON_Object* object)
 	//Texture Buffer
 	glGenTextures(1, &texColorBuffer);
 	glBindTexture(GL_TEXTURE_2D, texColorBuffer);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, App->window->width, App->window->height, 0, GL_RGBA, GL_UNSIGNED_INT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, App->window->width, App->window->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texColorBuffer, 0);
@@ -158,6 +162,9 @@ bool ModuleRenderer3D::Init(JSON_Object* object)
 		LOG_ERROR("Famebuffer is not complete");
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	meshes.push_back(FileSystem::LoadFBX("Assets/warrior/warrior.FBX"));
 
 	return ret;
 }
@@ -166,7 +173,6 @@ bool ModuleRenderer3D::Init(JSON_Object* object)
 update_status ModuleRenderer3D::PreUpdate(float dt)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-	glBindTexture(GL_TEXTURE_2D, 0);
 
 	Color c = App->camera->background;
 	glClearColor(c.r, c.g, c.b, c.a);
@@ -189,11 +195,13 @@ update_status ModuleRenderer3D::PreUpdate(float dt)
 // PostUpdate present buffer to screen
 update_status ModuleRenderer3D::PostUpdate(float dt)
 {
+	DrawMeshes();
+
 	glBindVertexArray(0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	glClear(GL_COLOR_BUFFER_BIT);
-	glBindTexture(GL_TEXTURE_2D, texColorBuffer);
+	//glBindTexture(GL_TEXTURE_2D, texColorBuffer);
 
 	App->editor->Draw();
 
@@ -213,6 +221,22 @@ bool ModuleRenderer3D::CleanUp()
 	SDL_GL_DeleteContext(context);
 
 	return true;
+}
+
+void ModuleRenderer3D::AddMesh(std::vector<Mesh*> mesh)
+{
+	meshes.push_back(mesh);
+}
+
+void ModuleRenderer3D::DrawMeshes()
+{
+	for (size_t i = 0; i < meshes.size(); i++)
+	{
+		for (size_t j = 0; j < meshes[i].size(); j++)
+		{
+			meshes[i][j]->Render();
+		}
+	}
 }
 
 

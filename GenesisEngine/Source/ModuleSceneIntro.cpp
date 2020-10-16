@@ -3,6 +3,7 @@
 #include "ModuleSceneIntro.h"
 #include "parson/parson.h"
 #include "Mesh.h"
+#include "FileSystem.h"
 
 //#include "glew/include/glew.h"
 
@@ -30,6 +31,7 @@ bool ModuleSceneIntro::Start()
 bool ModuleSceneIntro::Init(JSON_Object* object)
 {
 	show_grid = json_object_get_boolean(object, "show_grid");
+
 	return true;
 }
 
@@ -44,8 +46,6 @@ bool ModuleSceneIntro::CleanUp()
 // Update: draw background
 update_status ModuleSceneIntro::Update(float dt)
 {
-	bool wired = (App->renderer3D->GetDisplayMode() == WIREFRAME);
-
 	if (show_grid) 
 	{
 		Grid grid(10);
@@ -64,11 +64,11 @@ update_status ModuleSceneIntro::Update(float dt)
 	//Sphere sphere;
 	//sphere.Render();
 
-	//Cylinder cylinder(1, 2, 32);
+	//Cylinder cylinder(1, 2, 16);
 	//cylinder.Render();
 
-	Cone cone(1, 1.5, 12);
-	cone.Render();
+	//Cone cone(1, 1.5, 12);
+	//cone.Render();
 
 	return UPDATE_CONTINUE;
 }

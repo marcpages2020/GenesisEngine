@@ -10,16 +10,17 @@ public:
 	Mesh();
 	virtual ~Mesh();
 
+	void GenerateBuffers();
 	virtual void Render();
 
-public: 
-
-protected: 
-	void GenerateBuffers(float vertices[], int vertices_amount, uint indices[]);
-
+public:
 	uint vertices_buffer = 0;
+	int vertices_amount = 0;
+	float* vertices = nullptr;
+
 	uint indices_buffer = 0;
 	int indices_amount = 0;
+	uint* indices = nullptr;
 };
 
 class Cube : public Mesh {
@@ -45,7 +46,7 @@ public:
 	Sphere();
 	~Sphere();
 
-	void Render();
+	void Render() override;
 
 private: 
 	std::vector<GLfloat> vertices;
@@ -60,9 +61,9 @@ public:
 	
 	void CalculateGeometry();
 private:
-	float radius;
-	float height;
-	unsigned int sides;
+	float radius = 0;
+	float height = 0;
+	unsigned int sides = 0;
 };
 
 class Grid {
@@ -87,6 +88,14 @@ public:
 private: 
 	float radius;
 	float height;
+};
+
+class ImportedMesh : public Mesh {
+public:
+	ImportedMesh();
+	~ImportedMesh();
+
+	void Render() override;
 };
 
 /*

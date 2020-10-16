@@ -4,6 +4,8 @@
 #include "Module.h"
 #include "Globals.h"
 
+#include "ImGui/imgui.h"
+
 #include <string>
 #include <vector>
 
@@ -34,11 +36,14 @@ private:
 	bool CreateMainMenuBar();
 
 	//Windows
+	void ShowSceneWindow();
 	void ShowConfigurationWindow();
 	void ShowAboutWindow();
 
 	void ChangeTheme(std::string theme);
 	void GetMemoryStatistics(const char* gpu_brand, GLint& vram_budget, GLint& vram_usage, GLint& vram_available, GLint& vram_reserved);
+
+	void ResizeSceneImage(float window_width);
 
 private:
 	bool show_inspector_window;
@@ -61,6 +66,8 @@ private:
 	std::vector<float> ms_log;
 
 	std::vector<log_message> console_log;
+
+	ImVec2 image_size;
 };
 
 #endif // !_EDITOR_H_

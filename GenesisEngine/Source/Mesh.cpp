@@ -8,9 +8,17 @@
 
 Mesh::Mesh() {}
 
-Mesh::~Mesh(){}
+Mesh::~Mesh(){
+	glDeleteBuffers(1, &vertices_buffer);
+	delete vertices;
+	vertices = nullptr;
 
-void Mesh::GenerateBuffers(float vertices[], int vertices_amount, uint indices[])
+	glDeleteBuffers(1, &indices_buffer);
+	delete indices;
+	indices = nullptr;
+}
+
+void Mesh::GenerateBuffers()
 {
 	vertices_buffer = 0;
 	glGenBuffers(1, (GLuint*)&(vertices_buffer));
@@ -26,7 +34,6 @@ void Mesh::GenerateBuffers(float vertices[], int vertices_amount, uint indices[]
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * indices_amount, indices, GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
-
 }
 
 void Mesh::Render()
@@ -34,6 +41,7 @@ void Mesh::Render()
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
 	glDrawElements(GL_TRIANGLES, indices_amount, GL_UNSIGNED_INT, NULL);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
@@ -44,7 +52,7 @@ void Mesh::Render()
 
 Cube::Cube() : Mesh() 
 {
-	float vertices[24] = {
+	vertices = new float[24] {
 		//Bottom Vertices
 		0.0f ,0.0f, 0.0f,
 		1.0f ,0.0f, 0.0f,
@@ -58,7 +66,7 @@ Cube::Cube() : Mesh()
 		0.0f, 1.0f, 1.0f
 	};
 
-	uint indices[36] = {
+	indices = new uint[36] {
 		//Bottom face
 		0,1,2, 2,3,0,
 		//Front Face
@@ -73,9 +81,10 @@ Cube::Cube() : Mesh()
 		4,7,6, 6,5,4
 	};
 
+	vertices_amount = 24;
 	indices_amount = 36;
 
-	GenerateBuffers(vertices, 24, indices);
+	GenerateBuffers();
 }
 
 Cube::~Cube(){}
@@ -86,25 +95,25 @@ Cube::~Cube(){}
 
 Plane::Plane() : Mesh() 
 {
-	float vertices[12] = {
+	vertices = new float[12]{
 	0.0f ,0.0f, 0.0f,
 	1.0f ,0.0f, 0.0f,
 	1.0f ,0.0f, 1.0f,
 	0.0f ,0.0f, 1.0f,
 	};
 
-	uint indices[6]{
+	indices = new uint[6]{
 		0, 3, 2,
 		2, 1 ,0
 	};
 
+	vertices_amount = 12;
 	indices_amount = 6;
 
-	GenerateBuffers(vertices, 12, indices);
+	GenerateBuffers();
 }
 
 Plane::~Plane() {}
-
 
 // ------------------------------------------
 
@@ -112,7 +121,7 @@ Plane::~Plane() {}
 
 Pyramid::Pyramid() : Mesh() 
 {
-	float vertices[15] = {
+	vertices = new float[15] {
 		//Top
 		0.5f, 0.85f, 0.5f,
 
@@ -123,7 +132,7 @@ Pyramid::Pyramid() : Mesh()
 		0.0f ,0.0f, 1.0f
 	};
 
-	uint indices[18]{
+	indices = new uint[18] {
 		0, 4, 3, // Front
 		0, 3, 2, // Left
 		0, 2, 1, // Right
@@ -132,9 +141,10 @@ Pyramid::Pyramid() : Mesh()
 		1, 3, 4,  1, 2, 3 //Bottom
 	};
 
+	vertices_amount = 15;
 	indices_amount = 18;
 
-	GenerateBuffers(vertices, 15, indices);
+	GenerateBuffers();
 }
 
 Pyramid::~Pyramid() {}
@@ -307,8 +317,8 @@ void Cylinder::CalculateGeometry()
 	indices_vector.push_back(sides + 2);
 	indices_vector.push_back(2 * sides + 1);
 
-	int vertices_amount = vertices_vector.size();
-	float* vertices = new float[vertices_amount]();
+	vertices_amount = vertices_vector.size();
+	vertices = new float[vertices_amount]();
 
 	for (size_t i = 0; i < vertices_amount; i++)
 	{
@@ -316,7 +326,7 @@ void Cylinder::CalculateGeometry()
 	}
 
 	indices_amount = indices_vector.size();
-	uint* indices = new uint[indices_amount]();
+	indices = new uint[indices_amount]();
 
 	for (size_t i = 0; i < indices_amount; i++)
 	{
@@ -326,7 +336,7 @@ void Cylinder::CalculateGeometry()
 	vertices_vector.clear();
 	indices_vector.clear();
 
-	GenerateBuffers(vertices, vertices_amount, indices);
+	GenerateBuffers();
 }
 
 // ------------------------------------------
@@ -435,8 +445,8 @@ void Cone::CalculateGeometry(int sides)
 	//Copy into default class containers
 
 	//vertices
-	int vertices_amount = vertices_vector.size();
-	float* vertices = new float[vertices_amount]();
+	vertices_amount = vertices_vector.size();
+	vertices = new float[vertices_amount]();
 
 	for (size_t i = 0; i < vertices_amount; i++)
 	{
@@ -444,7 +454,7 @@ void Cone::CalculateGeometry(int sides)
 	}
 
 	indices_amount = indices_vector.size();
-	uint* indices = new uint[indices_amount]();
+	indices = new uint[indices_amount]();
 
 	for (size_t i = 0; i < indices_amount; i++)
 	{
@@ -454,6 +464,11 @@ void Cone::CalculateGeometry(int sides)
 	vertices_vector.clear();
 	indices_vector.clear();
 
-	GenerateBuffers(vertices, vertices_amount, indices);
+	GenerateBuffers();
 }
 
+ImportedMesh::ImportedMesh(){}
+
+ImportedMesh::~ImportedMesh(){}
+
+void ImportedMesh::Render(){}
