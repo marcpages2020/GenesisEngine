@@ -53,7 +53,7 @@ update_status ModuleSceneIntro::Update(float dt)
 	}
 
 	//Cube cube;
-	//cube.Render();
+	//cube.Render();;
 
 	//Pyramid pyramid;
 	//pyramid.Render();

@@ -90,12 +90,16 @@ private:
 	float height;
 };
 
-class ImportedMesh : public Mesh {
+class MeshCollection {
 public:
-	ImportedMesh();
-	~ImportedMesh();
+	MeshCollection();
+	~MeshCollection();
 
-	void Render() override;
+	void GenerateBuffers();
+	void Render();
+
+public:
+	std::vector<Mesh*> meshes;
 };
 
 /*

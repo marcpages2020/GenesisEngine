@@ -4,16 +4,21 @@
 #include "Application.h"
 #include "ModuleRenderer3D.h"
 
-// Mesh ===================================== 
+// Mesh ===================================== ===================================================================================
 
-Mesh::Mesh() {}
+Mesh::Mesh() : vertices_buffer(0), vertices_amount(0), vertices(nullptr),
+			   indices_buffer(0), indices_amount(0), indices(nullptr){ }
 
 Mesh::~Mesh(){
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glDeleteBuffers(1, &vertices_buffer);
+	vertices_buffer = 0;
 	delete vertices;
 	vertices = nullptr;
 
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glDeleteBuffers(1, &indices_buffer);
+	indices_buffer = 0;
 	delete indices;
 	indices = nullptr;
 }
@@ -24,9 +29,6 @@ void Mesh::GenerateBuffers()
 	glGenBuffers(1, (GLuint*)&(vertices_buffer));
 	glBindBuffer(GL_ARRAY_BUFFER, vertices_buffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices_amount * 3, vertices, GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vertices_buffer);
-	glVertexPointer(3, GL_FLOAT, 0, NULL);
 
 	indices_buffer = 0;
 	glGenBuffers(1, (GLuint*)&(indices_buffer));
@@ -39,16 +41,22 @@ void Mesh::GenerateBuffers()
 void Mesh::Render()
 {
 	glEnableClientState(GL_VERTEX_ARRAY);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vertices_buffer);
+	glVertexPointer(3, GL_FLOAT, 0, NULL);
+
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
 	glDrawElements(GL_TRIANGLES, indices_amount, GL_UNSIGNED_INT, NULL);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-// ------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------
 
-// Cube ===================================== 
+// Cube =========================================================================================================================
 
 Cube::Cube() : Mesh() 
 {
@@ -89,9 +97,9 @@ Cube::Cube() : Mesh()
 
 Cube::~Cube(){}
 
-// ------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------
 
-// Plane ====================================
+// Plane ========================================================================================================================
 
 Plane::Plane() : Mesh() 
 {
@@ -115,9 +123,9 @@ Plane::Plane() : Mesh()
 
 Plane::~Plane() {}
 
-// ------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------
 
-// Pyramid ==================================
+// Pyramid ======================================================================================================================
 
 Pyramid::Pyramid() : Mesh() 
 {
@@ -149,9 +157,9 @@ Pyramid::Pyramid() : Mesh()
 
 Pyramid::~Pyramid() {}
 
-// ------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------
 
-// Sphere ===================================
+// Sphere =======================================================================================================================
 
 Sphere::Sphere() : Mesh() 
 {
@@ -209,9 +217,9 @@ void Sphere::Render()
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-// ------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------------
 
-// Cylinder =================================
+// Cylinder ==================================================================================================================
 
 Cylinder::Cylinder() : Mesh(), radius(1), height(1), sides(16)  {
 	CalculateGeometry();
@@ -339,9 +347,9 @@ void Cylinder::CalculateGeometry()
 	GenerateBuffers();
 }
 
-// ------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------
 
-// Grid =====================================
+// Grid =========================================================================================================================
 
 Grid::Grid(int g_size) {
 	if ((g_size % 2) != 0)
@@ -372,6 +380,10 @@ void Grid::Render()
 
 	glEnd();
 }
+
+// ------------------------------------------------------------------------------------------------------------------------------
+
+// Cone =========================================================================================================================
 
 Cone::Cone() : Mesh(), radius(1), height(1) 
 {
@@ -467,8 +479,35 @@ void Cone::CalculateGeometry(int sides)
 	GenerateBuffers();
 }
 
-ImportedMesh::ImportedMesh(){}
+// ------------------------------------------------------------------------------------------------------------------------------
 
-ImportedMesh::~ImportedMesh(){}
+// Mesh Collection ==============================================================================================================
 
-void ImportedMesh::Render(){}
+MeshCollection::MeshCollection(){}
+
+MeshCollection::~MeshCollection()
+{
+	for (size_t i = 0; i < meshes.size(); i++)
+	{
+		delete meshes[i];
+		meshes[i] = nullptr;
+	}
+
+	meshes.clear();
+}
+
+void MeshCollection::GenerateBuffers()
+{
+	for (size_t i = 0; i < meshes.size(); i++)
+	{
+		meshes[i]->GenerateBuffers();
+	}
+}
+
+void MeshCollection::Render()
+{
+	for (size_t i = 0; i < meshes.size(); i++)
+	{
+		meshes[i]->Render();
+	}
+}

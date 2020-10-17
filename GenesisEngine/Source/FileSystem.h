@@ -1,12 +1,12 @@
 #pragma once
 
-class Mesh;
+class MeshCollection;
 #include <vector>
 
 namespace FileSystem
 {
 	void Init();
-	std::vector<Mesh*> LoadFBX(const char* path);
+	MeshCollection* LoadFBX(const char* path);
 	void CleanUp();
 }
 

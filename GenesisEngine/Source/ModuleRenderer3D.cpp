@@ -164,7 +164,8 @@ bool ModuleRenderer3D::Init(JSON_Object* object)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	meshes.push_back(FileSystem::LoadFBX("Assets/warrior/warrior.FBX"));
+	AddMeshCollection(FileSystem::LoadFBX("Assets/monkey.FBX"));
+	AddMeshCollection(FileSystem::LoadFBX("Assets/warrior/warrior.FBX"));
 
 	return ret;
 }
@@ -192,16 +193,22 @@ update_status ModuleRenderer3D::PreUpdate(float dt)
 	return UPDATE_CONTINUE;
 }
 
+update_status ModuleRenderer3D::Update(float dt)
+{
+	update_status ret = UPDATE_CONTINUE;
+
+	DrawMeshes();
+
+	return ret;
+}
+
 // PostUpdate present buffer to screen
 update_status ModuleRenderer3D::PostUpdate(float dt)
 {
-	DrawMeshes();
-
 	glBindVertexArray(0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	glClear(GL_COLOR_BUFFER_BIT);
-	//glBindTexture(GL_TEXTURE_2D, texColorBuffer);
 
 	App->editor->Draw();
 
@@ -223,19 +230,16 @@ bool ModuleRenderer3D::CleanUp()
 	return true;
 }
 
-void ModuleRenderer3D::AddMesh(std::vector<Mesh*> mesh)
+void ModuleRenderer3D::AddMeshCollection(MeshCollection* mesh)
 {
-	meshes.push_back(mesh);
+	meshCollections.push_back(mesh);
 }
 
 void ModuleRenderer3D::DrawMeshes()
 {
-	for (size_t i = 0; i < meshes.size(); i++)
+	for (size_t i = 0; i < meshCollections.size(); i++)
 	{
-		for (size_t j = 0; j < meshes[i].size(); j++)
-		{
-			meshes[i][j]->Render();
-		}
+		meshCollections[i]->Render();
 	}
 }
 
