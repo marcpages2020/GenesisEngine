@@ -12,6 +12,7 @@ public:
 
 	void GenerateBuffers();
 	virtual void Render();
+	virtual void RenderVertexNormals();
 
 public:
 	uint vertices_buffer = 0;
@@ -21,6 +22,11 @@ public:
 	uint indices_buffer = 0;
 	int indices_amount = 0;
 	uint* indices = nullptr;
+
+	uint normals_buffer;
+	float* normals;
+
+	float* colors;
 };
 
 class Cube : public Mesh {

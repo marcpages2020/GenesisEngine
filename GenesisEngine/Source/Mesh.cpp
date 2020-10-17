@@ -35,6 +35,11 @@ void Mesh::GenerateBuffers()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * indices_amount, indices, GL_STATIC_DRAW);
 
+	normals_buffer = 0;
+	glGenBuffers(1, (GLuint*)&(normals_buffer));
+	glBindBuffer(GL_ARRAY_BUFFER, normals_buffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices_amount * 3, normals, GL_STATIC_DRAW);
+
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
 }
 
@@ -42,16 +47,59 @@ void Mesh::Render()
 {
 	glEnableClientState(GL_VERTEX_ARRAY);
 
+	//vertices
 	glBindBuffer(GL_ARRAY_BUFFER, vertices_buffer);
 	glVertexPointer(3, GL_FLOAT, 0, NULL);
 
+	//indices
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
 	glDrawElements(GL_TRIANGLES, indices_amount, GL_UNSIGNED_INT, NULL);
+
+	//normals
+	//glBindBuffer(GL_ARRAY_BUFFER, normals_buffer);
+	//glVertexPointer(3, GL_FLOAT, 0, NULL);
+	//glDrawArrays(GL_LINES, 0, vertices_amount);
+
+	float normal_lenght = 0.5f;
+
+	//vertices normals
+	glBegin(GL_LINES);
+	/*
+	for (size_t i = 0; i < vertices_amount * 3; i+=3)
+	{
+		glColor3f(0.0f, 0.0f, 1.0f);
+		glVertex3f(vertices[i], vertices[i + 1], vertices[i + 2]);
+
+		glVertex3f(vertices[i]     + (normals[i]      * normal_lenght), 
+				   vertices[i + 1] + (normals[i + 1]  * normal_lenght),
+			       vertices[i + 2] + (normals[i + 2]) * normal_lenght);
+	}
+	*/
+
+	for (size_t i = 0; i < vertices_amount * 3; i += 3)
+	{
+		glColor3f(1.0f, 0.0f, 0.0f);
+		glVertex3f(vertices[i], vertices[i + 1], vertices[i + 2]);
+
+		glVertex3f(vertices[i] + (normals[i] * normal_lenght),
+				   vertices[i + 1] + (normals[i + 1] * normal_lenght),
+			       vertices[i + 2] + (normals[i + 2]) * normal_lenght);
+	}
+	glColor3f(1.0f, 1.0f, 1.0f);
+
+
+	glEnd();
+
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+void Mesh::RenderVertexNormals()
+{
+
 }
 
 // ------------------------------------------------------------------------------------------------------------------------------

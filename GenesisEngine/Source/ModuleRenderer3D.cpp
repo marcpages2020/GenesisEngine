@@ -164,8 +164,9 @@ bool ModuleRenderer3D::Init(JSON_Object* object)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	AddMeshCollection(FileSystem::LoadFBX("Assets/monkey.FBX"));
-	AddMeshCollection(FileSystem::LoadFBX("Assets/warrior/warrior.FBX"));
+	//AddMeshCollection(FileSystem::LoadFBX("Assets/monkey.FBX"));
+	//AddMeshCollection(FileSystem::LoadFBX("Assets/warrior/warrior.FBX"));
+	AddMeshCollection(FileSystem::LoadFBX("Assets/baker_house/BakerHouse.FBX"));
 
 	return ret;
 }
