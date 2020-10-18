@@ -15,8 +15,8 @@
 #include <gl/GL.h>
 #include <gl/GLU.h>
 
-#pragma comment (lib, "glu32.lib")      /* link OpenGL Utility lib     */
-#pragma comment (lib, "opengl32.lib")   /* link Microsoft OpenGL lib   */
+#pragma comment (lib, "glu32.lib")          /* link OpenGL Utility lib */
+#pragma comment (lib, "opengl32.lib")     /* link Microsoft OpenGL lib */
 #pragma comment (lib, "glew/libx86/glew32.lib")		  /* link glew lib */
 
 ModuleRenderer3D::ModuleRenderer3D(bool start_enabled) : Module(start_enabled)
@@ -161,9 +161,9 @@ bool ModuleRenderer3D::Init()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	AddMeshCollection(FileSystem::LoadFBX("Assets/monkey.FBX"));
-	//AddMeshCollection(FileSystem::LoadFBX("Assets/warrior/warrior.FBX"));
-	//AddMeshCollection(FileSystem::LoadFBX("Assets/baker_house/BakerHouse.FBX"));
+	AddMeshCollection(FileSystem::LoadFBX("Assets/Models/monkey.FBX"));
+	//AddMeshCollection(FileSystem::LoadFBX("Assets/Models/warrior/warrior.FBX"));
+	//AddMeshCollection(FileSystem::LoadFBX("Assets/Models/baker_house/BakerHouse.FBX"));
 
 	return ret;
 }
@@ -231,6 +231,9 @@ bool ModuleRenderer3D::CleanUp()
 {
 	LOG("Destroying 3D Renderer");
 
+	meshes.clear();
+	mesh_collections.clear();
+
 	glDeleteFramebuffers(1, &frameBuffer);
 	glDeleteTextures(1, &texColorBuffer);
 
@@ -246,7 +249,7 @@ void ModuleRenderer3D::AddMesh(Mesh* mesh)
 
 void ModuleRenderer3D::AddMeshCollection(MeshCollection* mesh)
 {
-	meshCollections.push_back(mesh);
+	mesh_collections.push_back(mesh);
 }
 
 void ModuleRenderer3D::DrawMeshes()
@@ -256,9 +259,9 @@ void ModuleRenderer3D::DrawMeshes()
 		meshes[i]->Render();
 	}
 
-	for (size_t i = 0; i < meshCollections.size(); i++)
+	for (size_t i = 0; i < mesh_collections.size(); i++)
 	{
-		meshCollections[i]->Render();
+		mesh_collections[i]->Render();
 	}
 }
 

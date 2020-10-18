@@ -11,6 +11,12 @@
 
 typedef int GLint;
 
+enum class AspectRatio {
+	FREE_ASPECT,
+	ASPECT_16_9,
+	ASPECT_4_3
+};
+
 struct log_message {
 	std::string log_text;
 	int warning_level;
@@ -43,7 +49,7 @@ private:
 	void ChangeTheme(std::string theme);
 	void GetMemoryStatistics(const char* gpu_brand, GLint& vram_budget, GLint& vram_usage, GLint& vram_available, GLint& vram_reserved);
 
-	void ResizeSceneImage(float window_width);
+	void ResizeSceneImage(ImVec2 window_size, AspectRatio ratio);
 
 private:
 	bool show_inspector_window;
@@ -68,6 +74,8 @@ private:
 	std::vector<log_message> console_log;
 
 	ImVec2 image_size;
+
+	AspectRatio aspect_ratio;
 };
 
 #endif // !_EDITOR_H_

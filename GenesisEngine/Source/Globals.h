@@ -22,6 +22,7 @@ void log(int warning_level, const char file[], int line, const char* format, ...
 const float M_PI = 3.14159265358979323846f;
 
 typedef unsigned int uint;
+typedef unsigned __int64 uint64;
 
 enum update_status
 {
@@ -29,6 +30,25 @@ enum update_status
 	UPDATE_STOP,
 	UPDATE_ERROR
 };
+
+#define RELEASE( x )\
+    {\
+       if( x != nullptr )\
+       {\
+         delete x;\
+	     x = nullptr;\
+       }\
+    }
+
+// Deletes an array of buffers
+#define RELEASE_ARRAY( x )\
+	{\
+       if( x != nullptr )\
+       {\
+           delete[] x;\
+	       x = nullptr;\
+		 }\
+	 }
 
 // Configuration -----------
 #define SCREEN_SIZE 1

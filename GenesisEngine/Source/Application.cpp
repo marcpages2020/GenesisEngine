@@ -129,6 +129,7 @@ bool Application::CleanUp()
 		modules_vector[i]->CleanUp();
 	}
 
+	FileSystem::CleanUp();
 	json_value_free(config_root);
 
 	return ret;

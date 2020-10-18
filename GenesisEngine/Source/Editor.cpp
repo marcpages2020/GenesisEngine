@@ -10,7 +10,7 @@
 #include "MathGeoLib/include/MathGeoLib.h"
 
 
-Editor::Editor(bool start_enabled) : Module(start_enabled)
+Editor::Editor(bool start_enabled) : Module(start_enabled), aspect_ratio(AspectRatio::FREE_ASPECT)
 {
 	name = "editor";
 	//*open_dockspace = true;
@@ -293,14 +293,6 @@ void Editor::GetMemoryStatistics(const char* gpu_brand, GLint& vram_budget, GLin
 	}
 }
 
-void Editor::ResizeSceneImage(float window_width)
-{
-	float size_proportion = (float)App->window->width / (float)App->window->height;
-
-	image_size.x = window_width;
-	image_size.y = image_size.x / size_proportion;
-}
-
 bool Editor::CreateMainMenuBar() {
 	bool ret = true;
 
@@ -382,14 +374,18 @@ void Editor::ShowSceneWindow()
 {
 	if (ImGui::Begin("Scene", &show_scene_window, ImGuiWindowFlags_MenuBar))
 	{
+		static AspectRatio desired_aspect_ratio = aspect_ratio;
+
 		if (ImGui::BeginMenuBar())
 		{
 			if (ImGui::BeginMenu("Display"))
 			{
 				if (ImGui::BeginMenu("Shading Mode"))
 				{
-					if (ImGui::MenuItem("Solid"))App->renderer3D->SetDisplayMode(DisplayMode::SOLID);
-					if (ImGui::MenuItem("Wireframe"))App->renderer3D->SetDisplayMode(DisplayMode::WIREFRAME);
+					if (ImGui::MenuItem("Solid"))
+						App->renderer3D->SetDisplayMode(DisplayMode::SOLID);
+					if (ImGui::MenuItem("Wireframe"))
+						App->renderer3D->SetDisplayMode(DisplayMode::WIREFRAME);
 					ImGui::EndMenu();
 				}
 
@@ -400,6 +396,17 @@ void Editor::ShowSceneWindow()
 				static bool face_normals = App->renderer3D->draw_face_normals;
 				if (ImGui::Checkbox("Face Normals", &face_normals))
 					App->renderer3D->draw_face_normals = face_normals;
+
+				if (ImGui::BeginMenu("Aspect"))
+				{
+					if (ImGui::MenuItem("Free Aspect"))
+						desired_aspect_ratio = AspectRatio::FREE_ASPECT;
+					else if (ImGui::MenuItem("16:9"))
+						desired_aspect_ratio = AspectRatio::ASPECT_16_9;
+					else if (ImGui::MenuItem("4:3"))
+						desired_aspect_ratio = AspectRatio::ASPECT_4_3;
+					ImGui::EndMenu();
+				}
 
 				ImGui::EndMenu();
 			}
@@ -416,8 +423,8 @@ void Editor::ShowSceneWindow()
 		}
 
 		ImVec2 windowSize = ImGui::GetWindowSize();
-		if (image_size.x != windowSize.x)
-			ResizeSceneImage(windowSize.x);
+		if (image_size.x != windowSize.x || desired_aspect_ratio != aspect_ratio)
+			ResizeSceneImage(windowSize, desired_aspect_ratio);
 
 		ImGui::Image((ImTextureID)App->renderer3D->texColorBuffer, image_size, ImVec2(0, 1), ImVec2(1, 0));
 	}
@@ -678,4 +685,27 @@ void Editor::ShowAboutWindow()
 			"SOFTWARE.");
 	}
 	ImGui::End();
+}
+
+void Editor::ResizeSceneImage(ImVec2 window_size, AspectRatio g_aspect_ratio)
+{
+	if (g_aspect_ratio == AspectRatio::FREE_ASPECT)
+	{
+		float size_proportion = (float)App->window->width / (float)App->window->height;
+
+		image_size.x = window_size.x;
+		image_size.y = image_size.x / size_proportion;
+	}
+	else if (g_aspect_ratio == AspectRatio::ASPECT_16_9)
+	{
+		image_size.y = window_size.y;
+		image_size.x = window_size.x * 9 / 16;
+	}
+	else if (g_aspect_ratio == AspectRatio::ASPECT_4_3)
+	{
+		image_size.y = window_size.y;
+		image_size.x = window_size.x * 3 / 4;
+	}
+
+	aspect_ratio = g_aspect_ratio;
 }

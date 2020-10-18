@@ -59,7 +59,7 @@ public:
 	DisplayMode display_mode;
 
 	std::vector<Mesh*> meshes;
-	std::vector<MeshCollection*> meshCollections;
+	std::vector<MeshCollection*> mesh_collections;
 
 	bool draw_vertex_normals;
 	bool draw_face_normals;
