@@ -166,7 +166,7 @@ bool ModuleRenderer3D::Init(JSON_Object* object)
 
 	//AddMeshCollection(FileSystem::LoadFBX("Assets/monkey.FBX"));
 	//AddMeshCollection(FileSystem::LoadFBX("Assets/warrior/warrior.FBX"));
-	AddMeshCollection(FileSystem::LoadFBX("Assets/baker_house/BakerHouse.FBX"));
+	//AddMeshCollection(FileSystem::LoadFBX("Assets/baker_house/BakerHouse.FBX"));
 
 	return ret;
 }

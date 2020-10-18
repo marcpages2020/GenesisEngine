@@ -1,6 +1,7 @@
 #include "Globals.h"
 #include "Application.h"
 #include "ModuleInput.h"
+#include "FileSystem.h"
 
 #define MAX_KEYS 300
 
@@ -23,6 +24,8 @@ bool ModuleInput::Init(JSON_Object* object)
 	LOG("Init SDL input event system");
 	bool ret = true;
 	SDL_Init(0);
+
+	SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
 
 	if(SDL_InitSubSystem(SDL_INIT_EVENTS) < 0)
 	{
@@ -86,6 +89,8 @@ update_status ModuleInput::PreUpdate(float dt)
 
 	bool quit = false;
 	SDL_Event e;
+	char* dropped_filedir;
+
 	while(SDL_PollEvent(&e))
 	{
 		switch(e.type)
@@ -105,6 +110,12 @@ update_status ModuleInput::PreUpdate(float dt)
 			case SDL_QUIT:
 			quit = true;
 			break;
+
+			case SDL_DROPFILE:
+				dropped_filedir = e.drop.file;
+				App->renderer3D->AddMeshCollection(FileSystem::LoadFBX(dropped_filedir));
+				SDL_free(dropped_filedir);
+				break;
 
 			case SDL_WINDOWEVENT:
 			{

@@ -12,7 +12,7 @@ public:
 
 	void GenerateBuffers();
 	virtual void Render();
-	virtual void RenderVertexNormals();
+	virtual void DrawVertexNormals();
 
 public:
 	uint vertices_buffer = 0;
