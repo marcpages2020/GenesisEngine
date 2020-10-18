@@ -62,7 +62,8 @@ bool Application::Init()
 	{
 		JSON_Object* module_object = GetJSONObjectByName(modules_vector[i]->name, modules_array);
 
-		ret = modules_vector[i]->Init(module_object);
+		ret = modules_vector[i]->LoadConfig(module_object);
+		ret = modules_vector[i]->Init();
 	}
 
 	// After all Init calls we call Start() in all modules

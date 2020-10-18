@@ -27,6 +27,7 @@ Various support, fixes and suggestions:
     Alexander Pipelka
 
 Russian translation,
+Ruby bindings,
 QPAK archiver:
     Ed Sinjiashvili
 
@@ -51,9 +52,6 @@ Mac OS X improvements:
 
 iPhone support:
     Christian Gmeiner
-
-WinRT support:
-    Martin Ahrnbom
 
 HOG archiver,
 MVL archiver:
@@ -108,64 +106,8 @@ OS/2 updates:
 Bug fixes:
     Patrice Mandin
 
-PHYSFS_stat() API:
-    Christoph Nelles
-    Indy Sams
-
-ISO9660 archiver:
-    Christoph Nelles
-
 Bug fixes:
-    Steven Fuller
-
-Bug fixes:
-    Tolga Dalman
-
-Bug fixes:
-    Frank Becker
-
-Bug fixes:
-    Norfanin
-
-Bug fixes:
-    Evgeny Podjachev
-
-Haiku fixes:
-    Chris Roberts
-
-SLB archiver:
-    Aleksi Nurmi
-
-Bug fixes:
-    Dmitry Marakasov
-
-Bug fixes:
-    Andreas Karlsson
-
-Bug fixes:
-    Michael Bacon
-
-Bug fixes:
-    Xian Nox
-
-Bug fixes:
-    Reto Schneider
-
-pkg-config support:
-    Jonas Kulla
-
-Bug fixes,
-VDF archiver:
-    Francesco Bertolaccini
-
-CMake fixes:
-    Tobias Markus
-
-Bug fixes,
-    Rémi Verschelde
-
-Bug fixes:
-    Rob Loach
+    Lauri Kasanen
 
 Other stuff:
     Your name here! Patches go to icculus@icculus.org ...

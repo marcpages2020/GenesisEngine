@@ -23,7 +23,7 @@ public:
 	virtual ~Module()
 	{}
 
-	virtual bool Init(JSON_Object* object) 
+	virtual bool Init() 
 	{
 		return true; 
 	}

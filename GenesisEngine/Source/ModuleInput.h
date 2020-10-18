@@ -19,7 +19,8 @@ public:
 	ModuleInput(bool start_enabled = true);
 	~ModuleInput();
 
-	bool Init(JSON_Object* object);
+	bool Init();
+	bool LoadConfig(JSON_Object* config) override;
 	update_status PreUpdate(float dt);
 	bool CleanUp();
 

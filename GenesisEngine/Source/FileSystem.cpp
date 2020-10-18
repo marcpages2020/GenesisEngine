@@ -1,4 +1,5 @@
 #include "FileSystem.h"
+#include "PhysFS/include/physfs.h"
 
 #include "Mesh.h"
 
@@ -38,7 +39,7 @@ MeshCollection* FileSystem::LoadFBX(const char* path)
 			currentMesh->vertices_amount = currentAiMesh->mNumVertices;
 			currentMesh->vertices = new float[currentMesh->vertices_amount * 3]();
 			memcpy(currentMesh->vertices, currentAiMesh->mVertices, sizeof(float) * currentMesh->vertices_amount * 3);
-			LOG("New mesh with %d vertices", currentMesh->vertices_amount);
+			LOG("%s loaded with %d vertices", currentAiMesh->mName.C_Str(), currentMesh->vertices_amount);
 
 			//face copying
 			if (currentAiMesh->HasFaces()) 
@@ -63,36 +64,41 @@ MeshCollection* FileSystem::LoadFBX(const char* path)
 			if (currentAiMesh->HasNormals())
 			{
 				currentMesh->normals = new float[currentAiMesh->mNumVertices * 3]();
+				currentMesh->colors = new float[currentMesh->indices_amount * 4]();
+				currentMesh->texturecoords = new float[currentAiMesh->mNumVertices * 2]();
 
-				for (size_t v = 0, n = 0; v < currentAiMesh->mNumVertices; v++, n += 3)
+				for (size_t v = 0, n = 0, tx = 0, c = 0; v < currentAiMesh->mNumVertices; v++, n += 3, c += 4, tx += 2)
 				{
+					//normal copying
 					currentMesh->normals[n] = currentAiMesh->mNormals[v].x;
 					currentMesh->normals[n + 1] = currentAiMesh->mNormals[v].y;
 					currentMesh->normals[n + 2] = currentAiMesh->mNormals[v].z;
+
+					//color copying
+					if (currentAiMesh->HasVertexColors(v)) 
+					{
+						currentMesh->colors[v] = currentAiMesh->mColors[v]->r;
+						currentMesh->colors[v + 1] = currentAiMesh->mColors[v]->g;
+						currentMesh->colors[v + 2] = currentAiMesh->mColors[v]->b;
+						currentMesh->colors[v + 3] = currentAiMesh->mColors[v]->a;
+					}
+					else 
+					{
+						currentMesh->colors[v] = 0.0f;
+						currentMesh->colors[v + 1] = 0.0f;
+						currentMesh->colors[v + 2] = 0.0f;
+						currentMesh->colors[v + 3] = 0.0f;
+					}
+
+					//texturecoords copying
+					if (currentAiMesh->HasTextureCoords(v)) 
+					{
+						currentMesh->texturecoords[tx] = currentAiMesh->mTextureCoords[v]->x;
+						currentMesh->texturecoords[tx + 1] = currentAiMesh->mTextureCoords[v]->y;
+					}
 				}
 			}
-
-			//color copying
-			for (size_t c = 0, ac = 0; ac < currentMesh->indices_amount; c+=4, ac++)
-			{
-				currentMesh->colors = new float[currentMesh->indices_amount * 4]();
-
-				if (currentAiMesh->HasVertexColors(ac))
-				{
-					currentMesh->colors[c] =	 currentAiMesh->mColors[ac]->r;
-					currentMesh->colors[c + 1] = currentAiMesh->mColors[ac]->g;
-					currentMesh->colors[c + 2] = currentAiMesh->mColors[ac]->b;
-					currentMesh->colors[c + 3] = currentAiMesh->mColors[ac]->a;
-				}
-				else 
-				{
-					currentMesh->colors[c] = 0.0f;
-					currentMesh->colors[c + 1] = 0.0f;
-					currentMesh->colors[c + 2] = 0.0f;
-					currentMesh->colors[c + 3] = 0.0f;
-				}
-			}
-
+			
 			currentMesh->GenerateBuffers();
 			collection->meshes.push_back(currentMesh);
 		}
@@ -104,3 +110,4 @@ MeshCollection* FileSystem::LoadFBX(const char* path)
 
 	return collection;
 }
+

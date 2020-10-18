@@ -9,8 +9,9 @@ public:
 	ModuleCamera3D(bool start_enabled = true);
 	~ModuleCamera3D();
 
-	bool Init(JSON_Object* object);
+	bool Init();
 	bool Start();
+	bool LoadConfig(JSON_Object* config) override;
 	update_status Update(float dt);
 	bool CleanUp();
 

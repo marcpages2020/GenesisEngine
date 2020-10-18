@@ -9,6 +9,7 @@
 typedef unsigned int GLuint;
 typedef unsigned int GLenum;
 typedef void* SDL_GLContext;
+class Mesh;
 class MeshCollection;
 
 enum DisplayMode
@@ -23,12 +24,14 @@ public:
 	ModuleRenderer3D(bool start_enabled = true);
 	~ModuleRenderer3D();
 
-	bool Init(JSON_Object* object);
+	bool Init();
+	bool LoadConfig(JSON_Object* config) override;
 	update_status PreUpdate(float dt) override;
 	update_status Update(float dt) override;
 	update_status PostUpdate(float dt) override;
 	bool CleanUp();
 	
+	void AddMesh(Mesh* mesh);
 	void AddMeshCollection(MeshCollection* mesh);
 	void DrawMeshes();
 
@@ -55,7 +58,11 @@ public:
 	mat4x4 ModelMatrix, ViewMatrix, ProjectionMatrix;
 	DisplayMode display_mode;
 
+	std::vector<Mesh*> meshes;
 	std::vector<MeshCollection*> meshCollections;
+
+	bool draw_vertex_normals;
+	bool draw_face_normals;
 
 private:
 	bool debug;

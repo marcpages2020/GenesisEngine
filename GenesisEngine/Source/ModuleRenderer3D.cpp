@@ -32,13 +32,10 @@ ModuleRenderer3D::~ModuleRenderer3D()
 {}
 
 // Called before render is available
-bool ModuleRenderer3D::Init(JSON_Object* object)
+bool ModuleRenderer3D::Init()
 {
 	LOG("Creating 3D Renderer context");
 	bool ret = true;
-
-	debug = json_object_get_string(object, "debug");
-	vsync = json_object_get_boolean(object, "vsync");
 
 	//Create context
 	context = SDL_GL_CreateContext(App->window->window);
@@ -164,11 +161,22 @@ bool ModuleRenderer3D::Init(JSON_Object* object)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	//AddMeshCollection(FileSystem::LoadFBX("Assets/monkey.FBX"));
+	AddMeshCollection(FileSystem::LoadFBX("Assets/monkey.FBX"));
 	//AddMeshCollection(FileSystem::LoadFBX("Assets/warrior/warrior.FBX"));
 	//AddMeshCollection(FileSystem::LoadFBX("Assets/baker_house/BakerHouse.FBX"));
 
 	return ret;
+}
+
+bool ModuleRenderer3D::LoadConfig(JSON_Object* config)
+{
+	debug = json_object_get_string(config, "debug");
+	vsync = json_object_get_boolean(config, "vsync");
+
+	draw_vertex_normals = json_object_get_boolean(config, "draw_vertex_normals");
+	draw_face_normals = json_object_get_boolean(config, "draw_face_normals");
+
+	return true;
 }
 
 // PreUpdate: clear buffer
@@ -231,6 +239,11 @@ bool ModuleRenderer3D::CleanUp()
 	return true;
 }
 
+void ModuleRenderer3D::AddMesh(Mesh* mesh)
+{
+	meshes.push_back(mesh);
+}
+
 void ModuleRenderer3D::AddMeshCollection(MeshCollection* mesh)
 {
 	meshCollections.push_back(mesh);
@@ -238,12 +251,16 @@ void ModuleRenderer3D::AddMeshCollection(MeshCollection* mesh)
 
 void ModuleRenderer3D::DrawMeshes()
 {
+	for (size_t i = 0; i < meshes.size(); i++)
+	{
+		meshes[i]->Render();
+	}
+
 	for (size_t i = 0; i < meshCollections.size(); i++)
 	{
 		meshCollections[i]->Render();
 	}
 }
-
 
 void ModuleRenderer3D::OnResize(int width, int height)
 {

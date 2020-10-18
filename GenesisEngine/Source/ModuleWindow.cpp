@@ -23,19 +23,10 @@ ModuleWindow::~ModuleWindow()
 }
 
 // Called before render is available
-bool ModuleWindow::Init(JSON_Object* object)
+bool ModuleWindow::Init()
 {
 	LOG("Init SDL window & surface");
 	bool ret = true;
-
-	//Get Json attributes
-	width = json_object_get_number(object, "width");
-	height = json_object_get_number(object, "height");
-
-	fullscreen = json_object_get_boolean(object, "fullscreen");
-	fullscreen_desktop = json_object_get_boolean(object, "fullscreen_desktop");
-	resizable = json_object_get_boolean(object, "resizable");
-	borderless = json_object_get_boolean(object, "borderless");
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
 	{
@@ -100,6 +91,20 @@ bool ModuleWindow::Init(JSON_Object* object)
 	}
 
 	return ret;
+}
+
+bool ModuleWindow::LoadConfig(JSON_Object* config)
+{
+	//Get Json attributes
+	width = json_object_get_number(config, "width");
+	height = json_object_get_number(config, "height");
+
+	fullscreen = json_object_get_boolean(config, "fullscreen");
+	fullscreen_desktop = json_object_get_boolean(config, "fullscreen_desktop");
+	resizable = json_object_get_boolean(config, "resizable");
+	borderless = json_object_get_boolean(config, "borderless");
+
+	return true;
 }
 
 // Called before quitting

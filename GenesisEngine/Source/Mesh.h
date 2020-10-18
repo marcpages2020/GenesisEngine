@@ -12,7 +12,8 @@ public:
 
 	void GenerateBuffers();
 	virtual void Render();
-	virtual void DrawVertexNormals();
+	void DrawVertexNormals();
+	void DrawFaceNormals();
 
 public:
 	uint vertices_buffer = 0;
@@ -27,6 +28,7 @@ public:
 	float* normals;
 
 	float* colors;
+	float* texturecoords;
 };
 
 class Cube : public Mesh {

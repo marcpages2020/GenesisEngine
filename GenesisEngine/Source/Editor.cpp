@@ -38,10 +38,8 @@ Editor::~Editor()
 	ms_log.clear();
 }
 
-bool Editor::Init(JSON_Object* object)
+bool Editor::Init()
 {
-	LoadConfig(object);
-
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
@@ -395,15 +393,13 @@ void Editor::ShowSceneWindow()
 					ImGui::EndMenu();
 				}
 
-				/*
-				ImGui::MenuItem("Display");
-				const char* items[] = { "Solid", "Wireframe" };
-				static int current_display = App->renderer3D->GetDisplayMode();
-				if (ImGui::Combo("Display Mode", &current_display, items, IM_ARRAYSIZE(items)))
-				{
-					App->renderer3D->SetDisplayMode((DisplayMode)current_display);
-				}
-				*/
+				static bool vertex_normals = App->renderer3D->draw_vertex_normals;
+				if (ImGui::Checkbox("Vertex Normals", &vertex_normals))
+					App->renderer3D->draw_vertex_normals = vertex_normals;
+
+				static bool face_normals = App->renderer3D->draw_face_normals;
+				if (ImGui::Checkbox("Face Normals", &face_normals))
+					App->renderer3D->draw_face_normals = face_normals;
 
 				ImGui::EndMenu();
 			}

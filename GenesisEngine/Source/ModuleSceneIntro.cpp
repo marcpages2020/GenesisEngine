@@ -28,10 +28,8 @@ bool ModuleSceneIntro::Start()
 	return ret;
 }
 
-bool ModuleSceneIntro::Init(JSON_Object* object)
+bool ModuleSceneIntro::Init()
 {
-	show_grid = json_object_get_boolean(object, "show_grid");
-
 	return true;
 }
 
@@ -39,6 +37,13 @@ bool ModuleSceneIntro::Init(JSON_Object* object)
 bool ModuleSceneIntro::CleanUp()
 {
 	LOG("Unloading Intro scene");
+
+	return true;
+}
+
+bool ModuleSceneIntro::LoadConfig(JSON_Object* config)
+{
+	show_grid = json_object_get_boolean(config, "show_grid");
 
 	return true;
 }

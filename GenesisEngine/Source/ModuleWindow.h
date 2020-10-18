@@ -15,7 +15,8 @@ public:
 	// Destructor
 	virtual ~ModuleWindow();
 
-	bool Init(JSON_Object* object);
+	bool Init();
+	bool LoadConfig(JSON_Object* config) override;
 	bool CleanUp();
 
 	void GetSize(int& width, int& height);

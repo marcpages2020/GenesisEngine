@@ -9,7 +9,8 @@ public:
 	~ModuleSceneIntro();
 
 	bool Start();
-	bool Init(JSON_Object* object);
+	bool Init();
+	bool LoadConfig(JSON_Object* config) override;
 	update_status Update(float dt);
 	bool CleanUp();
 

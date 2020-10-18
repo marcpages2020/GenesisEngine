@@ -67,7 +67,9 @@
     {
       "name": "renderer",
       "debug": false,
-      "vsync" :  false
+      "vsync": false,
+      "draw_vertex_normals": true,
+      "draw_face_normals" :  false
     }
   ]
 }

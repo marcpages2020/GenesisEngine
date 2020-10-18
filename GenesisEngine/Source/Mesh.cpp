@@ -4,10 +4,12 @@
 #include "Application.h"
 #include "ModuleRenderer3D.h"
 
-// Mesh ===================================== ===================================================================================
+// Mesh =========================================================================================================================
 
 Mesh::Mesh() : vertices_buffer(0), vertices_amount(0), vertices(nullptr),
-			   indices_buffer(0), indices_amount(0), indices(nullptr){ }
+			   indices_buffer(0), indices_amount(0), indices(nullptr), 
+	           normals_buffer(0), 
+			   normals(nullptr), colors(nullptr), texturecoords(nullptr) { }
 
 Mesh::~Mesh(){
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -21,6 +23,17 @@ Mesh::~Mesh(){
 	indices_buffer = 0;
 	delete indices;
 	indices = nullptr;
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glDeleteBuffers(1, &normals_buffer);
+	delete normals;
+	normals = nullptr;
+
+	delete colors;
+	colors = nullptr;
+
+	delete texturecoords;
+	texturecoords = nullptr;
 }
 
 void Mesh::GenerateBuffers()
@@ -55,7 +68,11 @@ void Mesh::Render()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
 	glDrawElements(GL_TRIANGLES, indices_amount, GL_UNSIGNED_INT, NULL);
 
-	DrawVertexNormals();
+	if(App->renderer3D->draw_vertex_normals)
+		DrawVertexNormals();
+
+	if (App->renderer3D->draw_face_normals)
+		DrawFaceNormals();
 
 	//normals
 	//glBindBuffer(GL_ARRAY_BUFFER, normals_buffer);
@@ -76,12 +93,41 @@ void Mesh::DrawVertexNormals()
 	glBegin(GL_LINES);
 	for (size_t i = 0; i < vertices_amount * 3; i += 3)
 	{
-		glColor3f(0.0f, 0.0f, 1.0f);
+		glColor3f(0.0f, 0.85f, 0.85f);
 		glVertex3f(vertices[i], vertices[i + 1], vertices[i + 2]);
 
 		glVertex3f(vertices[i] + (normals[i] * normal_lenght),
 			vertices[i + 1] + (normals[i + 1] * normal_lenght),
 			vertices[i + 2] + (normals[i + 2]) * normal_lenght);
+	}
+
+	glColor3f(1.0f, 1.0f, 1.0f);
+
+	glEnd();
+}
+
+void Mesh::DrawFaceNormals()
+{
+	float normal_lenght = 0.5f;
+
+	//vertices normals
+	glBegin(GL_LINES);
+	for (size_t i = 0; i < vertices_amount * 3; i += 3)
+	{
+		glColor3f(1.0f, 0.85f, 0.0f);
+		float vx =  (vertices[i] + vertices[i + 3] + vertices[i+ 6]) / 3;
+		float vy = (vertices[i + 1] + vertices[i + 4] + vertices[i + 7]) / 3;
+		float vz = (vertices[i + 2] + vertices[i + 5] + vertices[i + 8]) / 3;
+
+		float nx = (normals[i] +     normals[i + 3] + normals[i + 6]) / 3;
+		float ny = (normals[i + 1] + normals[i + 4] + normals[i + 7]) / 3;
+		float nz = (normals[i + 2] + normals[i + 5] + normals[i + 8]) / 3;
+
+		glVertex3f(vx, vy, vz);
+
+		glVertex3f(vx + (normals[i] * normal_lenght),
+			       vy + (normals[i + 1] * normal_lenght),
+			       vz + (normals[i + 2]) * normal_lenght);
 	}
 
 	glColor3f(1.0f, 1.0f, 1.0f);

@@ -14,7 +14,8 @@ public:
 	ModuleAudio(bool start_enabled = true);
 	~ModuleAudio();
 
-	bool Init(JSON_Object* object);
+	bool Init();
+	bool LoadConfig(JSON_Object* config) override;
 	bool CleanUp();
 
 	// Play a music file

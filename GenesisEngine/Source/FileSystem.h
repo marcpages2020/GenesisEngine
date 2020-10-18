@@ -6,8 +6,10 @@ class MeshCollection;
 namespace FileSystem
 {
 	void Init();
-	MeshCollection* LoadFBX(const char* path);
 	void CleanUp();
+
+	MeshCollection* LoadFBX(const char* path);
+	void Save();
 }
 
 

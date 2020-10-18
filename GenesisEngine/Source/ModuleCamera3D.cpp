@@ -22,13 +22,8 @@ ModuleCamera3D::ModuleCamera3D(bool start_enabled) : Module(start_enabled)
 ModuleCamera3D::~ModuleCamera3D()
 {}
 
-bool ModuleCamera3D::Init(JSON_Object* object)
+bool ModuleCamera3D::Init()
 {
-	move_speed = json_object_get_number(object, "move_speed");
-	drag_speed = json_object_get_number(object, "drag_speed");
-	zoom_speed = json_object_get_number(object, "zoom_speed");
-	sensitivity = json_object_get_number(object, "sensitivity");
-
 	return true;
 }
 
@@ -39,6 +34,16 @@ bool ModuleCamera3D::Start()
 	bool ret = true;
 
 	return ret;
+}
+
+bool ModuleCamera3D::LoadConfig(JSON_Object* config)
+{
+	move_speed = json_object_get_number(config, "move_speed");
+	drag_speed = json_object_get_number(config, "drag_speed");
+	zoom_speed = json_object_get_number(config, "zoom_speed");
+	sensitivity = json_object_get_number(config, "sensitivity");
+
+	return true;
 }
 
 // -----------------------------------------------------------------

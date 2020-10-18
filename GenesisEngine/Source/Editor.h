@@ -22,12 +22,12 @@ public:
 	Editor(bool start_enabled = true);
 	~Editor();
 
-	bool Init(JSON_Object* object);
+	bool Init();
+	bool LoadConfig(JSON_Object* config) override;
 	update_status Update(float dt);
 	update_status Draw();
 	bool CleanUp();
 
-	bool LoadConfig(JSON_Object* object);
 	void AddConsoleLog(const char* log, int warning_level);
 	
 private:

@@ -14,7 +14,7 @@ ModuleAudio::~ModuleAudio()
 {}
 
 // Called before render is available
-bool ModuleAudio::Init(JSON_Object* object)
+bool ModuleAudio::Init()
 {
 	LOG("Loading Audio Mixer");
 	bool ret = true;
@@ -44,6 +44,11 @@ bool ModuleAudio::Init(JSON_Object* object)
 	}
 
 	return ret;
+}
+
+bool ModuleAudio::LoadConfig(JSON_Object* config)
+{
+	return true;
 }
 
 // Called before quitting
