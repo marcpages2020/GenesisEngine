@@ -6,10 +6,10 @@
 
 // Mesh =========================================================================================================================
 
-Mesh::Mesh() : vertices_buffer(0), vertices_amount(0), vertices(nullptr),
-			   indices_buffer(0), indices_amount(0), indices(nullptr), 
-	           normals_buffer(0), 
-			   normals(nullptr), colors(nullptr), texturecoords(nullptr) { }
+Mesh::Mesh() : vertices_buffer(-1), vertices_amount(-1), vertices(nullptr),
+			   indices_buffer(-1), indices_amount(-1), indices(nullptr), 
+	           normals_buffer(-1), textures_buffer(-1), texcoords_amount(-1),
+			   normals(nullptr), colors(nullptr), texcoords(nullptr) { }
 
 Mesh::~Mesh(){
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -32,73 +32,119 @@ Mesh::~Mesh(){
 	delete colors;
 	colors = nullptr;
 
-	delete texturecoords;
-	texturecoords = nullptr;
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glDeleteTextures(1, &textures_buffer);
+	textures_buffer = 0;
+
+	delete texcoords;
+	texcoords = nullptr;
 }
 
 void Mesh::GenerateBuffers()
 {
-	vertices_buffer = 0;
+	//vertices
 	glGenBuffers(1, (GLuint*)&(vertices_buffer));
 	glBindBuffer(GL_ARRAY_BUFFER, vertices_buffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices_amount * 3, vertices, GL_STATIC_DRAW);
 
-	indices_buffer = 0;
+	//indices
 	glGenBuffers(1, (GLuint*)&(indices_buffer));
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * indices_amount, indices, GL_STATIC_DRAW);
 
-	normals_buffer = 0;
+	//normals
 	glGenBuffers(1, (GLuint*)&(normals_buffer));
 	glBindBuffer(GL_ARRAY_BUFFER, normals_buffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices_amount * 3, normals, GL_STATIC_DRAW);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
+	//textures
+	glGenBuffers(1, (GLuint*)&(textures_buffer));
+	glBindBuffer(GL_ARRAY_BUFFER, textures_buffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * texcoords_amount, texcoords, GL_STATIC_DRAW);
+
+	int CHECKERS_WIDTH = 64;
+	int CHECKERS_HEIGHT = 64;
+
+	GLubyte checkerImage[64][64][4];
+	for (int i = 0; i < CHECKERS_HEIGHT; i++) {
+		for (int j = 0; j < CHECKERS_WIDTH; j++) {
+			int c = ((((i & 0x8) == 0) ^ (((j & 0x8)) == 0))) * 255;
+			checkerImage[i][j][0] = (GLubyte)c;
+			checkerImage[i][j][1] = (GLubyte)c;
+			checkerImage[i][j][2] = (GLubyte)c;
+			checkerImage[i][j][3] = (GLubyte)255;
+		}
+	}
+
+	//textures
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glGenTextures(1, &textures_buffer);
+	glBindTexture(GL_TEXTURE_2D, textures_buffer);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, CHECKERS_WIDTH, CHECKERS_HEIGHT,0, GL_RGBA, GL_UNSIGNED_BYTE, checkerImage);
+	//glGenerateMipmap(GL_TEXTURE_2D);
+
 }
 
 void Mesh::Render()
 {
 	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
 	//vertices
 	glBindBuffer(GL_ARRAY_BUFFER, vertices_buffer);
 	glVertexPointer(3, GL_FLOAT, 0, NULL);
 
+	//normals
+	glBindBuffer(GL_NORMAL_ARRAY, normals_buffer);
+	glNormalPointer(GL_FLOAT, 0, NULL);
+
+	//if(textureID != -1)
+	glBindTexture(GL_TEXTURE_2D, textures_buffer);
+	glTexCoordPointer(2, GL_FLOAT, 0, NULL);
+
 	//indices
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
 	glDrawElements(GL_TRIANGLES, indices_amount, GL_UNSIGNED_INT, NULL);
 
-	if(App->renderer3D->draw_vertex_normals)
-		DrawVertexNormals();
+	//if(App->renderer3D->draw_vertex_normals)
+		//DrawVertexNormals();
 
-	if (App->renderer3D->draw_face_normals)
-		DrawFaceNormals();
+	//if (App->renderer3D->draw_face_normals)
+		//DrawFaceNormals();
 
-	//normals
-	//glBindBuffer(GL_ARRAY_BUFFER, normals_buffer);
-	//glVertexPointer(3, GL_FLOAT, 0, NULL);
-	//glDrawArrays(GL_LINES, 0, vertices_amount);
-
+	//clean buffers
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_NORMAL_ARRAY, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glDisableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
 void Mesh::DrawVertexNormals()
 {
+	if (normals_buffer == -1)
+		return;
+
 	float normal_lenght = 0.5f;
 
 	//vertices normals
 	glBegin(GL_LINES);
-	for (size_t i = 0; i < vertices_amount * 3; i += 3)
+	for (size_t i = 0, c = 0; i < vertices_amount * 3; i += 3, c+= 4)
 	{
 		glColor3f(0.0f, 0.85f, 0.85f);
+		//glColor4f(colors[c], colors[c + 1], colors[c + 2], colors[c + 3]);
 		glVertex3f(vertices[i], vertices[i + 1], vertices[i + 2]);
 
 		glVertex3f(vertices[i] + (normals[i] * normal_lenght),
-			vertices[i + 1] + (normals[i + 1] * normal_lenght),
-			vertices[i + 2] + (normals[i + 2]) * normal_lenght);
+			   vertices[i + 1] + (normals[i + 1] * normal_lenght),
+			   vertices[i + 2] + (normals[i + 2]) * normal_lenght);
 	}
 
 	glColor3f(1.0f, 1.0f, 1.0f);
@@ -108,6 +154,9 @@ void Mesh::DrawVertexNormals()
 
 void Mesh::DrawFaceNormals()
 {
+	if (normals_buffer == -1)
+		return;
+
 	float normal_lenght = 0.5f;
 
 	//vertices normals
@@ -141,7 +190,8 @@ void Mesh::DrawFaceNormals()
 
 Cube::Cube() : Mesh() 
 {
-	vertices = new float[24] {
+	vertices = new float[24] 
+	{
 		//Bottom Vertices
 		0.0f ,0.0f, 0.0f,
 		1.0f ,0.0f, 0.0f,
@@ -155,7 +205,8 @@ Cube::Cube() : Mesh()
 		0.0f, 1.0f, 1.0f
 	};
 
-	indices = new uint[36] {
+	indices = new uint[36] 
+	{
 		//Bottom face
 		0,1,2, 2,3,0,
 		//Front Face
@@ -170,8 +221,19 @@ Cube::Cube() : Mesh()
 		4,7,6, 6,5,4
 	};
 
+	texcoords = new float[48]
+	{
+		0.0f,0.0f, 1.0f,0.0f, 1.0f,1.0f, 0.0f,1.0f,
+		1.0f,0.0f, 1.0f,0.0f, 1.0f,1.0f, 0.0f,1.0f,
+		0.0f,0.0f, 1.0f,0.0f, 1.0f,1.0f, 0.0f,1.0f,
+		0.0f,0.0f, 1.0f,0.0f, 1.0f,1.0f, 0.0f,1.0f,
+		0.0f,0.0f, 1.0f,0.0f, 1.0f,1.0f, 0.0f,1.0f,
+		0.0f,0.0f, 1.0f,0.0f, 1.0f,1.0f, 0.0f,1.0f,
+	};
+
 	vertices_amount = 24;
 	indices_amount = 36;
+	texcoords_amount = 48;
 
 	GenerateBuffers();
 }

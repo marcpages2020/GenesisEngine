@@ -161,9 +161,10 @@ bool ModuleRenderer3D::Init()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	AddMeshCollection(FileSystem::LoadFBX("Assets/Models/monkey.FBX"));
+	//AddMeshCollection(FileSystem::LoadFBX("Assets/Models/monkey.FBX"));
 	//AddMeshCollection(FileSystem::LoadFBX("Assets/Models/warrior/warrior.FBX"));
 	//AddMeshCollection(FileSystem::LoadFBX("Assets/Models/baker_house/BakerHouse.FBX"));
+	FileSystem::LoadTexture("Assets/Models/baker_house/Baker_house.png");
 
 	return ret;
 }

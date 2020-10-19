@@ -9,8 +9,14 @@
 #include "Assimp/Assimp/include/scene.h"
 #include "Assimp/Assimp/include/postprocess.h"
 
+#include "Devil/include/il.h"
+#include "Devil/include/ilu.h"
+#include "Devil/include/ilut.h"
+#include "Devil/include/ilut_config.h"
+
 #pragma comment (lib, "PhysFS/libx86/physfs.lib")
 #pragma comment (lib, "Assimp/Assimp/libx86/assimp.lib")
+#pragma comment (lib, "Devil/libx86/DevIL.lib")	
 
 void FileSystem::Init()
 {
@@ -18,11 +24,12 @@ void FileSystem::Init()
 	PHYSFS_init(nullptr);
 	SDL_free(base_path);
 
+	AddPath("."); //Adding ProjectFolder (working directory)
+	AddPath("Assets");
+
 	if (PHYSFS_setWriteDir(".") == 0)
 		LOG_ERROR("File System error while creating write dir: %s\n", PHYSFS_getLastError());
 
-	AddPath("."); //Adding ProjectFolder (working directory)
-	AddPath("Assets");
 	CreateLibraryDirectories();
 
 	struct aiLogStream stream;
@@ -43,7 +50,7 @@ void FileSystem::CreateLibraryDirectories()
 	//CreateDir(MESHES_PATH);
 	//CreateDir(TEXTURES_PATH);
 	//CreateDir(MATERIALS_PATH);
-	CreateDir("/Models/");
+	CreateDir("Assets/Models/model");
 	//CreateDir(ANIMATIONS_PATH);
 	//CreateDir(PARTICLES_PATH);
 	//CreateDir(SHADERS_PATH);
@@ -57,7 +64,7 @@ bool FileSystem::AddPath(const char* path_or_zip)
 
 	if (PHYSFS_mount(path_or_zip, nullptr, 1) == 0)
 	{
-		LOG("File System error while adding a path or zip: %s\n", PHYSFS_getLastError());
+		LOG_ERROR("File System error while adding a path or zip: %s\n", PHYSFS_getLastError());
 	}
 	else
 		ret = true;
@@ -498,6 +505,7 @@ MeshCollection* FileSystem::LoadFBX(const char* path)
 			{
 				currentMesh->indices_amount = currentAiMesh->mNumFaces * 3;
 				currentMesh->indices = new uint[currentMesh->indices_amount]();
+				LOG("%s loaded with %d indices", currentAiMesh->mName.C_Str(), currentMesh->indices_amount);
 
 				for (size_t f = 0; f < currentAiMesh->mNumFaces; f++)
 				{
@@ -517,7 +525,7 @@ MeshCollection* FileSystem::LoadFBX(const char* path)
 			{
 				currentMesh->normals = new float[currentAiMesh->mNumVertices * 3]();
 				currentMesh->colors = new float[currentMesh->indices_amount * 4]();
-				currentMesh->texturecoords = new float[currentAiMesh->mNumVertices * 2]();
+				currentMesh->texcoords = new float[currentAiMesh->mNumVertices * 2]();
 
 				for (size_t v = 0, n = 0, tx = 0, c = 0; v < currentAiMesh->mNumVertices; v++, n += 3, c += 4, tx += 2)
 				{
@@ -529,24 +537,29 @@ MeshCollection* FileSystem::LoadFBX(const char* path)
 					//color copying
 					if (currentAiMesh->HasVertexColors(v)) 
 					{
-						currentMesh->colors[v] = currentAiMesh->mColors[v]->r;
-						currentMesh->colors[v + 1] = currentAiMesh->mColors[v]->g;
-						currentMesh->colors[v + 2] = currentAiMesh->mColors[v]->b;
-						currentMesh->colors[v + 3] = currentAiMesh->mColors[v]->a;
+						currentMesh->colors[c] = currentAiMesh->mColors[v]->r;
+						currentMesh->colors[c + 1] = currentAiMesh->mColors[v]->g;
+						currentMesh->colors[c + 2] = currentAiMesh->mColors[v]->b;
+						currentMesh->colors[c + 3] = currentAiMesh->mColors[v]->a;
 					}
 					else 
 					{
-						currentMesh->colors[v] = 0.0f;
-						currentMesh->colors[v + 1] = 0.0f;
-						currentMesh->colors[v + 2] = 0.0f;
-						currentMesh->colors[v + 3] = 0.0f;
+						currentMesh->colors[c] = 0.0f;
+						currentMesh->colors[c + 1] = 0.0f;
+						currentMesh->colors[c + 2] = 0.0f;
+						currentMesh->colors[c + 3] = 0.0f;
 					}
 
-					//texturecoords copying
+					//texcoords copying
 					if (currentAiMesh->HasTextureCoords(v)) 
 					{
-						currentMesh->texturecoords[tx] = currentAiMesh->mTextureCoords[v]->x;
-						currentMesh->texturecoords[tx + 1] = currentAiMesh->mTextureCoords[v]->y;
+						currentMesh->texcoords[tx] = currentAiMesh->mTextureCoords[0][v].x;
+						currentMesh->texcoords[tx + 1] = currentAiMesh->mTextureCoords[0][v].y;
+					}
+					else
+					{
+						currentMesh->texcoords[tx] = 0;
+						currentMesh->texcoords[tx + 1] = 0;
 					}
 				}
 			}
@@ -561,5 +574,24 @@ MeshCollection* FileSystem::LoadFBX(const char* path)
 		LOG_ERROR("Error loading scene %s", path);
 
 	return collection;
+}
+
+void FileSystem::LoadTexture(const char* path)
+{
+	ILubyte* lump;
+	ILuint size;
+	FILE* file;
+
+	file = fopen(path, "rb");
+	fseek(file, 0, SEEK_END);
+	size = ftell(file);
+
+	lump = (ILubyte*)malloc(size);
+	fseek(file, 0, SEEK_SET);
+	fread(lump, 1, size, file);
+	fclose(file);
+
+	ilLoadL(IL_TGA, lump, size);
+	free(lump);
 }
 

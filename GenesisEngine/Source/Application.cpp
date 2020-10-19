@@ -208,7 +208,7 @@ JSON_Array* Application::PrepareConfig()
 
 	config_root = json_parse_file(path);
 	JSON_Object* config_object = json_value_get_object(config_root);
-	JSON_Array* modules = json_object_get_array(config_object,"modules"); //json_value_get_array(config_json);
+	JSON_Array* modules = json_object_get_array(config_object,"modules");
 
 	if (config_root == NULL) 
 	{

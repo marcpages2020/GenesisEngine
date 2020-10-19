@@ -53,12 +53,12 @@ update_status ModuleSceneIntro::Update(float dt)
 {
 	if (show_grid) 
 	{
-		Grid grid(10);
+		Grid grid(24);
 		grid.Render();
 	}
 
-	//Cube cube;
-	//cube.Render();;
+	Cube cube;
+	cube.Render();;
 
 	//Pyramid pyramid;
 	//pyramid.Render();

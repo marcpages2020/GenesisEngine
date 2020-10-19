@@ -16,19 +16,22 @@ public:
 	void DrawFaceNormals();
 
 public:
-	uint vertices_buffer = 0;
-	int vertices_amount = 0;
+	uint vertices_buffer = -1;
+	int vertices_amount = -1;
 	float* vertices = nullptr;
 
-	uint indices_buffer = 0;
-	int indices_amount = 0;
+	uint indices_buffer = -1;
+	int indices_amount = -1;
 	uint* indices = nullptr;
 
 	uint normals_buffer;
 	float* normals;
 
+	uint textures_buffer = -1;
+	int texcoords_amount = -1;
+	float* texcoords = nullptr;
+
 	float* colors;
-	float* texturecoords;
 };
 
 class Cube : public Mesh {

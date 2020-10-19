@@ -649,6 +649,10 @@ void Editor::ShowAboutWindow()
 		//Glew
 		ImGui::BulletText("Glew %d.%d.%d", GLEW_VERSION_MAJOR, GLEW_VERSION_MINOR, GLEW_VERSION_MICRO);
 
+		ImGui::BulletText("DevIL 1.8.0");
+
+		ImGui::BulletText("Assimp 3.1.1");
+
 		ImGui::Spacing();
 		ImGui::Separator();
 		ImGui::Spacing();
