@@ -37,7 +37,8 @@ public:
 
 	uint texture_buffer = -1;
 	uint textureID;
-	int texcoords_amount = -1;
+	Texture texture;
+
 	float* texcoords = nullptr;
 
 	float* colors;

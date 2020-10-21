@@ -512,6 +512,9 @@ MeshCollection* FileSystem::LoadFBX(const char* path)
 			{
 				currentMesh->indices_amount = currentAiMesh->mNumFaces * 3;
 				currentMesh->indices = new uint[currentMesh->indices_amount]();
+				currentMesh->texcoords = new float[currentMesh->vertices_amount * 2]();
+				currentMesh->colors = new float[currentMesh->indices_amount * 4]();
+
 				LOG("%s loaded with %d indices", currentAiMesh->mName.C_Str(), currentMesh->indices_amount);
 
 				for (size_t f = 0; f < currentAiMesh->mNumFaces; f++)
@@ -531,8 +534,6 @@ MeshCollection* FileSystem::LoadFBX(const char* path)
 			if (currentAiMesh->HasNormals())
 			{
 				currentMesh->normals = new float[currentAiMesh->mNumVertices * 3]();
-				currentMesh->colors = new float[currentMesh->indices_amount * 4]();
-				currentMesh->texcoords = new float[currentAiMesh->mNumVertices * 2]();
 
 				for (size_t v = 0, n = 0, tx = 0, c = 0; v < currentAiMesh->mNumVertices; v++, n += 3, c += 4, tx += 2)
 				{
@@ -566,7 +567,7 @@ MeshCollection* FileSystem::LoadFBX(const char* path)
 					else
 					{
 						currentMesh->texcoords[tx] = 0;
-						currentMesh->texcoords[tx + 1] = 1;
+						currentMesh->texcoords[tx + 1] = 0;
 					}
 				}
 			}
@@ -618,5 +619,11 @@ Texture FileSystem::LoadTexture(char* path)
 		LOG_ERROR("%d: %s", error, iluErrorString(error));
 
 	return texture;
+}
+
+void FileSystem::UnloadTexture(uint imageID)
+{
+	ilBindImage(0);
+	ilDeleteImages(1, &imageID);
 }
 

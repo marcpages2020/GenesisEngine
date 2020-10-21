@@ -47,6 +47,7 @@ namespace FileSystem
 
 	MeshCollection* LoadFBX(const char* path);
 	Texture LoadTexture(char* path);
+	void UnloadTexture(uint imageID);
 }
 
 

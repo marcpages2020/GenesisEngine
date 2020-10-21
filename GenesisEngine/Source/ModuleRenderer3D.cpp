@@ -34,6 +34,7 @@ ModuleRenderer3D::~ModuleRenderer3D()
 {}
 
 // Called before render is available
+// Called before render is available
 bool ModuleRenderer3D::Init()
 {
 	LOG("Creating 3D Renderer context");
@@ -211,8 +212,8 @@ update_status ModuleRenderer3D::Update(float dt)
 {
 	update_status ret = UPDATE_CONTINUE;
 
-	//DrawMeshes();
-	DrawDirectModeCube();
+	DrawMeshes();
+	//DrawDirectModeCube();
 
 	return ret;
 }
@@ -437,6 +438,8 @@ void ModuleRenderer3D::DrawDirectModeCube()
 
 	glDeleteTextures(1, &textureID);
 	glBindTexture(GL_TEXTURE_2D, 0);
+	ilBindImage(0);
+	ilDeleteImages(1, &Lenna.id);
 }
 
 void ModuleRenderer3D::BeginDebugDraw() {}

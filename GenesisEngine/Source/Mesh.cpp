@@ -11,8 +11,8 @@
 Mesh::Mesh() : vertices_buffer(-1), vertices_amount(-1), vertices(nullptr),
 			   indices_buffer(-1), indices_amount(-1), indices(nullptr), 
 	           normals_buffer(-1),
-			   texture_buffer(-1), texcoords_amount(-1), textureID(-1),
-			   normals(nullptr), colors(nullptr), texcoords(nullptr) { }
+			   texture_buffer(-1),  textureID(-1), texcoords(nullptr),
+			   normals(nullptr), colors(nullptr)  { }
 
 Mesh::~Mesh(){
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -47,11 +47,6 @@ void Mesh::GenerateBuffers()
 	glBindBuffer(GL_ARRAY_BUFFER, vertices_buffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices_amount * 3, vertices, GL_STATIC_DRAW);
 
-	//indices
-	glGenBuffers(1, (GLuint*)&(indices_buffer));
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * indices_amount, indices, GL_STATIC_DRAW);
-
 	//normals
 	glGenBuffers(1, (GLuint*)&(normals_buffer));
 	glBindBuffer(GL_ARRAY_BUFFER, normals_buffer);
@@ -60,7 +55,12 @@ void Mesh::GenerateBuffers()
 	//textures
 	glGenBuffers(1, (GLuint*)&(texture_buffer));
 	glBindBuffer(GL_TEXTURE_COORD_ARRAY, texture_buffer);
-	glBufferData(GL_TEXTURE_COORD_ARRAY, sizeof(float) * texcoords_amount * 2, texcoords, GL_STATIC_DRAW);
+	glBufferData(GL_TEXTURE_COORD_ARRAY, sizeof(float) * vertices_amount * 2, texcoords, GL_STATIC_DRAW);
+
+	//indices
+	glGenBuffers(1, (GLuint*)&(indices_buffer));
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * indices_amount, indices, GL_STATIC_DRAW);
 
 	int CHECKERS_WIDTH = 64;
 	int CHECKERS_HEIGHT = 64;
@@ -76,7 +76,8 @@ void Mesh::GenerateBuffers()
 		}
 	}
 
-	//uint texture = FileSystem::LoadTexture("Assets/Models/baker_house/Baker_house.png");
+	//texture = FileSystem::LoadTexture("Assets/Models/baker_house/Baker_house.png");
+	texture = FileSystem::LoadTexture("Assets/Textures/Lenna.png");
 
 	//textures
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -87,8 +88,8 @@ void Mesh::GenerateBuffers()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, CHECKERS_WIDTH, CHECKERS_HEIGHT, 0, GL_RGBA,GL_UNSIGNED_INT, &texture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, CHECKERS_WIDTH, CHECKERS_HEIGHT,0, GL_RGBA, GL_UNSIGNED_BYTE, checkerImage);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.width, texture.height, 0, GL_RGBA,GL_UNSIGNED_BYTE, texture.data);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, CHECKERS_WIDTH, CHECKERS_HEIGHT,0, GL_RGBA, GL_UNSIGNED_BYTE, checkerImage);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	//glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -109,20 +110,20 @@ void Mesh::Render()
 
 	//textures
 	glBindBuffer(GL_TEXTURE_COORD_ARRAY, texture_buffer);
-	glTexCoordPointer(2, GL_FLOAT, 0, NULL);
+	glTexCoordPointer(3, GL_FLOAT, 0, NULL);
 
-	if(textureID != -1)
+	//if(textureID != -1)
 		glBindTexture(GL_TEXTURE_2D, textureID);
 
 	//indices
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
 	glDrawElements(GL_TRIANGLES, indices_amount, GL_UNSIGNED_INT, NULL);
 
-	//if(App->renderer3D->draw_vertex_normals)
-		//DrawVertexNormals();
+	if(App->renderer3D->draw_vertex_normals)
+		DrawVertexNormals();
 
-	//if (App->renderer3D->draw_face_normals)
-		//DrawFaceNormals();
+	if (App->renderer3D->draw_face_normals)
+		DrawFaceNormals();
 
 	//clean buffers
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -240,7 +241,6 @@ Cube::Cube() : Mesh()
 
 	vertices_amount = 8;
 	indices_amount = 36;
-	texcoords_amount = 36;
 
 	GenerateBuffers();
 }
