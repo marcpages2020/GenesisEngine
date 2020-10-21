@@ -4,23 +4,24 @@
 #include "Application.h"
 #include "ModuleRenderer3D.h"
 
+#include "FileSystem.h"
+
 // Mesh =========================================================================================================================
 
 Mesh::Mesh() : vertices_buffer(-1), vertices_amount(-1), vertices(nullptr),
 			   indices_buffer(-1), indices_amount(-1), indices(nullptr), 
-	           normals_buffer(-1), texture_buffer(-1), texcoords_amount(-1),
+	           normals_buffer(-1),
+			   texture_buffer(-1), texcoords_amount(-1), textureID(-1),
 			   normals(nullptr), colors(nullptr), texcoords(nullptr) { }
 
 Mesh::~Mesh(){
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glDeleteBuffers(1, &vertices_buffer);
-	vertices_buffer = 0;
 	delete vertices;
 	vertices = nullptr;
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glDeleteBuffers(1, &indices_buffer);
-	indices_buffer = 0;
 	delete indices;
 	indices = nullptr;
 
@@ -34,9 +35,7 @@ Mesh::~Mesh(){
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glDeleteBuffers(1, &texture_buffer);
-	glDeleteTextures(1, &texture);
-	texture_buffer = 0;
-
+	glDeleteTextures(1, &textureID);
 	delete texcoords;
 	texcoords = nullptr;
 }
@@ -77,6 +76,8 @@ void Mesh::GenerateBuffers()
 		}
 	}
 
+	//uint texture = FileSystem::LoadTexture("Assets/Models/baker_house/Baker_house.png");
+
 	//textures
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glGenTextures(1, &textureID);
@@ -86,6 +87,7 @@ void Mesh::GenerateBuffers()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, CHECKERS_WIDTH, CHECKERS_HEIGHT, 0, GL_RGBA,GL_UNSIGNED_INT, &texture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, CHECKERS_WIDTH, CHECKERS_HEIGHT,0, GL_RGBA, GL_UNSIGNED_BYTE, checkerImage);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	//glGenerateMipmap(GL_TEXTURE_2D);
@@ -105,12 +107,12 @@ void Mesh::Render()
 	glBindBuffer(GL_NORMAL_ARRAY, normals_buffer);
 	glNormalPointer(GL_FLOAT, 0, NULL);
 
+	//textures
 	glBindBuffer(GL_TEXTURE_COORD_ARRAY, texture_buffer);
 	glTexCoordPointer(2, GL_FLOAT, 0, NULL);
 
-	//if(texture != -1)
-	//glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, textureID);
+	if(textureID != -1)
+		glBindTexture(GL_TEXTURE_2D, textureID);
 
 	//indices
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
@@ -154,7 +156,6 @@ void Mesh::DrawVertexNormals()
 	}
 
 	glColor3f(1.0f, 1.0f, 1.0f);
-
 	glEnd();
 }
 

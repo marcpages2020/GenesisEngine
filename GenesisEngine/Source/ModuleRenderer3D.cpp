@@ -15,6 +15,8 @@
 #include <gl/GL.h>
 #include <gl/GLU.h>
 
+#include "Devil/include/IL/il.h"
+
 #pragma comment (lib, "glu32.lib")          /* link OpenGL Utility lib */
 #pragma comment (lib, "opengl32.lib")     /* link Microsoft OpenGL lib */
 #pragma comment (lib, "glew/libx86/glew32.lib")		  /* link glew lib */
@@ -209,7 +211,8 @@ update_status ModuleRenderer3D::Update(float dt)
 {
 	update_status ret = UPDATE_CONTINUE;
 
-	DrawMeshes();
+	//DrawMeshes();
+	DrawDirectModeCube();
 
 	return ret;
 }
@@ -306,6 +309,134 @@ void ModuleRenderer3D::SetCapActive(GLenum cap, bool active)
 		glEnable(cap);
 	else
 		glDisable(cap);
+}
+
+void ModuleRenderer3D::DrawDirectModeCube()
+{
+	int CHECKERS_WIDTH = 64;
+	int CHECKERS_HEIGHT = 64;
+	GLubyte checkerImage[64][64][4];
+
+	for (int i = 0; i < CHECKERS_HEIGHT; i++) {
+		for (int j = 0; j < CHECKERS_WIDTH; j++) {
+			int c = ((((i & 0x8) == 0) ^ (((j & 0x8)) == 0))) * 255;
+			checkerImage[i][j][0] = (GLubyte)c;
+			checkerImage[i][j][1] = (GLubyte)c;
+			checkerImage[i][j][2] = (GLubyte)c;
+			checkerImage[i][j][3] = (GLubyte)255;
+		}
+	}
+
+	Texture Lenna = FileSystem::LoadTexture("Assets/Textures/Lenna.png");
+
+	GLuint textureID;
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_2D, textureID);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, CHECKERS_WIDTH, CHECKERS_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, checkerImage);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Lenna.width, Lenna.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, Lenna.data);
+
+	{
+		glBegin(GL_TRIANGLES);
+		//Bottom Face
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex3f(0.f, 0.f, 0.f);
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex3f(1.f, 0.f, 0.f);
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex3f(1.f, 0.f, 1.f);
+
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex3f(1.f, 0.f, 1.f);
+		glTexCoord2f(0.0f, 1.0f);
+		glVertex3f(0.f, 0.f, 1.f);
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex3f(0.f, 0.f, 0.f);
+
+		//Front Face
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex3f(0.f, 0.f, 1.f);
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex3f(1.f, 0.f, 1.f);
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex3f(1.f, 1.f, 1.f);
+
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex3f(1.f, 1.f, 1.f);
+		glTexCoord2f(0.0f, 1.0f);
+		glVertex3f(0.f, 1.f, 1.f);
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex3f(0.f, 0.f, 1.f);
+
+		//Left Face
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex3f(0.f, 0.f, 0.f);
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex3f(0.f, 0.f, 1.f);
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex3f(0.f, 1.f, 1.f);
+
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex3f(0.f, 1.f, 1.f);
+		glTexCoord2f(0.0f, 1.0f);
+		glVertex3f(0.f, 1.f, 0.f);
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex3f(0.f, 0.f, 0.f);
+
+		//Right Face
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex3f(1.f, 0.f, 0.f);
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex3f(1.f, 1.f, 0.f);
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex3f(1.f, 1.f, 1.f);
+
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex3f(1.f, 1.f, 1.f);
+		glTexCoord2f(0.0f, 1.0f);
+		glVertex3f(1.f, 0.f, 1.f);
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex3f(1.f, 0.f, 0.f);
+
+		//Back Face
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex3f(0.f, 0.f, 0.f);
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex3f(0.f, 1.f, 0.f);
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex3f(1.f, 1.f, 0.f);
+
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex3f(1.f, 1.f, 0.f);
+		glTexCoord2f(0.0f, 1.0f);
+		glVertex3f(1.f, 0.f, 0.f);
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex3f(0.f, 0.f, 0.f);
+
+		//Top Face
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex3f(0.f, 1.f, 0.f);
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex3f(0.f, 1.f, 1.f);
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex3f(1.f, 1.f, 1.f);
+
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex3f(1.f, 1.f, 1.f);
+		glTexCoord2f(0.0f, 1.0f);
+		glVertex3f(1.f, 1.f, 0.f);
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex3f(0.f, 1.f, 0.f);
+		glEnd();
+	}
+
+	glDeleteTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void ModuleRenderer3D::BeginDebugDraw() {}

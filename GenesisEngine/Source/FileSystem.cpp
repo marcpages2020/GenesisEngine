@@ -9,17 +9,24 @@
 #include "Assimp/Assimp/include/scene.h"
 #include "Assimp/Assimp/include/postprocess.h"
 
-#include "Devil/include/il.h"
-#include "Devil/include/ilu.h"
-#include "Devil/include/ilut.h"
-#include "Devil/include/ilut_config.h"
+#include "Devil/include/IL/il.h"
+#include "Devil/include/IL/ilu.h"
+#include "Devil/include/IL/ilut.h"
+
 
 #pragma comment (lib, "PhysFS/libx86/physfs.lib")
 #pragma comment (lib, "Assimp/Assimp/libx86/assimp.lib")
+
 #pragma comment (lib, "Devil/libx86/DevIL.lib")	
+#pragma comment (lib, "Devil/libx86/ILU.lib")	
+#pragma comment (lib, "Devil/libx86/ILUT.lib")	
 
 void FileSystem::Init()
 {
+	ilInit();
+	iluInit();
+	ilutRenderer(ILUT_OPENGL);
+
 	char* base_path = SDL_GetBasePath();
 	PHYSFS_init(nullptr);
 	SDL_free(base_path);
@@ -551,7 +558,7 @@ MeshCollection* FileSystem::LoadFBX(const char* path)
 					}
 
 					//texcoords copying
-					if (currentAiMesh->HasTextureCoords(v)) 
+					if (currentAiMesh->mTextureCoords[0]) 
 					{
 						currentMesh->texcoords[tx] = currentAiMesh->mTextureCoords[0][v].x;
 						currentMesh->texcoords[tx + 1] = currentAiMesh->mTextureCoords[0][v].y;
@@ -559,7 +566,7 @@ MeshCollection* FileSystem::LoadFBX(const char* path)
 					else
 					{
 						currentMesh->texcoords[tx] = 0;
-						currentMesh->texcoords[tx + 1] = 0;
+						currentMesh->texcoords[tx + 1] = 1;
 					}
 				}
 			}
@@ -576,33 +583,40 @@ MeshCollection* FileSystem::LoadFBX(const char* path)
 	return collection;
 }
 
-uint FileSystem::LoadTexture(char* path)
+Texture FileSystem::LoadTexture(char* path)
 {
-	uint texture = -1;
-	ilBindImage(texture);
-	//ilutGLBindTexImage();
+	uint imageID = 0;
 
-	if (texture == 0)
-	{
+	ilGenImages(1, &imageID);
+	ilBindImage(imageID);
+	
+	ilEnable(IL_ORIGIN_SET);
+	ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
+
+	Texture texture;
+
+	if (imageID == 0)
 		LOG_ERROR("Could not create a texture buffer to load: %s, %d", path, ilGetError());
-		return texture;
-	}
-
-	/*
-	if (ilutGLLoadImage(path) == IL_FALSE)
-	{
-		//ilGetError();
-		//const char* error = iluErrorString();
+	
+	if (ilLoadImage(path) == IL_FALSE)
 		LOG_ERROR("Error trying to load the texture from %s", path);
-	};
-	*/
-	int width = ilGetInteger(IL_IMAGE_WIDTH);
-	int height = ilGetInteger(IL_IMAGE_HEIGHT);
-	byte* pixmap = new BYTE[width * height * 3];
-	ilCopyPixels(0, 0, 0, width, height, 1, IL_RGB, IL_UNSIGNED_BYTE, pixmap);
 
-	ilBindImage(0);
-	ilDeleteImage(texture);
+	ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
+	
+	texture.id = imageID;
+	texture.data = ilGetData();
+	texture.width = ilGetInteger(IL_IMAGE_WIDTH);
+	texture.height = ilGetInteger(IL_IMAGE_HEIGHT);
+
+	//ilBindImage(0);
+	//ilDeleteImages(1, &imageID);
+
+	ILenum error;
+	error = ilGetError();
+
+	if (error != IL_NO_ERROR) 
+		LOG_ERROR("%d: %s", error, iluErrorString(error));
+
 	return texture;
 }
 

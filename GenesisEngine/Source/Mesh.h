@@ -4,6 +4,14 @@
 
 typedef float GLfloat;
 typedef unsigned short GLushort;
+typedef unsigned char GLubyte;
+
+struct Texture {
+	uint id = -1;
+	GLubyte* data;
+	int width = -1;
+	int height = -1;
+};
 
 class Mesh {
 public:
@@ -27,7 +35,6 @@ public:
 	uint normals_buffer;
 	float* normals;
 
-	uint texture = -1;
 	uint texture_buffer = -1;
 	uint textureID;
 	int texcoords_amount = -1;

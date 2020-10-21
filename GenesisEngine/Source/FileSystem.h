@@ -5,6 +5,8 @@ class MeshCollection;
 #include <vector>
 #include <string>
 
+struct Texture;
+
 namespace FileSystem
 {
 	void Init();
@@ -44,7 +46,7 @@ namespace FileSystem
 	std::string GetUniqueName(const char* path, const char* name);
 
 	MeshCollection* LoadFBX(const char* path);
-	uint LoadTexture(char* path);
+	Texture LoadTexture(char* path);
 }
 
 

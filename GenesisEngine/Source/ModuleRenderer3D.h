@@ -43,6 +43,7 @@ public:
 	void SetCapActive(GLenum cap, bool active);
 
 private:
+	void DrawDirectModeCube();
 	void BeginDebugDraw();
 	void EndDebugDraw();
 

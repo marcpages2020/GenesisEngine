@@ -119,7 +119,7 @@ update_status ModuleInput::PreUpdate(float dt)
 			case SDL_DROPFILE:
 				dropped_filedir = e.drop.file;
 				//App->renderer3D->AddMeshCollection(FileSystem::LoadFBX(dropped_filedir));
-				FileSystem::LoadTexture(dropped_filedir);
+				//FileSystem::LoadTexture(dropped_filedir);
 				SDL_free(dropped_filedir);
 				break;
 
