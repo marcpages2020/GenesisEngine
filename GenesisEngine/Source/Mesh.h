@@ -27,7 +27,9 @@ public:
 	uint normals_buffer;
 	float* normals;
 
-	uint textures_buffer = -1;
+	uint texture = -1;
+	uint texture_buffer = -1;
+	uint textureID;
 	int texcoords_amount = -1;
 	float* texcoords = nullptr;
 

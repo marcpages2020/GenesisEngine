@@ -57,8 +57,8 @@ update_status ModuleSceneIntro::Update(float dt)
 		grid.Render();
 	}
 
-	Cube cube;
-	cube.Render();;
+	//Cube cube;
+	//cube.Render();;
 
 	//Pyramid pyramid;
 	//pyramid.Render();

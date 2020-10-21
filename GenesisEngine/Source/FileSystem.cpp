@@ -576,22 +576,33 @@ MeshCollection* FileSystem::LoadFBX(const char* path)
 	return collection;
 }
 
-void FileSystem::LoadTexture(const char* path)
+uint FileSystem::LoadTexture(char* path)
 {
-	ILubyte* lump;
-	ILuint size;
-	FILE* file;
+	uint texture = -1;
+	ilBindImage(texture);
+	//ilutGLBindTexImage();
 
-	file = fopen(path, "rb");
-	fseek(file, 0, SEEK_END);
-	size = ftell(file);
+	if (texture == 0)
+	{
+		LOG_ERROR("Could not create a texture buffer to load: %s, %d", path, ilGetError());
+		return texture;
+	}
 
-	lump = (ILubyte*)malloc(size);
-	fseek(file, 0, SEEK_SET);
-	fread(lump, 1, size, file);
-	fclose(file);
+	/*
+	if (ilutGLLoadImage(path) == IL_FALSE)
+	{
+		//ilGetError();
+		//const char* error = iluErrorString();
+		LOG_ERROR("Error trying to load the texture from %s", path);
+	};
+	*/
+	int width = ilGetInteger(IL_IMAGE_WIDTH);
+	int height = ilGetInteger(IL_IMAGE_HEIGHT);
+	byte* pixmap = new BYTE[width * height * 3];
+	ilCopyPixels(0, 0, 0, width, height, 1, IL_RGB, IL_UNSIGNED_BYTE, pixmap);
 
-	ilLoadL(IL_TGA, lump, size);
-	free(lump);
+	ilBindImage(0);
+	ilDeleteImage(texture);
+	return texture;
 }
 

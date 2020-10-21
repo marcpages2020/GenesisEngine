@@ -1,5 +1,5 @@
 #pragma once
-
+#include "Globals.h"
 class MeshCollection;
 
 #include <vector>
@@ -44,7 +44,7 @@ namespace FileSystem
 	std::string GetUniqueName(const char* path, const char* name);
 
 	MeshCollection* LoadFBX(const char* path);
-	void LoadTexture(const char* path);
+	uint LoadTexture(char* path);
 }
 
 

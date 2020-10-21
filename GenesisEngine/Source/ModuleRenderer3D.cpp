@@ -141,12 +141,14 @@ bool ModuleRenderer3D::Init()
 	//FrameBuffer
 	glGenFramebuffers(1, &frameBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+
 	//Texture Buffer
 	glGenTextures(1, &texColorBuffer);
 	glBindTexture(GL_TEXTURE_2D, texColorBuffer);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, App->window->width, App->window->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, App->window->width, App->window->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texColorBuffer, 0);
 
 	//RenderBuffer
@@ -163,8 +165,8 @@ bool ModuleRenderer3D::Init()
 
 	//AddMeshCollection(FileSystem::LoadFBX("Assets/Models/monkey.FBX"));
 	//AddMeshCollection(FileSystem::LoadFBX("Assets/Models/warrior/warrior.FBX"));
-	//AddMeshCollection(FileSystem::LoadFBX("Assets/Models/baker_house/BakerHouse.FBX"));
-	FileSystem::LoadTexture("Assets/Models/baker_house/Baker_house.png");
+	AddMeshCollection(FileSystem::LoadFBX("Assets/Models/baker_house/BakerHouse.FBX"));
+	//FileSystem::LoadTexture("Assets/Models/baker_house/Baker_house.png");
 
 	return ret;
 }
@@ -217,7 +219,6 @@ update_status ModuleRenderer3D::PostUpdate(float dt)
 {
 	glBindVertexArray(0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	App->editor->Draw();
