@@ -1,8 +1,13 @@
 #include "FileSystem.h"
 #include "Mesh.h"
+#include "Application.h"
 
 #include "SDL/include/SDL.h"
 #include <fstream>
+#include <iostream>
+#include <Shlwapi.h>
+
+#pragma comment(lib,"shlwapi.lib")
 
 #include "PhysFS/include/physfs.h"
 #include "Assimp/Assimp/include/cimport.h"
@@ -487,6 +492,21 @@ std::string FileSystem::GetUniqueName(const char* path, const char* name)
 	return finalName;
 }
 
+void FileSystem::LoadFile(const char* file_path)
+{
+	std::string extension = PathFindExtensionA(file_path);
+	std::transform(extension.begin(), extension.end(), extension.begin(), [](unsigned char c) { return std::tolower(c); });
+
+	if (extension == ".fbx") 
+	{
+		App->renderer3D->AddMeshCollection(LoadFBX(file_path));
+	}
+	else if (extension == ".png")
+	{
+		LoadTexture(file_path);
+	}
+}
+
 MeshCollection* FileSystem::LoadFBX(const char* path)
 {
 	MeshCollection* collection = nullptr;
@@ -512,9 +532,6 @@ MeshCollection* FileSystem::LoadFBX(const char* path)
 			{
 				currentMesh->indices_amount = currentAiMesh->mNumFaces * 3;
 				currentMesh->indices = new uint[currentMesh->indices_amount]();
-				currentMesh->texcoords = new float[currentMesh->vertices_amount * 2]();
-				currentMesh->colors = new float[currentMesh->indices_amount * 4]();
-
 				LOG("%s loaded with %d indices", currentAiMesh->mName.C_Str(), currentMesh->indices_amount);
 
 				for (size_t f = 0; f < currentAiMesh->mNumFaces; f++)
@@ -530,48 +547,53 @@ MeshCollection* FileSystem::LoadFBX(const char* path)
 				}
 			}
 
-			//normal copying
-			if (currentAiMesh->HasNormals())
-			{
-				currentMesh->normals = new float[currentAiMesh->mNumVertices * 3]();
+			currentMesh->texcoords = new float[currentMesh->vertices_amount * 2]();
+			currentMesh->colors = new float[currentMesh->indices_amount * 4]();
+			currentMesh->normals = new float[currentAiMesh->mNumVertices * 3]();
 
-				for (size_t v = 0, n = 0, tx = 0, c = 0; v < currentAiMesh->mNumVertices; v++, n += 3, c += 4, tx += 2)
+			int t = 0;
+
+			for (size_t v = 0, n = 0, tx = 0, c = 0; v < currentAiMesh->mNumVertices; v++, n += 3, c += 4, tx+= 2)
+			{
+				//normal copying
+				if (currentAiMesh->HasNormals())
 				{
 					//normal copying
 					currentMesh->normals[n] = currentAiMesh->mNormals[v].x;
 					currentMesh->normals[n + 1] = currentAiMesh->mNormals[v].y;
 					currentMesh->normals[n + 2] = currentAiMesh->mNormals[v].z;
-
-					//color copying
-					if (currentAiMesh->HasVertexColors(v)) 
-					{
-						currentMesh->colors[c] = currentAiMesh->mColors[v]->r;
-						currentMesh->colors[c + 1] = currentAiMesh->mColors[v]->g;
-						currentMesh->colors[c + 2] = currentAiMesh->mColors[v]->b;
-						currentMesh->colors[c + 3] = currentAiMesh->mColors[v]->a;
-					}
-					else 
-					{
-						currentMesh->colors[c] = 0.0f;
-						currentMesh->colors[c + 1] = 0.0f;
-						currentMesh->colors[c + 2] = 0.0f;
-						currentMesh->colors[c + 3] = 0.0f;
-					}
-
-					//texcoords copying
-					if (currentAiMesh->mTextureCoords[0]) 
-					{
-						currentMesh->texcoords[tx] = currentAiMesh->mTextureCoords[0][v].x;
-						currentMesh->texcoords[tx + 1] = currentAiMesh->mTextureCoords[0][v].y;
-					}
-					else
-					{
-						currentMesh->texcoords[tx] = 0;
-						currentMesh->texcoords[tx + 1] = 0;
-					}
 				}
+				//color copying
+				if (currentAiMesh->HasVertexColors(v)) 
+				{
+					currentMesh->colors[c] = currentAiMesh->mColors[v]->r;
+					currentMesh->colors[c + 1] = currentAiMesh->mColors[v]->g;
+					currentMesh->colors[c + 2] = currentAiMesh->mColors[v]->b;
+					currentMesh->colors[c + 3] = currentAiMesh->mColors[v]->a;
+				}
+				else 
+				{
+					currentMesh->colors[c] = 0.0f;
+					currentMesh->colors[c + 1] = 0.0f;
+					currentMesh->colors[c + 2] = 0.0f;
+					currentMesh->colors[c + 3] = 0.0f;
+				}
+
+				//texcoords copying
+				if (currentAiMesh->mTextureCoords[0]) 
+				{
+					currentMesh->texcoords[tx] = currentAiMesh->mTextureCoords[0][v].x;
+					currentMesh->texcoords[tx + 1] = currentAiMesh->mTextureCoords[0][v].y;
+					//LOG("TexCoords: %.2f , %.2f", currentMesh->texcoords[tx], currentMesh->texcoords[tx + 1]);
+				}
+				else
+				{
+					currentMesh->texcoords[tx] = 0.0f;
+					currentMesh->texcoords[tx + 1] = 0.0f;
+				}
+				t = tx;
 			}
-			
+			//LOG("Texcoords loaded: %d", t);
 			currentMesh->GenerateBuffers();
 			collection->meshes.push_back(currentMesh);
 		}
@@ -584,7 +606,7 @@ MeshCollection* FileSystem::LoadFBX(const char* path)
 	return collection;
 }
 
-Texture FileSystem::LoadTexture(char* path)
+Texture FileSystem::LoadTexture(const char* path)
 {
 	uint imageID = 0;
 
@@ -615,8 +637,11 @@ Texture FileSystem::LoadTexture(char* path)
 	ILenum error;
 	error = ilGetError();
 
-	if (error != IL_NO_ERROR) 
+	if (error != IL_NO_ERROR) {
 		LOG_ERROR("%d: %s", error, iluErrorString(error));
+	}
+	else {
+		LOG("Texture: %s loaded successfully", path);}
 
 	return texture;
 }

@@ -4,7 +4,6 @@ class MeshCollection;
 
 #include <vector>
 #include <string>
-
 struct Texture;
 
 namespace FileSystem
@@ -45,8 +44,9 @@ namespace FileSystem
 	//uint64 GetLastModTime(const char* filename);
 	std::string GetUniqueName(const char* path, const char* name);
 
+	void LoadFile(const char* file_path);
 	MeshCollection* LoadFBX(const char* path);
-	Texture LoadTexture(char* path);
+	Texture LoadTexture(const char* path);
 	void UnloadTexture(uint imageID);
 }
 

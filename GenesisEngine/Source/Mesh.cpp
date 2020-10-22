@@ -49,13 +49,13 @@ void Mesh::GenerateBuffers()
 
 	//normals
 	glGenBuffers(1, (GLuint*)&(normals_buffer));
-	glBindBuffer(GL_ARRAY_BUFFER, normals_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices_amount * 3, normals, GL_STATIC_DRAW);
+	glBindBuffer(GL_NORMAL_ARRAY, normals_buffer);
+	glBufferData(GL_NORMAL_ARRAY, sizeof(float) * vertices_amount * 3, normals, GL_STATIC_DRAW);
 
 	//textures
 	glGenBuffers(1, (GLuint*)&(texture_buffer));
-	glBindBuffer(GL_TEXTURE_COORD_ARRAY, texture_buffer);
-	glBufferData(GL_TEXTURE_COORD_ARRAY, sizeof(float) * vertices_amount * 2, texcoords, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, texture_buffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices_amount * 2, texcoords, GL_STATIC_DRAW);
 
 	//indices
 	glGenBuffers(1, (GLuint*)&(indices_buffer));
@@ -76,8 +76,8 @@ void Mesh::GenerateBuffers()
 		}
 	}
 
-	//texture = FileSystem::LoadTexture("Assets/Models/baker_house/Baker_house.png");
-	texture = FileSystem::LoadTexture("Assets/Textures/Lenna.png");
+	texture = FileSystem::LoadTexture("Assets/Models/baker_house/Baker_house.png");
+	//texture = FileSystem::LoadTexture("Assets/Textures/Lenna.png");
 
 	//textures
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -90,14 +90,14 @@ void Mesh::GenerateBuffers()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.width, texture.height, 0, GL_RGBA,GL_UNSIGNED_BYTE, texture.data);
 	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, CHECKERS_WIDTH, CHECKERS_HEIGHT,0, GL_RGBA, GL_UNSIGNED_BYTE, checkerImage);
+	glGenerateMipmap(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, 0);
-	//glGenerateMipmap(GL_TEXTURE_2D);
-
 }
 
 void Mesh::Render()
 {
 	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
 	//vertices
@@ -109,11 +109,11 @@ void Mesh::Render()
 	glNormalPointer(GL_FLOAT, 0, NULL);
 
 	//textures
-	glBindBuffer(GL_TEXTURE_COORD_ARRAY, texture_buffer);
-	glTexCoordPointer(3, GL_FLOAT, 0, NULL);
+	glBindBuffer(GL_ARRAY_BUFFER, texture_buffer);
+	glTexCoordPointer(2, GL_FLOAT, 0, NULL);
 
 	//if(textureID != -1)
-		glBindTexture(GL_TEXTURE_2D, textureID);
+	glBindTexture(GL_TEXTURE_2D, textureID);
 
 	//indices
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
@@ -127,9 +127,9 @@ void Mesh::Render()
 
 	//clean buffers
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_NORMAL_ARRAY, 0);
 	glBindBuffer(GL_TEXTURE_COORD_ARRAY, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glDisableClientState(GL_VERTEX_ARRAY);
