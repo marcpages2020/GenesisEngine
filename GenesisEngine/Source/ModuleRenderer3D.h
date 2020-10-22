@@ -8,6 +8,7 @@
 
 typedef unsigned int GLuint;
 typedef unsigned int GLenum;
+typedef unsigned char GLubyte;
 typedef void* SDL_GLContext;
 class Mesh;
 class MeshCollection;
@@ -34,13 +35,14 @@ public:
 	void AddMesh(Mesh* mesh);
 	void AddMeshCollection(MeshCollection* mesh);
 	void DrawMeshes();
-
 	void OnResize(int width, int height);
 
 	DisplayMode GetDisplayMode();
 	void SetDisplayMode(DisplayMode display);
 
 	void SetCapActive(GLenum cap, bool active);
+
+	GLubyte GetCheckersImage();
 
 private:
 	void DrawDirectModeCube();

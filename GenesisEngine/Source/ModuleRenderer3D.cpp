@@ -312,6 +312,26 @@ void ModuleRenderer3D::SetCapActive(GLenum cap, bool active)
 		glDisable(cap);
 }
 
+GLubyte ModuleRenderer3D::GetCheckersImage()
+{
+	int CHECKERS_WIDTH = 64;
+	int CHECKERS_HEIGHT = 64;
+
+	GLubyte checkerImage[64][64][4];
+
+	for (int i = 0; i < CHECKERS_HEIGHT; i++) {
+		for (int j = 0; j < CHECKERS_WIDTH; j++) {
+			int c = ((((i & 0x8) == 0) ^ (((j & 0x8)) == 0))) * 255;
+			checkerImage[i][j][0] = (GLubyte)c;
+			checkerImage[i][j][1] = (GLubyte)c;
+			checkerImage[i][j][2] = (GLubyte)c;
+			checkerImage[i][j][3] = (GLubyte)255;
+		}
+	}
+
+	return checkerImage[64][64][4];
+}
+
 void ModuleRenderer3D::DrawDirectModeCube()
 {
 	int CHECKERS_WIDTH = 64;

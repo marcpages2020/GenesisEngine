@@ -11,6 +11,7 @@ struct Texture {
 	GLubyte* data;
 	int width = -1;
 	int height = -1;
+	const char* name;
 };
 
 class Mesh {
@@ -19,6 +20,8 @@ public:
 	virtual ~Mesh();
 
 	void GenerateBuffers();
+	void AssignTexture(Texture texture);
+	void AssingCheckersImage();
 	virtual void Render();
 	void DrawVertexNormals();
 	void DrawFaceNormals();

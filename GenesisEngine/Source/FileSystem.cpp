@@ -527,7 +527,7 @@ MeshCollection* FileSystem::LoadFBX(const char* path)
 			memcpy(currentMesh->vertices, currentAiMesh->mVertices, sizeof(float) * currentMesh->vertices_amount * 3);
 			LOG("%s loaded with %d vertices", currentAiMesh->mName.C_Str(), currentMesh->vertices_amount);
 
-			//face copying
+			//indices copying
 			if (currentAiMesh->HasFaces()) 
 			{
 				currentMesh->indices_amount = currentAiMesh->mNumFaces * 3;
@@ -553,6 +553,7 @@ MeshCollection* FileSystem::LoadFBX(const char* path)
 
 			int t = 0;
 
+			//normals, color and texture coordinates
 			for (size_t v = 0, n = 0, tx = 0, c = 0; v < currentAiMesh->mNumVertices; v++, n += 3, c += 4, tx+= 2)
 			{
 				//normal copying
@@ -594,7 +595,25 @@ MeshCollection* FileSystem::LoadFBX(const char* path)
 				t = tx;
 			}
 			//LOG("Texcoords loaded: %d", t);
+			aiMaterial* material = scene->mMaterials[currentAiMesh->mMaterialIndex];
+			aiString texture_path;
+			aiGetMaterialTexture(material, aiTextureType_DIFFUSE, currentAiMesh->mMaterialIndex, &texture_path);
 			currentMesh->GenerateBuffers();
+
+			char full_path[2048] = {0};
+			memset(full_path, 0, sizeof(full_path));
+			sprintf_s(full_path, "Assets/Textures/%s", texture_path.C_Str());
+			Texture texture = LoadTexture(full_path);
+			
+			if (texture_path.length != 0) 
+			{
+				currentMesh->AssignTexture(texture);
+			}
+			else
+			{
+				currentMesh->AssingCheckersImage();
+			}
+
 			collection->meshes.push_back(currentMesh);
 		}
 
