@@ -12,12 +12,8 @@ Application::Application(int argc, char* args[]) : argc(argc), args(args)
 	audio = new ModuleAudio(true);
 	renderer3D = new ModuleRenderer3D(true);
 	camera = new ModuleCamera3D(true);
-	scene = new ModuleSceneIntro(true);
+	scene = new ModuleScene(true);
 	editor = new Editor(true);
-
-	// The order of calls is very important!
-	// Modules will Init() Start() and Update in this order
-	// They will CleanUp() in reverse order
 
 	// Main Modules
 	AddModule(window);

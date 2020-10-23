@@ -11,6 +11,7 @@ public:
 	~Transform();
 
 	void Update() override;
+	void OnEditor() override;
 
 private:
 	float3 position;

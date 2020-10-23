@@ -2,6 +2,8 @@
 #include "Editor.h"
 #include "parson/parson.h"
 #include "Mesh.h"
+#include "ModuleScene.h"
+#include "GameObject.h"
 
 #include "glew/include/glew.h"
 
@@ -73,6 +75,7 @@ update_status Editor::Draw()
 	if (show_inspector_window)
 	{
 		ImGui::Begin("Inspector", &show_inspector_window);
+		ShowInspectorWindow();
 		ImGui::End();
 	}
 
@@ -454,6 +457,14 @@ void Editor::ShowSceneWindow()
 		ImGui::Image((ImTextureID)App->renderer3D->texColorBuffer, image_size, ImVec2(0, 1), ImVec2(1, 0));
 	}
 	ImGui::End();
+}
+
+void Editor::ShowInspectorWindow()
+{
+	if (App->scene->selected_game_object != nullptr) 
+	{
+		App->scene->selected_game_object->OnEditor();
+	}
 }
 
 void Editor::ShowConfigurationWindow()

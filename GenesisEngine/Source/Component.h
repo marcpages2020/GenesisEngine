@@ -16,6 +16,7 @@ public:
 	virtual void Enable();
 	virtual void Disable();
 
+	virtual void OnEditor() = 0;
 public:
 	ComponentType type;
 

@@ -1,22 +1,21 @@
 #include "Globals.h"
 #include "Application.h"
-#include "ModuleSceneIntro.h"
+#include "ModuleScene.h"
 #include "parson/parson.h"
 #include "Mesh.h"
 #include "FileSystem.h"
+#include "GameObject.h"
 
-//#include "glew/include/glew.h"
-
-ModuleSceneIntro::ModuleSceneIntro(bool start_enabled) : Module(start_enabled)
+ModuleScene::ModuleScene(bool start_enabled) : Module(start_enabled), show_grid(true), selected_game_object(nullptr)
 {
 	name = "scene";
 }
 
-ModuleSceneIntro::~ModuleSceneIntro()
+ModuleScene::~ModuleScene()
 {}
 
 // Load assets
-bool ModuleSceneIntro::Start()
+bool ModuleScene::Start()
 {
 	LOG("Loading Intro assets");
 	bool ret = true;
@@ -25,23 +24,36 @@ bool ModuleSceneIntro::Start()
 
 	App->camera->LookAt(vec3(0, 0, 0));
 
+	root = new GameObject();
+	AddGameObject(root);
+	selected_game_object = root;
+
 	return ret;
 }
 
-bool ModuleSceneIntro::Init()
+bool ModuleScene::Init()
 {
 	return true;
 }
 
 // Load assets
-bool ModuleSceneIntro::CleanUp()
+bool ModuleScene::CleanUp()
 {
 	LOG("Unloading Intro scene");
+
+	delete root;
+	root = nullptr;
+	gameObjects.clear();
 
 	return true;
 }
 
-bool ModuleSceneIntro::LoadConfig(JSON_Object* config)
+void ModuleScene::AddGameObject(GameObject* gameObject)
+{
+	gameObjects.push_back(gameObject);
+}
+
+bool ModuleScene::LoadConfig(JSON_Object* config)
 {
 	show_grid = json_object_get_boolean(config, "show_grid");
 
@@ -49,12 +61,17 @@ bool ModuleSceneIntro::LoadConfig(JSON_Object* config)
 }
 
 // Update: draw background
-update_status ModuleSceneIntro::Update(float dt)
+update_status ModuleScene::Update(float dt)
 {
 	if (show_grid) 
 	{
 		GnGrid grid(24);
 		grid.Render();
+	}
+
+	for (size_t i = 0; i < gameObjects.size(); i++)
+	{
+		gameObjects[i]->Update();
 	}
 
 	//GnCube cube;

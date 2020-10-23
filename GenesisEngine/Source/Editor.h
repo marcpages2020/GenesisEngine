@@ -7,7 +7,6 @@
 #include "ImGui/imgui.h"
 
 #include <string>
-#include <vector>
 
 typedef int GLint;
 
@@ -43,6 +42,7 @@ private:
 
 	//Windows
 	void ShowSceneWindow();
+	void ShowInspectorWindow();
 	void ShowConfigurationWindow();
 	void ShowAboutWindow();
 

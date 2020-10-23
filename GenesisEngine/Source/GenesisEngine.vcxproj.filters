@@ -52,9 +52,6 @@
     <ClCompile Include="Libs\ImGui\imgui_widgets.cpp">
       <Filter>Libs\ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="ModuleSceneIntro.cpp">
-      <Filter>Modules</Filter>
-    </ClCompile>
     <ClCompile Include="Libs\parson\parson.c">
       <Filter>Tools\parson</Filter>
     </ClCompile>
@@ -72,6 +69,9 @@
     </ClCompile>
     <ClCompile Include="Transform.cpp">
       <Filter>GameObjects &amp; Components</Filter>
+    </ClCompile>
+    <ClCompile Include="ModuleScene.cpp">
+      <Filter>Modules</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -132,9 +132,6 @@
     <ClInclude Include="Libs\ImGui\imstb_truetype.h">
       <Filter>Libs\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="ModuleSceneIntro.h">
-      <Filter>Modules</Filter>
-    </ClInclude>
     <ClInclude Include="Libs\glew\include\wglew.h">
       <Filter>Libs\Glew</Filter>
     </ClInclude>
@@ -170,6 +167,9 @@
     </ClInclude>
     <ClInclude Include="Transform.h">
       <Filter>GameObjects &amp; Components</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleScene.h">
+      <Filter>Modules</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -10,7 +10,7 @@
 #include "ModuleAudio.h"
 #include "ModuleRenderer3D.h"
 #include "ModuleCamera3D.h"
-#include "ModuleSceneIntro.h"
+#include "ModuleScene.h"
 #include "Editor.h"
 
 #include <string>
@@ -57,7 +57,7 @@ public:
 	ModuleInput* input;
 	ModuleAudio* audio;
 	ModuleCamera3D* camera;
-	ModuleSceneIntro* scene;
+	ModuleScene* scene;
 	Editor* editor;
 	ModuleRenderer3D* renderer3D;
 
