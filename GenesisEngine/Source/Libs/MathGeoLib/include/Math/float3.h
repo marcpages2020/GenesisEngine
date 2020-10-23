@@ -17,7 +17,7 @@
 	@brief A 3D (x,y,z) ordered tuple. */
 #pragma once
 
-#include "../MathBuildConfig.h"
+#include "Libs/MathGeoLib/include/MathBuildConfig.h"
 
 #ifdef MATH_ENABLE_STL_SUPPORT
 #include <string>

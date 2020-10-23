@@ -170,9 +170,6 @@ bool ModuleRenderer3D::Init()
 	//AddMeshCollection(FileSystem::LoadFBX("Assets/Models/warrior/warrior.FBX"));
 	AddMeshCollection(FileSystem::LoadFBX("Assets/Models/baker_house/BakerHouse.FBX"));
 	//FileSystem::LoadTexture("Assets/Models/baker_house/Baker_house.png");
-	char** buffer = {0};
-	std::vector<std::string> file_list;
-	std::vector<std::string> dir_list;
 	//FileSystem::Load("Assets/Models/baker_house/BakerHouse.FBX", buffer);
 
 	return ret;

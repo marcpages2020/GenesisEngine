@@ -151,6 +151,7 @@ std::string FileSystem::FindTexture(const char* texture_name, const char* model_
 		}
 	}
 
+	texture_path.clear();
 	return texture_path;
 }
 
@@ -644,11 +645,11 @@ GnMeshCollection* FileSystem::LoadFBX(const char* path)
 			aiString aiTexture_path;
 			aiGetMaterialTexture(material, aiTextureType_DIFFUSE, currentAiMesh->mMaterialIndex, &aiTexture_path);
 
-			std::string texture_path = FindTexture(aiTexture_path.C_Str(), path);
-			GnTexture texture = LoadTexture(texture_path.c_str());
 			
-			if (texture_path.length() != 0)
+			if (aiTexture_path.length != 0)
 			{
+				std::string texture_path = FindTexture(aiTexture_path.C_Str(), path);
+				GnTexture texture = LoadTexture(texture_path.c_str());
 				currentMesh->AssignTexture(texture);
 			}
 			else
