@@ -145,7 +145,7 @@ bool ModuleRenderer3D::Init()
 	glGenFramebuffers(1, &frameBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 
-	//Texture Buffer
+	//GnTexture Buffer
 	glGenTextures(1, &texColorBuffer);
 	glBindTexture(GL_TEXTURE_2D, texColorBuffer);
 
@@ -170,6 +170,10 @@ bool ModuleRenderer3D::Init()
 	//AddMeshCollection(FileSystem::LoadFBX("Assets/Models/warrior/warrior.FBX"));
 	AddMeshCollection(FileSystem::LoadFBX("Assets/Models/baker_house/BakerHouse.FBX"));
 	//FileSystem::LoadTexture("Assets/Models/baker_house/Baker_house.png");
+	char** buffer = {0};
+	std::vector<std::string> file_list;
+	std::vector<std::string> dir_list;
+	//FileSystem::Load("Assets/Models/baker_house/BakerHouse.FBX", buffer);
 
 	return ret;
 }
@@ -248,12 +252,12 @@ bool ModuleRenderer3D::CleanUp()
 	return true;
 }
 
-void ModuleRenderer3D::AddMesh(Mesh* mesh)
+void ModuleRenderer3D::AddMesh(GnMesh* mesh)
 {
 	meshes.push_back(mesh);
 }
 
-void ModuleRenderer3D::AddMeshCollection(MeshCollection* mesh)
+void ModuleRenderer3D::AddMeshCollection(GnMeshCollection* mesh)
 {
 	mesh_collections.push_back(mesh);
 }
@@ -348,7 +352,7 @@ void ModuleRenderer3D::DrawDirectModeCube()
 		}
 	}
 
-	Texture Lenna = FileSystem::LoadTexture("Assets/Textures/Lenna.png");
+	GnTexture Lenna = FileSystem::LoadTexture("Assets/Textures/Lenna.png");
 
 	GLuint textureID;
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);

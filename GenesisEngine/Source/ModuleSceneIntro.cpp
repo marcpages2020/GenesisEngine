@@ -53,26 +53,26 @@ update_status ModuleSceneIntro::Update(float dt)
 {
 	if (show_grid) 
 	{
-		Grid grid(24);
+		GnGrid grid(24);
 		grid.Render();
 	}
 
-	//Cube cube;
+	//GnCube cube;
 	//cube.Render();;
 
-	//Pyramid pyramid;
+	//GnPyramid pyramid;
 	//pyramid.Render();
 
-	//Plane plane;
+	//GnPlane plane;
 	//plane.Render();
 
-	//Sphere sphere;
+	//GnSphere sphere;
 	//sphere.Render();
 
-	//Cylinder cylinder(1, 2, 16);
+	//GnCylinder cylinder(1, 2, 16);
 	//cylinder.Render();
 
-	//Cone cone(1, 1.5, 12);
+	//GnCone cone(1, 1.5, 12);
 	//cone.Render();
 
 	return UPDATE_CONTINUE;

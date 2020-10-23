@@ -10,8 +10,8 @@ typedef unsigned int GLuint;
 typedef unsigned int GLenum;
 typedef unsigned char GLubyte;
 typedef void* SDL_GLContext;
-class Mesh;
-class MeshCollection;
+class GnMesh;
+class GnMeshCollection;
 
 enum DisplayMode
 {
@@ -32,8 +32,8 @@ public:
 	update_status PostUpdate(float dt) override;
 	bool CleanUp();
 	
-	void AddMesh(Mesh* mesh);
-	void AddMeshCollection(MeshCollection* mesh);
+	void AddMesh(GnMesh* mesh);
+	void AddMeshCollection(GnMeshCollection* mesh);
 	void DrawMeshes();
 	void OnResize(int width, int height);
 
@@ -61,8 +61,8 @@ public:
 	mat4x4 ModelMatrix, ViewMatrix, ProjectionMatrix;
 	DisplayMode display_mode;
 
-	std::vector<Mesh*> meshes;
-	std::vector<MeshCollection*> mesh_collections;
+	std::vector<GnMesh*> meshes;
+	std::vector<GnMeshCollection*> mesh_collections;
 
 	bool draw_vertex_normals;
 	bool draw_face_normals;

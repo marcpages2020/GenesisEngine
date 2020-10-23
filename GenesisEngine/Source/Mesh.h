@@ -6,21 +6,21 @@ typedef float GLfloat;
 typedef unsigned short GLushort;
 typedef unsigned char GLubyte;
 
-struct Texture {
+struct GnTexture {
 	uint id = -1;
-	GLubyte* data;
+	GLubyte* data = nullptr;
 	int width = -1;
 	int height = -1;
-	const char* name;
+	//const char* name;
 };
 
-class Mesh {
+class GnMesh {
 public:
-	Mesh();
-	virtual ~Mesh();
+	GnMesh();
+	virtual ~GnMesh();
 
 	void GenerateBuffers();
-	void AssignTexture(Texture texture);
+	void AssignTexture(GnTexture texture);
 	void AssingCheckersImage();
 	virtual void Render();
 	void DrawVertexNormals();
@@ -40,35 +40,35 @@ public:
 
 	uint texture_buffer = -1;
 	uint textureID;
-	Texture texture;
+	GnTexture texture;
 
 	float* texcoords = nullptr;
 
 	float* colors;
 };
 
-class Cube : public Mesh {
+class GnCube : public GnMesh {
 public:
-	Cube();
-	~Cube();
+	GnCube();
+	~GnCube();
 };
 
-class Plane : public Mesh {
+class GnPlane : public GnMesh {
 public:
-	Plane();
-	~Plane();
+	GnPlane();
+	~GnPlane();
 };
 
-class Pyramid : public Mesh {
+class GnPyramid : public GnMesh {
 public:
-	Pyramid();
-	~Pyramid();
+	GnPyramid();
+	~GnPyramid();
 };
 
-class Sphere : public Mesh {
+class GnSphere : public GnMesh {
 public:
-	Sphere();
-	~Sphere();
+	GnSphere();
+	~GnSphere();
 
 	void Render() override;
 
@@ -77,11 +77,11 @@ private:
 	std::vector<GLushort> indices;
 };
 
-class Cylinder : public Mesh {
+class GnCylinder : public GnMesh {
 public:
-	Cylinder();
-	Cylinder(float radius, float height, int sides);
-	~Cylinder();
+	GnCylinder();
+	GnCylinder(float radius, float height, int sides);
+	~GnCylinder();
 	
 	void CalculateGeometry();
 private:
@@ -90,10 +90,10 @@ private:
 	unsigned int sides = 0;
 };
 
-class Grid {
+class GnGrid {
 public:
-	Grid(int size);
-	~Grid();
+	GnGrid(int size);
+	~GnGrid();
 
 	void Render();
 
@@ -101,11 +101,11 @@ private:
 	int size;
 };
 
-class Cone : public Mesh {
+class GnCone : public GnMesh {
 public:
-	Cone();
-	Cone(float radius, float height, int sides);
-	~Cone();
+	GnCone();
+	GnCone(float radius, float height, int sides);
+	~GnCone();
 
 	void CalculateGeometry(int sides);
 
@@ -114,20 +114,20 @@ private:
 	float height;
 };
 
-class MeshCollection {
+class GnMeshCollection {
 public:
-	MeshCollection();
-	~MeshCollection();
+	GnMeshCollection();
+	~GnMeshCollection();
 
 	void GenerateBuffers();
 	void Render();
 
 public:
-	std::vector<Mesh*> meshes;
+	std::vector<GnMesh*> meshes;
 };
 
 /*
-class Frustum : public Mesh {
+class Frustum : public GnMesh {
 public:
 private:
 };

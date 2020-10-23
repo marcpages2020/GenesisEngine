@@ -62,7 +62,9 @@ void FileSystem::CreateLibraryDirectories()
 	//CreateDir(MESHES_PATH);
 	//CreateDir(TEXTURES_PATH);
 	//CreateDir(MATERIALS_PATH);
-	CreateDir("Assets/Models/model");
+	CreateDir("Assets/Config/");
+	CreateDir("Assets/Textures/");
+	CreateDir("Assets/Models/");
 	//CreateDir(ANIMATIONS_PATH);
 	//CreateDir(PARTICLES_PATH);
 	//CreateDir(SHADERS_PATH);
@@ -110,6 +112,46 @@ const char* FileSystem::GetWriteDir()
 {
 	//TODO: erase first annoying dot (".")
 	return PHYSFS_getWriteDir();
+}
+
+// TODO: Transverse all folders to find a file
+std::string FileSystem::FindFile(const char* file)
+{
+	std::string path;
+	return path;
+}
+
+std::string FileSystem::FindTexture(const char* texture_name, const char* model_directory)
+{
+	std::string path;
+	SplitFilePath(model_directory, &path);
+	std::string texture_path = path + texture_name;
+
+	//Check if the texture is in the same folder
+	if (Exists(texture_path.c_str()))
+	{
+		return texture_path.c_str();
+	}
+	else
+	{
+		//Check if the texture is in a sub folder
+		texture_path = path + "Textures/" + texture_name;
+		if (Exists(texture_path.c_str()))
+		{
+			return texture_path.c_str();
+		}
+		else
+		{
+			//Check if the texture is in the root textures folder
+			texture_path = std::string("Assets/Textures/") + texture_name;
+			if (Exists(texture_path.c_str()))
+			{
+				return texture_path.c_str();
+			}
+		}
+	}
+
+	return texture_path;
 }
 
 void FileSystem::DiscoverFiles(const char* directory, std::vector<std::string>& file_list, std::vector<std::string>& dir_list) 
@@ -492,7 +534,7 @@ std::string FileSystem::GetUniqueName(const char* path, const char* name)
 	return finalName;
 }
 
-void FileSystem::LoadFile(const char* file_path)
+void FileSystem::LoadFile(const char* file_path, bool drag_and_drop)
 {
 	std::string extension = PathFindExtensionA(file_path);
 	std::transform(extension.begin(), extension.end(), extension.begin(), [](unsigned char c) { return std::tolower(c); });
@@ -507,18 +549,18 @@ void FileSystem::LoadFile(const char* file_path)
 	}
 }
 
-MeshCollection* FileSystem::LoadFBX(const char* path)
+GnMeshCollection* FileSystem::LoadFBX(const char* path)
 {
-	MeshCollection* collection = nullptr;
+	GnMeshCollection* collection = nullptr;
 	const aiScene* scene = aiImportFile(path, aiProcessPreset_TargetRealtime_MaxQuality);
 
 	if (scene != nullptr && scene->HasMeshes())
 	{
-		collection = new MeshCollection();
+		collection = new GnMeshCollection();
 
 		for (size_t i = 0; i < scene->mNumMeshes; i++)
 		{
-			Mesh* currentMesh = new Mesh();
+			GnMesh* currentMesh = new GnMesh();
 			aiMesh* currentAiMesh = scene->mMeshes[i];
 
 			//vertex copying
@@ -595,17 +637,17 @@ MeshCollection* FileSystem::LoadFBX(const char* path)
 				t = tx;
 			}
 			//LOG("Texcoords loaded: %d", t);
-			aiMaterial* material = scene->mMaterials[currentAiMesh->mMaterialIndex];
-			aiString texture_path;
-			aiGetMaterialTexture(material, aiTextureType_DIFFUSE, currentAiMesh->mMaterialIndex, &texture_path);
 			currentMesh->GenerateBuffers();
 
-			char full_path[2048] = {0};
-			memset(full_path, 0, sizeof(full_path));
-			sprintf_s(full_path, "Assets/Textures/%s", texture_path.C_Str());
-			Texture texture = LoadTexture(full_path);
+			//Assign GnTexture
+			aiMaterial* material = scene->mMaterials[currentAiMesh->mMaterialIndex];
+			aiString aiTexture_path;
+			aiGetMaterialTexture(material, aiTextureType_DIFFUSE, currentAiMesh->mMaterialIndex, &aiTexture_path);
+
+			std::string texture_path = FindTexture(aiTexture_path.C_Str(), path);
+			GnTexture texture = LoadTexture(texture_path.c_str());
 			
-			if (texture_path.length != 0) 
+			if (texture_path.length() != 0)
 			{
 				currentMesh->AssignTexture(texture);
 			}
@@ -625,7 +667,7 @@ MeshCollection* FileSystem::LoadFBX(const char* path)
 	return collection;
 }
 
-Texture FileSystem::LoadTexture(const char* path)
+GnTexture FileSystem::LoadTexture(const char* path)
 {
 	uint imageID = 0;
 
@@ -635,7 +677,7 @@ Texture FileSystem::LoadTexture(const char* path)
 	ilEnable(IL_ORIGIN_SET);
 	ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
 
-	Texture texture;
+	GnTexture texture;
 
 	if (imageID == 0)
 		LOG_ERROR("Could not create a texture buffer to load: %s, %d", path, ilGetError());

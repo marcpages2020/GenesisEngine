@@ -1,6 +1,7 @@
 #include "Application.h"
 #include "Editor.h"
 #include "parson/parson.h"
+#include "Mesh.h"
 
 #include "glew/include/glew.h"
 
@@ -307,7 +308,6 @@ bool Editor::CreateMainMenuBar() {
 			ImGui::EndMenu();
 		}
 
-
 		if (ImGui::BeginMenu("Edit"))
 		{
 			if (ImGui::MenuItem("Configuration"))
@@ -317,6 +317,31 @@ bool Editor::CreateMainMenuBar() {
 			else if (ImGui::MenuItem("Preferences"))
 			{
 				show_preferences_window = true;
+			}
+			ImGui::EndMenu();
+		}
+	
+		if (ImGui::BeginMenu("Game Object"))
+		{
+			if (ImGui::MenuItem("Cube"))
+			{
+				App->renderer3D->AddMesh(new GnCube());
+			}
+			else if (ImGui::MenuItem("Cylinder"))
+			{
+				App->renderer3D->AddMesh(new GnCylinder());
+			}
+			else if (ImGui::MenuItem("Sphere"))
+			{
+				App->renderer3D->AddMesh(new GnSphere());
+			}
+			else if (ImGui::MenuItem("Pyramid"))
+			{
+				App->renderer3D->AddMesh(new GnPyramid());
+			}
+			else if (ImGui::MenuItem("Plane"))
+			{
+				App->renderer3D->AddMesh(new GnPlane());
 			}
 			ImGui::EndMenu();
 		}
@@ -443,7 +468,6 @@ void Editor::ShowConfigurationWindow()
 			}
 
 			char title[25];
-
 			//FPS graph
 			fps_log.erase(fps_log.begin());
 			fps_log.push_back(App->GetFPS());

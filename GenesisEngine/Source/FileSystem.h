@@ -1,12 +1,12 @@
 #pragma once
 #include "Globals.h"
-class MeshCollection;
+class GnMeshCollection;
 
 #include <vector>
 #include <string>
-struct Texture;
+struct GnTexture;
 
-namespace FileSystem
+namespace FileSystem 
 {
 	void Init();
 	void CleanUp();
@@ -18,6 +18,8 @@ namespace FileSystem
 	bool CreateDir(const char* dir);
 	bool IsDirectory(const char* file);
 	const char* GetWriteDir();
+	std::string FindFile(const char* file);
+	std::string FindTexture(const char* texture_name, const char* model_directory);
 	void DiscoverFiles(const char* directory, std::vector<std::string>& file_list, std::vector<std::string>& dir_list);
 	void GetAllFilesWithExtension(const char* directory, const char* extension, std::vector<std::string>& file_list);
 	//PathNode GetAllFiles(const char* directory, std::vector<std::string>* filter_ext = nullptr, std::vector<std::string>* ignore_ext = nullptr);
@@ -44,10 +46,11 @@ namespace FileSystem
 	//uint64 GetLastModTime(const char* filename);
 	std::string GetUniqueName(const char* path, const char* name);
 
-	void LoadFile(const char* file_path);
-	MeshCollection* LoadFBX(const char* path);
-	Texture LoadTexture(const char* path);
+	void LoadFile(const char* file_path, bool drag_and_drop = false);
+	GnMeshCollection* LoadFBX(const char* path);
+	GnTexture LoadTexture(const char* path);
 	void UnloadTexture(uint imageID);
 }
+
 
 

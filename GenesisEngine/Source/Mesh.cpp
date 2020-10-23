@@ -6,15 +6,15 @@
 
 #include "FileSystem.h"
 
-// Mesh =========================================================================================================================
+// GnMesh =========================================================================================================================
 
-Mesh::Mesh() : vertices_buffer(-1), vertices_amount(-1), vertices(nullptr),
+GnMesh::GnMesh() : vertices_buffer(-1), vertices_amount(-1), vertices(nullptr),
 			   indices_buffer(-1), indices_amount(-1), indices(nullptr), 
 	           normals_buffer(-1),
 			   texture_buffer(-1),  textureID(-1), texcoords(nullptr),
 			   normals(nullptr), colors(nullptr)  { }
 
-Mesh::~Mesh(){
+GnMesh::~GnMesh(){
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glDeleteBuffers(1, &vertices_buffer);
 	delete vertices;
@@ -36,11 +36,13 @@ Mesh::~Mesh(){
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glDeleteBuffers(1, &texture_buffer);
 	glDeleteTextures(1, &textureID);
+	FileSystem::UnloadTexture(texture.id);
+
 	delete texcoords;
 	texcoords = nullptr;
 }
 
-void Mesh::GenerateBuffers()
+void GnMesh::GenerateBuffers()
 {
 	//vertices
 	glGenBuffers(1, (GLuint*)&(vertices_buffer));
@@ -75,12 +77,11 @@ void Mesh::GenerateBuffers()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.width, texture.height, 0, GL_RGBA,GL_UNSIGNED_BYTE, texture.data);
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, CHECKERS_WIDTH, CHECKERS_HEIGHT,0, GL_RGBA, GL_UNSIGNED_BYTE, checkerImage);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Mesh::AssignTexture(Texture g_texture)
+void GnMesh::AssignTexture(GnTexture g_texture)
 {
 	texture = g_texture;
 	glBindTexture(GL_TEXTURE_2D, textureID);
@@ -88,7 +89,7 @@ void Mesh::AssignTexture(Texture g_texture)
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Mesh::AssingCheckersImage()
+void GnMesh::AssingCheckersImage()
 {
 	int CHECKERS_WIDTH = 64;
 	int CHECKERS_HEIGHT = 64;
@@ -110,7 +111,7 @@ void Mesh::AssingCheckersImage()
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Mesh::Render()
+void GnMesh::Render()
 {
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
@@ -152,7 +153,7 @@ void Mesh::Render()
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
-void Mesh::DrawVertexNormals()
+void GnMesh::DrawVertexNormals()
 {
 	if (normals_buffer == -1)
 		return;
@@ -176,7 +177,7 @@ void Mesh::DrawVertexNormals()
 	glEnd();
 }
 
-void Mesh::DrawFaceNormals()
+void GnMesh::DrawFaceNormals()
 {
 	if (normals_buffer == -1)
 		return;
@@ -210,9 +211,9 @@ void Mesh::DrawFaceNormals()
 
 // ------------------------------------------------------------------------------------------------------------------------------
 
-// Cube =========================================================================================================================
+// GnCube =========================================================================================================================
 
-Cube::Cube() : Mesh() 
+GnCube::GnCube() : GnMesh() 
 {
 	vertices = new float[24] 
 	{
@@ -235,24 +236,27 @@ Cube::Cube() : Mesh()
 		0,1,2, 2,3,0,
 		//Front Face
 		3,2,6, 6,7,3,
-		//Right face
-		6,2,1, 1,5,6,
 		//Left face
-		4,0,7, 7,0,3,
+		7,4,0, 0,3,7,
+		//Right face
+		2,1,5, 5,6,2,
 		//Back face
-		1,0,5, 0,4,5,
+		1,0,4, 4,5,1,
 		//Top face
-		4,7,6, 6,5,4
+		5,4,7, 7,6,5
 	};
 
-	texcoords = new float[72]
+	texcoords = new float[16]
 	{
-		0.0f,0.0f, 1.0f,0.0f, 0.0f,1.0f, 1.0f,1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f,0.0f, 1.0f,0.0f, 1.0f,1.0f, 1.0f,1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f,0.0f, 1.0f,0.0f, 1.0f,1.0f, 1.0f,1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f,0.0f, 1.0f,0.0f, 1.0f,1.0f, 1.0f,1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f,0.0f, 1.0f,0.0f, 1.0f,1.0f, 1.0f,1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f,0.0f, 1.0f,0.0f, 1.0f,1.0f, 1.0f,1.0f, 0.0f, 1.0f, 0.0f, 0.0f
+		0.0f, 0.0f, 
+		1.0f, 0.0f,
+		1.0f, 1.0f, 
+		0.0f, 1.0f,
+
+		0.0f, 1.0f,
+		1.0f, 1.0f,
+		1.0f, 0.0f,
+		0.0f, 0.0f
 	};
 
 	vertices_amount = 8;
@@ -261,13 +265,13 @@ Cube::Cube() : Mesh()
 	GenerateBuffers();
 }
 
-Cube::~Cube(){}
+GnCube::~GnCube(){}
 
 // ------------------------------------------------------------------------------------------------------------------------------
 
-// Plane ========================================================================================================================
+// GnPlane ========================================================================================================================
 
-Plane::Plane() : Mesh() 
+GnPlane::GnPlane() : GnMesh() 
 {
 	vertices = new float[12]{
 	0.0f ,0.0f, 0.0f,
@@ -287,13 +291,13 @@ Plane::Plane() : Mesh()
 	GenerateBuffers();
 }
 
-Plane::~Plane() {}
+GnPlane::~GnPlane() {}
 
 // ------------------------------------------------------------------------------------------------------------------------------
 
-// Pyramid ======================================================================================================================
+// GnPyramid ======================================================================================================================
 
-Pyramid::Pyramid() : Mesh() 
+GnPyramid::GnPyramid() : GnMesh() 
 {
 	vertices = new float[15] {
 		//Top
@@ -321,13 +325,13 @@ Pyramid::Pyramid() : Mesh()
 	GenerateBuffers();
 }
 
-Pyramid::~Pyramid() {}
+GnPyramid::~GnPyramid() {}
 
 // ------------------------------------------------------------------------------------------------------------------------------
 
-// Sphere =======================================================================================================================
+// GnSphere =======================================================================================================================
 
-Sphere::Sphere() : Mesh() 
+GnSphere::GnSphere() : GnMesh() 
 {
 	float radius = 1;
 	unsigned int rings = 12;
@@ -369,13 +373,13 @@ Sphere::Sphere() : Mesh()
 	}
 }
 
-Sphere::~Sphere()
+GnSphere::~GnSphere()
 {
 	vertices.clear();
 	indices.clear();
 }
 
-void Sphere::Render()
+void GnSphere::Render()
 {
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer(3, GL_FLOAT, 0, &vertices[0]);
@@ -385,19 +389,19 @@ void Sphere::Render()
 
 // ---------------------------------------------------------------------------------------------------------------------------
 
-// Cylinder ==================================================================================================================
+// GnCylinder ==================================================================================================================
 
-Cylinder::Cylinder() : Mesh(), radius(1), height(1), sides(16)  {
+GnCylinder::GnCylinder() : GnMesh(), radius(1), height(2), sides(16)  {
 	CalculateGeometry();
 }
 
-Cylinder::Cylinder(float g_radius, float g_height, int g_sides) : Mesh(), radius(g_radius), height(g_height), sides(g_sides) {
+GnCylinder::GnCylinder(float g_radius, float g_height, int g_sides) : GnMesh(), radius(g_radius), height(g_height), sides(g_sides) {
 	CalculateGeometry();
 }
 
-Cylinder::~Cylinder() {}
+GnCylinder::~GnCylinder() {}
 
-void Cylinder::CalculateGeometry()
+void GnCylinder::CalculateGeometry()
 {
 	float current_angle = 0;
 	float angle_increase = 2 * M_PI / sides;
@@ -515,18 +519,18 @@ void Cylinder::CalculateGeometry()
 
 // ------------------------------------------------------------------------------------------------------------------------------
 
-// Grid =========================================================================================================================
+// GnGrid =========================================================================================================================
 
-Grid::Grid(int g_size) {
+GnGrid::GnGrid(int g_size) {
 	if ((g_size % 2) != 0)
 		g_size++;
 
 	size = g_size;
 }
 
-Grid::~Grid() {}
+GnGrid::~GnGrid() {}
 
-void Grid::Render()
+void GnGrid::Render()
 {
 	glBegin(GL_LINES);
 
@@ -549,21 +553,21 @@ void Grid::Render()
 
 // ------------------------------------------------------------------------------------------------------------------------------
 
-// Cone =========================================================================================================================
+// GnCone =========================================================================================================================
 
-Cone::Cone() : Mesh(), radius(1), height(1) 
+GnCone::GnCone() : GnMesh(), radius(1), height(1) 
 {
 	CalculateGeometry(8);
 }
 
-Cone::Cone(float g_radius, float g_height, int sides) : Mesh(), radius(g_radius) , height(g_height)
+GnCone::GnCone(float g_radius, float g_height, int sides) : GnMesh(), radius(g_radius) , height(g_height)
 {
 	CalculateGeometry(sides);
 }
 
-Cone::~Cone() {}
+GnCone::~GnCone() {}
 
-void Cone::CalculateGeometry(int sides) 
+void GnCone::CalculateGeometry(int sides) 
 {
 	//Verices -------------------------------------------------------
 	std::vector<GLfloat> vertices_vector;
@@ -647,11 +651,11 @@ void Cone::CalculateGeometry(int sides)
 
 // ------------------------------------------------------------------------------------------------------------------------------
 
-// Mesh Collection ==============================================================================================================
+// GnMesh Collection ==============================================================================================================
 
-MeshCollection::MeshCollection(){}
+GnMeshCollection::GnMeshCollection(){}
 
-MeshCollection::~MeshCollection()
+GnMeshCollection::~GnMeshCollection()
 {
 	for (size_t i = 0; i < meshes.size(); i++)
 	{
@@ -662,7 +666,7 @@ MeshCollection::~MeshCollection()
 	meshes.clear();
 }
 
-void MeshCollection::GenerateBuffers()
+void GnMeshCollection::GenerateBuffers()
 {
 	for (size_t i = 0; i < meshes.size(); i++)
 	{
@@ -670,7 +674,7 @@ void MeshCollection::GenerateBuffers()
 	}
 }
 
-void MeshCollection::Render()
+void GnMeshCollection::Render()
 {
 	for (size_t i = 0; i < meshes.size(); i++)
 	{
