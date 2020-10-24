@@ -1,10 +1,14 @@
 #pragma once
 #include "Globals.h"
-class GnMeshCollection;
 
 #include <vector>
 #include <string>
+
+class GameObject;
 struct GnTexture;
+class GnMesh;
+class aiScene;
+struct aiNode;
 
 namespace FileSystem 
 {
@@ -47,8 +51,11 @@ namespace FileSystem
 	std::string GetUniqueName(const char* path, const char* name);
 
 	void LoadFile(const char* file_path, bool drag_and_drop = false);
-	GnMeshCollection* LoadFBX(const char* path);
+	//GnMeshCollection* LoadFBX(const char* path, GameObject& gameObject);
+	GameObject* LoadFBX(const char* path);
+	GnMesh* LoadMesh(const aiScene* scene, aiNode* node);
 	GnTexture LoadTexture(const char* path);
+	void PreorderChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, GameObject* parentGameObject);
 	void UnloadTexture(uint imageID);
 }
 

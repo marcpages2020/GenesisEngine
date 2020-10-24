@@ -168,7 +168,7 @@ bool ModuleRenderer3D::Init()
 
 	//AddMeshCollection(FileSystem::LoadFBX("Assets/Models/monkey.FBX"));
 	//AddMeshCollection(FileSystem::LoadFBX("Assets/Models/warrior/warrior.FBX"));
-	AddMeshCollection(FileSystem::LoadFBX("Assets/Models/baker_house/BakerHouse.FBX"));
+	//AddMeshCollection(FileSystem::LoadFBX("Assets/Models/baker_house/BakerHouse.FBX"));
 	//FileSystem::LoadTexture("Assets/Models/baker_house/Baker_house.png");
 	//FileSystem::Load("Assets/Models/baker_house/BakerHouse.FBX", buffer);
 

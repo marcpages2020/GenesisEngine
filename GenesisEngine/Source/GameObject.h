@@ -17,6 +17,12 @@ public:
 	void AddComponent(Component* component);
 	bool RemoveComponent(Component* component);
 
+	const char* GetName();
+	void SetName(const char* name);
+
+	void AddChild(GameObject* child);
+	void SetParent(GameObject* parent);
+
 private:
 	bool enabled;
 	char* name;

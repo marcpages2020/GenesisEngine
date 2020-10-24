@@ -6,7 +6,7 @@
 #include "FileSystem.h"
 #include "GameObject.h"
 
-ModuleScene::ModuleScene(bool start_enabled) : Module(start_enabled), show_grid(true), selected_game_object(nullptr)
+ModuleScene::ModuleScene(bool start_enabled) : Module(start_enabled), show_grid(true), selected_game_object(nullptr), root(nullptr) 
 {
 	name = "scene";
 }
@@ -27,6 +27,14 @@ bool ModuleScene::Start()
 	root = new GameObject();
 	AddGameObject(root);
 	selected_game_object = root;
+	root->SetName("Root");
+
+	//GameObject* house = new GameObject();
+	GameObject* house = FileSystem::LoadFBX("Assets/Models/baker_house/BakerHouse.FBX");
+	AddGameObject(house);
+	//house->AddComponent(FileSystem::LoadFBX("Assets/Models/baker_house/BakerHouse.FBX"));
+	//house->AddComponent(ComponentType::MATERIAL);
+	//AddGameObject(house);
 
 	return ret;
 }
@@ -41,7 +49,12 @@ bool ModuleScene::CleanUp()
 {
 	LOG("Unloading Intro scene");
 
-	delete root;
+	for (size_t i = 0; i < gameObjects.size(); i++)
+	{
+		delete gameObjects[i];
+		gameObjects[i] = nullptr;
+	}
+
 	root = nullptr;
 	gameObjects.clear();
 
@@ -51,6 +64,7 @@ bool ModuleScene::CleanUp()
 void ModuleScene::AddGameObject(GameObject* gameObject)
 {
 	gameObjects.push_back(gameObject);
+	selected_game_object = gameObject;
 }
 
 bool ModuleScene::LoadConfig(JSON_Object* config)

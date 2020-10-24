@@ -89,8 +89,17 @@ update_status Editor::Draw()
 	//Hierachy
 	if (show_hierachy_window)
 	{
-		ImGui::Begin("Hierachy", &show_hierachy_window);
-		ImGui::End();
+		if(ImGui::Begin("Hierachy", &show_hierachy_window)){
+			ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+			if (ImGui::TreeNode("Game Objects")) 
+			{
+				if (ImGui::TreeNode(App->scene->GetRootGameObject()->GetName())) {
+					ImGui::TreePop();
+				}
+				ImGui::TreePop();
+			}
+			ImGui::End();
+		}
 	}
 
 	//scene window
@@ -328,23 +337,23 @@ bool Editor::CreateMainMenuBar() {
 		{
 			if (ImGui::MenuItem("Cube"))
 			{
-				App->renderer3D->AddMesh(new GnCube());
+				//App->renderer3D->AddMesh(new GnCube());
 			}
 			else if (ImGui::MenuItem("Cylinder"))
 			{
-				App->renderer3D->AddMesh(new GnCylinder());
+				//App->renderer3D->AddMesh(new GnCylinder());
 			}
 			else if (ImGui::MenuItem("Sphere"))
 			{
-				App->renderer3D->AddMesh(new GnSphere());
+				//App->renderer3D->AddMesh(new GnSphere());
 			}
 			else if (ImGui::MenuItem("Pyramid"))
 			{
-				App->renderer3D->AddMesh(new GnPyramid());
+				//App->renderer3D->AddMesh(new GnPyramid());
 			}
 			else if (ImGui::MenuItem("Plane"))
 			{
-				App->renderer3D->AddMesh(new GnPlane());
+				//App->renderer3D->AddMesh(new GnPlane());
 			}
 			ImGui::EndMenu();
 		}

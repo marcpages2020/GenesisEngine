@@ -18,6 +18,7 @@
 #include "Devil/include/IL/ilu.h"
 #include "Devil/include/IL/ilut.h"
 
+#include "GameObject.h"
 
 #pragma comment (lib, "PhysFS/libx86/physfs.lib")
 #pragma comment (lib, "Assimp/Assimp/libx86/assimp.lib")
@@ -142,7 +143,7 @@ std::string FileSystem::FindTexture(const char* texture_name, const char* model_
 		}
 		else
 		{
-			//Check if the texture is in the root textures folder
+			//Check if the texture is in the rootObject textures folder
 			texture_path = std::string("Assets/Textures/") + texture_name;
 			if (Exists(texture_path.c_str()))
 			{
@@ -192,13 +193,13 @@ void FileSystem::GetAllFilesWithExtension(const char* directory, const char* ext
 /*
 PathNode FileSystem::GetAllFiles(const char* directory, std::vector<std::string>* filter_ext, std::vector<std::string>* ignore_ext) 
 {
-	PathNode root;
+	PathNode rootObject;
 	if (Exists(directory))
 	{
-		root.path = directory;
-		Engine->fileSystem->SplitFilePath(directory, nullptr, &root.localPath);
-		if (root.localPath == "")
-			root.localPath = directory;
+		rootObject.path = directory;
+		Engine->fileSystem->SplitFilePath(directory, nullptr, &rootObject.localPath);
+		if (rootObject.localPath == "")
+			rootObject.localPath = directory;
 
 		std::vector<std::string> file_list, dir_list;
 		DiscoverFiles(directory, file_list, dir_list);
@@ -208,7 +209,7 @@ PathNode FileSystem::GetAllFiles(const char* directory, std::vector<std::string>
 		{
 			std::string str = directory;
 			str.append("/").append(dir_list[i]);
-			root.children.push_back(GetAllFiles(str.c_str(), filter_ext, ignore_ext));
+			rootObject.children.push_back(GetAllFiles(str.c_str(), filter_ext, ignore_ext));
 		}
 		//Adding all child files
 		for (uint i = 0; i < file_list.size(); i++)
@@ -227,13 +228,13 @@ PathNode FileSystem::GetAllFiles(const char* directory, std::vector<std::string>
 			{
 				std::string str = directory;
 				str.append("/").append(file_list[i]);
-				root.children.push_back(GetAllFiles(str.c_str(), filter_ext, ignore_ext));
+				rootObject.children.push_back(GetAllFiles(str.c_str(), filter_ext, ignore_ext));
 			}
 		}
-		root.isFile = HasExtension(root.path.c_str());
-		root.isLeaf = root.children.empty() == true;
+		rootObject.isFile = HasExtension(rootObject.path.c_str());
+		rootObject.isLeaf = rootObject.children.empty() == true;
 	}
-	return root;
+	return rootObject;
 }
 */
 
@@ -542,7 +543,7 @@ void FileSystem::LoadFile(const char* file_path, bool drag_and_drop)
 
 	if (extension == ".fbx") 
 	{
-		App->renderer3D->AddMeshCollection(LoadFBX(file_path));
+		App->scene->AddGameObject(LoadFBX(file_path));
 	}
 	else if (extension == ".png")
 	{
@@ -550,122 +551,131 @@ void FileSystem::LoadFile(const char* file_path, bool drag_and_drop)
 	}
 }
 
-GnMeshCollection* FileSystem::LoadFBX(const char* path)
+/*
+GnMeshCollection* FileSystem::LoadFBX(const char* path, GameObject& gameObject)
 {
-	GnMeshCollection* collection = nullptr;
+	return nullptr;
+}
+*/
+
+GameObject* FileSystem::LoadFBX(const char* path)
+{
+	GameObject* rootObject = new GameObject();
+
 	const aiScene* scene = aiImportFile(path, aiProcessPreset_TargetRealtime_MaxQuality);
 
 	if (scene != nullptr && scene->HasMeshes())
 	{
-		collection = new GnMeshCollection();
-
-		for (size_t i = 0; i < scene->mNumMeshes; i++)
-		{
-			GnMesh* currentMesh = new GnMesh();
-			aiMesh* currentAiMesh = scene->mMeshes[i];
-
-			//vertex copying
-			currentMesh->vertices_amount = currentAiMesh->mNumVertices;
-			currentMesh->vertices = new float[currentMesh->vertices_amount * 3]();
-			memcpy(currentMesh->vertices, currentAiMesh->mVertices, sizeof(float) * currentMesh->vertices_amount * 3);
-			LOG("%s loaded with %d vertices", currentAiMesh->mName.C_Str(), currentMesh->vertices_amount);
-
-			//indices copying
-			if (currentAiMesh->HasFaces()) 
-			{
-				currentMesh->indices_amount = currentAiMesh->mNumFaces * 3;
-				currentMesh->indices = new uint[currentMesh->indices_amount]();
-				LOG("%s loaded with %d indices", currentAiMesh->mName.C_Str(), currentMesh->indices_amount);
-
-				for (size_t f = 0; f < currentAiMesh->mNumFaces; f++)
-				{
-					if (currentAiMesh->mFaces[f].mNumIndices != 3) 
-					{
-						LOG_WARNING("WARNING, geometry face with != 3 indices!");
-					}
-					else
-					{
-						memcpy(&currentMesh->indices[f * 3], currentAiMesh->mFaces[f].mIndices, 3 * sizeof(uint));
-					}
-				}
-			}
-
-			currentMesh->texcoords = new float[currentMesh->vertices_amount * 2]();
-			currentMesh->colors = new float[currentMesh->indices_amount * 4]();
-			currentMesh->normals = new float[currentAiMesh->mNumVertices * 3]();
-
-			int t = 0;
-
-			//normals, color and texture coordinates
-			for (size_t v = 0, n = 0, tx = 0, c = 0; v < currentAiMesh->mNumVertices; v++, n += 3, c += 4, tx+= 2)
-			{
-				//normal copying
-				if (currentAiMesh->HasNormals())
-				{
-					//normal copying
-					currentMesh->normals[n] = currentAiMesh->mNormals[v].x;
-					currentMesh->normals[n + 1] = currentAiMesh->mNormals[v].y;
-					currentMesh->normals[n + 2] = currentAiMesh->mNormals[v].z;
-				}
-				//color copying
-				if (currentAiMesh->HasVertexColors(v)) 
-				{
-					currentMesh->colors[c] = currentAiMesh->mColors[v]->r;
-					currentMesh->colors[c + 1] = currentAiMesh->mColors[v]->g;
-					currentMesh->colors[c + 2] = currentAiMesh->mColors[v]->b;
-					currentMesh->colors[c + 3] = currentAiMesh->mColors[v]->a;
-				}
-				else 
-				{
-					currentMesh->colors[c] = 0.0f;
-					currentMesh->colors[c + 1] = 0.0f;
-					currentMesh->colors[c + 2] = 0.0f;
-					currentMesh->colors[c + 3] = 0.0f;
-				}
-
-				//texcoords copying
-				if (currentAiMesh->mTextureCoords[0]) 
-				{
-					currentMesh->texcoords[tx] = currentAiMesh->mTextureCoords[0][v].x;
-					currentMesh->texcoords[tx + 1] = currentAiMesh->mTextureCoords[0][v].y;
-					//LOG("TexCoords: %.2f , %.2f", currentMesh->texcoords[tx], currentMesh->texcoords[tx + 1]);
-				}
-				else
-				{
-					currentMesh->texcoords[tx] = 0.0f;
-					currentMesh->texcoords[tx + 1] = 0.0f;
-				}
-				t = tx;
-			}
-			//LOG("Texcoords loaded: %d", t);
-			currentMesh->GenerateBuffers();
-
-			//Assign GnTexture
-			aiMaterial* material = scene->mMaterials[currentAiMesh->mMaterialIndex];
-			aiString aiTexture_path;
-			aiGetMaterialTexture(material, aiTextureType_DIFFUSE, currentAiMesh->mMaterialIndex, &aiTexture_path);
-
-			
-			if (aiTexture_path.length != 0)
-			{
-				std::string texture_path = FindTexture(aiTexture_path.C_Str(), path);
-				GnTexture texture = LoadTexture(texture_path.c_str());
-				currentMesh->AssignTexture(texture);
-			}
-			else
-			{
-				currentMesh->AssingCheckersImage();
-			}
-
-			collection->meshes.push_back(currentMesh);
-		}
+		aiNode* rootNode = scene->mRootNode;
+		PreorderChildren(scene, rootNode, nullptr, rootObject);
 
 		aiReleaseImport(scene);
 	}
 	else
 		LOG_ERROR("Error loading scene %s", path);
 
-	return collection;
+	//return collection;
+	return rootObject;
+}
+
+GnMesh* FileSystem::LoadMesh(const aiScene* scene, aiNode* node) {
+	GnMesh* currentMesh = new GnMesh();
+	aiMesh* currentAiMesh =  scene->mMeshes[*node->mMeshes];
+
+	//vertex copying
+	currentMesh->vertices_amount = currentAiMesh->mNumVertices;
+	currentMesh->vertices = new float[currentMesh->vertices_amount * 3]();
+	memcpy(currentMesh->vertices, currentAiMesh->mVertices, sizeof(float) * currentMesh->vertices_amount * 3);
+	LOG("%s loaded with %d vertices", currentAiMesh->mName.C_Str(), currentMesh->vertices_amount);
+
+	//indices copying
+	if (currentAiMesh->HasFaces())
+	{
+		currentMesh->indices_amount = currentAiMesh->mNumFaces * 3;
+		currentMesh->indices = new uint[currentMesh->indices_amount]();
+		LOG("%s loaded with %d indices", currentAiMesh->mName.C_Str(), currentMesh->indices_amount);
+
+		for (size_t f = 0; f < currentAiMesh->mNumFaces; f++)
+		{
+			if (currentAiMesh->mFaces[f].mNumIndices != 3)
+			{
+				LOG_WARNING("WARNING, geometry face with != 3 indices!");
+			}
+			else
+			{
+				memcpy(&currentMesh->indices[f * 3], currentAiMesh->mFaces[f].mIndices, 3 * sizeof(uint));
+			}
+		}
+	}
+
+	currentMesh->texcoords = new float[currentMesh->vertices_amount * 2]();
+	currentMesh->colors = new float[currentMesh->indices_amount * 4]();
+	currentMesh->normals = new float[currentAiMesh->mNumVertices * 3]();
+
+	int t = 0;
+
+	//normals, color and texture coordinates
+	for (size_t v = 0, n = 0, tx = 0, c = 0; v < currentAiMesh->mNumVertices; v++, n += 3, c += 4, tx += 2)
+	{
+		//normal copying
+		if (currentAiMesh->HasNormals())
+		{
+			//normal copying
+			currentMesh->normals[n] = currentAiMesh->mNormals[v].x;
+			currentMesh->normals[n + 1] = currentAiMesh->mNormals[v].y;
+			currentMesh->normals[n + 2] = currentAiMesh->mNormals[v].z;
+		}
+		//color copying
+		if (currentAiMesh->HasVertexColors(v))
+		{
+			currentMesh->colors[c] = currentAiMesh->mColors[v]->r;
+			currentMesh->colors[c + 1] = currentAiMesh->mColors[v]->g;
+			currentMesh->colors[c + 2] = currentAiMesh->mColors[v]->b;
+			currentMesh->colors[c + 3] = currentAiMesh->mColors[v]->a;
+		}
+		else
+		{
+			currentMesh->colors[c] = 0.0f;
+			currentMesh->colors[c + 1] = 0.0f;
+			currentMesh->colors[c + 2] = 0.0f;
+			currentMesh->colors[c + 3] = 0.0f;
+		}
+
+		//texcoords copying
+		if (currentAiMesh->mTextureCoords[0])
+		{
+			currentMesh->texcoords[tx] = currentAiMesh->mTextureCoords[0][v].x;
+			currentMesh->texcoords[tx + 1] = currentAiMesh->mTextureCoords[0][v].y;
+			//LOG("TexCoords: %.2f , %.2f", currentMesh->texcoords[tx], currentMesh->texcoords[tx + 1]);
+		}
+		else
+		{
+			currentMesh->texcoords[tx] = 0.0f;
+			currentMesh->texcoords[tx + 1] = 0.0f;
+		}
+		t = tx;
+	}
+	//LOG("Texcoords loaded: %d", t);
+	currentMesh->GenerateBuffers();
+
+	//Assign GnTexture
+	aiMaterial* material = scene->mMaterials[currentAiMesh->mMaterialIndex];
+	aiString aiTexture_path;
+	aiGetMaterialTexture(material, aiTextureType_DIFFUSE, currentAiMesh->mMaterialIndex, &aiTexture_path);
+
+	/*
+	if (aiTexture_path.length != 0)
+	{
+		std::string texture_path = FindTexture(aiTexture_path.C_Str(), path);
+		GnTexture texture = LoadTexture(texture_path.c_str());
+		currentMesh->AssignTexture(texture);
+	}
+	else
+	{
+		currentMesh->AssingCheckersImage();
+	}
+	*/
+	return currentMesh;
 }
 
 GnTexture FileSystem::LoadTexture(const char* path)
@@ -706,6 +716,27 @@ GnTexture FileSystem::LoadTexture(const char* path)
 		LOG("Texture: %s loaded successfully", path);}
 
 	return texture;
+}
+
+void FileSystem::PreorderChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, GameObject* parentGameObject)
+{
+	GameObject* gameObject = new GameObject();
+	gameObject->SetName(node->mName.C_Str());
+
+	if (node->mMeshes != nullptr)
+	{
+		gameObject->SetName(scene->mMeshes[*node->mMeshes]->mName.C_Str());
+		GnMesh* mesh = LoadMesh(scene, node);
+		gameObject->AddComponent(mesh);
+	}
+
+	for (size_t i = 0; i < node->mNumChildren; i++)
+	{
+		PreorderChildren(scene, node->mChildren[i], node, gameObject);
+	}
+
+	parentGameObject->AddChild(gameObject);
+	gameObject->SetParent(parentGameObject);
 }
 
 void FileSystem::UnloadTexture(uint imageID)

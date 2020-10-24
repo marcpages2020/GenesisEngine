@@ -1,5 +1,6 @@
 #pragma once
 #include "Globals.h"
+#include "Component.h"
 #include <vector>;
 
 typedef float GLfloat;
@@ -14,7 +15,7 @@ struct GnTexture {
 	//const char* name;
 };
 
-class GnMesh {
+class GnMesh : public Component {
 public:
 	GnMesh();
 	virtual ~GnMesh();
@@ -22,7 +23,11 @@ public:
 	void GenerateBuffers();
 	void AssignTexture(GnTexture texture);
 	void AssingCheckersImage();
+
+	virtual void Update() override;
 	virtual void Render();
+	virtual void OnEditor() override;
+
 	void DrawVertexNormals();
 	void DrawFaceNormals();
 
@@ -114,13 +119,15 @@ private:
 	float height;
 };
 
-class GnMeshCollection {
+class GnMeshCollection : public Component{
 public:
 	GnMeshCollection();
 	~GnMeshCollection();
 
 	void GenerateBuffers();
+	virtual void Update() override;
 	void Render();
+	virtual void OnEditor() override;
 
 public:
 	std::vector<GnMesh*> meshes;

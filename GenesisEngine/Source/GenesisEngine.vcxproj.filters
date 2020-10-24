@@ -55,9 +55,6 @@
     <ClCompile Include="Libs\parson\parson.c">
       <Filter>Tools\parson</Filter>
     </ClCompile>
-    <ClCompile Include="Mesh.cpp">
-      <Filter>Tools</Filter>
-    </ClCompile>
     <ClCompile Include="FileSystem.cpp">
       <Filter>Tools</Filter>
     </ClCompile>
@@ -72,6 +69,12 @@
     </ClCompile>
     <ClCompile Include="ModuleScene.cpp">
       <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>GameObjects &amp; Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Material.cpp">
+      <Filter>GameObjects &amp; Components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -153,9 +156,6 @@
     <ClInclude Include="Libs\parson\parson.h">
       <Filter>Tools\parson</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>Tools</Filter>
-    </ClInclude>
     <ClInclude Include="FileSystem.h">
       <Filter>Tools</Filter>
     </ClInclude>
@@ -170,6 +170,12 @@
     </ClInclude>
     <ClInclude Include="ModuleScene.h">
       <Filter>Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>GameObjects &amp; Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>GameObjects &amp; Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,18 +1,18 @@
 #include "Mesh.h"
-#include "glew/include/glew.h"
-
 #include "Application.h"
 #include "ModuleRenderer3D.h"
-
 #include "FileSystem.h"
+
+#include "glew/include/glew.h"
+#include "ImGui/imgui.h"
 
 // GnMesh =========================================================================================================================
 
-GnMesh::GnMesh() : vertices_buffer(-1), vertices_amount(-1), vertices(nullptr),
-			   indices_buffer(-1), indices_amount(-1), indices(nullptr), 
-	           normals_buffer(-1),
-			   texture_buffer(-1),  textureID(-1), texcoords(nullptr),
-			   normals(nullptr), colors(nullptr)  { }
+GnMesh::GnMesh() : Component(),  vertices_buffer(-1), vertices_amount(-1), vertices(nullptr), indices_buffer(-1), indices_amount(-1), indices(nullptr), 
+ normals_buffer(-1), texture_buffer(-1),  textureID(-1), texcoords(nullptr), normals(nullptr), colors(nullptr) 
+{
+	type = ComponentType::MESH;
+}
 
 GnMesh::~GnMesh(){
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -111,6 +111,11 @@ void GnMesh::AssingCheckersImage()
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+void GnMesh::Update()
+{
+	Render();
+}
+
 void GnMesh::Render()
 {
 	glEnableClientState(GL_VERTEX_ARRAY);
@@ -151,6 +156,14 @@ void GnMesh::Render()
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+}
+
+void GnMesh::OnEditor()
+{
+	if (ImGui::CollapsingHeader("Mesh", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+
+	}
 }
 
 void GnMesh::DrawVertexNormals()
@@ -653,7 +666,7 @@ void GnCone::CalculateGeometry(int sides)
 
 // GnMesh Collection ==============================================================================================================
 
-GnMeshCollection::GnMeshCollection(){}
+GnMeshCollection::GnMeshCollection() : Component() {}
 
 GnMeshCollection::~GnMeshCollection()
 {
@@ -674,10 +687,23 @@ void GnMeshCollection::GenerateBuffers()
 	}
 }
 
+void GnMeshCollection::Update()
+{
+	Render();
+}
+
 void GnMeshCollection::Render()
 {
 	for (size_t i = 0; i < meshes.size(); i++)
 	{
 		meshes[i]->Render();
+	}
+}
+
+void GnMeshCollection::OnEditor()
+{
+	if (ImGui::CollapsingHeader("Mesh", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+
 	}
 }
