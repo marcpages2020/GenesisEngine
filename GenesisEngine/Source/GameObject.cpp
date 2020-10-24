@@ -37,7 +37,7 @@ void GameObject::OnEditor()
 {
 	ImGui::Checkbox("Enabled", &enabled);
 	ImGui::SameLine();
-	ImGui::Text(name);
+	ImGui::Text(name.c_str());
 	//static char nameBuffer[256] = { *name };
 	//ImGui::InputText(" ", nameBuffer, IM_ARRAYSIZE(nameBuffer));
 
@@ -93,13 +93,26 @@ bool GameObject::RemoveComponent(Component* component)
 	return ret;
 }
 
-const char* GameObject::GetName() { return name; }
+const char* GameObject::GetName() { return name.c_str(); }
 
-void GameObject::SetName(const char* g_name) { name = (char* )g_name ; }
+void GameObject::SetName(const char* g_name) 
+{
+	name = g_name;
+}
 
 void GameObject::AddChild(GameObject* child)
 {
 	children.push_back(child);
+}
+
+int GameObject::GetChildAmount()
+{
+	return children.size();
+}
+
+GameObject* GameObject::GetChildAt(int index)
+{
+	return children[index];
 }
 
 void GameObject::SetParent(GameObject* g_parent)

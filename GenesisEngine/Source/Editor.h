@@ -6,6 +6,7 @@
 
 #include "ImGui/imgui.h"
 
+#include <vector>
 #include <string>
 
 typedef int GLint;
@@ -43,6 +44,7 @@ private:
 	//Windows
 	void ShowSceneWindow();
 	void ShowInspectorWindow();
+	void ShowHierarchyWindow();
 	void ShowConfigurationWindow();
 	void ShowAboutWindow();
 
@@ -50,11 +52,12 @@ private:
 	void GetMemoryStatistics(const char* gpu_brand, GLint& vram_budget, GLint& vram_usage, GLint& vram_available, GLint& vram_reserved);
 
 	void ResizeSceneImage(ImVec2 window_size, AspectRatio ratio);
+	void PreorderHierarchy(GameObject* gameObject);
 
 private:
 	bool show_inspector_window;
 	bool show_project_window;
-	bool show_hierachy_window;
+	bool show_hierarchy_window;
 	bool show_console_window;
 	bool show_scene_window;
 	bool show_configuration_window;

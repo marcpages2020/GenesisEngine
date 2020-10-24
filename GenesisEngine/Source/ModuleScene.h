@@ -17,7 +17,7 @@ public:
 	bool CleanUp();
 
 	void AddGameObject(GameObject* gameObject);
-	GameObject* GetRootGameObject() { return root; }
+	GameObject* GetRoot() { return root; }
 
 public:
 	bool show_grid;

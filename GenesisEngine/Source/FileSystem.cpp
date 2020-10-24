@@ -143,7 +143,7 @@ std::string FileSystem::FindTexture(const char* texture_name, const char* model_
 		}
 		else
 		{
-			//Check if the texture is in the rootObject textures folder
+			//Check if the texture is in the root textures folder
 			texture_path = std::string("Assets/Textures/") + texture_name;
 			if (Exists(texture_path.c_str()))
 			{
@@ -193,13 +193,13 @@ void FileSystem::GetAllFilesWithExtension(const char* directory, const char* ext
 /*
 PathNode FileSystem::GetAllFiles(const char* directory, std::vector<std::string>* filter_ext, std::vector<std::string>* ignore_ext) 
 {
-	PathNode rootObject;
+	PathNode root;
 	if (Exists(directory))
 	{
-		rootObject.path = directory;
-		Engine->fileSystem->SplitFilePath(directory, nullptr, &rootObject.localPath);
-		if (rootObject.localPath == "")
-			rootObject.localPath = directory;
+		root.path = directory;
+		Engine->fileSystem->SplitFilePath(directory, nullptr, &root.localPath);
+		if (root.localPath == "")
+			root.localPath = directory;
 
 		std::vector<std::string> file_list, dir_list;
 		DiscoverFiles(directory, file_list, dir_list);
@@ -209,7 +209,7 @@ PathNode FileSystem::GetAllFiles(const char* directory, std::vector<std::string>
 		{
 			std::string str = directory;
 			str.append("/").append(dir_list[i]);
-			rootObject.children.push_back(GetAllFiles(str.c_str(), filter_ext, ignore_ext));
+			root.children.push_back(GetAllFiles(str.c_str(), filter_ext, ignore_ext));
 		}
 		//Adding all child files
 		for (uint i = 0; i < file_list.size(); i++)
@@ -228,13 +228,13 @@ PathNode FileSystem::GetAllFiles(const char* directory, std::vector<std::string>
 			{
 				std::string str = directory;
 				str.append("/").append(file_list[i]);
-				rootObject.children.push_back(GetAllFiles(str.c_str(), filter_ext, ignore_ext));
+				root.children.push_back(GetAllFiles(str.c_str(), filter_ext, ignore_ext));
 			}
 		}
-		rootObject.isFile = HasExtension(rootObject.path.c_str());
-		rootObject.isLeaf = rootObject.children.empty() == true;
+		root.isFile = HasExtension(root.path.c_str());
+		root.isLeaf = root.children.empty() == true;
 	}
-	return rootObject;
+	return root;
 }
 */
 
@@ -560,25 +560,24 @@ GnMeshCollection* FileSystem::LoadFBX(const char* path, GameObject& gameObject)
 
 GameObject* FileSystem::LoadFBX(const char* path)
 {
-	GameObject* rootObject = new GameObject();
+	GameObject* root = App->scene->GetRoot();
 
 	const aiScene* scene = aiImportFile(path, aiProcessPreset_TargetRealtime_MaxQuality);
 
 	if (scene != nullptr && scene->HasMeshes())
 	{
 		aiNode* rootNode = scene->mRootNode;
-		PreorderChildren(scene, rootNode, nullptr, rootObject);
-
+		PreorderChildren(scene, rootNode, nullptr, root, path);
 		aiReleaseImport(scene);
 	}
 	else
 		LOG_ERROR("Error loading scene %s", path);
 
 	//return collection;
-	return rootObject;
+	return root->GetChildAt(0);
 }
 
-GnMesh* FileSystem::LoadMesh(const aiScene* scene, aiNode* node) {
+GnMesh* FileSystem::LoadMesh(const aiScene* scene, aiNode* node, const char* path) {
 	GnMesh* currentMesh = new GnMesh();
 	aiMesh* currentAiMesh =  scene->mMeshes[*node->mMeshes];
 
@@ -663,7 +662,6 @@ GnMesh* FileSystem::LoadMesh(const aiScene* scene, aiNode* node) {
 	aiString aiTexture_path;
 	aiGetMaterialTexture(material, aiTextureType_DIFFUSE, currentAiMesh->mMaterialIndex, &aiTexture_path);
 
-	/*
 	if (aiTexture_path.length != 0)
 	{
 		std::string texture_path = FindTexture(aiTexture_path.C_Str(), path);
@@ -674,7 +672,7 @@ GnMesh* FileSystem::LoadMesh(const aiScene* scene, aiNode* node) {
 	{
 		currentMesh->AssingCheckersImage();
 	}
-	*/
+	
 	return currentMesh;
 }
 
@@ -718,25 +716,27 @@ GnTexture FileSystem::LoadTexture(const char* path)
 	return texture;
 }
 
-void FileSystem::PreorderChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, GameObject* parentGameObject)
+void FileSystem::PreorderChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, GameObject* parentGameObject, const char* path)
 {
 	GameObject* gameObject = new GameObject();
-	gameObject->SetName(node->mName.C_Str());
 
 	if (node->mMeshes != nullptr)
 	{
-		gameObject->SetName(scene->mMeshes[*node->mMeshes]->mName.C_Str());
-		GnMesh* mesh = LoadMesh(scene, node);
+		GnMesh* mesh = LoadMesh(scene, node, path);
 		gameObject->AddComponent(mesh);
+
+		gameObject->SetName(node->mName.C_Str());
 	}
 
 	for (size_t i = 0; i < node->mNumChildren; i++)
 	{
-		PreorderChildren(scene, node->mChildren[i], node, gameObject);
+		PreorderChildren(scene, node->mChildren[i], node, gameObject, path);
 	}
 
 	parentGameObject->AddChild(gameObject);
-	gameObject->SetParent(parentGameObject);
+	
+	if(node != scene->mRootNode)
+		gameObject->SetParent(parentGameObject);
 }
 
 void FileSystem::UnloadTexture(uint imageID)

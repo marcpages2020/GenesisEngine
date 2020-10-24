@@ -53,9 +53,9 @@ namespace FileSystem
 	void LoadFile(const char* file_path, bool drag_and_drop = false);
 	//GnMeshCollection* LoadFBX(const char* path, GameObject& gameObject);
 	GameObject* LoadFBX(const char* path);
-	GnMesh* LoadMesh(const aiScene* scene, aiNode* node);
+	GnMesh* LoadMesh(const aiScene* scene, aiNode* node, const char* path);
 	GnTexture LoadTexture(const char* path);
-	void PreorderChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, GameObject* parentGameObject);
+	void PreorderChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, GameObject* parentGameObject, const char* path);
 	void UnloadTexture(uint imageID);
 }
 

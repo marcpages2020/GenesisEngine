@@ -19,7 +19,7 @@ Editor::Editor(bool start_enabled) : Module(start_enabled), aspect_ratio(AspectR
 	//*open_dockspace = true;
 	show_scene_window = true;
 	show_inspector_window = true;
-	show_hierachy_window = true;
+	show_hierarchy_window = true;
 	show_project_window = true;
 	show_console_window = true;
 	show_configuration_window = false;
@@ -86,20 +86,10 @@ update_status Editor::Draw()
 		ImGui::End();
 	}
 
-	//Hierachy
-	if (show_hierachy_window)
+	//Hierarchy
+	if (show_hierarchy_window)
 	{
-		if(ImGui::Begin("Hierachy", &show_hierachy_window)){
-			ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-			if (ImGui::TreeNode("Game Objects")) 
-			{
-				if (ImGui::TreeNode(App->scene->GetRootGameObject()->GetName())) {
-					ImGui::TreePop();
-				}
-				ImGui::TreePop();
-			}
-			ImGui::End();
-		}
+		ShowHierarchyWindow();
 	}
 
 	//scene window
@@ -190,7 +180,7 @@ bool Editor::LoadConfig(JSON_Object* object)
 	show_inspector_window = json_object_get_boolean(window, "visible");
 
 	window = json_array_get_object_by_name(windows, "hierachy");
-	show_hierachy_window = json_object_get_boolean(window, "visible");
+	show_hierarchy_window = json_object_get_boolean(window, "visible");
 
 	window = json_array_get_object_by_name(windows, "project");
 	show_project_window = json_object_get_boolean(window, "visible");
@@ -476,6 +466,37 @@ void Editor::ShowInspectorWindow()
 	}
 }
 
+void Editor::ShowHierarchyWindow()
+{
+	if (ImGui::Begin("Hierarchy", &show_hierarchy_window)) 
+	{
+		if (ImGui::TreeNode("Game Objects")) {
+			GameObject* root = App->scene->GetRoot();
+			PreorderHierarchy(root);
+			ImGui::TreePop();
+		}
+		ImGui::End();
+	}
+}
+
+void Editor::PreorderHierarchy(GameObject* gameObject)
+{
+	if (gameObject->GetChildAmount() > 0) {
+		if (ImGui::TreeNode(gameObject->GetName())) 
+		{
+			for (size_t i = 0; i < gameObject->GetChildAmount(); i++)
+			{
+				PreorderHierarchy(gameObject->GetChildAt(i));
+			}
+			ImGui::TreePop();
+		}
+	}
+	else
+	{
+		ImGui::Text(gameObject->GetName());
+	}
+}
+
 void Editor::ShowConfigurationWindow()
 {
 	if (ImGui::Begin("Configuration", &show_configuration_window))
@@ -757,3 +778,4 @@ void Editor::ResizeSceneImage(ImVec2 window_size, AspectRatio g_aspect_ratio)
 
 	aspect_ratio = g_aspect_ratio;
 }
+

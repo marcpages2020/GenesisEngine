@@ -25,13 +25,14 @@ bool ModuleScene::Start()
 	App->camera->LookAt(vec3(0, 0, 0));
 
 	root = new GameObject();
-	AddGameObject(root);
+
+	gameObjects.push_back(root);
 	selected_game_object = root;
 	root->SetName("Root");
 
 	//GameObject* house = new GameObject();
 	GameObject* house = FileSystem::LoadFBX("Assets/Models/baker_house/BakerHouse.FBX");
-	AddGameObject(house);
+	//AddGameObject(house);
 	//house->AddComponent(FileSystem::LoadFBX("Assets/Models/baker_house/BakerHouse.FBX"));
 	//house->AddComponent(ComponentType::MATERIAL);
 	//AddGameObject(house);
@@ -64,6 +65,11 @@ bool ModuleScene::CleanUp()
 void ModuleScene::AddGameObject(GameObject* gameObject)
 {
 	gameObjects.push_back(gameObject);
+
+	gameObject->SetParent(root);
+	
+	root->AddChild(gameObject);
+
 	selected_game_object = gameObject;
 }
 

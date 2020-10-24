@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <string>
 
 class Component;
 enum class ComponentType;
@@ -21,11 +22,13 @@ public:
 	void SetName(const char* name);
 
 	void AddChild(GameObject* child);
+	int GetChildAmount();
+	GameObject* GetChildAt(int index);
 	void SetParent(GameObject* parent);
 
 private:
 	bool enabled;
-	char* name;
+	std::string name;
 	GameObject* parent;
 	std::vector<Component*> components;
 	std::vector<GameObject*> children;
