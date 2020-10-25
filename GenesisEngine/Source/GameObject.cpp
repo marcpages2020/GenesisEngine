@@ -12,6 +12,12 @@ GameObject::GameObject() : enabled(true), name("Empty Game Object"), parent(null
 	transform = (Transform*)AddComponent(ComponentType::TRANSFORM);
 }
 
+GameObject::GameObject(GnMesh* mesh) : GameObject()
+{
+	SetName(mesh->name);
+	AddComponent((Component*)mesh);
+}
+
 GameObject::~GameObject(){
 	parent = nullptr;
 
@@ -37,9 +43,13 @@ void GameObject::OnEditor()
 {
 	ImGui::Checkbox("Enabled", &enabled);
 	ImGui::SameLine();
-	ImGui::Text(name.c_str());
-	//static char nameBuffer[256] = { *name };
-	//ImGui::InputText(" ", nameBuffer, IM_ARRAYSIZE(nameBuffer));
+	//ImGui::Text(name.c_str());
+	static char buf[64] = "Name";
+	strcpy(buf, name.c_str());
+	if (ImGui::InputText("", buf, IM_ARRAYSIZE(buf), ImGuiInputTextFlags_CharsHexadecimal))
+	{
+		ImGui::CaptureKeyboardFromApp(true);
+	}
 
 	for (size_t i = 0; i < components.size(); i++)
 	{
@@ -144,4 +154,29 @@ GameObject* GameObject::GetChildAt(int index)
 void GameObject::SetParent(GameObject* g_parent)
 {
 	parent = g_parent;
+}
+
+bool GameObject::RemoveChild(GameObject* gameObject)
+{
+	bool ret = false;
+	for (size_t i = 0; i < children.size(); i++)
+	{
+		if (children[i] == gameObject)
+		{
+			children.erase(children.begin() + i);
+			ret = true;
+		}
+	}
+	return ret;
+}
+
+void GameObject::DeleteChildren()
+{
+	for (size_t i = 0; i < children.size(); i++)
+	{
+		children[i]->DeleteChildren();
+		children[i] = nullptr;
+	}
+
+	this->~GameObject();
 }

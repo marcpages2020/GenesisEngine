@@ -40,10 +40,10 @@ public:
 	uint texture_buffer = -1;
 	uint textureID;
 	GnTexture texture;
-
 	float* texcoords = nullptr;
-
 	float* colors;
+
+	const char* name;
 };
 
 class GnCube : public GnMesh {
@@ -121,7 +121,6 @@ public:
 	void GenerateBuffers();
 	virtual void Update() override;
 	void Render();
-	virtual void OnEditor() override;
 
 public:
 	std::vector<GnMesh*> meshes;

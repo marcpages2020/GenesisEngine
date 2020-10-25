@@ -60,6 +60,10 @@ update_status ModuleCamera3D::Update(float dt)
 	// Implement a debug camera with keys and mouse
 	// Now we can make this movememnt frame rate independant!
 
+	if (!App->editor->IsSceneFocused())
+		return UPDATE_CONTINUE;
+
+
 	vec3 newPos(0, 0, 0);
 	int speed_multiplier = 1;
 

@@ -16,6 +16,8 @@ Transform::Transform(float3 g_position, Quat g_rotation, float3 g_scale)
 	position = g_position;
 	rotation = g_rotation;
 	scale = g_scale;
+
+	//transform = float4x4::FromTRS(position, rotation, scale);
 }
 
 Transform::~Transform() {}

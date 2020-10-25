@@ -1,8 +1,8 @@
-#pragma once
+#ifndef __TRANSFORM_H__
+#define __TRANSFORM_H__
 
 #include "Component.h"
-#include "MathGeoLib/include/Math/float3.h"
-#include "MathGeoLib/include/Math/Quat.h"
+#include "MathGeoLib/include/MathGeoLib.h"
 
 class Transform : public Component {
 public:
@@ -27,7 +27,11 @@ public:
 	float3 GetScale();
 
 private:
+	float4x4 transform;
+
 	float3 position;
 	float3 scale;
 	Quat rotation;
 };
+
+#endif //__TRANSFORM_H__

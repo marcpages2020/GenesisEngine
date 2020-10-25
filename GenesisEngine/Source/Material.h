@@ -29,4 +29,5 @@ public:
 private:
 	GnTexture diffuse_texture;
 	GnMesh* mesh;
+	bool checkers_image;
 };

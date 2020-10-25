@@ -6,7 +6,7 @@
 #include "FileSystem.h"
 #include "GameObject.h"
 
-ModuleScene::ModuleScene(bool start_enabled) : Module(start_enabled), show_grid(true), selected_game_object(nullptr), root(nullptr) 
+ModuleScene::ModuleScene(bool start_enabled) : Module(start_enabled), show_grid(true), selectedGameObject(nullptr), root(nullptr) 
 {
 	name = "scene";
 }
@@ -21,18 +21,14 @@ bool ModuleScene::Start()
 	bool ret = true;
 
 	App->camera->Move(vec3(1.0f, 1.0f, 0.0f));
-
 	App->camera->LookAt(vec3(0, 0, 0));
 
 	root = new GameObject();
-
-	gameObjects.push_back(root);
-	selected_game_object = root;
+	selectedGameObject = root;
 	root->SetName("Root");
 
 	//GameObject* house = new GameObject();
 	GameObject* house = FileSystem::LoadFBX("Assets/Models/baker_house/BakerHouse.FBX");
-	//AddGameObject(house);
 	//house->AddComponent(FileSystem::LoadFBX("Assets/Models/baker_house/BakerHouse.FBX"));
 	//house->AddComponent(ComponentType::MATERIAL);
 	//AddGameObject(house);
@@ -50,27 +46,27 @@ bool ModuleScene::CleanUp()
 {
 	LOG("Unloading Intro scene");
 
-	for (size_t i = 0; i < gameObjects.size(); i++)
-	{
-		delete gameObjects[i];
-		gameObjects[i] = nullptr;
-	}
-
+	root->DeleteChildren();
+	delete root;
 	root = nullptr;
-	gameObjects.clear();
 
 	return true;
 }
 
 void ModuleScene::AddGameObject(GameObject* gameObject)
 {
-	gameObjects.push_back(gameObject);
-
 	gameObject->SetParent(root);
-	
 	root->AddChild(gameObject);
 
-	selected_game_object = gameObject;
+	selectedGameObject = gameObject;
+}
+
+void ModuleScene::DeleteGameObject(GameObject* gameObject)
+{
+	if (root->RemoveChild(selectedGameObject))
+	{
+		selectedGameObject->DeleteChildren();
+	}
 }
 
 bool ModuleScene::LoadConfig(JSON_Object* config)
@@ -89,10 +85,13 @@ update_status ModuleScene::Update(float dt)
 		grid.Render();
 	}
 
-	for (size_t i = 0; i < gameObjects.size(); i++)
+	if ((App->input->GetKey(SDL_SCANCODE_DELETE) == KEY_DOWN) && (selectedGameObject != nullptr) && (selectedGameObject != root)) 
 	{
-		root->Update();
+		DeleteGameObject(selectedGameObject);
+		selectedGameObject = nullptr;
 	}
+
+	root->Update();
 
 	//GnCube cube;
 	//cube.Render();;

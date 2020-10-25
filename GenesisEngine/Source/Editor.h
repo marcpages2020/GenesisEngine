@@ -34,6 +34,7 @@ public:
 	update_status Draw();
 	bool CleanUp();
 
+	bool IsSceneFocused();
 	void AddConsoleLog(const char* log, int warning_level);
 	
 private:
@@ -61,13 +62,13 @@ private:
 	bool show_console_window;
 	bool show_scene_window;
 	bool show_configuration_window;
-	bool show_about_window;
 
 	//edit subwindows
 	bool show_preferences_window;
-
+	bool show_about_window;
 	//menus
 	bool* open_dockspace;
+	bool scene_window_focused;
 
 	int current_theme;
 

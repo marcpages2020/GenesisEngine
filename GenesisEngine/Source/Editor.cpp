@@ -12,7 +12,6 @@
 
 #include "MathGeoLib/include/MathGeoLib.h"
 
-
 Editor::Editor(bool start_enabled) : Module(start_enabled), aspect_ratio(AspectRatio::FREE_ASPECT)
 {
 	name = "editor";
@@ -26,6 +25,8 @@ Editor::Editor(bool start_enabled) : Module(start_enabled), aspect_ratio(AspectR
 
 	show_preferences_window = false;
 	show_about_window = false;
+
+	scene_window_focused = false;
 
 	current_theme = 1;
 
@@ -47,6 +48,8 @@ bool Editor::Init()
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+	//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
 	ImGui::StyleColorsDark();
 
@@ -200,18 +203,24 @@ bool Editor::LoadConfig(JSON_Object* object)
 	return true;
 }
 
+bool Editor::IsSceneFocused()
+{
+	return scene_window_focused;
+}
+
 void Editor::AddConsoleLog(const char* log, int warning_level)
 {
 	log_message message = { log, warning_level };
 	console_log.push_back(message);
 }
 
-update_status Editor::ShowDockSpace(bool* p_open) {
+update_status Editor::ShowDockSpace(bool* p_open) 
+{
 	update_status ret = UPDATE_CONTINUE;
 
 	static bool opt_fullscreen = true;
 	static bool opt_padding = false;
-	static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_PassthruCentralNode;
+	static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 
 	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking;
 
@@ -255,6 +264,8 @@ update_status Editor::ShowDockSpace(bool* p_open) {
 		ret = UPDATE_CONTINUE;
 	else
 		ret = UPDATE_STOP;
+
+	ImGui::End();
 
 	return ret;
 }
@@ -327,42 +338,42 @@ bool Editor::CreateMainMenuBar() {
 		{
 			if (ImGui::MenuItem("Cube"))
 			{
-				//App->renderer3D->AddMesh(new GnCube());
+				App->scene->AddGameObject(new GameObject(new GnCube()));
 			}
 			else if (ImGui::MenuItem("Cylinder"))
 			{
-				//App->renderer3D->AddMesh(new GnCylinder());
+				App->scene->AddGameObject(new GameObject(new GnCylinder()));
 			}
 			else if (ImGui::MenuItem("Sphere"))
 			{
-				//App->renderer3D->AddMesh(new GnSphere());
+				App->scene->AddGameObject(new GameObject(new GnSphere()));
 			}
 			else if (ImGui::MenuItem("Pyramid"))
 			{
-				//App->renderer3D->AddMesh(new GnPyramid());
+				App->scene->AddGameObject(new GameObject(new GnPyramid()));
 			}
 			else if (ImGui::MenuItem("Plane"))
 			{
-				//App->renderer3D->AddMesh(new GnPlane());
+				App->scene->AddGameObject(new GameObject(new GnPlane()));
 			}
 			ImGui::EndMenu();
 		}
 
 		if (ImGui::BeginMenu("Window"))
 		{
-			if (ImGui::MenuItem("Inspector"))
+			if (ImGui::MenuItem("Inspector", NULL, show_inspector_window))
 			{
 				show_inspector_window = true;
 			}
-			else if (ImGui::MenuItem("Scene"))
+			else if (ImGui::MenuItem("Scene", NULL, show_scene_window))
 			{
 				show_scene_window = true;
 			}
-			else if (ImGui::MenuItem("Project"))
+			else if (ImGui::MenuItem("Project", NULL, show_project_window))
 			{
 				show_project_window = true;
 			}
-			else if (ImGui::MenuItem("Console"))
+			else if (ImGui::MenuItem("Console", NULL, show_console_window))
 			{
 				show_console_window = true;
 			}
@@ -391,7 +402,6 @@ bool Editor::CreateMainMenuBar() {
 
 		ImGui::EndMainMenuBar();
 	}
-	ImGui::End();
 
 	return ret;
 }
@@ -401,6 +411,7 @@ void Editor::ShowSceneWindow()
 {
 	if (ImGui::Begin("Scene", &show_scene_window, ImGuiWindowFlags_MenuBar))
 	{
+		scene_window_focused = ImGui::IsWindowFocused();
 		static AspectRatio desired_aspect_ratio = aspect_ratio;
 
 		if (ImGui::BeginMenuBar())
@@ -453,16 +464,16 @@ void Editor::ShowSceneWindow()
 		if (image_size.x != windowSize.x || desired_aspect_ratio != aspect_ratio)
 			ResizeSceneImage(windowSize, desired_aspect_ratio);
 
-		ImGui::Image((ImTextureID)App->renderer3D->texColorBuffer, image_size, ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::Image((ImTextureID)App->renderer3D->texColorBuffer, image_size, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
 	}
 	ImGui::End();
 }
 
 void Editor::ShowInspectorWindow()
 {
-	if (App->scene->selected_game_object != nullptr) 
+	if (App->scene->selectedGameObject != nullptr) 
 	{
-		App->scene->selected_game_object->OnEditor();
+		App->scene->selectedGameObject->OnEditor();
 	}
 }
 
@@ -470,22 +481,28 @@ void Editor::ShowHierarchyWindow()
 {
 	if (ImGui::Begin("Hierarchy", &show_hierarchy_window)) 
 	{
-		if (ImGui::TreeNode("Game Objects")) {
+		//if (ImGui::TreeNode("Game Objects")) {
 			GameObject* root = App->scene->GetRoot();
 			PreorderHierarchy(root);
-			ImGui::TreePop();
-		}
+			//ImGui::TreePop();
+		//}
 		ImGui::End();
 	}
 }
 
 void Editor::PreorderHierarchy(GameObject* gameObject)
 {
-	if (gameObject->GetChildAmount() > 0) {
+	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None;
+
+	if (gameObject->GetChildAmount() > 0) 
+	{
+		if (gameObject->GetName() == "Root")
+			flags | -ImGuiTreeNodeFlags_DefaultOpen;
+
 		if (ImGui::TreeNodeEx(gameObject->GetName())) 
 		{
 			if (ImGui::IsItemClicked())
-				App->scene->selected_game_object = gameObject;
+				App->scene->selectedGameObject = gameObject;
 			for (size_t i = 0; i < gameObject->GetChildAmount(); i++)
 			{
 				PreorderHierarchy(gameObject->GetChildAt(i));
@@ -498,7 +515,7 @@ void Editor::PreorderHierarchy(GameObject* gameObject)
 		if (ImGui::TreeNodeEx(gameObject->GetName(), ImGuiTreeNodeFlags_Leaf))
 		{
 			if (ImGui::IsItemClicked())
-				App->scene->selected_game_object = gameObject;
+				App->scene->selectedGameObject = gameObject;
 			ImGui::TreePop();
 		}
 	}

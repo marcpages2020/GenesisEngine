@@ -38,7 +38,7 @@
 MATH_BEGIN_NAMESPACE
 
 /// A 3-by-3 matrix for linear transformations of 3D geometry.
-/** This matrix can represent any kind of linear transformations of 3D geometry, which include rotation,
+/* This matrix can represent any kind of linear transformations of 3D geometry, which include rotation,
 	scale, shear, mirroring and orthographic projection. A 3x3 matrix cannot represent translation (which requires
 	a 3x4 matrix), or perspective projection (which requires a 4x4 matrix).
 

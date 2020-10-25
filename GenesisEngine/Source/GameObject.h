@@ -4,12 +4,14 @@
 #include <string>
 
 class Component;
-enum class ComponentType;
 class Transform;
+class GnMesh;
+enum class ComponentType;
 
 class GameObject {
 public:
 	GameObject();
+	GameObject(GnMesh* mesh);
 	~GameObject();
 
 	void Update();
@@ -29,6 +31,8 @@ public:
 	int GetChildAmount();
 	GameObject* GetChildAt(int index);
 	void SetParent(GameObject* parent);
+	bool RemoveChild(GameObject* gameObject);
+	void DeleteChildren();
 
 private:
 	bool enabled;

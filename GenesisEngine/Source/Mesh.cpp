@@ -242,8 +242,10 @@ void GnMesh::DrawFaceNormals()
 
 // GnCube =========================================================================================================================
 
-GnCube::GnCube() : GnMesh() 
+GnCube::GnCube() : GnMesh()
 {
+	name = {"Cube"};
+
 	vertices = new float[24] 
 	{
 		//Bottom Vertices
@@ -302,6 +304,8 @@ GnCube::~GnCube(){}
 
 GnPlane::GnPlane() : GnMesh() 
 {
+	name = { "Plane" };
+
 	vertices = new float[12]{
 	0.0f ,0.0f, 0.0f,
 	1.0f ,0.0f, 0.0f,
@@ -314,7 +318,7 @@ GnPlane::GnPlane() : GnMesh()
 		2, 1 ,0
 	};
 
-	vertices_amount = 12;
+	vertices_amount = 4;
 	indices_amount = 6;
 
 	GenerateBuffers();
@@ -328,6 +332,8 @@ GnPlane::~GnPlane() {}
 
 GnPyramid::GnPyramid() : GnMesh() 
 {
+	name = { "Pyramid" };
+
 	vertices = new float[15] {
 		//Top
 		0.5f, 0.85f, 0.5f,
@@ -348,7 +354,7 @@ GnPyramid::GnPyramid() : GnMesh()
 		1, 3, 4,  1, 2, 3 //Bottom
 	};
 
-	vertices_amount = 15;
+	vertices_amount = 5;
 	indices_amount = 18;
 
 	GenerateBuffers();
@@ -362,6 +368,8 @@ GnPyramid::~GnPyramid() {}
 
 GnSphere::GnSphere() : GnMesh() 
 {
+	name = { "Sphere" };
+
 	float radius = 1;
 	unsigned int rings = 12;
 	unsigned int sectors = 24;
@@ -420,11 +428,14 @@ void GnSphere::Render()
 
 // GnCylinder ==================================================================================================================
 
-GnCylinder::GnCylinder() : GnMesh(), radius(1), height(2), sides(16)  {
+GnCylinder::GnCylinder() : GnMesh(), radius(1), height(2), sides(16)  
+{
+	name = { "Cylinder" };
 	CalculateGeometry();
 }
 
-GnCylinder::GnCylinder(float g_radius, float g_height, int g_sides) : GnMesh(), radius(g_radius), height(g_height), sides(g_sides) {
+GnCylinder::GnCylinder(float g_radius, float g_height, int g_sides) : GnMesh(), radius(g_radius), height(g_height), sides(g_sides) 
+{
 	CalculateGeometry();
 }
 
@@ -550,7 +561,8 @@ void GnCylinder::CalculateGeometry()
 
 // GnGrid =========================================================================================================================
 
-GnGrid::GnGrid(int g_size) {
+GnGrid::GnGrid(int g_size) 
+{
 	if ((g_size % 2) != 0)
 		g_size++;
 
@@ -586,11 +598,13 @@ void GnGrid::Render()
 
 GnCone::GnCone() : GnMesh(), radius(1), height(1) 
 {
+	name = { "Cone" };
 	CalculateGeometry(8);
 }
 
 GnCone::GnCone(float g_radius, float g_height, int sides) : GnMesh(), radius(g_radius) , height(g_height)
 {
+	name = { "Cone" };
 	CalculateGeometry(sides);
 }
 
@@ -713,13 +727,5 @@ void GnMeshCollection::Render()
 	for (size_t i = 0; i < meshes.size(); i++)
 	{
 		meshes[i]->Render();
-	}
-}
-
-void GnMeshCollection::OnEditor()
-{
-	if (ImGui::CollapsingHeader("Mesh", ImGuiTreeNodeFlags_DefaultOpen))
-	{
-
 	}
 }

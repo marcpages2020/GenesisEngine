@@ -546,7 +546,7 @@ void FileSystem::LoadFile(const char* file_path, bool drag_and_drop)
 
 	if (extension == ".fbx") 
 	{
-		App->scene->AddGameObject(LoadFBX(file_path));
+		LoadFBX(file_path);
 	}
 	else if (extension == ".png")
 	{

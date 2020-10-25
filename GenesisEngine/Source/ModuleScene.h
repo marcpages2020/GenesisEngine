@@ -17,13 +17,13 @@ public:
 	bool CleanUp();
 
 	void AddGameObject(GameObject* gameObject);
+	void DeleteGameObject(GameObject* gameObject);
 	GameObject* GetRoot() { return root; }
 
 public:
 	bool show_grid;
-	GameObject* selected_game_object;
+	GameObject* selectedGameObject;
 
 private:
 	GameObject* root;
-	std::vector<GameObject*> gameObjects;
 };

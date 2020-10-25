@@ -24,6 +24,6 @@ public:
 
 protected:
 	ComponentType type;
-	bool enabled;
 	GameObject* gameObject;
+	bool enabled;
 };
