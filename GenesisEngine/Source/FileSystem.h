@@ -7,6 +7,8 @@
 class GameObject;
 struct GnTexture;
 class GnMesh;
+class Transform;
+
 class aiScene;
 struct aiNode;
 
@@ -55,8 +57,10 @@ namespace FileSystem
 	//GnMeshCollection* LoadFBX(const char* path, GameObject& gameObject);
 
 	GameObject* LoadFBX(const char* path);
+
 	GnMesh* LoadMesh(const aiScene* scene, aiNode* node, const char* path);
 	void PreorderChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, GameObject* parentGameObject, const char* path);
+	Transform LoadTransform(aiNode* node);
 
 	GnTexture GetAiMeshTexture(const aiScene* scene, aiNode* node, const char* path);
 	GnTexture LoadTexture(const char* path);

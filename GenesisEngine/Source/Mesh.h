@@ -16,7 +16,6 @@ public:
 	void GenerateBuffers();
 
 	void SetTexture(GnTexture texture);
-	void AssignTexture(GnTexture texture);
 	void AssignCheckersImage();
 
 	virtual void Update() override;

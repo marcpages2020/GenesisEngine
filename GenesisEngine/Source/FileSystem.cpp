@@ -1,7 +1,9 @@
 #include "FileSystem.h"
+#include "Application.h"
+
 #include "Mesh.h"
 #include "Material.h"
-#include "Application.h"
+#include "Transform.h"
 
 #include "SDL/include/SDL.h"
 #include <fstream>
@@ -739,6 +741,9 @@ void FileSystem::PreorderChildren(const aiScene* scene, aiNode* node, aiNode* pa
 		GnTexture texture = GetAiMeshTexture(scene, node, path);
 		Material* material = new Material(mesh, texture);
 		gameObject->AddComponent(material);
+
+		Transform transform = LoadTransform(node);
+		gameObject->SetTransform(transform);
 	}
 	else
 	{
@@ -757,6 +762,21 @@ void FileSystem::PreorderChildren(const aiScene* scene, aiNode* node, aiNode* pa
 	
 	if(node != scene->mRootNode)
 		gameObject->SetParent(parentGameObject);
+}
+
+Transform FileSystem::LoadTransform(aiNode* node)
+{
+	Transform transform;
+	aiVector3D position, scaling;
+	aiQuaternion rotation;
+
+	node->mTransformation.Decompose(scaling, rotation, position);
+
+	transform.SetPosition(position.x, position.y, position.z);
+	transform.SetRotation(position.x, position.y, position.z);
+	transform.SetScale(scaling.x, scaling.y, scaling.z);
+
+	return transform;
 }
 
 void FileSystem::UnloadTexture(uint imageID)

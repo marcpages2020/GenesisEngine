@@ -91,7 +91,7 @@ update_status ModuleScene::Update(float dt)
 
 	for (size_t i = 0; i < gameObjects.size(); i++)
 	{
-		gameObjects[i]->Update();
+		root->Update();
 	}
 
 	//GnCube cube;

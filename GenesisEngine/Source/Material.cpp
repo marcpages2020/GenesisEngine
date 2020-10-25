@@ -2,7 +2,7 @@
 #include "Mesh.h"
 #include "ImGui/imgui.h"
 
-Material::Material()
+Material::Material(): mesh(nullptr)
 {
 
 }
@@ -26,8 +26,7 @@ void Material::OnEditor()
 {
 	if (ImGui::CollapsingHeader("Material", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		if (ImGui::Checkbox("Enabled", &enabled))
-			enabled = !enabled;
+		ImGui::Checkbox("Enabled", &enabled);
 
 		ImGui::Separator();
 

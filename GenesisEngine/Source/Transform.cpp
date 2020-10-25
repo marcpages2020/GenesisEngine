@@ -27,7 +27,8 @@ void Transform::OnEditor()
 	if(ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
 	{
 		float position4f[4] = { position.x, position.y, position.z, 1.0f };
-		if (ImGui::DragFloat3("Position", position4f, 0.1f, -10000.0f, 10000.0f)) {
+		if (ImGui::DragFloat3("Position", position4f, 0.1f, -10000.0f, 10000.0f))
+		{
 			position.x = position4f[0];
 			position.y = position4f[1];
 			position.z = position4f[2];
@@ -51,5 +52,64 @@ void Transform::OnEditor()
 
 		ImGui::Spacing();
 	}
+}
+
+void Transform::SetPosition(float x, float y, float z)
+{
+	position.x = x;
+	position.y = y;
+	position.z = z;
+}
+
+void Transform::SetPosition(float3 new_position)
+{
+	position = new_position;
+}
+
+float3 Transform::GetPosition()
+{
+	return position;
+}
+
+void Transform::SetRotation(float x, float y, float z)
+{
+	rotation.x = x;
+	rotation.y = y;
+	rotation.z = z;
+}
+
+void Transform::SetRotation(Quat new_rotation)
+{
+	rotation = new_rotation;
+}
+
+void Transform::SetRotation(float x, float y, float z, float w)
+{
+	rotation.x = x;
+	rotation.y = y;
+	rotation.z = z;
+	rotation.w = w;
+}
+
+Quat Transform::GetRotation()
+{
+	return rotation;
+}
+
+void Transform::SetScale(float x, float y, float z)
+{
+	scale.x = x;
+	scale.y = y;
+	scale.z = z;
+}
+
+void Transform::SetScale(float3 new_scale)
+{
+	scale = new_scale;
+}
+
+float3 Transform::GetScale()
+{
+	return scale;
 }
 

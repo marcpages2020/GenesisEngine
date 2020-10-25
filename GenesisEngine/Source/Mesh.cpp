@@ -3,6 +3,7 @@
 #include "ModuleRenderer3D.h"
 #include "FileSystem.h"
 #include "Material.h"
+#include "GameObject.h"
 
 #include "glew/include/glew.h"
 #include "ImGui/imgui.h"
@@ -97,11 +98,6 @@ void GnMesh::SetTexture(GnTexture g_texture)
 	}
 }
 
-void GnMesh::AssignTexture(GnTexture g_texture)
-{
-
-}
-
 void GnMesh::AssignCheckersImage()
 {
 	int CHECKERS_WIDTH = 64;
@@ -131,6 +127,10 @@ void GnMesh::Update()
 
 void GnMesh::Render()
 {
+	//glPushMatrix();
+	gameObject->GetTransform();
+	//glMultMatrixf()
+
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -160,6 +160,8 @@ void GnMesh::Render()
 	if (App->renderer3D->draw_face_normals)
 		DrawFaceNormals();
 
+	//glPopMatrix();
+
 	//clean buffers
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_NORMAL_ARRAY, 0);
@@ -175,6 +177,7 @@ void GnMesh::OnEditor()
 {
 	if (ImGui::CollapsingHeader("Mesh", ImGuiTreeNodeFlags_DefaultOpen))
 	{
+		ImGui::Text("Vertices: %d Indices: %d", vertices_amount, indices_amount);
 		ImGui::Spacing();
 	}
 }

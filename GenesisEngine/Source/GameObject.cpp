@@ -9,7 +9,7 @@
 
 GameObject::GameObject() : enabled(true), name("Empty Game Object"), parent(nullptr)
 {
-	AddComponent(ComponentType::TRANSFORM);
+	transform = (Transform*)AddComponent(ComponentType::TRANSFORM);
 }
 
 GameObject::~GameObject(){
@@ -87,6 +87,7 @@ Component* GameObject::AddComponent(ComponentType type)
 void GameObject::AddComponent(Component* component)
 {
 	components.push_back(component);
+	component->SetGameObject(this);
 }
 
 bool GameObject::RemoveComponent(Component* component)
@@ -111,6 +112,18 @@ const char* GameObject::GetName() { return name.c_str(); }
 void GameObject::SetName(const char* g_name) 
 {
 	name = g_name;
+}
+
+void GameObject::SetTransform(Transform g_transform)
+{
+	transform->SetPosition(g_transform.GetPosition());
+	transform->SetRotation(g_transform.GetRotation());
+	transform->SetScale(g_transform.GetScale());
+}
+
+Transform* GameObject::GetTransform()
+{
+	return transform;
 }
 
 void GameObject::AddChild(GameObject* child)

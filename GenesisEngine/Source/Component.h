@@ -19,8 +19,11 @@ public:
 	ComponentType GetType();
 	virtual void OnEditor() = 0;
 
+	void SetGameObject(GameObject* gameObject);
+	GameObject* GetGameObject();
+
 protected:
 	ComponentType type;
 	bool enabled;
-
+	GameObject* gameObject;
 };
