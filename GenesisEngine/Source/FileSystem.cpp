@@ -1,5 +1,6 @@
 #include "FileSystem.h"
 #include "Mesh.h"
+#include "Material.h"
 #include "Application.h"
 
 #include "SDL/include/SDL.h"
@@ -656,24 +657,29 @@ GnMesh* FileSystem::LoadMesh(const aiScene* scene, aiNode* node, const char* pat
 	}
 	//LOG("Texcoords loaded: %d", t);
 	currentMesh->GenerateBuffers();
+	
+	return currentMesh;
+}
 
-	//Assign GnTexture
+GnTexture FileSystem::GetAiMeshTexture(const aiScene* scene, aiNode* node, const char* path)
+{
+	aiMesh* currentAiMesh = scene->mMeshes[*node->mMeshes];
+
 	aiMaterial* material = scene->mMaterials[currentAiMesh->mMaterialIndex];
 	aiString aiTexture_path;
 	aiGetMaterialTexture(material, aiTextureType_DIFFUSE, currentAiMesh->mMaterialIndex, &aiTexture_path);
 
+	GnTexture texture;
+
 	if (aiTexture_path.length != 0)
 	{
-		std::string texture_path = FindTexture(aiTexture_path.C_Str(), path);
-		GnTexture texture = LoadTexture(texture_path.c_str());
-		currentMesh->AssignTexture(texture);
+		std::string tmp_path = FindTexture(aiTexture_path.C_Str(), path);
+		texture = LoadTexture(tmp_path.c_str());
+		texture.name = aiTexture_path.C_Str();
+		texture.path = tmp_path;
 	}
-	else
-	{
-		currentMesh->AssingCheckersImage();
-	}
-	
-	return currentMesh;
+
+	return texture;
 }
 
 GnTexture FileSystem::LoadTexture(const char* path)
@@ -701,17 +707,20 @@ GnTexture FileSystem::LoadTexture(const char* path)
 	texture.width = ilGetInteger(IL_IMAGE_WIDTH);
 	texture.height = ilGetInteger(IL_IMAGE_HEIGHT);
 
-	//ilBindImage(0);
-	//ilDeleteImages(1, &imageID);
-
 	ILenum error;
 	error = ilGetError();
 
-	if (error != IL_NO_ERROR) {
+	if (error != IL_NO_ERROR) 
+	{
 		LOG_ERROR("%d: %s", error, iluErrorString(error));
+		texture.id = -1;
+		texture.data = nullptr;
+		texture.width = texture.height = -1;
 	}
-	else {
-		LOG("Texture: %s loaded successfully", path);}
+	else 
+	{
+		LOG("Texture: %s loaded successfully", path);
+	}
 
 	return texture;
 }
@@ -722,10 +731,21 @@ void FileSystem::PreorderChildren(const aiScene* scene, aiNode* node, aiNode* pa
 
 	if (node->mMeshes != nullptr)
 	{
+		gameObject->SetName(node->mName.C_Str());
+
 		GnMesh* mesh = LoadMesh(scene, node, path);
 		gameObject->AddComponent(mesh);
 
-		gameObject->SetName(node->mName.C_Str());
+		GnTexture texture = GetAiMeshTexture(scene, node, path);
+		Material* material = new Material(mesh, texture);
+		gameObject->AddComponent(material);
+	}
+	else
+	{
+		std::string folder;
+		std::string file;
+		SplitFilePath(path, &folder, &file);
+		gameObject->SetName(file.c_str());
 	}
 
 	for (size_t i = 0; i < node->mNumChildren; i++)

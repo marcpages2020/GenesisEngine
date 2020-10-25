@@ -47,6 +47,19 @@ void GameObject::OnEditor()
 	}
 }
 
+Component* GameObject::GetComponent(ComponentType component)
+{
+	for (size_t i = 0; i < components.size(); i++)
+	{
+		if (components[i]->GetType() == component)
+		{
+			return components[i];
+		}
+	}
+
+	return nullptr;
+}
+
 Component* GameObject::AddComponent(ComponentType type)
 {
 	if (type == ComponentType::TRANSFORM) 

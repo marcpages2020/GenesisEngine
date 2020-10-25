@@ -2,18 +2,11 @@
 #include "Globals.h"
 #include "Component.h"
 #include <vector>;
+#include "Material.h"
 
 typedef float GLfloat;
 typedef unsigned short GLushort;
 typedef unsigned char GLubyte;
-
-struct GnTexture {
-	uint id = -1;
-	GLubyte* data = nullptr;
-	int width = -1;
-	int height = -1;
-	//const char* name;
-};
 
 class GnMesh : public Component {
 public:
@@ -21,8 +14,10 @@ public:
 	virtual ~GnMesh();
 
 	void GenerateBuffers();
+
+	void SetTexture(GnTexture texture);
 	void AssignTexture(GnTexture texture);
-	void AssingCheckersImage();
+	void AssignCheckersImage();
 
 	virtual void Update() override;
 	virtual void Render();

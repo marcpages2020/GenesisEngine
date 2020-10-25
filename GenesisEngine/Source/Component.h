@@ -16,11 +16,11 @@ public:
 	virtual void Enable();
 	virtual void Disable();
 
+	ComponentType GetType();
 	virtual void OnEditor() = 0;
-public:
-	ComponentType type;
 
 protected:
+	ComponentType type;
 	bool enabled;
 
 };

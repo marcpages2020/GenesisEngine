@@ -12,6 +12,8 @@ struct aiNode;
 
 namespace FileSystem 
 {
+	static std::vector<int> nums;
+
 	void Init();
 	void CleanUp();
 
@@ -23,7 +25,6 @@ namespace FileSystem
 	bool IsDirectory(const char* file);
 	const char* GetWriteDir();
 	std::string FindFile(const char* file);
-	std::string FindTexture(const char* texture_name, const char* model_directory);
 	void DiscoverFiles(const char* directory, std::vector<std::string>& file_list, std::vector<std::string>& dir_list);
 	void GetAllFilesWithExtension(const char* directory, const char* extension, std::vector<std::string>& file_list);
 	//PathNode GetAllFiles(const char* directory, std::vector<std::string>* filter_ext = nullptr, std::vector<std::string>* ignore_ext = nullptr);
@@ -52,10 +53,14 @@ namespace FileSystem
 
 	void LoadFile(const char* file_path, bool drag_and_drop = false);
 	//GnMeshCollection* LoadFBX(const char* path, GameObject& gameObject);
+
 	GameObject* LoadFBX(const char* path);
 	GnMesh* LoadMesh(const aiScene* scene, aiNode* node, const char* path);
-	GnTexture LoadTexture(const char* path);
 	void PreorderChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, GameObject* parentGameObject, const char* path);
+
+	GnTexture GetAiMeshTexture(const aiScene* scene, aiNode* node, const char* path);
+	GnTexture LoadTexture(const char* path);
+	std::string FindTexture(const char* texture_name, const char* model_directory);
 	void UnloadTexture(uint imageID);
 }
 

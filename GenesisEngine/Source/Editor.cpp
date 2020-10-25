@@ -482,8 +482,10 @@ void Editor::ShowHierarchyWindow()
 void Editor::PreorderHierarchy(GameObject* gameObject)
 {
 	if (gameObject->GetChildAmount() > 0) {
-		if (ImGui::TreeNode(gameObject->GetName())) 
+		if (ImGui::TreeNodeEx(gameObject->GetName())) 
 		{
+			if (ImGui::IsItemClicked())
+				App->scene->selected_game_object = gameObject;
 			for (size_t i = 0; i < gameObject->GetChildAmount(); i++)
 			{
 				PreorderHierarchy(gameObject->GetChildAt(i));
@@ -493,7 +495,12 @@ void Editor::PreorderHierarchy(GameObject* gameObject)
 	}
 	else
 	{
-		ImGui::Text(gameObject->GetName());
+		if (ImGui::TreeNodeEx(gameObject->GetName(), ImGuiTreeNodeFlags_Leaf))
+		{
+			if (ImGui::IsItemClicked())
+				App->scene->selected_game_object = gameObject;
+			ImGui::TreePop();
+		}
 	}
 }
 

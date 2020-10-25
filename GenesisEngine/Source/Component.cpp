@@ -9,3 +9,8 @@ void Component::Update(){}
 void Component::Enable() { enabled = true; }
 
 void Component::Disable() { enabled = false; }
+
+ComponentType Component::GetType()
+{
+    return type;
+}

@@ -14,6 +14,7 @@ public:
 	void Update();
 	void OnEditor();
 
+	Component* GetComponent(ComponentType component);
 	Component* AddComponent(ComponentType type);
 	void AddComponent(Component* component);
 	bool RemoveComponent(Component* component);

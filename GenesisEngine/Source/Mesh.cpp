@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "ModuleRenderer3D.h"
 #include "FileSystem.h"
+#include "Material.h"
 
 #include "glew/include/glew.h"
 #include "ImGui/imgui.h"
@@ -81,15 +82,27 @@ void GnMesh::GenerateBuffers()
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void GnMesh::AssignTexture(GnTexture g_texture)
+void GnMesh::SetTexture(GnTexture g_texture)
 {
-	texture = g_texture;
-	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.width, texture.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.data);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	if (g_texture.data != nullptr)
+	{
+		texture = g_texture;
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.width, texture.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.data);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+	else 
+	{
+		AssignCheckersImage();
+	}
 }
 
-void GnMesh::AssingCheckersImage()
+void GnMesh::AssignTexture(GnTexture g_texture)
+{
+
+}
+
+void GnMesh::AssignCheckersImage()
 {
 	int CHECKERS_WIDTH = 64;
 	int CHECKERS_HEIGHT = 64;
@@ -162,7 +175,7 @@ void GnMesh::OnEditor()
 {
 	if (ImGui::CollapsingHeader("Mesh", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-
+		ImGui::Spacing();
 	}
 }
 

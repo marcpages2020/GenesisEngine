@@ -2,6 +2,8 @@
 #include "Application.h"
 
 #include "Mesh.h"
+#include "Material.h"
+
 #include <vector>
 #include "FileSystem.h"
 
