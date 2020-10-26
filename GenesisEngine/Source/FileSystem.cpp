@@ -2,6 +2,7 @@
 #include "Application.h"
 
 #include "Mesh.h"
+#include "GameObject.h"
 #include "Material.h"
 #include "Transform.h"
 
@@ -9,8 +10,6 @@
 #include <fstream>
 #include <iostream>
 #include <Shlwapi.h>
-
-#pragma comment(lib,"shlwapi.lib")
 
 #include "PhysFS/include/physfs.h"
 #include "Assimp/Assimp/include/cimport.h"
@@ -21,14 +20,15 @@
 #include "Devil/include/IL/ilu.h"
 #include "Devil/include/IL/ilut.h"
 
-#include "GameObject.h"
-
 #pragma comment (lib, "PhysFS/libx86/physfs.lib")
+#pragma comment (lib,"shlwapi.lib")
 #pragma comment (lib, "Assimp/Assimp/libx86/assimp.lib")
 
 #pragma comment (lib, "Devil/libx86/DevIL.lib")	
 #pragma comment (lib, "Devil/libx86/ILU.lib")	
 #pragma comment (lib, "Devil/libx86/ILUT.lib")	
+
+#pragma region FileSystem
 
 void FileSystem::Init()
 {
@@ -116,13 +116,6 @@ const char* FileSystem::GetWriteDir()
 {
 	//TODO: erase first annoying dot (".")
 	return PHYSFS_getWriteDir();
-}
-
-// TODO: Transverse all folders to find a file
-std::string FileSystem::FindFile(const char* file)
-{
-	std::string path;
-	return path;
 }
 
 std::string FileSystem::FindTexture(const char* texture_name, const char* model_directory)
@@ -554,13 +547,6 @@ void FileSystem::LoadFile(const char* file_path, bool drag_and_drop)
 	}
 }
 
-/*
-GnMeshCollection* FileSystem::LoadFBX(const char* path, GameObject& gameObject)
-{
-	return nullptr;
-}
-*/
-
 GameObject* FileSystem::LoadFBX(const char* path)
 {
 	GameObject* root = App->scene->GetRoot();
@@ -784,4 +770,10 @@ void FileSystem::UnloadTexture(uint imageID)
 	ilBindImage(0);
 	ilDeleteImages(1, &imageID);
 }
+
+#pragma endregion 
+
+#pragma region MeshImporter
+
+#pragma endregion 
 

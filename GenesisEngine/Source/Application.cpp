@@ -50,6 +50,12 @@ bool Application::Init()
 
 	FileSystem::Init();
 
+	char* buffer = nullptr;
+
+	//uint size = FileSystem::Load("", &buffer);
+
+	//uint size = fileSystem->Load("Engine/Settings.JSON", &buffer);
+
 	JSON_Array* modules_array = PrepareConfig();
 	
 

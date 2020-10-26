@@ -1,6 +1,8 @@
 #include "Globals.h"
 #include "Application.h"
 #include "ModuleCamera3D.h"
+#include "GameObject.h"
+#include "Transform.h"
 
 #include "parson/parson.h"
 
@@ -71,8 +73,20 @@ update_status ModuleCamera3D::Update(float dt)
 		speed_multiplier = 2;
 
 	// Up/Down
-	if (App->input->GetKey(SDL_SCANCODE_R) == KEY_REPEAT) newPos.y += move_speed * dt;
-	if (App->input->GetKey(SDL_SCANCODE_F) == KEY_REPEAT) newPos.y -= move_speed * dt;
+	//if (App->input->GetKey(SDL_SCANCODE_R) == KEY_REPEAT) newPos.y += move_speed * dt;
+	//if (App->input->GetKey(SDL_SCANCODE_F) == KEY_REPEAT) newPos.y -= move_speed * dt;
+
+	if (App->input->GetKey(SDL_SCANCODE_F) == KEY_DOWN) 
+	{
+		if (App->scene->selectedGameObject != nullptr)
+		{
+			vec3 center(App->scene->selectedGameObject->GetTransform()->GetPosition().x,
+				App->scene->selectedGameObject->GetTransform()->GetPosition().y,
+				App->scene->selectedGameObject->GetTransform()->GetPosition().z);
+
+				LookAt(center);
+		}
+	}
 
 	//Forwards/Backwards
 	if ((App->input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT) || (App->input->GetKey(SDL_SCANCODE_UP) == KEY_REPEAT)) 

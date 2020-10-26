@@ -74,6 +74,9 @@
       <Filter>GameObjects &amp; Components</Filter>
     </ClCompile>
     <ClCompile Include="FileSystem.cpp" />
+    <ClCompile Include="GnJSON.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
@@ -173,6 +176,9 @@
       <Filter>GameObjects &amp; Components</Filter>
     </ClInclude>
     <ClInclude Include="FileSystem.h" />
+    <ClInclude Include="GnJSON.h">
+      <Filter>Tools</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Modules">

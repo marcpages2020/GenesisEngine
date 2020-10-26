@@ -26,7 +26,7 @@ namespace FileSystem
 	bool CreateDir(const char* dir);
 	bool IsDirectory(const char* file);
 	const char* GetWriteDir();
-	std::string FindFile(const char* file);
+
 	void DiscoverFiles(const char* directory, std::vector<std::string>& file_list, std::vector<std::string>& dir_list);
 	void GetAllFilesWithExtension(const char* directory, const char* extension, std::vector<std::string>& file_list);
 	//PathNode GetAllFiles(const char* directory, std::vector<std::string>* filter_ext = nullptr, std::vector<std::string>* ignore_ext = nullptr);
@@ -54,7 +54,6 @@ namespace FileSystem
 	std::string GetUniqueName(const char* path, const char* name);
 
 	void LoadFile(const char* file_path, bool drag_and_drop = false);
-	//GnMeshCollection* LoadFBX(const char* path, GameObject& gameObject);
 
 	GameObject* LoadFBX(const char* path);
 
@@ -66,6 +65,16 @@ namespace FileSystem
 	GnTexture LoadTexture(const char* path);
 	std::string FindTexture(const char* texture_name, const char* model_directory);
 	void UnloadTexture(uint imageID);
+}
+
+namespace MeshImporter 
+{
+
+}
+
+namespace TextureImporter
+{
+
 }
 
 

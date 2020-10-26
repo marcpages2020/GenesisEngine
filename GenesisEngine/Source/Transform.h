@@ -2,6 +2,7 @@
 #define __TRANSFORM_H__
 
 #include "Component.h"
+
 #include "MathGeoLib/include/MathGeoLib.h"
 
 class Transform : public Component {
