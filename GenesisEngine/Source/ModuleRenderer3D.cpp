@@ -351,7 +351,7 @@ void ModuleRenderer3D::DrawDirectModeCube()
 		}
 	}
 
-	GnTexture Lenna = FileSystem::LoadTexture("Assets/Textures/Lenna.png");
+	GnTexture Lenna = TextureImporter::LoadTexture("Assets/Textures/Lenna.png");
 
 	GLuint textureID;
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);

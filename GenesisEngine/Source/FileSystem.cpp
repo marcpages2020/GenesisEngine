@@ -120,40 +120,6 @@ const char* FileSystem::GetWriteDir()
 	return PHYSFS_getWriteDir();
 }
 
-std::string FileSystem::FindTexture(const char* texture_name, const char* model_directory)
-{
-	std::string path;
-	SplitFilePath(model_directory, &path);
-	std::string texture_path = path + texture_name;
-
-	//Check if the texture is in the same folder
-	if (Exists(texture_path.c_str()))
-	{
-		return texture_path.c_str();
-	}
-	else
-	{
-		//Check if the texture is in a sub folder
-		texture_path = path + "Textures/" + texture_name;
-		if (Exists(texture_path.c_str()))
-		{
-			return texture_path.c_str();
-		}
-		else
-		{
-			//Check if the texture is in the root textures folder
-			texture_path = std::string("Assets/Textures/") + texture_name;
-			if (Exists(texture_path.c_str()))
-			{
-				return texture_path.c_str();
-			}
-		}
-	}
-
-	texture_path.clear();
-	return texture_path;
-}
-
 void FileSystem::DiscoverFiles(const char* directory, std::vector<std::string>& file_list, std::vector<std::string>& dir_list) 
 {
 	char** rc = PHYSFS_enumerateFiles(directory);
@@ -353,7 +319,7 @@ uint FileSystem::Load(const char* file, char** buffer)
 			uint readed = (uint)PHYSFS_read(fs_file, *buffer, 1, size);
 			if (readed != size)
 			{
-				LOG("File System error while reading from file %s: %s\n", file, PHYSFS_getLastError());
+				LOG_ERROR("File System error while reading from file %s: %s\n", file, PHYSFS_getLastError());
 				RELEASE_ARRAY(buffer);
 			}
 			else
@@ -365,10 +331,10 @@ uint FileSystem::Load(const char* file, char** buffer)
 		}
 
 		if (PHYSFS_close(fs_file) == 0)
-			LOG("File System error while closing file %s: %s\n", file, PHYSFS_getLastError());
+			LOG_ERROR("File System error while closing file %s: %s\n", file, PHYSFS_getLastError());
 	}
 	else
-		LOG("File System error while opening file %s: %s\n", file, PHYSFS_getLastError());
+		LOG_ERROR("File System error while opening file %s: %s\n", file, PHYSFS_getLastError());
 
 	return ret;
 }
@@ -539,21 +505,42 @@ void FileSystem::LoadFile(const char* file_path, bool drag_and_drop)
 	std::string extension = PathFindExtensionA(file_path);
 	std::transform(extension.begin(), extension.end(), extension.begin(), [](unsigned char c) { return std::tolower(c); });
 
-	if (extension == ".fbx") 
+	if (extension == ".fbx")
 	{
-		LoadFBX(file_path);
+		MeshImporter::LoadFBX(file_path);
 	}
 	else if (extension == ".png")
 	{
-		LoadTexture(file_path);
+		if (drag_and_drop)
+			App->scene->SetDroppedTexture(TextureImporter::LoadTexture(file_path));
 	}
 }
 
-GameObject* FileSystem::LoadFBX(const char* path)
+#pragma endregion 
+
+#pragma region MeshImporter
+
+GameObject* MeshImporter::LoadFBX(const char* path)
 {
 	GameObject* root = App->scene->GetRoot();
 
-	const aiScene* scene = aiImportFile(path, aiProcessPreset_TargetRealtime_MaxQuality);
+	char* buffer = nullptr;
+	uint size = FileSystem::Load(path, &buffer);
+
+	if (buffer == nullptr)
+	{
+		std::string normalized_path = FileSystem::NormalizePath(path);
+		size = FileSystem::Load(normalized_path.c_str(), &buffer);
+	}
+
+	const aiScene* scene = nullptr;
+
+	if (buffer != nullptr) {
+		scene = aiImportFileFromMemory(buffer, size, aiProcessPreset_TargetRealtime_MaxQuality, NULL);
+	}
+	else {
+		scene = aiImportFile(path, aiProcessPreset_TargetRealtime_MaxQuality);
+	}
 
 	if (scene != nullptr && scene->HasMeshes())
 	{
@@ -568,9 +555,9 @@ GameObject* FileSystem::LoadFBX(const char* path)
 	return root->GetChildAt(0);
 }
 
-GnMesh* FileSystem::LoadMesh(const aiScene* scene, aiNode* node, const char* path) {
+GnMesh* MeshImporter::LoadMesh(const aiScene* scene, aiNode* node, const char* path) {
 	GnMesh* currentMesh = new GnMesh();
-	aiMesh* currentAiMesh =  scene->mMeshes[*node->mMeshes];
+	aiMesh* currentAiMesh = scene->mMeshes[*node->mMeshes];
 
 	//vertex copying
 	currentMesh->vertices_amount = currentAiMesh->mNumVertices;
@@ -647,11 +634,67 @@ GnMesh* FileSystem::LoadMesh(const aiScene* scene, aiNode* node, const char* pat
 	}
 	//LOG("Texcoords loaded: %d", t);
 	currentMesh->GenerateBuffers();
-	
+
 	return currentMesh;
 }
 
-GnTexture FileSystem::GetAiMeshTexture(const aiScene* scene, aiNode* node, const char* path)
+void MeshImporter::PreorderChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, GameObject* parentGameObject, const char* path)
+{
+	GameObject* gameObject = new GameObject();
+
+	if (node->mMeshes != nullptr)
+	{
+		gameObject->SetName(node->mName.C_Str());
+
+		GnMesh* mesh = LoadMesh(scene, node, path);
+		gameObject->AddComponent(mesh);
+
+		GnTexture texture = TextureImporter::GetAiMeshTexture(scene, node, path);
+		Material* material = new Material(mesh, texture);
+		gameObject->AddComponent(material);
+
+		Transform transform = LoadTransform(node);
+		gameObject->SetTransform(transform);
+	}
+	else
+	{
+		std::string folder;
+		std::string file;
+		FileSystem::SplitFilePath(path, &folder, &file);
+		gameObject->SetName(file.c_str());
+	}
+
+	for (size_t i = 0; i < node->mNumChildren; i++)
+	{
+		PreorderChildren(scene, node->mChildren[i], node, gameObject, path);
+	}
+
+	parentGameObject->AddChild(gameObject);
+
+	if (node != scene->mRootNode)
+		gameObject->SetParent(parentGameObject);
+}
+
+Transform MeshImporter::LoadTransform(aiNode* node)
+{
+	Transform transform;
+	aiVector3D position, scaling;
+	aiQuaternion rotation;
+
+	node->mTransformation.Decompose(scaling, rotation, position);
+
+	transform.SetPosition(position.x, position.y, position.z);
+	transform.SetRotation(position.x, position.y, position.z);
+	transform.SetScale(scaling.x, scaling.y, scaling.z);
+
+	return transform;
+}
+
+#pragma endregion 
+
+#pragma region TextureImporter
+
+GnTexture TextureImporter::GetAiMeshTexture(const aiScene* scene, aiNode* node, const char* path)
 {
 	aiMesh* currentAiMesh = scene->mMeshes[*node->mMeshes];
 
@@ -672,13 +715,13 @@ GnTexture FileSystem::GetAiMeshTexture(const aiScene* scene, aiNode* node, const
 	return texture;
 }
 
-GnTexture FileSystem::LoadTexture(const char* path)
+GnTexture TextureImporter::LoadTexture(const char* path)
 {
 	uint imageID = 0;
 
 	ilGenImages(1, &imageID);
 	ilBindImage(imageID);
-	
+
 	ilEnable(IL_ORIGIN_SET);
 	ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
 
@@ -686,28 +729,29 @@ GnTexture FileSystem::LoadTexture(const char* path)
 
 	if (imageID == 0)
 		LOG_ERROR("Could not create a texture buffer to load: %s, %d", path, ilGetError());
-	
+
 	if (ilLoadImage(path) == IL_FALSE)
 		LOG_ERROR("Error trying to load the texture from %s", path);
 
 	ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
-	
+
 	texture.id = imageID;
 	texture.data = ilGetData();
 	texture.width = ilGetInteger(IL_IMAGE_WIDTH);
 	texture.height = ilGetInteger(IL_IMAGE_HEIGHT);
+	texture.path = path;
 
 	ILenum error;
 	error = ilGetError();
 
-	if (error != IL_NO_ERROR) 
+	if (error != IL_NO_ERROR)
 	{
 		LOG_ERROR("%d: %s", error, iluErrorString(error));
 		texture.id = -1;
 		texture.data = nullptr;
 		texture.width = texture.height = -1;
 	}
-	else 
+	else
 	{
 		LOG("Texture: %s loaded successfully", path);
 	}
@@ -715,71 +759,45 @@ GnTexture FileSystem::LoadTexture(const char* path)
 	return texture;
 }
 
-void FileSystem::PreorderChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, GameObject* parentGameObject, const char* path)
+std::string TextureImporter::FindTexture(const char* texture_name, const char* model_directory)
 {
-	GameObject* gameObject = new GameObject();
+	std::string path;
+	FileSystem::SplitFilePath(model_directory, &path);
+	std::string texture_path = path + texture_name;
 
-	if (node->mMeshes != nullptr)
+	//Check if the texture is in the same folder
+	if (FileSystem::Exists(texture_path.c_str()))
 	{
-		gameObject->SetName(node->mName.C_Str());
-
-		GnMesh* mesh = LoadMesh(scene, node, path);
-		gameObject->AddComponent(mesh);
-
-		GnTexture texture = GetAiMeshTexture(scene, node, path);
-		Material* material = new Material(mesh, texture);
-		gameObject->AddComponent(material);
-
-		Transform transform = LoadTransform(node);
-		gameObject->SetTransform(transform);
+		return texture_path.c_str();
 	}
 	else
 	{
-		std::string folder;
-		std::string file;
-		SplitFilePath(path, &folder, &file);
-		gameObject->SetName(file.c_str());
+		//Check if the texture is in a sub folder
+		texture_path = path + "Textures/" + texture_name;
+		if (FileSystem::Exists(texture_path.c_str()))
+		{
+			return texture_path.c_str();
+		}
+		else
+		{
+			//Check if the texture is in the root textures folder
+			texture_path = std::string("Assets/Textures/") + texture_name;
+			if (FileSystem::Exists(texture_path.c_str()))
+			{
+				return texture_path.c_str();
+			}
+		}
 	}
 
-	for (size_t i = 0; i < node->mNumChildren; i++)
-	{
-		PreorderChildren(scene, node->mChildren[i], node, gameObject, path);
-	}
-
-	parentGameObject->AddChild(gameObject);
-	
-	if(node != scene->mRootNode)
-		gameObject->SetParent(parentGameObject);
+	texture_path.clear();
+	return texture_path;
 }
 
-Transform FileSystem::LoadTransform(aiNode* node)
-{
-	Transform transform;
-	aiVector3D position, scaling;
-	aiQuaternion rotation;
-
-	node->mTransformation.Decompose(scaling, rotation, position);
-
-	transform.SetPosition(position.x, position.y, position.z);
-	transform.SetRotation(position.x, position.y, position.z);
-	transform.SetScale(scaling.x, scaling.y, scaling.z);
-
-	return transform;
-}
-
-void FileSystem::UnloadTexture(uint imageID)
+void TextureImporter::UnloadTexture(uint imageID)
 {
 	ilBindImage(0);
 	ilDeleteImages(1, &imageID);
 }
-
-#pragma endregion 
-
-#pragma region MeshImporter
-
-#pragma endregion 
-
-#pragma region TextureImporter
 
 #pragma endregion
 

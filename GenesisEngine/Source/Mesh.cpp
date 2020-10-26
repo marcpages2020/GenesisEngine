@@ -39,7 +39,7 @@ GnMesh::~GnMesh(){
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glDeleteBuffers(1, &texture_buffer);
 	glDeleteTextures(1, &textureID);
-	FileSystem::UnloadTexture(texture.id);
+	TextureImporter::UnloadTexture(texture.id);
 
 	delete texcoords;
 	texcoords = nullptr;

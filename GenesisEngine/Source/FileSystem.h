@@ -65,27 +65,22 @@ namespace FileSystem
 	std::string GetUniqueName(const char* path, const char* name);
 
 	void LoadFile(const char* file_path, bool drag_and_drop = false);
-
-	GameObject* LoadFBX(const char* path);
-
-	GnMesh* LoadMesh(const aiScene* scene, aiNode* node, const char* path);
-	void PreorderChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, GameObject* parentGameObject, const char* path);
-	Transform LoadTransform(aiNode* node);
-
-	GnTexture GetAiMeshTexture(const aiScene* scene, aiNode* node, const char* path);
-	GnTexture LoadTexture(const char* path);
-	std::string FindTexture(const char* texture_name, const char* model_directory);
-	void UnloadTexture(uint imageID);
 }
 
 namespace MeshImporter 
 {
-
+	GameObject* LoadFBX(const char* path);
+	GnMesh* LoadMesh(const aiScene* scene, aiNode* node, const char* path);
+	void PreorderChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, GameObject* parentGameObject, const char* path);
+	Transform LoadTransform(aiNode* node);
 }
 
 namespace TextureImporter
 {
-
+	GnTexture GetAiMeshTexture(const aiScene* scene, aiNode* node, const char* path);
+	GnTexture LoadTexture(const char* path);
+	std::string FindTexture(const char* texture_name, const char* model_directory);
+	void UnloadTexture(uint imageID);
 }
 
 namespace JSONParser
