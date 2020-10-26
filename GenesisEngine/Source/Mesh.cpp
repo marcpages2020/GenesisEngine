@@ -4,6 +4,7 @@
 #include "FileSystem.h"
 #include "Material.h"
 #include "GameObject.h"
+#include "Transform.h"
 
 #include "glew/include/glew.h"
 #include "ImGui/imgui.h"
@@ -127,9 +128,8 @@ void GnMesh::Update()
 
 void GnMesh::Render()
 {
-	//glPushMatrix();
-	gameObject->GetTransform();
-	//glMultMatrixf()
+	glPushMatrix();
+	glMultMatrixf((float*)&gameObject->GetTransform()->GetGlobalTransform());
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
@@ -160,8 +160,6 @@ void GnMesh::Render()
 	if (App->renderer3D->draw_face_normals)
 		DrawFaceNormals();
 
-	//glPopMatrix();
-
 	//clean buffers
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_NORMAL_ARRAY, 0);
@@ -171,6 +169,8 @@ void GnMesh::Render()
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+	glPopMatrix();
 }
 
 void GnMesh::OnEditor()

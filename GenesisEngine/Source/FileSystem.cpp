@@ -11,6 +11,8 @@
 #include <iostream>
 #include <Shlwapi.h>
 
+#include "parson/parson.h"
+
 #include "PhysFS/include/physfs.h"
 #include "Assimp/Assimp/include/cimport.h"
 #include "Assimp/Assimp/include/scene.h"
@@ -777,3 +779,43 @@ void FileSystem::UnloadTexture(uint imageID)
 
 #pragma endregion 
 
+#pragma region TextureImporter
+
+#pragma endregion
+
+#pragma region JSONParser
+
+JSON_Array* JSONParser::LoadConfig(char* buffer, JSON_Value* root)
+{
+	root = json_parse_string(buffer);
+	JSON_Object* config_object = json_value_get_object(root);
+	JSON_Array* modules = json_object_get_array(config_object, "modules");
+
+	if (root != NULL)
+	{
+		LOG("Config file loaded successfully");
+	}
+	else
+	{
+		LOG_ERROR("Error trying to load config file");
+	}
+
+	return modules;
+}
+
+JSON_Object* JSONParser::GetJSONObjectByName(const char* name, JSON_Array* modules_array)
+{
+	int modules = json_array_get_count(modules_array);
+
+	for (size_t i = 0; i < modules; i++)
+	{
+		JSON_Object* object = json_array_get_object(modules_array, i);
+		if (strcmp(name, json_object_get_string(object, "name")) == 0)
+			return object;
+	}
+
+	LOG_ERROR("JSON object %s could not be found", name);
+	return NULL;
+}
+
+#pragma endregion

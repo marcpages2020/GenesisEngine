@@ -52,17 +52,17 @@ bool Application::Init()
 
 	char* buffer = nullptr;
 
-	//uint size = FileSystem::Load("", &buffer);
+	uint size = FileSystem::Load("Assets/Config/config.json", &buffer);
 
-	//uint size = fileSystem->Load("Engine/Settings.JSON", &buffer);
-
-	JSON_Array* modules_array = PrepareConfig();
+	JSON_Value* config_root = nullptr;
+	JSON_Array* modules_array = JSONParser::LoadConfig(buffer, config_root);
 	
+	LoadConfig(JSONParser::GetJSONObjectByName("app", modules_array));
 
 	// Call Init() in all modules
 	for (int i = 0; i < modules_vector.size() && ret == true; i++)
 	{
-		JSON_Object* module_object = GetJSONObjectByName(modules_vector[i]->name, modules_array);
+		JSON_Object* module_object = JSONParser::GetJSONObjectByName(modules_vector[i]->name, modules_array);
 
 		ret = modules_vector[i]->LoadConfig(module_object);
 		ret = modules_vector[i]->Init();
@@ -74,7 +74,10 @@ bool Application::Init()
 	{
 		ret = modules_vector[i]->Start();
 	}
-	
+
+	if(config_root)
+		json_value_free(config_root);
+
 	ms_timer.Start();
 	return ret;
 }
@@ -132,7 +135,16 @@ bool Application::CleanUp()
 	}
 
 	FileSystem::CleanUp();
-	json_value_free(config_root);
+
+	return ret;
+}
+
+bool Application::LoadConfig(JSON_Object* object)
+{
+	bool ret = true;
+
+	engine_name = json_object_get_string(object, "engine name");
+	version = json_object_get_string(object, "version");
 
 	return ret;
 }
@@ -200,43 +212,6 @@ HardwareSpecs Application::GetHardware()
 const char* Application::GetEngineVersion()
 {
 	return version;
-}
-
-JSON_Array* Application::PrepareConfig()
-{
-	static char path[2048] = { 0 };
-	memset(path, 0, sizeof(path));
-	sprintf_s(path, "%s/%s", config_path, "config.json");
-
-	config_root = json_parse_file(path);
-	JSON_Object* config_object = json_value_get_object(config_root);
-	JSON_Array* modules = json_object_get_array(config_object,"modules");
-
-	if (config_root == NULL) 
-	{
-		LOG("Error config file");
-	}
-
-	JSON_Object* app_data = GetJSONObjectByName("app", modules);
-	engine_name = json_object_get_string(app_data, "engine name");
-	version = json_object_get_string(app_data, "version");
-
-	return modules;
-}
-
-JSON_Object* Application::GetJSONObjectByName(const char* name, JSON_Array* modules_array)
-{
-	int modules = json_array_get_count(modules_array);
-	
-	for (size_t i = 0; i < modules; i++)
-	{
-		JSON_Object* object = json_array_get_object(modules_array, i);
-		if (strcmp(name, json_object_get_string(object, "name")) == 0)
-			return object;
-	}
-
-	LOG_ERROR("JSON object %s could not be found", name);
-	return NULL;
 }
 
 

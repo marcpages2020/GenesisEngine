@@ -36,16 +36,16 @@ struct HardwareSpecs
 	float vram_available;
 	float vram_reserved;
 
-	bool RDTSC;
-	bool MMX;
-	bool SSE;
-	bool SSE2;
-	bool SSE3;
-	bool SSE41;
-	bool SSE42;
-	bool AVX;
-	bool AVX2;
-	bool AltiVec;
+	bool RDTSC = false;
+	bool MMX = false;
+	bool SSE = false;
+	bool SSE2 = false;
+	bool SSE3 = false;
+	bool SSE41 = false;
+	bool SSE42 = false;
+	bool AVX = false;
+	bool AVX2 = false;
+	bool AltiVec = false;
 
 	std::string caps;
 };
@@ -72,6 +72,8 @@ public:
 	update_status Update();
 	bool CleanUp();
 
+	bool LoadConfig(JSON_Object* object);
+
 public:
 	float GetFPS();
 	float GetLastDt();
@@ -87,9 +89,6 @@ private:
 	void PrepareUpdate();
 	void FinishUpdate();
 
-	JSON_Array* PrepareConfig();
-	JSON_Object* GetJSONObjectByName(const char* name, JSON_Array* modules_array);
-
 private:
 	int	   argc;
 	char** args;
@@ -103,7 +102,6 @@ private:
 	const char* version;
 
 	const char* config_path;
-	JSON_Value* config_root;
 };
 
 extern Application* App;

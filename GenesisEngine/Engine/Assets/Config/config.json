@@ -69,7 +69,7 @@
       "debug": false,
       "vsync": false,
       "draw_vertex_normals": false,
-      "draw_face_normals": false
+      "draw_face_normals" :  false
     }
   ]
 }

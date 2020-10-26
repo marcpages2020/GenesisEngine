@@ -14,6 +14,9 @@ public:
 	void Update() override;
 	void OnEditor() override;
 
+	float4x4 GetTransform();
+	float4x4 GetGlobalTransform();
+
 	void SetPosition(float x, float y, float z);
 	void SetPosition(float3 new_position);
 	float3 GetPosition();
@@ -29,6 +32,7 @@ public:
 
 private:
 	float4x4 transform;
+	float4x4 globalTransform;
 
 	float3 position;
 	float3 scale;

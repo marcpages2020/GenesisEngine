@@ -4,6 +4,8 @@
 #include <vector>
 #include <string>
 
+#pragma region ForwardDeclarations
+
 class GameObject;
 struct GnTexture;
 class GnMesh;
@@ -12,10 +14,19 @@ class Transform;
 class aiScene;
 struct aiNode;
 
+struct json_array_t;
+typedef json_array_t JSON_Array;
+
+struct json_value_t;
+typedef json_value_t JSON_Value;
+
+struct json_object_t;
+typedef json_object_t JSON_Object;
+
+#pragma endregion
+
 namespace FileSystem 
 {
-	static std::vector<int> nums;
-
 	void Init();
 	void CleanUp();
 
@@ -77,5 +88,10 @@ namespace TextureImporter
 
 }
 
+namespace JSONParser
+{
+	JSON_Array* LoadConfig(char* buffer, JSON_Value* root);
+	JSON_Object* GetJSONObjectByName(const char* name, JSON_Array* modules_array);
+}
 
 
