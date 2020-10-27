@@ -16,6 +16,7 @@ Editor::Editor(bool start_enabled) : Module(start_enabled), aspect_ratio(AspectR
 {
 	name = "editor";
 	//*open_dockspace = true;
+
 	show_scene_window = true;
 	show_inspector_window = true;
 	show_hierarchy_window = true;
@@ -363,19 +364,19 @@ bool Editor::CreateMainMenuBar() {
 		{
 			if (ImGui::MenuItem("Inspector", NULL, show_inspector_window))
 			{
-				show_inspector_window = true;
+				show_inspector_window = !show_inspector_window;
 			}
 			else if (ImGui::MenuItem("Scene", NULL, show_scene_window))
 			{
-				show_scene_window = true;
+				show_scene_window = !show_scene_window;
 			}
 			else if (ImGui::MenuItem("Project", NULL, show_project_window))
 			{
-				show_project_window = true;
+				show_project_window = !show_project_window;
 			}
 			else if (ImGui::MenuItem("Console", NULL, show_console_window))
 			{
-				show_console_window = true;
+				show_console_window = !show_console_window;
 			}
 			ImGui::EndMenu();
 		}
