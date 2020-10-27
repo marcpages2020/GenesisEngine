@@ -10,6 +10,11 @@ void Component::Enable() { enabled = true; }
 
 void Component::Disable() { enabled = false; }
 
+bool Component::IsEnabled()
+{
+    return enabled;
+}
+
 ComponentType Component::GetType()
 {
     return type;

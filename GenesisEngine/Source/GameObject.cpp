@@ -30,7 +30,8 @@ void GameObject::Update()
 {
 	for (size_t i = 0; i < components.size(); i++)
 	{
-		components[i]->Update();
+		if(components[i]->IsEnabled())
+			components[i]->Update();
 	}
 
 	for (size_t i = 0; i < children.size(); i++)
@@ -54,6 +55,14 @@ void GameObject::OnEditor()
 	for (size_t i = 0; i < components.size(); i++)
 	{
 		components[i]->OnEditor();
+	}
+
+	if(ImGui::CollapsingHeader("Debugging Information")) 
+	{
+		if(parent != nullptr)
+			ImGui::Text("Parent: %s", parent->GetName());
+		else 
+			ImGui::Text("No parent");
 	}
 }
 

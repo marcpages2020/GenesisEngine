@@ -502,8 +502,7 @@ std::string FileSystem::GetUniqueName(const char* path, const char* name)
 
 void FileSystem::LoadFile(const char* file_path, bool drag_and_drop)
 {
-	std::string extension = PathFindExtensionA(file_path);
-	std::transform(extension.begin(), extension.end(), extension.begin(), [](unsigned char c) { return std::tolower(c); });
+	std::string extension = GetFileFormat(file_path);
 
 	if (extension == ".fbx")
 	{
@@ -514,6 +513,21 @@ void FileSystem::LoadFile(const char* file_path, bool drag_and_drop)
 		if (drag_and_drop)
 			App->scene->SetDroppedTexture(TextureImporter::LoadTexture(file_path));
 	}
+}
+
+std::string FileSystem::GetFileFormat(const char* path)
+{
+	std::string format = PathFindExtensionA(path);
+	std::transform(format.begin(), format.end(), format.begin(), [](unsigned char c) { return std::tolower(c); });
+	return format;
+}
+
+std::string FileSystem::GetFile(const char* path)
+{
+	std::string file;
+	std::string file_path;
+	SplitFilePath(path, &file_path, &file);
+	return file;
 }
 
 #pragma endregion 
@@ -649,7 +663,7 @@ void MeshImporter::PreorderChildren(const aiScene* scene, aiNode* node, aiNode* 
 		GnMesh* mesh = LoadMesh(scene, node, path);
 		gameObject->AddComponent(mesh);
 
-		GnTexture texture = TextureImporter::GetAiMeshTexture(scene, node, path);
+		GnTexture* texture = TextureImporter::GetAiMeshTexture(scene, node, path);
 		Material* material = new Material(mesh, texture);
 		gameObject->AddComponent(material);
 
@@ -671,7 +685,7 @@ void MeshImporter::PreorderChildren(const aiScene* scene, aiNode* node, aiNode* 
 
 	parentGameObject->AddChild(gameObject);
 
-	if (node != scene->mRootNode)
+	if(gameObject != App->scene->GetRoot())
 		gameObject->SetParent(parentGameObject);
 }
 
@@ -694,7 +708,7 @@ Transform MeshImporter::LoadTransform(aiNode* node)
 
 #pragma region TextureImporter
 
-GnTexture TextureImporter::GetAiMeshTexture(const aiScene* scene, aiNode* node, const char* path)
+GnTexture* TextureImporter::GetAiMeshTexture(const aiScene* scene, aiNode* node, const char* path)
 {
 	aiMesh* currentAiMesh = scene->mMeshes[*node->mMeshes];
 
@@ -702,22 +716,25 @@ GnTexture TextureImporter::GetAiMeshTexture(const aiScene* scene, aiNode* node, 
 	aiString aiTexture_path;
 	aiGetMaterialTexture(material, aiTextureType_DIFFUSE, currentAiMesh->mMaterialIndex, &aiTexture_path);
 
-	GnTexture texture;
+	GnTexture* texture = new GnTexture();
 
 	if (aiTexture_path.length != 0)
 	{
 		std::string tmp_path = FindTexture(aiTexture_path.C_Str(), path);
 		texture = LoadTexture(tmp_path.c_str());
-		texture.name = aiTexture_path.C_Str();
-		texture.path = tmp_path;
+		texture->name = aiTexture_path.C_Str();
+		texture->path = tmp_path;
 	}
 
 	return texture;
 }
 
-GnTexture TextureImporter::LoadTexture(const char* path)
+GnTexture* TextureImporter::LoadTexture(const char* path)
 {
 	uint imageID = 0;
+
+	std::string normalized_path = FileSystem::NormalizePath(path);
+	//std::string relative_path = FileSystem::GetPathRelativeToAssets(normalized_path.c_str());
 
 	ilGenImages(1, &imageID);
 	ilBindImage(imageID);
@@ -725,21 +742,35 @@ GnTexture TextureImporter::LoadTexture(const char* path)
 	ilEnable(IL_ORIGIN_SET);
 	ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
 
-	GnTexture texture;
+	GnTexture* texture = new GnTexture();
 
 	if (imageID == 0)
 		LOG_ERROR("Could not create a texture buffer to load: %s, %d", path, ilGetError());
 
-	if (ilLoadImage(path) == IL_FALSE)
-		LOG_ERROR("Error trying to load the texture from %s", path);
+	char* buffer;
+	uint size = FileSystem::Load(normalized_path.c_str(), &buffer);
+
+	ILenum file_format = IL_TYPE_UNKNOWN;
+
+	std::string format = FileSystem::GetFileFormat(path);
+
+	if (format == ".png")
+		file_format = IL_PNG;
+	else if (format == ".jpg")
+		file_format = IL_JPG;
+	else if (format == ".bmp")
+		file_format = IL_BMP;
+
+
+	if (ilLoadL(file_format, buffer, size) == IL_FALSE)
+	{
+		LOG_ERROR("Error trying to load the texture %s into buffer, %d: %s", path, ilGetError(), iluErrorString(ilGetError()));
+
+		if (ilLoadImage(normalized_path.c_str()) == IL_FALSE)
+			LOG_ERROR("Error trying to load the texture directly form %s", path);
+	}
 
 	ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
-
-	texture.id = imageID;
-	texture.data = ilGetData();
-	texture.width = ilGetInteger(IL_IMAGE_WIDTH);
-	texture.height = ilGetInteger(IL_IMAGE_HEIGHT);
-	texture.path = path;
 
 	ILenum error;
 	error = ilGetError();
@@ -747,13 +778,17 @@ GnTexture TextureImporter::LoadTexture(const char* path)
 	if (error != IL_NO_ERROR)
 	{
 		LOG_ERROR("%d: %s", error, iluErrorString(error));
-		texture.id = -1;
-		texture.data = nullptr;
-		texture.width = texture.height = -1;
 	}
 	else
 	{
 		LOG("Texture: %s loaded successfully", path);
+
+		texture->id = imageID;
+		texture->name = FileSystem::GetFile(path);
+		texture->data = ilGetData();
+		texture->width = ilGetInteger(IL_IMAGE_WIDTH);
+		texture->height = ilGetInteger(IL_IMAGE_HEIGHT);
+		texture->path = normalized_path.c_str();
 	}
 
 	return texture;

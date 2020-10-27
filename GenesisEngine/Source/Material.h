@@ -15,19 +15,27 @@ struct GnTexture
 	GLubyte* data = nullptr;
 	int width = -1;
 	int height = -1;
+
+	~GnTexture()
+	{
+		name.clear();
+		path.clear();
+		delete data;
+		data = nullptr;
+	}
 };
 
 class Material : public Component {
 public: 
 	Material();
-	Material(GnMesh* mesh, GnTexture diffuse_texture);
+	Material(GnMesh* mesh, GnTexture* diffuse_texture);
 	~Material();
 	void OnEditor() override;
 
-	void SetTexture(GnTexture texture);
+	void SetTexture(GnTexture* texture);
 
 private:
-	GnTexture diffuse_texture;
+	GnTexture* diffuse_texture;
 	GnMesh* mesh;
 	bool checkers_image;
 };

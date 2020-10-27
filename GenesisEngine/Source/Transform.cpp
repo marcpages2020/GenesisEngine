@@ -7,15 +7,15 @@ Transform::Transform() : Component()
 	type = ComponentType::TRANSFORM;
 
 	position.x = position.y = position.z = 0.0f;
-	rotation.x = rotation.y = rotation.z = 1.0f;
-	rotation.w = 1.0f;
+	rotation = Quat::identity;
 	scale.x = scale.y = scale.z = 1.0f;
-
-	//transform = float4x4::FromTRS(position, rotation, scale);
 
 	transform.SetIdentity();
 	globalTransform.SetIdentity();
 
+	globalTransform = float4x4::FromTRS(position, rotation, scale);
+
+	//transform.SetIdentity();
 	//globalTransform = transform;
 }
 
@@ -25,11 +25,11 @@ Transform::Transform(float3 g_position, Quat g_rotation, float3 g_scale) : Compo
 	rotation = g_rotation;
 	scale = g_scale;
 
-	//transform = float4x4::FromTRS(g_position, g_rotation, g_scale);
-	//globalTransform = transform;
-
 	transform.SetIdentity();
 	globalTransform.SetIdentity();
+
+	transform = float4x4::FromTRS(g_position, g_rotation, g_scale);
+	globalTransform = transform;
 }
 
 Transform::~Transform() {}
@@ -89,11 +89,15 @@ void Transform::SetPosition(float x, float y, float z)
 	position.x = x;
 	position.y = y;
 	position.z = z;
+
+	globalTransform.SetTranslatePart(position);
 }
 
 void Transform::SetPosition(float3 new_position)
 {
 	position = new_position;
+
+	globalTransform.SetTranslatePart(position);
 }
 
 float3 Transform::GetPosition()
@@ -103,9 +107,7 @@ float3 Transform::GetPosition()
 
 void Transform::SetRotation(float x, float y, float z)
 {
-	rotation.x = x;
-	rotation.y = y;
-	rotation.z = z;
+	rotation = Quat::FromEulerXYZ(x, y, z);
 
 	globalTransform.SetRotatePart(rotation);
 }

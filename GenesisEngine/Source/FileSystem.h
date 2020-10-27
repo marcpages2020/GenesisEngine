@@ -65,6 +65,8 @@ namespace FileSystem
 	std::string GetUniqueName(const char* path, const char* name);
 
 	void LoadFile(const char* file_path, bool drag_and_drop = false);
+	std::string GetFileFormat(const char* path);
+	std::string GetFile(const char* path);
 }
 
 namespace MeshImporter 
@@ -77,8 +79,8 @@ namespace MeshImporter
 
 namespace TextureImporter
 {
-	GnTexture GetAiMeshTexture(const aiScene* scene, aiNode* node, const char* path);
-	GnTexture LoadTexture(const char* path);
+	GnTexture* GetAiMeshTexture(const aiScene* scene, aiNode* node, const char* path);
+	GnTexture* LoadTexture(const char* path);
 	std::string FindTexture(const char* texture_name, const char* model_directory);
 	void UnloadTexture(uint imageID);
 }

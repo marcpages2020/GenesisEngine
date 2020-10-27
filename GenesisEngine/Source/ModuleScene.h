@@ -20,7 +20,7 @@ public:
 	void AddGameObject(GameObject* gameObject);
 	void DeleteGameObject(GameObject* gameObject);
 	GameObject* GetRoot() { return root; }
-	void SetDroppedTexture(GnTexture texture);
+	void SetDroppedTexture(GnTexture* texture);
 
 public:
 	bool show_grid;

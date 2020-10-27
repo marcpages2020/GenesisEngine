@@ -15,7 +15,7 @@ public:
 
 	void GenerateBuffers();
 
-	void SetTexture(GnTexture texture);
+	void SetTexture(GnTexture* texture);
 	void AssignCheckersImage();
 
 	virtual void Update() override;
@@ -39,7 +39,7 @@ public:
 
 	uint texture_buffer = -1;
 	uint textureID;
-	GnTexture texture;
+	GnTexture* texture;
 	float* texcoords = nullptr;
 	float* colors;
 

@@ -39,7 +39,7 @@ GnMesh::~GnMesh(){
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glDeleteBuffers(1, &texture_buffer);
 	glDeleteTextures(1, &textureID);
-	TextureImporter::UnloadTexture(texture.id);
+	TextureImporter::UnloadTexture(texture->id);
 
 	delete texcoords;
 	texcoords = nullptr;
@@ -84,13 +84,13 @@ void GnMesh::GenerateBuffers()
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void GnMesh::SetTexture(GnTexture g_texture)
+void GnMesh::SetTexture(GnTexture* g_texture)
 {
-	if (g_texture.data != nullptr)
+	if (g_texture->data != nullptr)
 	{
 		texture = g_texture;
 		glBindTexture(GL_TEXTURE_2D, textureID);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.width, texture.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.data);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture->width, texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture->data);
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 	else 
@@ -123,7 +123,7 @@ void GnMesh::AssignCheckersImage()
 
 void GnMesh::Update()
 {
-	Render();
+ 	Render();
 }
 
 void GnMesh::Render()
@@ -177,6 +177,8 @@ void GnMesh::OnEditor()
 {
 	if (ImGui::CollapsingHeader("Mesh", ImGuiTreeNodeFlags_DefaultOpen))
 	{
+		ImGui::Checkbox(" Enabled", &enabled);
+
 		ImGui::Text("Vertices: %d Indices: %d", vertices_amount, indices_amount);
 		ImGui::Spacing();
 	}
