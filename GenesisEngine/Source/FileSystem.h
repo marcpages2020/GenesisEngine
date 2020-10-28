@@ -48,6 +48,7 @@ namespace FileSystem
 	bool HasExtension(const char* path, std::string extension);
 	bool HasExtension(const char* path, std::vector<std::string> extensions);
 
+	std::string ProcessPath(const char* path);
 	std::string NormalizePath(const char* path);
 	void SplitFilePath(const char* full_path, std::string* path, std::string* file = nullptr, std::string* extension = nullptr);
 

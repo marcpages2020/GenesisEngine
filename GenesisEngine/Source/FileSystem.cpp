@@ -73,6 +73,7 @@ void FileSystem::CreateLibraryDirectories()
 	CreateDir("Config/");
 	CreateDir("Textures/");
 	CreateDir("Models/");
+	CreateDir("Materials/");
 	//CreateDir(ANIMATIONS_PATH);
 	//CreateDir(PARTICLES_PATH);
 	//CreateDir(SHADERS_PATH);
@@ -155,55 +156,6 @@ void FileSystem::GetAllFilesWithExtension(const char* directory, const char* ext
 	}
 }
 
-//TODO
-/*
-PathNode FileSystem::GetAllFiles(const char* directory, std::vector<std::string>* filter_ext, std::vector<std::string>* ignore_ext) 
-{
-	PathNode root;
-	if (Exists(directory))
-	{
-		root.path = directory;
-		Engine->fileSystem->SplitFilePath(directory, nullptr, &root.localPath);
-		if (root.localPath == "")
-			root.localPath = directory;
-
-		std::vector<std::string> file_list, dir_list;
-		DiscoverFiles(directory, file_list, dir_list);
-
-		//Adding all child directories
-		for (uint i = 0; i < dir_list.size(); i++)
-		{
-			std::string str = directory;
-			str.append("/").append(dir_list[i]);
-			root.children.push_back(GetAllFiles(str.c_str(), filter_ext, ignore_ext));
-		}
-		//Adding all child files
-		for (uint i = 0; i < file_list.size(); i++)
-		{
-			//Filtering extensions
-			bool filter = true, discard = false;
-			if (filter_ext != nullptr)
-			{
-				filter = HasExtension(file_list[i].c_str(), *filter_ext);
-			}
-			if (ignore_ext != nullptr)
-			{
-				discard = HasExtension(file_list[i].c_str(), *ignore_ext);
-			}
-			if (filter == true && discard == false)
-			{
-				std::string str = directory;
-				str.append("/").append(file_list[i]);
-				root.children.push_back(GetAllFiles(str.c_str(), filter_ext, ignore_ext));
-			}
-		}
-		root.isFile = HasExtension(root.path.c_str());
-		root.isLeaf = root.children.empty() == true;
-	}
-	return root;
-}
-*/
-
 void FileSystem::GetRealDir(const char* path, std::string& output) 
 {
 	output = PHYSFS_getBaseDir();
@@ -215,8 +167,6 @@ void FileSystem::GetRealDir(const char* path, std::string& output)
 	output.append(*PHYSFS_getSearchPath()).append("/");
 	output.append(PHYSFS_getRealDir(path)).append("/").append(path);
 }
-
-
 
 std::string FileSystem::GetPathRelativeToAssets(const char* originalPath) 
 {
@@ -265,7 +215,23 @@ bool FileSystem::HasExtension(const char* path, std::vector<std::string> extensi
 	return false;
 }
 
-std::string FileSystem::NormalizePath(const char* full_path) 
+std::string FileSystem::ProcessPath(const char* path)
+{
+	std::string final_path = path;
+	
+	final_path = NormalizePath(final_path.c_str());
+	std::string tmp_path = GetPathRelativeToAssets(final_path.c_str());
+
+	//The file is inside a directory
+	if (tmp_path.size() > 0)
+	{
+		return tmp_path.c_str();
+	}
+
+	return final_path.c_str();
+}
+
+std::string FileSystem::NormalizePath(const char* full_path)
 {
 	std::string newPath(full_path);
 	for (int i = 0; i < newPath.size(); ++i)
@@ -441,45 +407,6 @@ uint FileSystem::Save(const char* file, const void* buffer, unsigned int size, b
 	return ret;
 }
 
-//TODO
-/*
-bool FileSystem::Remove(const char* file)
-{
-	bool ret = false;
-
-	if (file != nullptr)
-	{
-		//If it is a directory, we need to recursively remove all the files inside
-		if (IsDirectory(file))
-		{
-			std::vector<std::string> containedFiles, containedDirs;
-			PathNode rootDirectory = GetAllFiles(file);
-
-			for (uint i = 0; i < rootDirectory.children.size(); ++i)
-				Remove(rootDirectory.children[i].path.c_str());
-		}
-
-		if (PHYSFS_delete(file) != 0)
-		{
-			LOG("File deleted: [%s]", file);
-			ret = true;
-		}
-		else
-			LOG("File System error while trying to delete [%s]: %s", file, PHYSFS_getLastError());
-	}
-
-	return ret;
-}
-*/
-
-//TODO
-/*
-uint64 FileSystem::GetLastModTime(const char* filename)
-{
-	return PHYSFS_getLastModTime(filename);
-}
-*/
-
 std::string FileSystem::GetUniqueName(const char* path, const char* name) 
 {
 	//TODO: modify to distinguix files and dirs?
@@ -518,15 +445,21 @@ std::string FileSystem::GetUniqueName(const char* path, const char* name)
 void FileSystem::LoadFile(const char* file_path, bool drag_and_drop)
 {
 	std::string extension = GetFileFormat(file_path);
+	std::string processed_path = ProcessPath(file_path);
 
 	if (extension == ".fbx")
 	{
-		MeshImporter::LoadFBX(file_path);
+		GameObject* imported_fbx = MeshImporter::LoadFBX(processed_path.c_str());
+
+		if (imported_fbx != nullptr)
+			App->scene->AddGameObject(imported_fbx);
 	}
-	else if (extension == ".png")
+	else if (extension == ".png" || extension ==".jpg" || extension == ".bmp" || extension == ".tga")
 	{
 		if (drag_and_drop)
-			App->scene->SetDroppedTexture(TextureImporter::LoadTexture(file_path));
+		{
+			App->scene->SetDroppedTexture(TextureImporter::LoadTexture(processed_path.c_str()));
+		}
 	}
 }
 
@@ -553,22 +486,37 @@ GameObject* MeshImporter::LoadFBX(const char* path)
 {
 	GameObject* root = nullptr;
 
+	std::string normalized_path = FileSystem::NormalizePath(path);
+	std::string relative_path = FileSystem::GetPathRelativeToAssets(normalized_path.c_str());
+
 	char* buffer = nullptr;
-	uint size = FileSystem::Load(path, &buffer);
+	uint size = FileSystem::Load(relative_path.c_str(), &buffer);
 
 	if (buffer == nullptr)
 	{
-		std::string normalized_path = FileSystem::NormalizePath(path);
-		size = FileSystem::Load(normalized_path.c_str(), &buffer);
+		if(relative_path.size() <= 0) {
+			size = FileSystem::Load(normalized_path.c_str(), &buffer);
+		}
+		else {
+			size = FileSystem::Load(relative_path.c_str(), &buffer);
+		}
 	}
 
 	const aiScene* scene = nullptr;
 
-	if (buffer != nullptr) {
+	if (buffer != nullptr) 
+	{
 		scene = aiImportFileFromMemory(buffer, size, aiProcessPreset_TargetRealtime_MaxQuality, NULL);
+
+		if(scene == NULL)
+		{
+			LOG_ERROR("Error trying to load %s directly from memory", path);
+			scene = aiImportFile(normalized_path.c_str(), aiProcessPreset_TargetRealtime_MaxQuality);
+		}
 	}
-	else {
-		scene = aiImportFile(path, aiProcessPreset_TargetRealtime_MaxQuality);
+	else 
+	{
+		scene = aiImportFile(normalized_path.c_str(), aiProcessPreset_TargetRealtime_MaxQuality);
 	}
 
 	if (scene != nullptr && scene->HasMeshes())
@@ -579,6 +527,8 @@ GameObject* MeshImporter::LoadFBX(const char* path)
 	}
 	else
 		LOG_ERROR("Error loading scene %s", path);
+
+	RELEASE_ARRAY(buffer);
 
 	return root;
 }
@@ -717,7 +667,7 @@ Transform MeshImporter::LoadTransform(aiNode* node)
 
 	transform.SetPosition(position.x, position.y, position.z);
 	transform.SetRotation(eulerRotation.x, eulerRotation.y, eulerRotation.z);
-	transform.SetScale(1.0f, 1.0f, 1.0f);
+	transform.SetScale(scaling.x, scaling.y, scaling.z);
 	//transform.SetScale(scaling.x, scaling.y, scaling.z);
 
 	return transform;
@@ -740,6 +690,10 @@ GnTexture* TextureImporter::GetAiMeshTexture(const aiScene* scene, aiNode* node,
 	if (aiTexture_path.length != 0)
 	{
 		std::string tmp_path = FindTexture(aiTexture_path.C_Str(), path);
+
+		if (tmp_path.size() <= 0)
+			tmp_path = aiTexture_path.C_Str();
+
 		texture = LoadTexture(tmp_path.c_str());
 		texture->name = aiTexture_path.C_Str();
 		texture->path = tmp_path;
@@ -784,9 +738,12 @@ GnTexture* TextureImporter::LoadTexture(const char* path)
 	if (ilLoadL(file_format, buffer, size) == IL_FALSE)
 	{
 		LOG_ERROR("Error trying to load the texture %s into buffer, %d: %s", path, ilGetError(), iluErrorString(ilGetError()));
+		buffer = nullptr;
 
 		if (ilLoadImage(normalized_path.c_str()) == IL_FALSE)
-			LOG_ERROR("Error trying to load the texture directly form %s", path);
+		{
+			LOG_ERROR("Error trying to load the texture directly from %s", path);
+		}
 	}
 
 	ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
@@ -809,6 +766,9 @@ GnTexture* TextureImporter::LoadTexture(const char* path)
 		texture->height = ilGetInteger(IL_IMAGE_HEIGHT);
 		texture->path = normalized_path.c_str();
 	}
+
+	if(buffer != NULL)
+		RELEASE_ARRAY(buffer);
 
 	return texture;
 }
