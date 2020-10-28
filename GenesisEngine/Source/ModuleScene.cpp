@@ -59,10 +59,17 @@ void ModuleScene::AddGameObject(GameObject* gameObject)
 
 void ModuleScene::DeleteGameObject(GameObject* gameObject)
 {
-	if (root->RemoveChild(selectedGameObject))
+	if (root->RemoveChild(gameObject))
 	{
-		selectedGameObject->DeleteChildren();
+		gameObject->DeleteChildren();
 	}
+	else if (gameObject->GetParent()->RemoveChild(gameObject))
+	{
+		gameObject->DeleteChildren();
+	}
+
+	delete gameObject;
+	gameObject = nullptr;
 }
 
 void ModuleScene::SetDroppedTexture(GnTexture* texture)
@@ -96,31 +103,12 @@ update_status ModuleScene::Update(float dt)
 		grid.Render();
 	}
 
-	if ((App->input->GetKey(SDL_SCANCODE_DELETE) == KEY_DOWN) && (selectedGameObject != nullptr) && (selectedGameObject != root)) 
-	{
-		DeleteGameObject(selectedGameObject);
-		selectedGameObject = nullptr;
-	}
-
 	root->Update();
 
-	//GnCube cube;
-	//cube.Render();;
-
-	//GnPyramid pyramid;
-	//pyramid.Render();
-
-	//GnPlane plane;
-	//plane.Render();
-
-	//GnSphere sphere;
-	//sphere.Render();
-
-	//GnCylinder cylinder(1, 2, 16);
-	//cylinder.Render();
-
-	//GnCone cone(1, 1.5, 12);
-	//cone.Render();
+	if ((App->input->GetKey(SDL_SCANCODE_DELETE) == KEY_DOWN) && (selectedGameObject != nullptr) && (selectedGameObject != root)) 
+	{
+		selectedGameObject->to_delete = true;
+	}
 
 	return UPDATE_CONTINUE;
 }

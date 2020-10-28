@@ -692,14 +692,16 @@ void MeshImporter::PreorderChildren(const aiScene* scene, aiNode* node, aiNode* 
 Transform MeshImporter::LoadTransform(aiNode* node)
 {
 	Transform transform;
-	aiVector3D position, scaling;
+	aiVector3D position, scaling, eulerRotation;
 	aiQuaternion rotation;
 
 	node->mTransformation.Decompose(scaling, rotation, position);
+	eulerRotation = rotation.GetEuler() * RADTODEG;
 
 	transform.SetPosition(position.x, position.y, position.z);
-	transform.SetRotation(position.x, position.y, position.z);
-	transform.SetScale(scaling.x, scaling.y, scaling.z);
+	transform.SetRotation(eulerRotation.x, eulerRotation.y, eulerRotation.z);
+	transform.SetScale(1.0f, 1.0f, 1.0f);
+	//transform.SetScale(scaling.x, scaling.y, scaling.z);
 
 	return transform;
 }
@@ -781,7 +783,7 @@ GnTexture* TextureImporter::LoadTexture(const char* path)
 	}
 	else
 	{
-		LOG("Texture: %s loaded successfully", path);
+		LOG("Texture loaded successfully from: %s", path);
 
 		texture->id = imageID;
 		texture->name = FileSystem::GetFile(path);

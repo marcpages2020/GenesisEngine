@@ -105,20 +105,30 @@ update_status Editor::Draw()
 	//Console
 	if (show_console_window)
 	{
-		ImGui::Begin("Console", &show_console_window);
-		for (int i = 0; i < console_log.size(); i++)
-		{
+		if (ImGui::Begin("Console", &show_console_window, ImGuiWindowFlags_MenuBar)) {
 
-			if (console_log[i].warning_level == 0) //Normal log
+			if (ImGui::BeginMenuBar()) 
 			{
-				ImGui::Text(console_log[i].log_text.c_str());
+				if (ImGui::MenuItem("Clear"))
+				{
+					console_log.clear();
+				}
+				ImGui::EndMenuBar();
 			}
-			else if (console_log[i].warning_level == 1) //Warning
+
+			for (int i = 0; i < console_log.size(); i++)
 			{
-				ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), console_log[i].log_text.c_str());
+				if (console_log[i].warning_level == 0) //Normal log
+				{
+					ImGui::Text(console_log[i].log_text.c_str());
+				}
+				else if (console_log[i].warning_level == 1) //Warning
+				{
+					ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), console_log[i].log_text.c_str());
+				}
+				else //Error
+					ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), console_log[i].log_text.c_str());
 			}
-			else //Error
-				ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), console_log[i].log_text.c_str());
 		}
 		ImGui::End();
 	}
@@ -126,18 +136,17 @@ update_status Editor::Draw()
 	//Preferences
 	if (show_preferences_window)
 	{
-		ImGui::Begin("Preferences", &show_preferences_window);
-
-		//Style
-		{
-			const char* items[] = { "Classic", "Dark", "Light" };
-			if (ImGui::Combo("Interface Style", &current_theme, items, IM_ARRAYSIZE(items)))
+		if (ImGui::Begin("Preferences", &show_preferences_window)) {
+			//Style
 			{
-				ChangeTheme(std::string(items[current_theme]));
+				const char* items[] = { "Classic", "Dark", "Light" };
+				if (ImGui::Combo("Interface Style", &current_theme, items, IM_ARRAYSIZE(items)))
+				{
+					ChangeTheme(std::string(items[current_theme]));
+				}
+				ImGui::SameLine();
 			}
-			ImGui::SameLine();
 		}
-
 		ImGui::End();
 	}
 
@@ -244,28 +253,27 @@ update_status Editor::ShowDockSpace(bool* p_open)
 	if (!opt_padding)
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 
-	ImGui::Begin("DockSpace", p_open, window_flags);
+	if(ImGui::Begin("DockSpace", p_open, window_flags)){
+		if (!opt_padding)
+			ImGui::PopStyleVar();
 
-	if (!opt_padding)
-		ImGui::PopStyleVar();
+		if (opt_fullscreen)
+			ImGui::PopStyleVar(2);
 
-	if (opt_fullscreen)
-		ImGui::PopStyleVar(2);
+		// DockSpace
+		ImGuiIO& io = ImGui::GetIO();
+		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
+		{
+			ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+		}
 
-	// DockSpace
-	ImGuiIO& io = ImGui::GetIO();
-	if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
-	{
-		ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
-		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+		//main bar
+		if (CreateMainMenuBar())
+			ret = UPDATE_CONTINUE;
+		else
+			ret = UPDATE_STOP;
 	}
-
-	//main bar
-	if (CreateMainMenuBar())
-		ret = UPDATE_CONTINUE;
-	else
-		ret = UPDATE_STOP;
-
 	ImGui::End();
 
 	return ret;
@@ -484,13 +492,13 @@ void Editor::ShowHierarchyWindow()
 	{
 		GameObject* root = App->scene->GetRoot();
 		PreorderHierarchy(root);
-		ImGui::End();
 	}
+	ImGui::End();
 }
 
 void Editor::PreorderHierarchy(GameObject* gameObject)
 {
-	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None;
+	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 
 	if (gameObject->GetChildAmount() > 0) 
 	{
@@ -509,6 +517,7 @@ void Editor::PreorderHierarchy(GameObject* gameObject)
 			{
 				PreorderHierarchy(gameObject->GetChildAt(i));
 			}
+
 			ImGui::TreePop();
 		}
 	}
@@ -523,6 +532,7 @@ void Editor::PreorderHierarchy(GameObject* gameObject)
 		{
 			if (ImGui::IsItemClicked())
 				App->scene->selectedGameObject = gameObject;
+
 			ImGui::TreePop();
 		}
 	}
@@ -589,7 +599,6 @@ void Editor::ShowConfigurationWindow()
 				App->window->SetFullscreenDesktop(fullscreen_desktop);
 
 		}
-
 
 		if (ImGui::CollapsingHeader("Renderer"))
 		{
@@ -696,6 +705,7 @@ void Editor::ShowConfigurationWindow()
 			*/
 
 		}
+		
 	}
 	ImGui::End();
 }

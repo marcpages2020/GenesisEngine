@@ -16,6 +16,7 @@ public:
 
 	float4x4 GetTransform();
 	float4x4 GetGlobalTransform();
+	void UpdateTransform();
 
 	void SetPosition(float x, float y, float z);
 	void SetPosition(float3 new_position);
@@ -36,6 +37,7 @@ private:
 
 	float3 position;
 	float3 scale;
+	float3 eulerRotation;
 	Quat rotation;
 };
 

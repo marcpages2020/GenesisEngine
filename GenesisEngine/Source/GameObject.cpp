@@ -7,7 +7,7 @@
 
 #include <vector>
 
-GameObject::GameObject() : enabled(true), name("Empty Game Object"), parent(nullptr)
+GameObject::GameObject() : enabled(true), name("Empty Game Object"), parent(nullptr), to_delete(false)
 {
 	transform = (Transform*)AddComponent(ComponentType::TRANSFORM);
 }
@@ -21,22 +21,31 @@ GameObject::GameObject(GnMesh* mesh) : GameObject()
 GameObject::~GameObject(){
 	parent = nullptr;
 
-	//TODO: CleanUp Components
+	for (size_t i = 0; i < components.size(); i++)
+	{
+		delete components[i];
+		components[i] = nullptr;
+	}
+	transform = nullptr;
+
 	components.clear();
 	children.clear();
 }
 
 void GameObject::Update()
 {
-	for (size_t i = 0; i < components.size(); i++)
+	if (enabled)
 	{
-		if(components[i]->IsEnabled())
-			components[i]->Update();
-	}
+		for (size_t i = 0; i < components.size(); i++)
+		{
+			if (components[i]->IsEnabled())
+				components[i]->Update();
+		}
 
-	for (size_t i = 0; i < children.size(); i++)
-	{
-		children[i]->Update();
+		for (size_t i = 0; i < children.size(); i++)
+		{
+			children[i]->Update();
+		}
 	}
 }
 
@@ -158,6 +167,11 @@ int GameObject::GetChildAmount()
 GameObject* GameObject::GetChildAt(int index)
 {
 	return children[index];
+}
+
+GameObject* GameObject::GetParent()
+{
+	return parent;
 }
 
 void GameObject::SetParent(GameObject* g_parent)

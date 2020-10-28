@@ -8,6 +8,7 @@ Transform::Transform() : Component()
 
 	position.x = position.y = position.z = 0.0f;
 	rotation = Quat::identity;
+	eulerRotation = float3::zero;
 	scale.x = scale.y = scale.z = 1.0f;
 
 	transform.SetIdentity();
@@ -23,6 +24,8 @@ Transform::Transform(float3 g_position, Quat g_rotation, float3 g_scale) : Compo
 {
 	position = g_position;
 	rotation = g_rotation;
+	eulerRotation = rotation.ToEulerXYX();
+	eulerRotation *= RADTODEG;
 	scale = g_scale;
 
 	transform.SetIdentity();
@@ -50,14 +53,14 @@ void Transform::OnEditor()
 			SetPosition(position);
 		}
 
-		float rotation4f[4] = { rotation.x, rotation.y, rotation.z, 1.0f };
+		float rotation4f[4] = { eulerRotation.x, eulerRotation.y, eulerRotation.z, 1.0f };
 		if (ImGui::DragFloat3("Rotation", rotation4f, 0.1f, -360.0f, 360.0f)) 
 		{
-			rotation.x = rotation4f[0];
-			rotation.y = rotation4f[1];
-			rotation.z = rotation4f[2];
+			eulerRotation.x = rotation4f[0];
+			eulerRotation.y = rotation4f[1];
+			eulerRotation.z = rotation4f[2];
 
-			SetRotation(rotation);
+			SetRotation(eulerRotation.x, eulerRotation.y, eulerRotation.z);
 		}
 
 		float scale4f[4] = { scale.x, scale.y, scale.z, 1.0f };
@@ -84,20 +87,27 @@ float4x4 Transform::GetGlobalTransform()
 	return globalTransform;
 }
 
+void Transform::UpdateTransform()
+{
+	rotation = Quat::FromEulerXYZ(eulerRotation.x * DEGTORAD, eulerRotation.y * DEGTORAD, eulerRotation.z * DEGTORAD);
+	transform = float4x4::FromTRS(position, rotation, scale);
+	globalTransform = transform;
+}
+
 void Transform::SetPosition(float x, float y, float z)
 {
 	position.x = x;
 	position.y = y;
 	position.z = z;
 
-	globalTransform.SetTranslatePart(position);
+	UpdateTransform();
 }
 
 void Transform::SetPosition(float3 new_position)
 {
 	position = new_position;
 
-	globalTransform.SetTranslatePart(position);
+	UpdateTransform();
 }
 
 float3 Transform::GetPosition()
@@ -105,18 +115,21 @@ float3 Transform::GetPosition()
 	return position;
 }
 
+//Set rotation from Euler angles
 void Transform::SetRotation(float x, float y, float z)
 {
-	rotation = Quat::FromEulerXYZ(x, y, z);
+	rotation = Quat::FromEulerXYZ(x * DEGTORAD, y * DEGTORAD, z * DEGTORAD);
+	eulerRotation = float3(x, y, z);
 
-	globalTransform.SetRotatePart(rotation);
+	UpdateTransform();
 }
 
 void Transform::SetRotation(Quat new_rotation)
 {
 	rotation = new_rotation;
+	eulerRotation = rotation.ToEulerXYZ() * RADTODEG;
 
-	globalTransform.SetRotatePart(rotation);
+	UpdateTransform();
 }
 
 void Transform::SetRotation(float x, float y, float z, float w)
@@ -126,7 +139,7 @@ void Transform::SetRotation(float x, float y, float z, float w)
 	rotation.z = z;
 	rotation.w = w;
 
-	globalTransform.SetRotatePart(rotation);
+	UpdateTransform();
 }
 
 Quat Transform::GetRotation()
@@ -140,14 +153,14 @@ void Transform::SetScale(float x, float y, float z)
 	scale.y = y;
 	scale.z = z;
 
-	globalTransform.Scale(scale);
+	UpdateTransform();
 }
 
 void Transform::SetScale(float3 new_scale)
 {
 	scale = new_scale;
 
-	globalTransform.Scale(scale);
+	UpdateTransform();
 }
 
 float3 Transform::GetScale()

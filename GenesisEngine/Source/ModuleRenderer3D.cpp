@@ -1,6 +1,7 @@
 #include "Globals.h"
 #include "Application.h"
 
+#include "GameObject.h"
 #include "Mesh.h"
 #include "Material.h"
 
@@ -231,6 +232,12 @@ update_status ModuleRenderer3D::PostUpdate(float dt)
 	App->editor->Draw();
 
 	SDL_GL_SwapWindow(App->window->window);
+
+	if (App->scene->selectedGameObject != nullptr && App->scene->selectedGameObject->to_delete)
+	{
+		App->scene->DeleteGameObject(App->scene->selectedGameObject);
+		App->scene->selectedGameObject = nullptr;
+	}
 
 	return UPDATE_CONTINUE;
 }

@@ -27,13 +27,17 @@ public:
 	void SetTransform(Transform transform);
 	Transform* GetTransform();
 
+	GameObject* GetParent();
+	void SetParent(GameObject* parent);
+
 	void AddChild(GameObject* child);
 	int GetChildAmount();
 	GameObject* GetChildAt(int index);
-	void SetParent(GameObject* parent);
 	bool RemoveChild(GameObject* gameObject);
 	void DeleteChildren();
 
+public: 
+	bool to_delete;
 private:
 	bool enabled;
 	std::string name;

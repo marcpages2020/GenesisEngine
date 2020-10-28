@@ -128,9 +128,6 @@ void GnMesh::Update()
 
 void GnMesh::Render()
 {
-	glPushMatrix();
-	glMultMatrixf((float*)&gameObject->GetTransform()->GetGlobalTransform());
-
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -152,7 +149,11 @@ void GnMesh::Render()
 
 	//indices
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
+
+	glPushMatrix();
+	glMultMatrixf((float*)&gameObject->GetTransform()->GetGlobalTransform());
 	glDrawElements(GL_TRIANGLES, indices_amount, GL_UNSIGNED_INT, NULL);
+	glPopMatrix();
 
 	if(App->renderer3D->draw_vertex_normals)
 		DrawVertexNormals();
@@ -169,8 +170,6 @@ void GnMesh::Render()
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-
-	glPopMatrix();
 }
 
 void GnMesh::OnEditor()
