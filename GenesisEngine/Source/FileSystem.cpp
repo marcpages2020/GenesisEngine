@@ -45,7 +45,7 @@ void FileSystem::Init()
 	AddPath("."); //Adding ProjectFolder (working directory)
 	AddPath("Assets");
 
-	if (PHYSFS_setWriteDir(".") == 0)
+	if (PHYSFS_setWriteDir("./Assets") == 0)
 		LOG_ERROR("File System error while creating write dir: %s\n", PHYSFS_getLastError());
 
 	CreateLibraryDirectories();
@@ -53,6 +53,8 @@ void FileSystem::Init()
 	struct aiLogStream stream;
 	stream = aiGetPredefinedLogStream(aiDefaultLogStream_DEBUGGER, nullptr);
 	aiAttachLogStream(&stream);
+
+	std::string path = PHYSFS_getWriteDir();
 }
 
 void FileSystem::CleanUp()
@@ -68,9 +70,9 @@ void FileSystem::CreateLibraryDirectories()
 	//CreateDir(MESHES_PATH);
 	//CreateDir(TEXTURES_PATH);
 	//CreateDir(MATERIALS_PATH);
-	CreateDir("Assets/Config/");
-	CreateDir("Assets/Textures/");
-	CreateDir("Assets/Models/");
+	CreateDir("Config/");
+	CreateDir("Textures/");
+	CreateDir("Models/");
 	//CreateDir(ANIMATIONS_PATH);
 	//CreateDir(PARTICLES_PATH);
 	//CreateDir(SHADERS_PATH);
@@ -214,12 +216,25 @@ void FileSystem::GetRealDir(const char* path, std::string& output)
 	output.append(PHYSFS_getRealDir(path)).append("/").append(path);
 }
 
+
+
 std::string FileSystem::GetPathRelativeToAssets(const char* originalPath) 
 {
-	std::string ret;
-	GetRealDir(originalPath, ret);
+	std::string file_path = originalPath;
+	
+	std::size_t pos = file_path.find("Assets");
 
-	return ret;
+	if (pos > file_path.size())
+	{
+		LOG_WARNING("Trying to load a file out of the working directory");
+		file_path.clear();
+	}
+	else
+	{
+		file_path = file_path.substr(pos);
+	}
+
+	return file_path;
 }
 
 bool FileSystem::HasExtension(const char* path) 
@@ -536,7 +551,7 @@ std::string FileSystem::GetFile(const char* path)
 
 GameObject* MeshImporter::LoadFBX(const char* path)
 {
-	GameObject* root = App->scene->GetRoot();
+	GameObject* root = nullptr;
 
 	char* buffer = nullptr;
 	uint size = FileSystem::Load(path, &buffer);
@@ -559,14 +574,13 @@ GameObject* MeshImporter::LoadFBX(const char* path)
 	if (scene != nullptr && scene->HasMeshes())
 	{
 		aiNode* rootNode = scene->mRootNode;
-		PreorderChildren(scene, rootNode, nullptr, root, path);
+		root = PreorderChildren(scene, rootNode, nullptr, nullptr, path);
 		aiReleaseImport(scene);
 	}
 	else
 		LOG_ERROR("Error loading scene %s", path);
 
-	//return collection;
-	return root->GetChildAt(0);
+	return root;
 }
 
 GnMesh* MeshImporter::LoadMesh(const aiScene* scene, aiNode* node, const char* path) {
@@ -652,7 +666,7 @@ GnMesh* MeshImporter::LoadMesh(const aiScene* scene, aiNode* node, const char* p
 	return currentMesh;
 }
 
-void MeshImporter::PreorderChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, GameObject* parentGameObject, const char* path)
+GameObject* MeshImporter::PreorderChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, GameObject* parentGameObject, const char* path)
 {
 	GameObject* gameObject = new GameObject();
 
@@ -683,10 +697,13 @@ void MeshImporter::PreorderChildren(const aiScene* scene, aiNode* node, aiNode* 
 		PreorderChildren(scene, node->mChildren[i], node, gameObject, path);
 	}
 
-	parentGameObject->AddChild(gameObject);
-
-	if(gameObject != App->scene->GetRoot())
+	if (parentGameObject != nullptr)
+	{
+		parentGameObject->AddChild(gameObject);
 		gameObject->SetParent(parentGameObject);
+	}
+
+	return gameObject;
 }
 
 Transform MeshImporter::LoadTransform(aiNode* node)
@@ -736,7 +753,7 @@ GnTexture* TextureImporter::LoadTexture(const char* path)
 	uint imageID = 0;
 
 	std::string normalized_path = FileSystem::NormalizePath(path);
-	//std::string relative_path = FileSystem::GetPathRelativeToAssets(normalized_path.c_str());
+	std::string relative_path = FileSystem::GetPathRelativeToAssets(normalized_path.c_str());
 
 	ilGenImages(1, &imageID);
 	ilBindImage(imageID);
@@ -750,7 +767,7 @@ GnTexture* TextureImporter::LoadTexture(const char* path)
 		LOG_ERROR("Could not create a texture buffer to load: %s, %d", path, ilGetError());
 
 	char* buffer;
-	uint size = FileSystem::Load(normalized_path.c_str(), &buffer);
+	uint size = FileSystem::Load(relative_path.c_str(), &buffer);
 
 	ILenum file_format = IL_TYPE_UNKNOWN;
 
@@ -786,7 +803,7 @@ GnTexture* TextureImporter::LoadTexture(const char* path)
 		LOG("Texture loaded successfully from: %s", path);
 
 		texture->id = imageID;
-		texture->name = FileSystem::GetFile(path);
+		texture->name = FileSystem::GetFile(path) + format;
 		texture->data = ilGetData();
 		texture->width = ilGetInteger(IL_IMAGE_WIDTH);
 		texture->height = ilGetInteger(IL_IMAGE_HEIGHT);

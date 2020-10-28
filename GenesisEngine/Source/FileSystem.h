@@ -73,7 +73,7 @@ namespace MeshImporter
 {
 	GameObject* LoadFBX(const char* path);
 	GnMesh* LoadMesh(const aiScene* scene, aiNode* node, const char* path);
-	void PreorderChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, GameObject* parentGameObject, const char* path);
+	GameObject* PreorderChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, GameObject* parentGameObject, const char* path);
 	Transform LoadTransform(aiNode* node);
 }
 

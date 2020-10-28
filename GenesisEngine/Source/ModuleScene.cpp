@@ -28,6 +28,8 @@ bool ModuleScene::Start()
 	root->SetName("Root");
 
 	GameObject* house = MeshImporter::LoadFBX("Assets/Models/baker_house/BakerHouse.FBX");
+	AddGameObject(house);
+	//MeshImporter::LoadFBX("Assets/Models/monkey.fbx");
 
 	return ret;
 }
@@ -76,6 +78,12 @@ void ModuleScene::SetDroppedTexture(GnTexture* texture)
 {
 	if (selectedGameObject != nullptr) 
 	{
+		if (selectedGameObject->GetComponent(ComponentType::MESH) == nullptr) {
+			delete texture;
+			texture = nullptr;
+			return;
+		}
+
 		Material* material = dynamic_cast<Material*>(selectedGameObject->GetComponent(ComponentType::MATERIAL));
 
 		if (material == nullptr)

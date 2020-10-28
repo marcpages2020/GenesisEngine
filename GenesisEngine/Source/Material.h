@@ -20,7 +20,7 @@ struct GnTexture
 	{
 		name.clear();
 		path.clear();
-		delete data;
+		//delete data;
 		data = nullptr;
 	}
 };
