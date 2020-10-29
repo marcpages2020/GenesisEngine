@@ -41,6 +41,7 @@ public:
 	void SetDisplayMode(DisplayMode display);
 
 	void SetCapActive(GLenum cap, bool active);
+	void SetVSYNC(bool enabled);
 
 	GLubyte GetCheckersImage();
 
@@ -67,7 +68,8 @@ public:
 	bool draw_vertex_normals;
 	bool draw_face_normals;
 
+	bool vsync;
+
 private:
 	bool debug;
-	bool vsync;
 };

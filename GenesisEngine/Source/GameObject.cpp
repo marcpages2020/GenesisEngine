@@ -54,13 +54,10 @@ void GameObject::OnEditor()
 {
 	ImGui::Checkbox("Enabled", &enabled);
 	ImGui::SameLine();
-	//ImGui::Text(name.c_str());
-	static char buf[64] = "Name";
-	strcpy(buf, name.c_str());
-	if (ImGui::InputText("", buf, IM_ARRAYSIZE(buf), ImGuiInputTextFlags_CharsHexadecimal))
-	{
-		ImGui::CaptureKeyboardFromApp(true);
-	}
+	ImGui::Text(name.c_str());
+	//static char buf[64] = "Name";
+	//strcpy(buf, name.c_str());
+	//if (ImGui::InputText("", &buf[0], IM_ARRAYSIZE(buf))){}
 
 	for (size_t i = 0; i < components.size(); i++)
 	{

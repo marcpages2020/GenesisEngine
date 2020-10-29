@@ -250,7 +250,7 @@
     <ClCompile Include="Transform.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Engine\jsons\config.json" />
+    <None Include="..\Engine\Assets\Config\config.json" />
     <None Include="Libs\MathGeoLib\include\Geometry\KDTree.inl" />
     <None Include="Libs\MathGeoLib\include\Geometry\QuadTree.inl" />
     <None Include="Libs\MathGeoLib\include\Geometry\TriangleMesh_IntersectRay_AVX.inl" />

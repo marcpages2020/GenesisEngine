@@ -11,6 +11,7 @@
 #include <iostream>
 #include <Shlwapi.h>
 
+#include "Timer.h"
 #include "parson/parson.h"
 
 #include "PhysFS/include/physfs.h"
@@ -488,6 +489,9 @@ std::string FileSystem::GetFile(const char* path)
 
 GameObject* MeshImporter::LoadFBX(const char* path)
 {
+	Timer timer;
+	timer.Start();
+
 	GameObject* root = nullptr;
 
 	std::string normalized_path = FileSystem::NormalizePath(path);
@@ -511,7 +515,7 @@ GameObject* MeshImporter::LoadFBX(const char* path)
 	if (buffer != nullptr) 
 	{
 		scene = aiImportFileFromMemory(buffer, size, aiProcessPreset_TargetRealtime_MaxQuality, NULL);
-
+		
 		if(scene == NULL)
 		{
 			LOG_ERROR("Error trying to load %s directly from memory", path);
@@ -528,6 +532,7 @@ GameObject* MeshImporter::LoadFBX(const char* path)
 		aiNode* rootNode = scene->mRootNode;
 		root = PreorderChildren(scene, rootNode, nullptr, nullptr, path);
 		aiReleaseImport(scene);
+		LOG("%s loaded in %.3f s", path, timer.ReadSec());
 	}
 	else
 		LOG_ERROR("Error loading scene %s", path);
@@ -707,6 +712,8 @@ GnTexture* TextureImporter::GetAiMeshTexture(const aiScene* scene, aiNode* node,
 
 GnTexture* TextureImporter::LoadTexture(const char* path)
 {
+	Timer timer;
+	timer.Start();
 	uint imageID = 0;
 
 	std::string normalized_path = FileSystem::NormalizePath(path);
@@ -760,7 +767,7 @@ GnTexture* TextureImporter::LoadTexture(const char* path)
 	}
 	else
 	{
-		LOG("Texture loaded successfully from: %s", path);
+		LOG("Texture loaded successfully from: %s in %.3f s", path, timer.ReadSec());
 
 		texture->id = imageID;
 		texture->name = FileSystem::GetFile(path) + format;

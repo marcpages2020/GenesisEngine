@@ -11,7 +11,7 @@ enum class ComponentType {
 class Component {
 public: 
 	Component();
-	~Component();
+	virtual ~Component();
 	virtual void Update();
 	virtual void Enable();
 	virtual void Disable();

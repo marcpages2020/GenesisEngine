@@ -489,7 +489,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Engine\jsons\config.json" />
     <None Include="Libs\MathGeoLib\include\Math\Matrix.inl">
       <Filter>Libs\MathGeoLib\Math</Filter>
     </None>
@@ -508,5 +507,6 @@
     <None Include="Libs\MathGeoLib\include\Geometry\TriangleMesh_IntersectRay_SSE.inl">
       <Filter>Libs\MathGeoLib\Geometry</Filter>
     </None>
+    <None Include="..\Engine\Assets\Config\config.json" />
   </ItemGroup>
 </Project>

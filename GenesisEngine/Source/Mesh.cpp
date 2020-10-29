@@ -37,13 +37,12 @@ GnMesh::~GnMesh(){
 	delete colors;
 	colors = nullptr;
 
+	delete texcoords;
+	texcoords = nullptr;
+
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glDeleteBuffers(1, &texture_buffer);
 	glDeleteTextures(1, &textureID);
-	TextureImporter::UnloadTexture(texture->id);
-
-	delete texcoords;
-	texcoords = nullptr;
 
 	texture = nullptr;
 }
@@ -195,6 +194,15 @@ void GnMesh::OnEditor()
 		ImGui::SameLine();
 		ImGui::Checkbox("Face Normals", &draw_face_normals);
 	}
+}
+
+void GnMesh::RemoveTexture()
+{
+	//TextureImporter::UnloadTexture(texture->id);
+	//delete texture;
+	texture = nullptr;
+
+	AssignCheckersImage();
 }
 
 void GnMesh::DrawVertexNormals()

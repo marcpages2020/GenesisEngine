@@ -1,6 +1,7 @@
 #include "Material.h"
 #include "Mesh.h"
 #include "ImGui/imgui.h"
+#include "FileSystem.h"
 
 Material::Material() : Component(), mesh(nullptr), checkers_image(true), diffuse_texture(nullptr) {
 	type = ComponentType::MATERIAL;
@@ -24,8 +25,12 @@ Material::Material(GnMesh* g_mesh, GnTexture* g_diffuse_texture) : Component(), 
 
 Material::~Material()
 {
-	delete diffuse_texture;
-	diffuse_texture = nullptr;
+	if (diffuse_texture != nullptr)
+	{
+		delete diffuse_texture;
+		TextureImporter::UnloadTexture(diffuse_texture->id);
+		diffuse_texture = nullptr;
+	}
 
 	mesh = nullptr;
 }
@@ -58,6 +63,15 @@ void Material::OnEditor()
 
 			ImGui::Spacing();
 			ImGui::Image((ImTextureID)diffuse_texture->id, ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
+
+			if (ImGui::Button("Remove Texture")) 
+			{
+				TextureImporter::UnloadTexture(diffuse_texture->id);
+				delete diffuse_texture;
+				diffuse_texture = nullptr;
+
+				mesh->RemoveTexture();
+			}
 		}
 
 		ImGui::Spacing();

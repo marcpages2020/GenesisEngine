@@ -322,6 +322,33 @@ void ModuleRenderer3D::SetCapActive(GLenum cap, bool active)
 		glDisable(cap);
 }
 
+void ModuleRenderer3D::SetVSYNC(bool enabled)
+{
+	if (enabled)
+	{
+		if (SDL_GL_SetSwapInterval(1) == -1)
+		{
+			LOG_ERROR("VSYNC not supported");
+		}
+		else
+		{
+			LOG("VSYNC enabled");
+		}
+	}
+	else
+	{
+		if (SDL_GL_SetSwapInterval(0) == -1)
+		{
+			LOG_ERROR("VSYNC not supported");
+		}
+		else
+		{
+			LOG("VSYNC disabled");
+		}
+	}
+
+}
+
 GLubyte ModuleRenderer3D::GetCheckersImage()
 {
 	int CHECKERS_WIDTH = 64;

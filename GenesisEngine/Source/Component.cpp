@@ -2,7 +2,10 @@
 
 Component::Component() : enabled(true), gameObject(nullptr) {}
 
-Component::~Component(){}
+Component::~Component()
+{
+    gameObject = nullptr;
+}
 
 void Component::Update(){}
 

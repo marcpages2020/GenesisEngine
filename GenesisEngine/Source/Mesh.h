@@ -22,6 +22,8 @@ public:
 	virtual void Render();
 	virtual void OnEditor() override;
 
+	void RemoveTexture();
+
 	void DrawVertexNormals();
 	void DrawFaceNormals();
 

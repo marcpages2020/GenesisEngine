@@ -78,8 +78,10 @@ update_status Editor::Draw()
 	//Inspector
 	if (show_inspector_window)
 	{
-		ImGui::Begin("Inspector", &show_inspector_window);
-		ShowInspectorWindow();
+		if (ImGui::Begin("Inspector", &show_inspector_window)) 
+		{
+			ShowInspectorWindow();
+		}
 		ImGui::End();
 	}
 
@@ -192,7 +194,7 @@ bool Editor::LoadConfig(JSON_Object* object)
 	window = json_array_get_object_by_name(windows, "inspector");
 	show_inspector_window = json_object_get_boolean(window, "visible");
 
-	window = json_array_get_object_by_name(windows, "hierachy");
+	window = json_array_get_object_by_name(windows, "hierarchy");
 	show_hierarchy_window = json_object_get_boolean(window, "visible");
 
 	window = json_array_get_object_by_name(windows, "project");
@@ -607,6 +609,7 @@ void Editor::ShowConfigurationWindow()
 			static bool lighting = glIsEnabled(GL_LIGHTING);
 			static bool color_material = glIsEnabled(GL_COLOR_MATERIAL);
 			static bool texture_2D = glIsEnabled(GL_TEXTURE_2D);
+			static bool vsync = App->renderer3D->vsync;
 
 			if (ImGui::Checkbox("Depth Test", &depth_test))
 				App->renderer3D->SetCapActive(GL_DEPTH_TEST, depth_test);
@@ -626,6 +629,10 @@ void Editor::ShowConfigurationWindow()
 			if (ImGui::Checkbox("Color Material", &color_material))
 				App->renderer3D->SetCapActive(GL_COLOR_MATERIAL, color_material);
 
+			if (ImGui::Checkbox("VSYNC", &vsync)) 
+				App->renderer3D->SetVSYNC(vsync);
+
+
 			//TODO:	Add two more enables
 		}
 
@@ -636,6 +643,11 @@ void Editor::ShowConfigurationWindow()
 			if (ImGui::ColorEdit3("Background Color##1", (float*)&color)) {
 				App->camera->SetBackgroundColor(color.x, color.y, color.z, color.w);
 			}
+
+			ImGui::SliderFloat("Movement Speed", &App->camera->move_speed, 0.0f, 50.0f);
+			ImGui::SliderFloat("Drag Speed", &App->camera->drag_speed, 0.0f, 10.0f);
+			ImGui::SliderFloat("Zoom Speed", &App->camera->move_speed, 0.0f, 50.0f);
+			ImGui::SliderFloat("Sensitivity", &App->camera->sensitivity, 0.0f, 50.0f);
 		}
 
 		if (ImGui::CollapsingHeader("Hardware"))
