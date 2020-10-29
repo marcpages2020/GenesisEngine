@@ -88,6 +88,11 @@ update_status ModuleCamera3D::Update(float dt)
 		}
 	}
 
+	if (App->input->GetKey(SDL_SCANCODE_R) == KEY_DOWN)
+	{
+		Reset();
+	}
+
 	//Forwards/Backwards
 	if ((App->input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT) || (App->input->GetKey(SDL_SCANCODE_UP) == KEY_REPEAT)) 
 		newPos -= Z * move_speed * speed_multiplier * dt;
@@ -245,6 +250,19 @@ void ModuleCamera3D::Move(const vec3& Movement)
 float* ModuleCamera3D::GetViewMatrix()
 {
 	return &ViewMatrix;
+}
+
+void ModuleCamera3D::Reset()
+{
+	X = vec3(1.0f, 0.0f, 0.0f);
+	Y = vec3(0.0f, 1.0f, 0.0f);
+	Z = vec3(0.0f, 0.0f, 1.0f);
+
+	Position = vec3(0.0f, 0.0f, 5.0f);
+	Reference = vec3(0.0f, 0.0f, 0.0f);
+
+	Move(vec3(1.0f, 1.0f, 0.0f));
+	LookAt(vec3(0, 0, 0));
 }
 
 void ModuleCamera3D::SetBackgroundColor(float r, float g, float b, float w)

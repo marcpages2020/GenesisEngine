@@ -36,10 +36,14 @@ void FileSystem::Init()
 {
 	ilInit();
 	iluInit();
-	ilutRenderer(ILUT_OPENGL);
+	if (ilutRenderer(ILUT_OPENGL)) 
+		LOG("DevIL initted correctly");
 
 	char* base_path = SDL_GetBasePath();
-	PHYSFS_init(nullptr);
+
+	if (PHYSFS_init(nullptr) != 0)
+		LOG("PhysFS initted correctly");
+	
 	SDL_free(base_path);
 
 	AddPath("."); //Adding ProjectFolder (working directory)
@@ -530,6 +534,8 @@ GameObject* MeshImporter::LoadFBX(const char* path)
 
 	RELEASE_ARRAY(buffer);
 
+	//root->UpdateChildrenTransforms();
+
 	return root;
 }
 
@@ -637,12 +643,7 @@ GameObject* MeshImporter::PreorderChildren(const aiScene* scene, aiNode* node, a
 		Material* material = new Material(mesh, texture);
 		gameObject->AddComponent(material);
 
-		LoadTransform(node, *gameObject->GetTransform());
-
-		if (parentGameObject != nullptr)
-		{
-			//gameObject->GetTransform()->UpdateGlobalTransform(parentGameObject->GetTransform()->GetGlobalTransform());
-		}
+		LoadTransform(node, gameObject->GetTransform());
 	}
 	else
 	{
@@ -660,7 +661,7 @@ GameObject* MeshImporter::PreorderChildren(const aiScene* scene, aiNode* node, a
 	return gameObject;
 }
 
-void MeshImporter::LoadTransform(aiNode* node, Transform& transform)
+void MeshImporter::LoadTransform(aiNode* node, Transform* transform)
 {
 	aiVector3D position, scaling, eulerRotation;
 	aiQuaternion rotation;
@@ -668,10 +669,11 @@ void MeshImporter::LoadTransform(aiNode* node, Transform& transform)
 	node->mTransformation.Decompose(scaling, rotation, position);
 	eulerRotation = rotation.GetEuler() * RADTODEG;
 
-	transform.SetPosition(position.x, position.y, position.z);
-	transform.SetRotation(eulerRotation.x, eulerRotation.y, eulerRotation.z);
-	//transform.SetScale(scaling.x, scaling.y, scaling.z);
-	transform.SetScale(1.0f, 1.0f, 1.0f);
+	transform->SetPosition(position.x, position.y, position.z);
+	transform->SetRotation(eulerRotation.x, eulerRotation.y, eulerRotation.z);
+	//localTransform.SetScale(scaling.x, scaling.y, scaling.z);
+	transform->SetScale(1.0f, 1.0f, 1.0f);
+	transform->UpdateLocalTransform();
 }
 
 #pragma endregion 

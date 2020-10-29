@@ -21,7 +21,10 @@
    of the scene).
  - F: Focus the camera around the selected object.(If an object is not selected it will focus around    the center
    of the scene).
+ - R: Reset camera position and orientation. 
  - Hold Shift: Duplicate movement speed.
+
+ If for any reason the camera got stuck or didn't show anything on screen push R to reset it. 
 
 ## Engine Functionality
 

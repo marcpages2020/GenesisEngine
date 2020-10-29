@@ -15,13 +15,14 @@ public:
 	void OnEditor() override;
 
 	void Set(float4x4 transform);
-	void SetParentTransform();
 
-	float4x4 GetTransform();
+	float4x4 GetLocalTransform();
 	float4x4 GetGlobalTransform();
 
-	void UpdateTransform();
+	void UpdateLocalTransform();
 	void UpdateGlobalTransform(float4x4 parentGlobalTransform);
+
+	void Reset();
 
 	void SetPosition(float x, float y, float z);
 	void SetPosition(float3 new_position);
@@ -37,7 +38,7 @@ public:
 	float3 GetScale();
 
 private:
-	float4x4 transform;
+	float4x4 localTransform;
 	float4x4 globalTransform;
 
 	float3 position;

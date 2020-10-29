@@ -146,8 +146,8 @@ void GameObject::SetName(const char* g_name)
 
 void GameObject::SetTransform(Transform g_transform)
 {
-	//transform->Set(g_transform.GetTransform());
-	//transform->UpdateTransform();
+	//localTransform->Set(g_transform.GetLocalTransform());
+	//localTransform->UpdateLocalTransform();
 	memcpy(transform, &g_transform, sizeof(g_transform));
 }
 
@@ -204,4 +204,14 @@ void GameObject::DeleteChildren()
 	}
 
 	this->~GameObject();
+}
+
+void GameObject::UpdateChildrenTransforms()
+{
+	transform->UpdateLocalTransform();
+
+	for (size_t i = 0; i < children.size(); i++)
+	{
+		children[i]->GetTransform()->UpdateGlobalTransform(transform->GetGlobalTransform());
+	}
 }

@@ -44,6 +44,10 @@ public:
 	float* colors;
 
 	const char* name;
+
+private:
+	bool draw_vertex_normals;
+	bool draw_face_normals;
 };
 
 class GnCube : public GnMesh {

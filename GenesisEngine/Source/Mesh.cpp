@@ -12,7 +12,8 @@
 // GnMesh =========================================================================================================================
 
 GnMesh::GnMesh() : Component(),  vertices_buffer(-1), vertices_amount(-1), vertices(nullptr), indices_buffer(-1), indices_amount(-1), indices(nullptr), 
- normals_buffer(-1), texture_buffer(-1),  textureID(-1), texcoords(nullptr), normals(nullptr), colors(nullptr) 
+ normals_buffer(-1), texture_buffer(-1),  textureID(-1), texcoords(nullptr), normals(nullptr), colors(nullptr), draw_face_normals(false), draw_vertex_normals(false),
+ name("No name"), texture(nullptr)
 {
 	type = ComponentType::MESH;
 }
@@ -159,14 +160,16 @@ void GnMesh::Render()
 
 	glPushMatrix();
 	glMultMatrixf((float*)&gameObject->GetTransform()->GetGlobalTransform());
-	glDrawElements(GL_TRIANGLES, indices_amount, GL_UNSIGNED_INT, NULL);
-	glPopMatrix();
 
-	if(App->renderer3D->draw_vertex_normals)
+	glDrawElements(GL_TRIANGLES, indices_amount, GL_UNSIGNED_INT, NULL);
+
+	if(draw_vertex_normals ||App->renderer3D->draw_vertex_normals)
 		DrawVertexNormals();
 
-	if (App->renderer3D->draw_face_normals)
+	if (draw_face_normals || App->renderer3D->draw_face_normals)
 		DrawFaceNormals();
+
+	glPopMatrix();
 
 	//clean buffers
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -187,6 +190,10 @@ void GnMesh::OnEditor()
 
 		ImGui::Text("Vertices: %d Indices: %d", vertices_amount, indices_amount);
 		ImGui::Spacing();
+
+		ImGui::Checkbox("Vertex Normals", &draw_vertex_normals);
+		ImGui::SameLine();
+		ImGui::Checkbox("Face Normals", &draw_face_normals);
 	}
 }
 

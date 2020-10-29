@@ -20,6 +20,7 @@ public:
 	void Move(const vec3& Movement);
 	float* GetViewMatrix();
 
+	void Reset();
 	void SetBackgroundColor(float r, float g, float b, float w);
 
 private:

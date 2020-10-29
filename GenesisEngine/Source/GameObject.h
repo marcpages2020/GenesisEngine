@@ -35,6 +35,7 @@ public:
 	GameObject* GetChildAt(int index);
 	bool RemoveChild(GameObject* gameObject);
 	void DeleteChildren();
+	void UpdateChildrenTransforms();
 
 public: 
 	bool to_delete;
