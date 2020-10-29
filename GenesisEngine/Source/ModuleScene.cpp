@@ -11,8 +11,7 @@ ModuleScene::ModuleScene(bool start_enabled) : Module(start_enabled), show_grid(
 	name = "scene";
 }
 
-ModuleScene::~ModuleScene()
-{}
+ModuleScene::~ModuleScene() {}
 
 // Load assets
 bool ModuleScene::Start()
@@ -27,11 +26,12 @@ bool ModuleScene::Start()
 	selectedGameObject = root;
 	root->SetName("Root");
 
-	//GameObject* house = MeshImporter::LoadFBX("Assets/Models/baker_house/BakerHouse.FBX");
-	//AddGameObject(house);
+	GameObject* house = MeshImporter::LoadFBX("Assets/Models/baker_house/BakerHouse.FBX");
+	AddGameObject(house);
 
-	GameObject* rayman = MeshImporter::LoadFBX("Assets/Models/rayman/rayman.fbx");
-	AddGameObject(rayman);
+	//GameObject* rayman = MeshImporter::LoadFBX("Assets/Models/rayman/rayman.fbx");
+	//AddGameObject(rayman);
+
 	//MeshImporter::LoadFBX("Assets/Models/monkey.fbx");
 
 	return ret;
@@ -50,6 +50,8 @@ bool ModuleScene::CleanUp()
 	root->DeleteChildren();
 	delete root;
 	root = nullptr;
+
+	selectedGameObject = nullptr;
 
 	return true;
 }
@@ -81,7 +83,8 @@ void ModuleScene::SetDroppedTexture(GnTexture* texture)
 {
 	if (selectedGameObject != nullptr) 
 	{
-		if (selectedGameObject->GetComponent(ComponentType::MESH) == nullptr) {
+		if (selectedGameObject->GetComponent(ComponentType::MESH) == nullptr) 
+		{
 			delete texture;
 			texture = nullptr;
 			return;

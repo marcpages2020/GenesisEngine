@@ -14,9 +14,14 @@ public:
 	void Update() override;
 	void OnEditor() override;
 
+	void Set(float4x4 transform);
+	void SetParentTransform();
+
 	float4x4 GetTransform();
 	float4x4 GetGlobalTransform();
+
 	void UpdateTransform();
+	void UpdateGlobalTransform(float4x4 parentGlobalTransform);
 
 	void SetPosition(float x, float y, float z);
 	void SetPosition(float3 new_position);

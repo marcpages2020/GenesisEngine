@@ -26,6 +26,8 @@ Material::~Material()
 {
 	delete diffuse_texture;
 	diffuse_texture = nullptr;
+
+	mesh = nullptr;
 }
 
 void Material::OnEditor()
@@ -68,6 +70,6 @@ void Material::SetTexture(GnTexture* texture)
 
 	if (mesh != nullptr)
 	{
-		mesh->SetTexture(diffuse_texture);
+		checkers_image = !mesh->SetTexture(diffuse_texture);
 	}
 }

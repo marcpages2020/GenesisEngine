@@ -73,7 +73,7 @@ void FileSystem::CreateLibraryDirectories()
 	CreateDir("Config/");
 	CreateDir("Textures/");
 	CreateDir("Models/");
-	CreateDir("Materials/");
+	//CreateDir("Materials/");
 	//CreateDir(ANIMATIONS_PATH);
 	//CreateDir(PARTICLES_PATH);
 	//CreateDir(SHADERS_PATH);
@@ -620,6 +620,12 @@ GameObject* MeshImporter::PreorderChildren(const aiScene* scene, aiNode* node, a
 {
 	GameObject* gameObject = new GameObject();
 
+	if (parentGameObject != nullptr)
+	{
+		parentGameObject->AddChild(gameObject);
+		gameObject->SetParent(parentGameObject);
+	}
+
 	if (node->mMeshes != nullptr)
 	{
 		gameObject->SetName(node->mName.C_Str());
@@ -631,8 +637,12 @@ GameObject* MeshImporter::PreorderChildren(const aiScene* scene, aiNode* node, a
 		Material* material = new Material(mesh, texture);
 		gameObject->AddComponent(material);
 
-		Transform transform = LoadTransform(node);
-		gameObject->SetTransform(transform);
+		LoadTransform(node, *gameObject->GetTransform());
+
+		if (parentGameObject != nullptr)
+		{
+			//gameObject->GetTransform()->UpdateGlobalTransform(parentGameObject->GetTransform()->GetGlobalTransform());
+		}
 	}
 	else
 	{
@@ -647,18 +657,11 @@ GameObject* MeshImporter::PreorderChildren(const aiScene* scene, aiNode* node, a
 		PreorderChildren(scene, node->mChildren[i], node, gameObject, path);
 	}
 
-	if (parentGameObject != nullptr)
-	{
-		parentGameObject->AddChild(gameObject);
-		gameObject->SetParent(parentGameObject);
-	}
-
 	return gameObject;
 }
 
-Transform MeshImporter::LoadTransform(aiNode* node)
+void MeshImporter::LoadTransform(aiNode* node, Transform& transform)
 {
-	Transform transform;
 	aiVector3D position, scaling, eulerRotation;
 	aiQuaternion rotation;
 
@@ -667,10 +670,8 @@ Transform MeshImporter::LoadTransform(aiNode* node)
 
 	transform.SetPosition(position.x, position.y, position.z);
 	transform.SetRotation(eulerRotation.x, eulerRotation.y, eulerRotation.z);
-	transform.SetScale(scaling.x, scaling.y, scaling.z);
 	//transform.SetScale(scaling.x, scaling.y, scaling.z);
-
-	return transform;
+	transform.SetScale(1.0f, 1.0f, 1.0f);
 }
 
 #pragma endregion 
@@ -737,7 +738,7 @@ GnTexture* TextureImporter::LoadTexture(const char* path)
 
 	if (ilLoadL(file_format, buffer, size) == IL_FALSE)
 	{
-		LOG_ERROR("Error trying to load the texture %s into buffer, %d: %s", path, ilGetError(), iluErrorString(ilGetError()));
+		LOG_WARNING("Error trying to load the texture %s into buffer, %d: %s", path, ilGetError(), iluErrorString(ilGetError()));
 		buffer = nullptr;
 
 		if (ilLoadImage(normalized_path.c_str()) == IL_FALSE)

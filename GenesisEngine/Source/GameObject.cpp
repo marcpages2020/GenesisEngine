@@ -30,6 +30,7 @@ GameObject::~GameObject(){
 
 	components.clear();
 	children.clear();
+	name.clear();
 }
 
 void GameObject::Update()
@@ -93,6 +94,7 @@ Component* GameObject::AddComponent(ComponentType type)
 	if (type == ComponentType::TRANSFORM) 
 	{
 		Transform* transform = new Transform();
+		transform->SetGameObject(this);
 		components.push_back(transform);
 		return transform;
 	}
@@ -144,9 +146,9 @@ void GameObject::SetName(const char* g_name)
 
 void GameObject::SetTransform(Transform g_transform)
 {
-	transform->SetPosition(g_transform.GetPosition());
-	transform->SetRotation(g_transform.GetRotation());
-	transform->SetScale(g_transform.GetScale());
+	//transform->Set(g_transform.GetTransform());
+	//transform->UpdateTransform();
+	memcpy(transform, &g_transform, sizeof(g_transform));
 }
 
 Transform* GameObject::GetTransform()

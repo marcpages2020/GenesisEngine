@@ -1,6 +1,7 @@
 #include "Transform.h"
 #include "ImGui/imgui.h"
 #include "Globals.h"
+#include "GameObject.h"
 
 Transform::Transform() : Component()
 {
@@ -11,13 +12,8 @@ Transform::Transform() : Component()
 	eulerRotation = float3::zero;
 	scale.x = scale.y = scale.z = 1.0f;
 
-	transform.SetIdentity();
-	globalTransform.SetIdentity();
-
-	globalTransform = float4x4::FromTRS(position, rotation, scale);
-
-	//transform.SetIdentity();
-	//globalTransform = transform;
+	transform = float4x4::FromTRS(position, rotation, scale);
+	globalTransform = transform;
 }
 
 Transform::Transform(float3 g_position, Quat g_rotation, float3 g_scale) : Component()
@@ -27,9 +23,6 @@ Transform::Transform(float3 g_position, Quat g_rotation, float3 g_scale) : Compo
 	eulerRotation = rotation.ToEulerXYX();
 	eulerRotation *= RADTODEG;
 	scale = g_scale;
-
-	transform.SetIdentity();
-	globalTransform.SetIdentity();
 
 	transform = float4x4::FromTRS(g_position, g_rotation, g_scale);
 	globalTransform = transform;
@@ -77,6 +70,11 @@ void Transform::OnEditor()
 	}
 }
 
+void Transform::Set(float4x4 g_transform)
+{
+	transform = g_transform;
+}
+
 float4x4 Transform::GetTransform()
 {
 	return transform;
@@ -89,9 +87,20 @@ float4x4 Transform::GetGlobalTransform()
 
 void Transform::UpdateTransform()
 {
-	rotation = Quat::FromEulerXYZ(eulerRotation.x * DEGTORAD, eulerRotation.y * DEGTORAD, eulerRotation.z * DEGTORAD);
 	transform = float4x4::FromTRS(position, rotation, scale);
-	globalTransform = transform;
+
+	if (gameObject->GetParent() != nullptr)
+		globalTransform = transform;
+	else
+	{
+		//UpdateGlobalTransform(gameObject->GetParent()->GetTransform()->GetGlobalTransform());
+	}
+	
+}
+
+void Transform::UpdateGlobalTransform(float4x4 parentGlobalTransform)
+{
+	transform = parentGlobalTransform * transform;
 }
 
 void Transform::SetPosition(float x, float y, float z)
@@ -118,9 +127,8 @@ float3 Transform::GetPosition()
 //Set rotation from Euler angles
 void Transform::SetRotation(float x, float y, float z)
 {
-	rotation = Quat::FromEulerXYZ(x * DEGTORAD, y * DEGTORAD, z * DEGTORAD);
 	eulerRotation = float3(x, y, z);
-
+	rotation = Quat::FromEulerXYZ(x * DEGTORAD, y * DEGTORAD, z * DEGTORAD);
 	UpdateTransform();
 }
 

@@ -43,6 +43,8 @@ GnMesh::~GnMesh(){
 
 	delete texcoords;
 	texcoords = nullptr;
+
+	texture = nullptr;
 }
 
 void GnMesh::GenerateBuffers()
@@ -84,19 +86,24 @@ void GnMesh::GenerateBuffers()
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void GnMesh::SetTexture(GnTexture* g_texture)
+bool GnMesh::SetTexture(GnTexture* g_texture)
 {
+	bool ret = false;
+
 	if (g_texture->data != nullptr)
 	{
 		texture = g_texture;
 		glBindTexture(GL_TEXTURE_2D, textureID);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture->width, texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture->data);
 		glBindTexture(GL_TEXTURE_2D, 0);
+		ret = true;
 	}
 	else 
 	{
 		AssignCheckersImage();
 	}
+
+	return ret;
 }
 
 void GnMesh::AssignCheckersImage()
