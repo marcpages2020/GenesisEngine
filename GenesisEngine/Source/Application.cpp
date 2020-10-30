@@ -9,7 +9,6 @@ Application::Application(int argc, char* args[]) : argc(argc), args(args)
 {
 	window = new ModuleWindow(true);
 	input = new ModuleInput(true);
-	audio = new ModuleAudio(true);
 	renderer3D = new ModuleRenderer3D(true);
 	camera = new ModuleCamera3D(true);
 	scene = new ModuleScene(true);
@@ -19,7 +18,6 @@ Application::Application(int argc, char* args[]) : argc(argc), args(args)
 	AddModule(window);
 	AddModule(camera);
 	AddModule(input);
-	AddModule(audio);
 	AddModule(scene);
 
 	AddModule(editor);

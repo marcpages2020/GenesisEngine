@@ -90,7 +90,7 @@ bool GnMesh::SetTexture(GnTexture* g_texture)
 {
 	bool ret = false;
 
-	if (g_texture->data != nullptr)
+	if (g_texture != nullptr && g_texture->data != nullptr)
 	{
 		texture = g_texture;
 		glBindTexture(GL_TEXTURE_2D, textureID);
