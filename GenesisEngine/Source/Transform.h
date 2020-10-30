@@ -35,6 +35,7 @@ public:
 
 	void SetScale(float x, float y, float z);
 	void SetScale(float3 new_scale);
+	void SetProportionalScale(float multiplier);
 	float3 GetScale();
 
 private:

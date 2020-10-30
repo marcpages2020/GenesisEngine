@@ -69,6 +69,12 @@ void Transform::OnEditor()
 			UpdateLocalTransform();
 		};
 
+		float scale_multiplier = scale.x;
+		if (ImGui::DragFloat("Scale Multiplier", &scale_multiplier, 0.01f, 0.0f, 10.0f)) 
+		{
+			SetProportionalScale(scale_multiplier);
+		}
+
 		ImGui::Spacing();
 
 		if (ImGui::Button("Reset"))
@@ -192,6 +198,13 @@ void Transform::SetScale(float3 new_scale)
 	scale = new_scale;
 
 	//UpdateLocalTransform();
+}
+
+void Transform::SetProportionalScale(float multiplier)
+{
+	scale.x = scale.y = scale.z = multiplier;
+
+	UpdateLocalTransform();
 }
 
 float3 Transform::GetScale()

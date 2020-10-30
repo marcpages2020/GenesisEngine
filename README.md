@@ -32,17 +32,20 @@
  the same and if an object is selected it will be automatically applied to it. 
  
 ### Game Objects Inspector actions
- - Transform: Translate, Rotate and Scale the object.
+ - Transform: Translate, Rotate and Scale the object. There is a scale multiplier which lest ypu scale the Object in all teh axis at    the same time. 
  - Mesh: Toggle the view of the vertex and face normals. 
- - Material: Toggle the checkers image.  
+ - Material: 
+     - Toggle the checkers image. 
+     - Remove the current texture. 
 
 ### Actions in tabs:
  - Windows: Enable the engine windows. 
  - Edit: 
    - Configuration: Change the engine settings and view graphs about the performance. 
 
- - Game Object: There are six primitives available to be created at any time. These are: Cube, Plane,    Cylinder, Sphere,
-   Cone and Pyramid.  
+ - Game Object: There are six primitives available to be created at any time. These are: Cube, Plane, Cylinder, Sphere,
+   Cone and Pyramid. These are duplicated, the firsts are generated automatically and have no texture coordinates and the 
+   ones marked with FBX will be loaded from FBX files and will have texture coordinates. 
 
  - About: Get the pages where the project is held in GitHub and get more information about the engine.
 

@@ -4,6 +4,7 @@
 #include "Mesh.h"
 #include "ModuleScene.h"
 #include "GameObject.h"
+#include "FileSystem.h"
 
 #include "glew/include/glew.h"
 
@@ -351,21 +352,53 @@ bool Editor::CreateMainMenuBar() {
 			{
 				App->scene->AddGameObject(new GameObject(new GnCube()));
 			}
+			else if (ImGui::MenuItem("FBX: Cube"))
+			{
+				App->scene->AddGameObject(MeshImporter::LoadFBX("Assets/Models/Primitives/cube.fbx"));
+			}
 			else if (ImGui::MenuItem("Cylinder"))
 			{
 				App->scene->AddGameObject(new GameObject(new GnCylinder()));
+			}
+			else if (ImGui::MenuItem("FBX: Cylinder"))
+			{
+				App->scene->AddGameObject(MeshImporter::LoadFBX("Assets/Models/Primitives/cylinder.fbx"));
 			}
 			else if (ImGui::MenuItem("Sphere"))
 			{
 				App->scene->AddGameObject(new GameObject(new GnSphere()));
 			}
+			else if (ImGui::MenuItem("FBX: Sphere"))
+			{
+				App->scene->AddGameObject(MeshImporter::LoadFBX("Assets/Models/Primitives/sphere.fbx"));
+			}
 			else if (ImGui::MenuItem("Pyramid"))
 			{
 				App->scene->AddGameObject(new GameObject(new GnPyramid()));
 			}
+			else if (ImGui::MenuItem("FBX: Pyramid"))
+			{
+				App->scene->AddGameObject(MeshImporter::LoadFBX("Assets/Models/Primitives/pyramid.fbx"));
+			}
 			else if (ImGui::MenuItem("Plane"))
 			{
 				App->scene->AddGameObject(new GameObject(new GnPlane()));
+			}
+			else if (ImGui::MenuItem("FBX: Plane"))
+			{
+				App->scene->AddGameObject(MeshImporter::LoadFBX("Assets/Models/Primitives/plane.fbx"));
+			}
+			else if (ImGui::MenuItem("Cone"))
+			{
+				App->scene->AddGameObject(new GameObject(new GnCone()));
+			}
+			else if (ImGui::MenuItem("FBX: Cone"))
+			{
+				App->scene->AddGameObject(MeshImporter::LoadFBX("Assets/Models/Primitives/cone.fbx"));
+			}
+			else if (ImGui::MenuItem("Suzanne"))
+			{
+				App->scene->AddGameObject(MeshImporter::LoadFBX("Assets/Models/Primitives/monkey.fbx"));
 			}
 			ImGui::EndMenu();
 		}
