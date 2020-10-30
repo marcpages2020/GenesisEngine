@@ -6,6 +6,8 @@
 #include "GameObject.h"
 #include "FileSystem.h"
 
+#include "Assimp/Assimp/include/version.h"
+
 #include "glew/include/glew.h"
 
 #include "ImGui/imgui_impl_sdl.h"
@@ -750,6 +752,10 @@ void Editor::ShowConfigurationWindow()
 			*/
 
 		}
+
+		if (ImGui::CollapsingHeader("File System")) {
+			ImGui::Checkbox("Normalize imported meshes", &FileSystem::normalize_scales);
+		}
 		
 	}
 	ImGui::End();
@@ -802,7 +808,13 @@ void Editor::ShowAboutWindow()
 
 		ImGui::BulletText("DevIL 1.8.0");
 
-		ImGui::BulletText("Assimp 3.1.1");
+		ImGui::BulletText("Assimp %d.%d.%d", aiGetVersionMajor(), aiGetVersionMinor(), aiGetVersionRevision());
+
+		static std::string physfs_version;
+		FileSystem::GetPhysFSVersion(physfs_version);
+		ImGui::BulletText("PhysFS %s", physfs_version.c_str());
+
+		ImGui::BulletText("Parson 1.1.0");
 
 		ImGui::Spacing();
 		ImGui::Separator();

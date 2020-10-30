@@ -27,9 +27,7 @@ Material::~Material()
 {
 	if (diffuse_texture != nullptr)
 	{
-		delete diffuse_texture;
-		TextureImporter::UnloadTexture(diffuse_texture->id);
-		diffuse_texture = nullptr;
+		DeleteTexture();
 	}
 
 	mesh = nullptr;
@@ -66,9 +64,7 @@ void Material::OnEditor()
 
 			if (ImGui::Button("Remove Texture")) 
 			{
-				TextureImporter::UnloadTexture(diffuse_texture->id);
-				delete diffuse_texture;
-				diffuse_texture = nullptr;
+				DeleteTexture();
 
 				mesh->RemoveTexture();
 			}
@@ -86,4 +82,15 @@ void Material::SetTexture(GnTexture* texture)
 	{
 		checkers_image = !mesh->SetTexture(diffuse_texture);
 	}
+}
+
+bool Material::DeleteTexture()
+{
+	bool ret = true;
+
+	TextureImporter::UnloadTexture(diffuse_texture->id);
+	delete diffuse_texture;
+	diffuse_texture = nullptr;
+
+	return ret;
 }

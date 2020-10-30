@@ -17,10 +17,8 @@
  - D / Right Arrow: Move Right
 
  - Mouse Wheel: Zoom In/Out
- - Alt + Left Click: Orbit around the selected object. (If an object is not selected it will orbit    around the center
-   of the scene).
- - F: Focus the camera around the selected object.(If an object is not selected it will focus around    the center
-   of the scene).
+ - Alt + Left Click: Orbit around the selected object. (If an object is not selected it will orbit around the center of the scene).
+ - F: Focus the camera around the selected object.(If an object is not selected it will focus around the center of the scene).
  - R: Reset camera position and orientation. 
  - Hold Shift: Duplicate movement speed.
 
@@ -32,7 +30,7 @@
  the same and if an object is selected it will be automatically applied to it. 
  
 ### Game Objects Inspector actions
- - Transform: Translate, Rotate and Scale the object. There is a scale multiplier which lest ypu scale the Object in all teh axis at    the same time. 
+ - Transform: Translate, Rotate and Scale the object. There is a scale multiplier which lest ypu scale the Object in all the axis at the same time. 
  - Mesh: Toggle the view of the vertex and face normals. 
  - Material: 
      - Toggle the checkers image. 
@@ -50,9 +48,12 @@
  - About: Get the pages where the project is held in GitHub and get more information about the engine.
 
  ## Additional functionality
- - The engine settings are loaded directly from a JSON file named config and located in    Engine/Assets/Config. 
+ - The engine settings are loaded directly from a JSON file named config and located in GenesisEngine/Assets/Config. 
    this settings include the modules values and which windows are opened on start. 
- - When and FBX is loaded the hierarchy of the objects is mantained and the name of the objects in the    FBX will be assigned
+ - When and FBX is loaded the hierarchy of the objects is mantained and the name of the objects in the FBX will be assigned
    to the new Game Object.  
  - Objects can be deleted selecting them and pressing SUPR.  
+ - Local Transformations are applied to objects, to represent so the baker house will be rotated. Its childs can be rotated and scaled via inspector.
+ - In configuration you can change if you want the size of the files to be normalized when imported. They are normalized if their size is (100, 100, 100).
+ - Size can be changed in all axis at the same time using the scale multiplier under the scale transform in the inspector. 
  

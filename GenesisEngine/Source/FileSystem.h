@@ -27,8 +27,12 @@ typedef json_object_t JSON_Object;
 
 namespace FileSystem 
 {
+	static bool normalize_scales;
+
 	void Init();
 	void CleanUp();
+
+	void GetPhysFSVersion(std::string& version_str);
 
 	void CreateLibraryDirectories();
 

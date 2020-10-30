@@ -60,12 +60,21 @@ void FileSystem::Init()
 	aiAttachLogStream(&stream);
 
 	std::string path = PHYSFS_getWriteDir();
+
+	normalize_scales = true;
 }
 
 void FileSystem::CleanUp()
 {
 	PHYSFS_deinit();
 	aiDetachAllLogStreams();
+}
+
+void FileSystem::GetPhysFSVersion(std::string& version_str)
+{
+	PHYSFS_Version version;
+	PHYSFS_getLinkedVersion(&version);
+	version_str = std::to_string(version.major) + "." + std::to_string(version.minor) + "." + std::to_string(version.patch);
 }
 
 void FileSystem::CreateLibraryDirectories()
@@ -676,8 +685,15 @@ void MeshImporter::LoadTransform(aiNode* node, Transform* transform)
 
 	transform->SetPosition(position.x, position.y, position.z);
 	transform->SetRotation(eulerRotation.x, eulerRotation.y, eulerRotation.z);
-	//localTransform.SetScale(scaling.x, scaling.y, scaling.z);
-	transform->SetScale(1.0f, 1.0f, 1.0f);
+
+	if (FileSystem::normalize_scales) {
+		if (scaling.x == 100 && scaling.y == 100 && scaling.z == 100) 
+		{
+			scaling.x = scaling.y = scaling.z = 1.0f;
+		}
+	}
+
+	transform->SetScale(scaling.x, scaling.y, scaling.z);
 	transform->UpdateLocalTransform();
 }
 

@@ -33,6 +33,7 @@ public:
 	void OnEditor() override;
 
 	void SetTexture(GnTexture* texture);
+	bool DeleteTexture();
 
 private:
 	GnTexture* diffuse_texture;
