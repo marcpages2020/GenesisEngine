@@ -44,10 +44,17 @@ void Material::OnEditor()
 		ImGui::SameLine();
 		if (ImGui::Checkbox("Checkers Image", &checkers_image))
 		{
-			if (checkers_image == false)
-				mesh->SetTexture(diffuse_texture);
+			if (diffuse_texture != nullptr)
+			{
+				if (checkers_image == false)
+					mesh->SetTexture(diffuse_texture);
+				else
+					mesh->AssignCheckersImage();
+			}
 			else
-				mesh->AssignCheckersImage();
+			{
+				checkers_image = true;
+			}
 		}
 
 		ImGui::Separator();
@@ -76,6 +83,9 @@ void Material::OnEditor()
 
 void Material::SetTexture(GnTexture* texture)
 {
+	if (diffuse_texture != nullptr)
+		DeleteTexture();
+
 	diffuse_texture = texture;
 
 	if (mesh != nullptr)

@@ -83,7 +83,7 @@ void ModuleScene::SetDroppedTexture(GnTexture* texture)
 {
 	if (selectedGameObject != nullptr) 
 	{
-		if (selectedGameObject->GetComponent(ComponentType::MESH) == nullptr) 
+		if (selectedGameObject->GetComponent(ComponentType::MESH) == nullptr && texture != nullptr) 
 		{
 			delete texture;
 			texture = nullptr;

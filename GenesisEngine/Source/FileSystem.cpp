@@ -190,7 +190,6 @@ std::string FileSystem::GetPathRelativeToAssets(const char* originalPath)
 
 	if (pos > file_path.size())
 	{
-		LOG_WARNING("Trying to load a file out of the working directory");
 		file_path.clear();
 	}
 	else
@@ -730,7 +729,7 @@ GnTexture* TextureImporter::LoadTexture(const char* path)
 {
 	Timer timer;
 	timer.Start();
-	uint imageID = 0;
+	ILuint imageID = 0;
 
 	std::string normalized_path = FileSystem::NormalizePath(path);
 	std::string relative_path = FileSystem::GetPathRelativeToAssets(normalized_path.c_str());
@@ -763,12 +762,19 @@ GnTexture* TextureImporter::LoadTexture(const char* path)
 
 	if (ilLoadL(file_format, buffer, size) == IL_FALSE)
 	{
-		LOG_WARNING("Error trying to load the texture %s into buffer, %d: %s", path, ilGetError(), iluErrorString(ilGetError()));
+		LOG_WARNING("Warning: Trying to load the texture %s into buffer, %d: %s", path, ilGetError(), iluErrorString(ilGetError()));
 		buffer = nullptr;
+
+		//Reset Image
+		ilBindImage(0);
+		ilDeleteImages(1, &imageID);
+		ilGenImages(1, &imageID);
+		ilBindImage(imageID);
 
 		if (ilLoadImage(normalized_path.c_str()) == IL_FALSE)
 		{
 			LOG_ERROR("Error trying to load the texture directly from %s", path);
+			//texture = nullptr;
 		}
 	}
 
@@ -779,19 +785,23 @@ GnTexture* TextureImporter::LoadTexture(const char* path)
 
 	if (error != IL_NO_ERROR)
 	{
+		ilBindImage(0);
+		ilDeleteImages(1, &imageID);
 		LOG_ERROR("%d: %s", error, iluErrorString(error));
 	}
 	else
 	{
 		LOG("Texture loaded successfully from: %s in %.3f s", path, timer.ReadSec());
 
-		texture->id = imageID;
+		texture->id = (uint)(imageID);
 		texture->name = FileSystem::GetFile(path) + format;
 		texture->data = ilGetData();
 		texture->width = ilGetInteger(IL_IMAGE_WIDTH);
 		texture->height = ilGetInteger(IL_IMAGE_HEIGHT);
 		texture->path = normalized_path.c_str();
 	}
+
+	ilBindImage(0);
 
 	if(buffer != NULL)
 		RELEASE_ARRAY(buffer);
@@ -835,7 +845,6 @@ std::string TextureImporter::FindTexture(const char* texture_name, const char* m
 
 void TextureImporter::UnloadTexture(uint imageID)
 {
-	ilBindImage(0);
 	ilDeleteImages(1, &imageID);
 }
 

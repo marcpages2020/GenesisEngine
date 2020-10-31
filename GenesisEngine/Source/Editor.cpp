@@ -481,6 +481,7 @@ void Editor::ShowSceneWindow()
 				if (ImGui::Checkbox("Face Normals", &face_normals))
 					App->renderer3D->draw_face_normals = face_normals;
 
+				/*
 				if (ImGui::BeginMenu("Aspect"))
 				{
 					if (ImGui::MenuItem("Free Aspect"))
@@ -493,6 +494,7 @@ void Editor::ShowSceneWindow()
 				}
 
 				ImGui::EndMenu();
+				*/
 			}
 
 			static bool lighting = glIsEnabled(GL_LIGHTING);
