@@ -380,7 +380,7 @@ void ModuleRenderer3D::DrawDirectModeCube()
 		}
 	}
 
-	GnTexture* Lenna = TextureImporter::LoadTexture("Assets/Textures/Lenna.png");
+	//GnTexture* Lenna = TextureImporter::LoadTexture("Assets/Textures/Lenna.png");
 
 	GLuint textureID;
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -392,7 +392,7 @@ void ModuleRenderer3D::DrawDirectModeCube()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, CHECKERS_WIDTH, CHECKERS_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, checkerImage);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Lenna->width, Lenna->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, Lenna->data);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Lenna->width, Lenna->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, Lenna->data);
 
 	{
 		glBegin(GL_TRIANGLES);
@@ -491,7 +491,7 @@ void ModuleRenderer3D::DrawDirectModeCube()
 	glDeleteTextures(1, &textureID);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	ilBindImage(0);
-	ilDeleteImages(1, &Lenna->id);
+	//ilDeleteImages(1, &Lenna->id);
 }
 
 void ModuleRenderer3D::BeginDebugDraw() {}

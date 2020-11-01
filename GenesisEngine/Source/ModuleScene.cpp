@@ -26,13 +26,13 @@ bool ModuleScene::Start()
 	selectedGameObject = root;
 	root->SetName("Root");
 
-	GameObject* house = MeshImporter::LoadFBX("Assets/Models/baker_house/BakerHouse.FBX");
+	GameObject* house = MeshImporter::ImportFBX("Assets/Models/baker_house/BakerHouse.FBX");
 	AddGameObject(house);
 
-	//GameObject* rayman = MeshImporter::LoadFBX("Assets/Models/rayman/rayman.fbx");
+	//GameObject* rayman = MeshImporter::ImportFBX("Assets/Models/rayman/rayman.fbx");
 	//AddGameObject(rayman);
 
-	//MeshImporter::LoadFBX("Assets/Models/monkey.fbx");
+	//MeshImporter::ImportFBX("Assets/Models/monkey.fbx");
 
 	return ret;
 }

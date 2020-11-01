@@ -8,11 +8,14 @@
 
 class GameObject;
 struct GnTexture;
+class aiMesh;
 class GnMesh;
 class Transform;
+class Material;
 
 class aiScene;
 struct aiNode;
+class aiMaterial;
 
 struct json_array_t;
 typedef json_array_t JSON_Array;
@@ -76,18 +79,28 @@ namespace FileSystem
 
 namespace MeshImporter 
 {
-	GameObject* LoadFBX(const char* path);
-	GnMesh* LoadMesh(const aiScene* scene, aiNode* node, const char* path);
+	void Import(const aiMesh* aimesh, GnMesh* mesh);
+	uint64 Save(GnMesh* mesh, char** fileBuffer);
+	void Load(char* fileBuffer, GnMesh* mesh);
+
+	GameObject* ImportFBX(const char* path);
 	GameObject* PreorderChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, GameObject* parentGameObject, const char* path);
 	void LoadTransform(aiNode* node, Transform* transform);
 }
 
 namespace TextureImporter
 {
-	GnTexture* GetAiMeshTexture(const aiScene* scene, aiNode* node, const char* path);
-	GnTexture* LoadTexture(const char* path);
 	std::string FindTexture(const char* texture_name, const char* model_directory);
 	void UnloadTexture(uint imageID);
+}
+
+namespace MaterialImporter
+{
+	void Import(const aiMaterial* material, Material* ourMaterial, const char* folder_path);
+	uint64 Save(const Material* ourMaterial, char** fileBuffer);
+	void Load(const char* fileBuffer, Material* material);
+
+	GnTexture* LoadTexture(const char* path);
 }
 
 namespace JSONParser
