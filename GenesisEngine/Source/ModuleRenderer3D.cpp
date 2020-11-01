@@ -294,10 +294,11 @@ void ModuleRenderer3D::SetDisplayMode(DisplayMode display)
 { 
 	GLenum face = GL_FRONT;
 
+	display_mode = display;
+
 	if (!glIsEnabled(GL_CULL_FACE_MODE))
 		face = GL_FRONT_AND_BACK;
 
-	//display_mode = display;
 	if (display == SOLID) 
 	{
 		glPolygonMode(face, GL_FILL);

@@ -48,11 +48,12 @@ private:
 	void ShowHierarchyWindow();
 	void ShowConfigurationWindow();
 	void ShowAboutWindow();
+	void ShowPreferencesWindow();
 
 	void ChangeTheme(std::string theme);
 	void GetMemoryStatistics(const char* gpu_brand, GLint& vram_budget, GLint& vram_usage, GLint& vram_available, GLint& vram_reserved);
 
-	void ResizeSceneImage(ImVec2 window_size, AspectRatio ratio);
+	void ResizeSceneImage(ImVec2 window_size, ImVec2& uv0, ImVec2& uv1);
 	void PreorderHierarchy(GameObject* gameObject);
 
 private:

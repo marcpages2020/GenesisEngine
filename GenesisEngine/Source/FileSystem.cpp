@@ -586,8 +586,6 @@ GnMesh* MeshImporter::LoadMesh(const aiScene* scene, aiNode* node, const char* p
 	currentMesh->colors = new float[currentMesh->indices_amount * 4]();
 	currentMesh->normals = new float[currentAiMesh->mNumVertices * 3]();
 
-	int t = 0;
-
 	//normals, color and texture coordinates
 	for (size_t v = 0, n = 0, tx = 0, c = 0; v < currentAiMesh->mNumVertices; v++, n += 3, c += 4, tx += 2)
 	{
@@ -627,9 +625,7 @@ GnMesh* MeshImporter::LoadMesh(const aiScene* scene, aiNode* node, const char* p
 			currentMesh->texcoords[tx] = 0.0f;
 			currentMesh->texcoords[tx + 1] = 0.0f;
 		}
-		t = tx;
 	}
-	//LOG("Texcoords loaded: %d", t);
 	currentMesh->GenerateBuffers();
 
 	return currentMesh;

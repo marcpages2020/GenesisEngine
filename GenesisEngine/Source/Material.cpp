@@ -37,9 +37,7 @@ void Material::OnEditor()
 {
 	if (ImGui::CollapsingHeader("Material", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		if (ImGui::Checkbox("Enabled", &enabled)) {
-			LOG("Checked");
-		}
+		if (ImGui::Checkbox("Enabled", &enabled)) {}
 
 		ImGui::SameLine();
 		if (ImGui::Checkbox("Checkers Image", &checkers_image))
