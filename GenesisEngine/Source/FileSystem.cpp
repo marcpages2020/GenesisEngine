@@ -98,7 +98,7 @@ void FileSystem::CreateLibraryDirectories()
 	//CreateDir(SCENES_PATH);
 }
 
-// Add a new zip file or folder
+// Add a new zip file_path or folder
 bool FileSystem::AddPath(const char* path_or_zip)
 {
 	bool ret = false;
@@ -113,7 +113,7 @@ bool FileSystem::AddPath(const char* path_or_zip)
 	return ret;
 }
 
-// Check if a file exists
+// Check if a file_path exists
 bool FileSystem::Exists(const char* file) 
 {
 	return PHYSFS_exists(file) != 0;
@@ -129,7 +129,7 @@ bool FileSystem::CreateDir(const char* dir)
 	return false;
 }
 
-// Check if a file is a directory
+// Check if a file_path is a directory
 bool FileSystem::IsDirectory(const char* file) 
 {
 	return PHYSFS_isDirectory(file) != 0;
@@ -239,7 +239,7 @@ std::string FileSystem::ProcessPath(const char* path)
 	final_path = NormalizePath(final_path.c_str());
 	std::string tmp_path = GetPathRelativeToAssets(final_path.c_str());
 
-	//The file is inside a directory
+	//The file_path is inside a directory
 	if (tmp_path.size() > 0)
 	{
 		return tmp_path.c_str();
@@ -300,7 +300,7 @@ unsigned int FileSystem::Load(const char* path, const char* file, char** buffer)
 	return Load(full_path.c_str(), buffer);
 }
 
-// Read a whole file and put it in a new buffer
+// Read a whole file_path and put it in a new buffer
 uint FileSystem::Load(const char* file, char** buffer) 
 {
 	uint ret = 0;
@@ -323,7 +323,7 @@ uint FileSystem::Load(const char* file, char** buffer)
 			else
 			{
 				ret = readed;
-				//Adding end of file at the end of the buffer. Loading a shader file does not add this for some reason
+				//Adding end of file_path at the end of the buffer. Loading a shader file_path does not add this for some reason
 				(*buffer)[size] = '\0';
 			}
 		}
@@ -499,145 +499,6 @@ std::string FileSystem::GetFile(const char* path)
 
 #pragma region MeshImporter
 
-uint64 MeshImporter::Save(GnMesh* mesh, char** fileBuffer)
-{
-	uint ranges[4] = { mesh->indices_amount, mesh->vertices_amount, mesh->normals_amount, mesh->texcoords_amount };
-
-	uint size = sizeof(ranges) + sizeof(uint) * mesh->indices_amount + sizeof(float) * mesh->vertices_amount * 3
-				               + sizeof(float) * mesh->normals_amount * 3 + sizeof(float) * mesh->texcoords_amount * 2;
-
-	char* buffer = new char[size];
-	char* cursor = buffer;
-
-	uint bytes = sizeof(ranges);
-	memcpy(cursor, ranges, bytes);
-	cursor += bytes;
-
-	//store indices
-	bytes = sizeof(uint) * mesh->indices_amount;
-	memcpy(cursor, mesh->indices, bytes);
-	cursor += bytes;
-
-	//store vertices
-	bytes = sizeof(float) * mesh->vertices_amount * 3;
-	memcpy(cursor, mesh->vertices, bytes);
-	cursor += bytes;
-
-	//store normals
-	bytes = sizeof(float) * mesh->normals_amount * 3;
-	memcpy(cursor, mesh->normals, bytes);
-	cursor += bytes;
-
-	//store texcoords
-	bytes = sizeof(float) * mesh->texcoords_amount * 2;
-	memcpy(cursor, mesh->texcoords, bytes);
-	//cursor += bytes;
-
-	std::string path = "Library/Meshes/";
-	path += mesh->name;
-	FileSystem::Save(path.c_str(), buffer, size);
-
-	return size;
-}
-
-void MeshImporter::Load(const char* fileBuffer, GnMesh* mesh)
-{
-	Timer timer;
-	timer.Start();
-
-	char* buffer = nullptr;
-
-	FileSystem::Load(fileBuffer, &buffer);
-
-	char* cursor = buffer;
-
-	uint ranges[4];
-	uint bytes = sizeof(ranges);
-	memcpy(ranges, cursor, bytes);
-	cursor += bytes;
-
-	mesh->indices_amount = ranges[0];
-	mesh->vertices_amount = ranges[1];
-	mesh->normals_amount = ranges[2];
-	mesh->texcoords_amount = ranges[3];
-
-	// Load indices
-	bytes = sizeof(uint) * mesh->indices_amount;
-	mesh->indices = new uint[mesh->indices_amount];
-	memcpy(mesh->indices, cursor, bytes);
-	cursor += bytes;
-
-	//load vertices
-	bytes = sizeof(float) * mesh->vertices_amount * 3;
-	mesh->vertices = new float[mesh->vertices_amount * 3];
-	memcpy(mesh->vertices, cursor, bytes);
-	cursor += bytes;
-
-	//load normals
-	bytes = sizeof(float) * mesh->normals_amount * 3;
-	mesh->normals = new float[mesh->normals_amount * 3];
-	memcpy(mesh->normals, cursor, bytes);
-	cursor += bytes;
-
-	//load texcoords
-	bytes = sizeof(float) * mesh->texcoords_amount * 2;
-	mesh->texcoords = new float[mesh->texcoords_amount * 2];
-	memcpy(mesh->texcoords, cursor, bytes);
-	cursor += bytes;
-
-	mesh->GenerateBuffers();
-
-	//RELEASE_ARRAY(buffer);
-
-	LOG("%s loaded in %.3f s", mesh->name, timer.ReadSec());
-}
-
-GameObject* MeshImporter::ImportFBX(const char* full_path)
-{
-	Timer timer;
-	timer.Start();
-
-	GameObject* root = nullptr;
-
-	std::string folder, file;
-	FileSystem::SplitFilePath(full_path, &folder, &file);
-	std::string path = FileSystem::GetPathRelativeToAssets(full_path);
-
-	const aiScene* scene = nullptr;
-
-	if (FileSystem::Exists(path.c_str())) 
-	{
-		char* buffer = nullptr;
-		uint size = FileSystem::Load(path.c_str(), &buffer);
-
-		size = FileSystem::Load(path.c_str(), &buffer);
-		scene = aiImportFileFromMemory(buffer, size, aiProcessPreset_TargetRealtime_MaxQuality, NULL);
-		
-		RELEASE_ARRAY(buffer);
-	}
-	else 
-	{
-		scene = aiImportFile(path.c_str(), aiProcessPreset_TargetRealtime_MaxQuality);
-	}
-
-	if (scene != nullptr && scene->HasMeshes())
-	{
-		aiNode* rootNode = scene->mRootNode;
-
-		root = PreorderChildren(scene, rootNode, nullptr, nullptr, folder.c_str());
-		root->SetName(file.c_str());
-
-		aiReleaseImport(scene);
-		LOG("%s loaded in %.3f s", full_path, timer.ReadSec());
-	}
-	else
-		LOG_ERROR("Error loading scene %s", full_path);
-
-	//root->UpdateChildrenTransforms();
-
-	return root;
-}
-
 void MeshImporter::Import(const aiMesh* aimesh, GnMesh* mesh)
 {
 	Timer timer;
@@ -723,8 +584,142 @@ void MeshImporter::Import(const aiMesh* aimesh, GnMesh* mesh)
 	}
 
 	LOG("Mesh imported from Assimp in %.3f s", timer.ReadSec());
+}
+
+uint64 MeshImporter::Save(GnMesh* mesh, char** fileBuffer)
+{
+	uint ranges[4] = { mesh->indices_amount, mesh->vertices_amount, mesh->normals_amount, mesh->texcoords_amount };
+
+	uint size = sizeof(ranges) + sizeof(uint) * mesh->indices_amount + sizeof(float) * mesh->vertices_amount * 3
+				               + sizeof(float) * mesh->normals_amount * 3 + sizeof(float) * mesh->texcoords_amount * 2;
+
+	char* buffer = new char[size];
+	char* cursor = buffer;
+
+	uint bytes = sizeof(ranges);
+	memcpy(cursor, ranges, bytes);
+	cursor += bytes;
+
+	//store indices
+	bytes = sizeof(uint) * mesh->indices_amount;
+	memcpy(cursor, mesh->indices, bytes);
+	cursor += bytes;
+
+	//store vertices
+	bytes = sizeof(float) * mesh->vertices_amount * 3;
+	memcpy(cursor, mesh->vertices, bytes);
+	cursor += bytes;
+
+	//store normals
+	bytes = sizeof(float) * mesh->normals_amount * 3;
+	memcpy(cursor, mesh->normals, bytes);
+	cursor += bytes;
+
+	//store texcoords
+	bytes = sizeof(float) * mesh->texcoords_amount * 2;
+	memcpy(cursor, mesh->texcoords, bytes);
+	//cursor += bytes;
+
+	*fileBuffer = buffer;
+
+	return size;
+}
+
+void MeshImporter::Load(const char* fileBuffer, GnMesh* mesh)
+{
+	Timer timer;
+	timer.Start();
+
+	char* buffer = nullptr;
+
+	FileSystem::Load(fileBuffer, &buffer);
+
+	char* cursor = buffer;
+
+	uint ranges[4];
+	uint bytes = sizeof(ranges);
+	memcpy(ranges, cursor, bytes);
+	cursor += bytes;
+
+	mesh->indices_amount = ranges[0];
+	mesh->vertices_amount = ranges[1];
+	mesh->normals_amount = ranges[2];
+	mesh->texcoords_amount = ranges[3];
+
+	// Load indices
+	bytes = sizeof(uint) * mesh->indices_amount;
+	mesh->indices = new uint[mesh->indices_amount];
+	memcpy(mesh->indices, cursor, bytes);
+	cursor += bytes;
+
+	//load vertices
+	bytes = sizeof(float) * mesh->vertices_amount * 3;
+	mesh->vertices = new float[mesh->vertices_amount * 3];
+	memcpy(mesh->vertices, cursor, bytes);
+	cursor += bytes;
+
+	//load normals
+	bytes = sizeof(float) * mesh->normals_amount * 3;
+	mesh->normals = new float[mesh->normals_amount * 3];
+	memcpy(mesh->normals, cursor, bytes);
+	cursor += bytes;
+
+	//load texcoords
+	bytes = sizeof(float) * mesh->texcoords_amount * 2;
+	mesh->texcoords = new float[mesh->texcoords_amount * 2];
+	memcpy(mesh->texcoords, cursor, bytes);
+	cursor += bytes;
 
 	mesh->GenerateBuffers();
+
+	RELEASE_ARRAY(buffer);
+
+	LOG("%s loaded in %.3f s", mesh->name, timer.ReadSec());
+}
+
+GameObject* MeshImporter::ImportFBX(const char* full_path)
+{
+	Timer timer;
+	timer.Start();
+
+	GameObject* root = nullptr;
+
+	std::string folder, file;
+	FileSystem::SplitFilePath(full_path, &folder, &file);
+	std::string path = FileSystem::GetPathRelativeToAssets(full_path);
+
+	const aiScene* scene = nullptr;
+
+	if (FileSystem::Exists(path.c_str())) 
+	{
+		char* buffer = nullptr;
+		uint size = FileSystem::Load(path.c_str(), &buffer);
+
+		scene = aiImportFileFromMemory(buffer, size, aiProcessPreset_TargetRealtime_MaxQuality, NULL);
+		
+		RELEASE_ARRAY(buffer);
+	}
+	else 
+	{
+		scene = aiImportFile(path.c_str(), aiProcessPreset_TargetRealtime_MaxQuality);
+	}
+
+	if (scene != nullptr && scene->HasMeshes())
+	{
+		aiNode* rootNode = scene->mRootNode;
+
+		root = PreorderChildren(scene, rootNode, nullptr, nullptr, folder.c_str());
+		root->SetName(file.c_str());
+
+		aiReleaseImport(scene);
+		LOG("%s loaded in %.3f s", full_path, timer.ReadSec());
+	}
+	else
+		LOG_ERROR("Error loading scene %s", full_path);
+
+	//root->UpdateChildrenTransforms();
+
+	return root;
 }
 
 GameObject* MeshImporter::PreorderChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, GameObject* parentGameObject, const char* path)
@@ -748,20 +743,26 @@ GameObject* MeshImporter::PreorderChildren(const aiScene* scene, aiNode* node, a
 		aiMesh* aimesh = scene->mMeshes[*node->mMeshes];
 
 		Import(aimesh, mesh);
-		Save(mesh, &buffer);
+		uint size = Save(mesh, &buffer);
 
-		std::string file = "Library/Meshes/";
-		file += mesh->name;
+		std::string file_path = "Library/Meshes/";
+		file_path += node->mName.C_Str();
+		file_path += ".gnMesh";
+
+		FileSystem::Save(file_path.c_str(), buffer, size);
 
 		delete mesh;
 		mesh = nullptr;
 
 		mesh = new GnMesh();
 
-		Load(file.c_str(), mesh);
+		Load(file_path.c_str(), mesh);
 
 		gameObject->AddComponent(mesh);
-		//RELEASE_ARRAY(buffer);
+		
+		buffer;
+
+		RELEASE_ARRAY(buffer);
 
 		//Materials ----------------------------------------------------------
 
@@ -769,7 +770,22 @@ GameObject* MeshImporter::PreorderChildren(const aiScene* scene, aiNode* node, a
 		aiMaterial* aimaterial = scene->mMaterials[aimesh->mMaterialIndex];
 
 		MaterialImporter::Import(aimaterial, material, path);
-		//MaterialImporter::Save(material, &buffer);
+		size = MaterialImporter::Save(material, &buffer);
+
+		file_path = "Library/Textures/";
+
+		std::string file = FileSystem::GetFile(material->GetDiffuseTexture()->name.c_str());
+
+		file_path += file;
+		file_path += ".gnTex";
+
+		FileSystem::Save(file_path.c_str(), buffer, size);
+
+		//delete material;
+		//material = nullptr;
+
+		MaterialImporter::Load(file_path.c_str(), material);
+
 		material->SetMesh(mesh);
 		gameObject->AddComponent(material);
 		
@@ -902,7 +918,6 @@ void MaterialImporter::Import(const aiMaterial* aimaterial, Material* material, 
 	{ 
 		std::string file_path = folder_path;
 		file_path += path.C_Str();
-
 		GnTexture* texture = LoadTexture(file_path.c_str());
 
 		material->SetTexture(texture);
@@ -927,6 +942,16 @@ uint64 MaterialImporter::Save(const Material* ourMaterial, char** fileBuffer)
 	}
 
 	return size;
+}
+
+void MaterialImporter::Load(const char* fileBuffer, Material* material)
+{
+	Timer timer;
+	timer.Start();
+
+	char* buffer = nullptr;
+
+	FileSystem::Load(fileBuffer, &buffer);
 }
 
 GnTexture* MaterialImporter::LoadTexture(const char* full_path)

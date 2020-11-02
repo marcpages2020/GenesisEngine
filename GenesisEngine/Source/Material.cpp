@@ -92,6 +92,11 @@ void Material::SetTexture(GnTexture* texture)
 	}
 }
 
+GnTexture* Material::GetDiffuseTexture()
+{
+	return diffuse_texture;
+}
+
 void Material::SetMesh(GnMesh* g_mesh)
 {
 	mesh = g_mesh;
