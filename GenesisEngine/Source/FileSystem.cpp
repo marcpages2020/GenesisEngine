@@ -50,7 +50,7 @@ void FileSystem::Init()
 	AddPath("."); //Adding ProjectFolder (working directory)
 	AddPath("Assets");
 
-	if (PHYSFS_setWriteDir("./Assets") == 0)
+	if (PHYSFS_setWriteDir(".") == 0)
 		LOG_ERROR("File System error while creating write dir: %s\n", PHYSFS_getLastError());
 
 	CreateLibraryDirectories();
@@ -84,9 +84,13 @@ void FileSystem::CreateLibraryDirectories()
 	//CreateDir(MESHES_PATH);
 	//CreateDir(TEXTURES_PATH);
 	//CreateDir(MATERIALS_PATH);
-	CreateDir("Config/");
-	CreateDir("Textures/");
-	CreateDir("Models/");
+	CreateDir("Assets/Config/");
+	CreateDir("Assets/Textures/");
+	CreateDir("Assets/Models/");
+
+	CreateDir("Library/Config/");
+	CreateDir("Library/Textures/");
+	CreateDir("Library/Meshes/");
 	//CreateDir("Materials/");
 	//CreateDir(ANIMATIONS_PATH);
 	//CreateDir(PARTICLES_PATH);
@@ -391,7 +395,7 @@ uint FileSystem::Save(const char* file, const void* buffer, unsigned int size, b
 		uint written = (uint)PHYSFS_write(fs_file, (const void*)buffer, 1, size);
 		if (written != size)
 		{
-			LOG("[error] File System error while writing to file %s: %s", file, PHYSFS_getLastError());
+			LOG_ERROR("[error] File System error while writing to file %s: %s", file, PHYSFS_getLastError());
 		}
 		else
 		{
@@ -412,10 +416,10 @@ uint FileSystem::Save(const char* file, const void* buffer, unsigned int size, b
 		}
 
 		if (PHYSFS_close(fs_file) == 0)
-			LOG("[error] File System error while closing file %s: %s", file, PHYSFS_getLastError());
+			LOG_ERROR("[error] File System error while closing file %s: %s", file, PHYSFS_getLastError());
 	}
 	else
-		LOG("[error] File System error while opening file %s: %s", file, PHYSFS_getLastError());
+		LOG_ERROR("[error] File System error while opening file %s: %s", file, PHYSFS_getLastError());
 
 	return ret;
 }
@@ -500,7 +504,7 @@ uint64 MeshImporter::Save(GnMesh* mesh, char** fileBuffer)
 	uint ranges[4] = { mesh->indices_amount, mesh->vertices_amount, mesh->normals_amount, mesh->texcoords_amount };
 
 	uint size = sizeof(ranges) + sizeof(uint) * mesh->indices_amount + sizeof(float) * mesh->vertices_amount * 3
-				               + sizeof(float) * mesh->texcoords_amount * 2 + sizeof(float) * mesh->normals_amount * 3;
+				               + sizeof(float) * mesh->normals_amount * 3 + sizeof(float) * mesh->texcoords_amount * 2;
 
 	char* buffer = new char[size];
 	char* cursor = buffer;
@@ -527,19 +531,25 @@ uint64 MeshImporter::Save(GnMesh* mesh, char** fileBuffer)
 	//store texcoords
 	bytes = sizeof(float) * mesh->texcoords_amount * 2;
 	memcpy(cursor, mesh->texcoords, bytes);
-	cursor += bytes;
+	//cursor += bytes;
 
-	//*fileBuffer = (char*)buffer;
+	std::string path = "Library/Meshes/";
+	path += mesh->name;
+	FileSystem::Save(path.c_str(), buffer, size);
 
 	return size;
 }
 
-void MeshImporter::Load(char* fileBuffer, GnMesh* mesh)
+void MeshImporter::Load(const char* fileBuffer, GnMesh* mesh)
 {
 	Timer timer;
 	timer.Start();
 
-	char* cursor = fileBuffer;
+	char* buffer = nullptr;
+
+	FileSystem::Load(fileBuffer, &buffer);
+
+	char* cursor = buffer;
 
 	uint ranges[4];
 	uint bytes = sizeof(ranges);
@@ -559,18 +569,25 @@ void MeshImporter::Load(char* fileBuffer, GnMesh* mesh)
 
 	//load vertices
 	bytes = sizeof(float) * mesh->vertices_amount * 3;
+	mesh->vertices = new float[mesh->vertices_amount * 3];
 	memcpy(mesh->vertices, cursor, bytes);
 	cursor += bytes;
 
 	//load normals
 	bytes = sizeof(float) * mesh->normals_amount * 3;
+	mesh->normals = new float[mesh->normals_amount * 3];
 	memcpy(mesh->normals, cursor, bytes);
 	cursor += bytes;
 
 	//load texcoords
-	bytes = sizeof(float) * mesh->texcoords_amount * 3;
+	bytes = sizeof(float) * mesh->texcoords_amount * 2;
+	mesh->texcoords = new float[mesh->texcoords_amount * 2];
 	memcpy(mesh->texcoords, cursor, bytes);
 	cursor += bytes;
+
+	mesh->GenerateBuffers();
+
+	//RELEASE_ARRAY(buffer);
 
 	LOG("%s loaded in %.3f s", mesh->name, timer.ReadSec());
 }
@@ -603,28 +620,6 @@ GameObject* MeshImporter::ImportFBX(const char* full_path)
 		scene = aiImportFile(path.c_str(), aiProcessPreset_TargetRealtime_MaxQuality);
 	}
 
-	/*
-	if (buffer == nullptr)
-	{
-		if(full_path.size() <= 0) {
-			size = FileSystem::Load(normalized_path.c_str(), &buffer);
-		}
-		else {
-			
-		}
-	}
-
-	if (buffer != nullptr) 
-	{
-		
-		if(scene == NULL)
-		{
-			LOG_ERROR("Error trying to load %s directly from memory", full_path);
-			scene = aiImportFile(normalized_path.c_str(), aiProcessPreset_TargetRealtime_MaxQuality);
-		}
-	}
-	*/
-
 	if (scene != nullptr && scene->HasMeshes())
 	{
 		aiNode* rootNode = scene->mRootNode;
@@ -647,6 +642,8 @@ void MeshImporter::Import(const aiMesh* aimesh, GnMesh* mesh)
 {
 	Timer timer;
 	timer.Start();
+
+	mesh->name = aimesh->mName.C_Str();
 
 	//vertex copying
 	mesh->vertices_amount = aimesh->mNumVertices;
@@ -752,7 +749,16 @@ GameObject* MeshImporter::PreorderChildren(const aiScene* scene, aiNode* node, a
 
 		Import(aimesh, mesh);
 		Save(mesh, &buffer);
-		//Load(buffer, mesh);
+
+		std::string file = "Library/Meshes/";
+		file += mesh->name;
+
+		delete mesh;
+		mesh = nullptr;
+
+		mesh = new GnMesh();
+
+		Load(file.c_str(), mesh);
 
 		gameObject->AddComponent(mesh);
 		//RELEASE_ARRAY(buffer);
@@ -764,7 +770,9 @@ GameObject* MeshImporter::PreorderChildren(const aiScene* scene, aiNode* node, a
 
 		MaterialImporter::Import(aimaterial, material, path);
 		//MaterialImporter::Save(material, &buffer);
+		material->SetMesh(mesh);
 		gameObject->AddComponent(material);
+		
 
 		//RELEASE_ARRAY(buffer);
 

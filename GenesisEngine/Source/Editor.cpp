@@ -503,14 +503,12 @@ void Editor::ShowSceneWindow()
 			ImGui::EndMenuBar();
 		}
 
-		ImVec2 windowSize = ImGui::GetWindowSize();
-		static ImVec2 uv0(0.0f, 1.0f);
-		static ImVec2 uv1(1.0f, 0.0f);
+		ImVec2 window_size = ImGui::GetWindowSize();
 
-		if (image_size.x != windowSize.x)
-			ResizeSceneImage(windowSize, uv0, uv1);
+		if (image_size.x != window_size.x || image_size.y != window_size.y)
+			OnResize(window_size);
 
-		ImGui::Image((ImTextureID)App->renderer3D->texColorBuffer, image_size, uv0, uv1);
+		ImGui::Image((ImTextureID)App->renderer3D->texColorBuffer, image_size, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
 	}
 	ImGui::End();
 }
@@ -868,11 +866,11 @@ void Editor::ShowPreferencesWindow()
 	ImGui::End();
 }
 
-void Editor::ResizeSceneImage(ImVec2 window_size, ImVec2& uv0, ImVec2& uv1)
+void Editor::OnResize(ImVec2 window_size)
 {
-	float size_proportion = (float)App->window->width / (float)App->window->height;
+	image_size = window_size;
+	image_size.y -= 50.0f;
 
-	image_size.x = window_size.x;
-	image_size.y = image_size.x / size_proportion;
+	App->renderer3D->OnResize(image_size.x, image_size.y);
 }
 

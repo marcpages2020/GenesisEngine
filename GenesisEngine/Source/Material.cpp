@@ -92,6 +92,16 @@ void Material::SetTexture(GnTexture* texture)
 	}
 }
 
+void Material::SetMesh(GnMesh* g_mesh)
+{
+	mesh = g_mesh;
+
+	if (diffuse_texture != nullptr)
+	{
+		checkers_image = !mesh->SetTexture(diffuse_texture);
+	}
+}
+
 bool Material::DeleteTexture()
 {
 	bool ret = true;

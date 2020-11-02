@@ -33,6 +33,7 @@ public:
 	void OnEditor() override;
 
 	void SetTexture(GnTexture* texture);
+	void SetMesh(GnMesh* mesh);
 	bool DeleteTexture();
 
 private:

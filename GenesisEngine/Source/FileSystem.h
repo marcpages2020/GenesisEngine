@@ -81,7 +81,7 @@ namespace MeshImporter
 {
 	void Import(const aiMesh* aimesh, GnMesh* mesh);
 	uint64 Save(GnMesh* mesh, char** fileBuffer);
-	void Load(char* fileBuffer, GnMesh* mesh);
+	void Load(const char* fileBuffer, GnMesh* mesh);
 
 	GameObject* ImportFBX(const char* path);
 	GameObject* PreorderChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, GameObject* parentGameObject, const char* path);

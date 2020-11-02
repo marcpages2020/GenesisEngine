@@ -53,8 +53,11 @@ private:
 	void ChangeTheme(std::string theme);
 	void GetMemoryStatistics(const char* gpu_brand, GLint& vram_budget, GLint& vram_usage, GLint& vram_available, GLint& vram_reserved);
 
-	void ResizeSceneImage(ImVec2 window_size, ImVec2& uv0, ImVec2& uv1);
+	void OnResize(ImVec2 window_size);
 	void PreorderHierarchy(GameObject* gameObject);
+
+public:
+	ImVec2 image_size;
 
 private:
 	bool show_inspector_window;
@@ -77,8 +80,6 @@ private:
 	std::vector<float> ms_log;
 
 	std::vector<log_message> console_log;
-
-	ImVec2 image_size;
 
 	AspectRatio aspect_ratio;
 };
