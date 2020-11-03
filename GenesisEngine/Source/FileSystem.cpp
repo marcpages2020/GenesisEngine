@@ -622,6 +622,8 @@ uint64 MeshImporter::Save(GnMesh* mesh, char** fileBuffer)
 
 	*fileBuffer = buffer;
 
+	//RELEASE_ARRAY(buffer);
+
 	return size;
 }
 
@@ -672,7 +674,7 @@ void MeshImporter::Load(const char* fileBuffer, GnMesh* mesh)
 
 	mesh->GenerateBuffers();
 
-	RELEASE_ARRAY(buffer);
+	//RELEASE_ARRAY(buffer);
 
 	LOG("%s loaded in %.3f s", mesh->name, timer.ReadSec());
 }
@@ -738,41 +740,38 @@ GameObject* MeshImporter::PreorderChildren(const aiScene* scene, aiNode* node, a
 
 		//Mesh --------------------------------------------------------------
 
-		char* buffer;
+		char* meshBuffer;
 		GnMesh* mesh = new GnMesh();
 		aiMesh* aimesh = scene->mMeshes[*node->mMeshes];
 
 		Import(aimesh, mesh);
-		uint size = Save(mesh, &buffer);
+		uint size = Save(mesh, &meshBuffer);
 
 		std::string file_path = "Library/Meshes/";
 		file_path += node->mName.C_Str();
 		file_path += ".gnMesh";
 
-		FileSystem::Save(file_path.c_str(), buffer, size);
+		FileSystem::Save(file_path.c_str(), meshBuffer, size);
 
 		delete mesh;
 		mesh = nullptr;
 
 		mesh = new GnMesh();
-
 		Load(file_path.c_str(), mesh);
-
 		gameObject->AddComponent(mesh);
-		
-		buffer;
 
-		RELEASE_ARRAY(buffer);
+		RELEASE_ARRAY(meshBuffer);
 
 		//Materials ----------------------------------------------------------
+
+		char* texBuffer;
 
 		Material* material = new Material();
 		aiMaterial* aimaterial = scene->mMaterials[aimesh->mMaterialIndex];
 
 		//Import Material
 		MaterialImporter::Import(aimaterial, material, path);
-		//Save material
-		size = MaterialImporter::Save(material, &buffer);
+		size = MaterialImporter::Save(material, &texBuffer);
 
 		//Set own format path
 		file_path = "Library/Textures/";
@@ -780,7 +779,7 @@ GameObject* MeshImporter::PreorderChildren(const aiScene* scene, aiNode* node, a
 		file_path += file;
 		file_path += ".dds";
 
-		FileSystem::Save(file_path.c_str(), buffer, size);
+		FileSystem::Save(file_path.c_str(), texBuffer, size);
 
 		delete material;
 		material = nullptr;
@@ -791,7 +790,7 @@ GameObject* MeshImporter::PreorderChildren(const aiScene* scene, aiNode* node, a
 		material->SetMesh(mesh);
 		gameObject->AddComponent(material);
 		
-		RELEASE_ARRAY(buffer);
+		RELEASE_ARRAY(texBuffer);
 
 		//Transform------------------------------------------------------------
 		LoadTransform(node, gameObject->GetTransform());
@@ -940,9 +939,19 @@ uint64 MaterialImporter::Save(Material* ourMaterial, char** fileBuffer)
 		data = new ILubyte[size];
 		if (ilSaveL(IL_DDS, data, size) > 0)
 			*fileBuffer = (char*)data;
-		
+
 		//RELEASE_ARRAY(data);
+
+		ILenum error;
+		error = ilGetError();
+
+		if (error != IL_NO_ERROR)
+		{
+			//LOG_ERROR("Error when saving %s - %d: %s", ourMaterial->GetDiffuseTexture()->name, error, iluErrorString(error));
+		}
 	}
+
+	ilBindImage(0);
 
 	return size;
 }
@@ -955,6 +964,9 @@ void MaterialImporter::Load(const char* fileBuffer, Material* material)
 
 	ilGenImages(1, &imageID);
 	ilBindImage(imageID);
+
+	ilEnable(IL_ORIGIN_SET);
+	ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
 
 	char* buffer = nullptr;
 	uint size = FileSystem::Load(fileBuffer, &buffer);
