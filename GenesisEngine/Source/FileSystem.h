@@ -38,7 +38,6 @@ namespace FileSystem
 	void GetPhysFSVersion(std::string& version_str);
 
 	void CreateLibraryDirectories();
-
 	bool AddPath(const char* path_or_zip);
 	bool Exists(const char* file);
 	bool CreateDir(const char* dir);
@@ -97,7 +96,7 @@ namespace TextureImporter
 namespace MaterialImporter
 {
 	void Import(const aiMaterial* material, Material* ourMaterial, const char* folder_path);
-	uint64 Save(const Material* ourMaterial, char** fileBuffer);
+	uint64 Save(Material* ourMaterial, char** fileBuffer);
 	void Load(const char* fileBuffer, Material* material);
 
 	GnTexture* LoadTexture(const char* path);

@@ -769,28 +769,29 @@ GameObject* MeshImporter::PreorderChildren(const aiScene* scene, aiNode* node, a
 		Material* material = new Material();
 		aiMaterial* aimaterial = scene->mMaterials[aimesh->mMaterialIndex];
 
+		//Import Material
 		MaterialImporter::Import(aimaterial, material, path);
+		//Save material
 		size = MaterialImporter::Save(material, &buffer);
 
+		//Set own format path
 		file_path = "Library/Textures/";
-
 		std::string file = FileSystem::GetFile(material->GetDiffuseTexture()->name.c_str());
-
 		file_path += file;
-		file_path += ".gnTex";
+		file_path += ".dds";
 
 		FileSystem::Save(file_path.c_str(), buffer, size);
 
-		//delete material;
-		//material = nullptr;
+		delete material;
+		material = nullptr;
+		material = new Material();
 
 		MaterialImporter::Load(file_path.c_str(), material);
 
 		material->SetMesh(mesh);
 		gameObject->AddComponent(material);
 		
-
-		//RELEASE_ARRAY(buffer);
+		RELEASE_ARRAY(buffer);
 
 		//Transform------------------------------------------------------------
 		LoadTransform(node, gameObject->GetTransform());
@@ -924,10 +925,12 @@ void MaterialImporter::Import(const aiMaterial* aimaterial, Material* material, 
 	}
 }
 
-uint64 MaterialImporter::Save(const Material* ourMaterial, char** fileBuffer)
+uint64 MaterialImporter::Save(Material* ourMaterial, char** fileBuffer)
 {
 	ILuint size;
 	ILubyte* data;
+
+	ilBindImage(ourMaterial->GetDiffuseTexture()->id);
 
 	ilSetInteger(IL_DXTC_DATA_FORMAT, IL_DXT5);
 	size = ilSaveL(IL_DDS, nullptr, 0);
@@ -938,7 +941,7 @@ uint64 MaterialImporter::Save(const Material* ourMaterial, char** fileBuffer)
 		if (ilSaveL(IL_DDS, data, size) > 0)
 			*fileBuffer = (char*)data;
 		
-		RELEASE_ARRAY(data);
+		//RELEASE_ARRAY(data);
 	}
 
 	return size;
@@ -948,10 +951,56 @@ void MaterialImporter::Load(const char* fileBuffer, Material* material)
 {
 	Timer timer;
 	timer.Start();
+	ILuint imageID = 0;
+
+	ilGenImages(1, &imageID);
+	ilBindImage(imageID);
 
 	char* buffer = nullptr;
+	uint size = FileSystem::Load(fileBuffer, &buffer);
 
-	FileSystem::Load(fileBuffer, &buffer);
+	if (ilLoadL(IL_DDS, buffer, size) == IL_FALSE)
+	{
+		LOG_WARNING("Error when trying to load the texture %s into buffer, %d: %s", fileBuffer, ilGetError(), iluErrorString(ilGetError()));
+		buffer = nullptr;
+
+		//Reset Image
+		ilBindImage(0);
+		ilDeleteImages(1, &imageID);
+		ilGenImages(1, &imageID);
+		ilBindImage(imageID);
+	}
+
+	if (buffer != NULL)
+		RELEASE_ARRAY(buffer);
+
+	ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
+
+	ILenum error;
+	error = ilGetError();
+
+	if (error != IL_NO_ERROR)
+	{
+		ilBindImage(0);
+		ilDeleteImages(1, &imageID);
+		LOG_ERROR("Error when loading %s - %d: %s", fileBuffer, error, iluErrorString(error));
+	}
+	else
+	{
+		GnTexture* texture = new GnTexture();
+		LOG("Texture loaded successfully from: %s in %.3f s", fileBuffer, timer.ReadSec());
+
+		texture->id = (uint)(imageID);
+		//texture->name = FileSystem::GetFile(f) + format;
+		texture->data = ilGetData();
+		texture->width = ilGetInteger(IL_IMAGE_WIDTH);
+		texture->height = ilGetInteger(IL_IMAGE_HEIGHT);
+		texture->path = fileBuffer;
+
+		material->SetTexture(texture);
+	}
+
+	ilBindImage(0);
 }
 
 GnTexture* MaterialImporter::LoadTexture(const char* full_path)
@@ -996,8 +1045,7 @@ GnTexture* MaterialImporter::LoadTexture(const char* full_path)
 			//Reset Image
 			ilBindImage(0);
 			ilDeleteImages(1, &imageID);
-			ilGenImages(1, &imageID);
-			ilBindImage(imageID);
+			return nullptr;
 		}
 
 		if (buffer != NULL)
@@ -1008,7 +1056,6 @@ GnTexture* MaterialImporter::LoadTexture(const char* full_path)
 		if (ilLoadImage(normalized_path.c_str()) == IL_FALSE)
 		{
 			LOG_ERROR("Error trying to load the texture directly from %s", full_path);
-			//texture = nullptr;
 		}
 	}
 
