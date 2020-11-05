@@ -327,6 +327,10 @@ bool Editor::CreateMainMenuBar() {
 			{
 				ret = false;
 			}
+			else if (ImGui::MenuItem("Save"))
+			{
+				App->Save();
+			}
 			ImGui::EndMenu();
 		}
 

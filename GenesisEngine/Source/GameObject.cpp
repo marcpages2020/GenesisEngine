@@ -4,12 +4,16 @@
 #include "Mesh.h"
 #include "Material.h"
 #include "ImGui/imgui.h"
+#include "GnJSON.h"
+
+#include "MathGeoLib/include/MathGeoLib.h"
 
 #include <vector>
 
 GameObject::GameObject() : enabled(true), name("Empty Game Object"), parent(nullptr), to_delete(false)
 {
 	transform = (Transform*)AddComponent(ComponentType::TRANSFORM);
+	UUID = LCG().Int();
 }
 
 GameObject::GameObject(GnMesh* mesh) : GameObject()
@@ -70,6 +74,27 @@ void GameObject::OnEditor()
 			ImGui::Text("Parent: %s", parent->GetName());
 		else 
 			ImGui::Text("No parent");
+
+		ImGui::Text("UUID: %d", UUID);
+	}
+}
+
+void GameObject::Save(GnJSONArray& save_array)
+{
+	GnJSONObj save_object;
+
+	save_object.AddInt("UUID", UUID);
+
+	if(parent != nullptr)
+		save_object.AddInt("Parent UUID",parent->UUID);
+
+	save_object.AddC_Str("Name", name.c_str());
+
+	save_array.AddObject(save_object);
+
+	for (size_t i = 0; i < children.size(); i++)
+	{
+		children[i]->Save(save_array);
 	}
 }
 

@@ -7,7 +7,7 @@
 
 #include "parson/parson.h"
 
-Application::Application(int argc, char* args[]) : argc(argc), args(args)
+Application::Application(int argc, char* args[]) : argc(argc), args(args), want_to_save(false)
 {
 	window = new ModuleWindow(true);
 	input = new ModuleInput(true);
@@ -120,6 +120,12 @@ update_status Application::Update()
 		ret = modules_vector[i]->PostUpdate(dt);
 	}
 
+	if (want_to_save)
+	{
+		scene->Save();
+		want_to_save = false;
+	}
+
 	FinishUpdate();
 	return ret;
 }
@@ -154,6 +160,11 @@ int Application::GetFPSCap()
 void Application::SetFPSCap(int fps_cap)
 {
 	capped_ms = 1000 / fps_cap;
+}
+
+void Application::Save()
+{
+	want_to_save = true;
 }
 
 HardwareSpecs Application::GetHardware()

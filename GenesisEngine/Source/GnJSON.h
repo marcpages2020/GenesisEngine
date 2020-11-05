@@ -19,8 +19,12 @@ public:
 	GnJSONObj();
 	GnJSONObj(const char* buffer);
 	GnJSONObj(JSON_Object* object);
-
 	~GnJSONObj();
+
+	JSON_Object* GetJSONObject();
+	JSON_Value* GetValue();
+
+	uint Save(char** buffer);
 
 	JSON_Array* GetParsonArray(const char* name);
 
@@ -28,6 +32,12 @@ public:
 	float GetFloat(const char* name);
 	bool GetBool(const char* name);
 	const char* GetC_Str(const char* name);
+
+	void AddInt(const char* name, int number);
+	void AddFloat(const char* name, float number);
+	void AddBool(const char* name, bool boolean);
+	void AddC_Str(const char* name, const char* string);
+	GnJSONArray AddArray(const char* name);
 
 private:
 	JSON_Object* _object;
@@ -43,6 +53,8 @@ public:
 
 	GnJSONObj GetObjectInArray(const char* name);
 
+	void AddObject(GnJSONObj object);
+
 private: 
-	JSON_Array* array;
+	JSON_Array* _array;
 };

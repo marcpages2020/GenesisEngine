@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Globals.h"
+
 #include <vector>
 #include <string>
 
@@ -7,6 +9,9 @@ class Component;
 class Transform;
 class GnMesh;
 enum class ComponentType;
+
+class GnJSONObj;
+class GnJSONArray;
 
 class GameObject {
 public:
@@ -16,6 +21,8 @@ public:
 
 	void Update();
 	void OnEditor();
+
+	void Save(GnJSONArray& save_array);
 
 	Component* GetComponent(ComponentType component);
 	Component* AddComponent(ComponentType type);
@@ -39,6 +46,8 @@ public:
 
 public: 
 	bool to_delete;
+	uint UUID = -1;
+
 private:
 	bool enabled;
 	std::string name;

@@ -21,6 +21,7 @@ public:
 	void DeleteGameObject(GameObject* gameObject);
 	GameObject* GetRoot() { return root; }
 	void SetDroppedTexture(GnTexture* texture);
+	bool Save();
 
 public:
 	bool show_grid;

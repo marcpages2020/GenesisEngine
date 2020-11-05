@@ -101,6 +101,25 @@ void ModuleScene::SetDroppedTexture(GnTexture* texture)
 	}
 }
 
+bool ModuleScene::Save()
+{
+	bool ret = true;
+
+	GnJSONObj save_file;
+
+	save_file.AddC_Str("name", "Save File");
+	GnJSONArray gameObjects(save_file.AddArray("Game Objects"));
+
+	root->Save(gameObjects);
+
+	char* buffer;
+	uint size = save_file.Save(&buffer);
+
+	FileSystem::Save("Library/Config/save_file.save", buffer, size);
+
+	return ret;
+}
+
 bool ModuleScene::LoadConfig(GnJSONObj& config)
 {
 	show_grid = config.GetBool("show_grid");
