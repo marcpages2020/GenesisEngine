@@ -96,6 +96,7 @@
     <ClInclude Include="Component.h" />
     <ClInclude Include="FileSystem.h" />
     <ClInclude Include="GameObject.h" />
+    <ClInclude Include="GnJSON.h" />
     <ClInclude Include="Libs\MathGeoLib\include\Algorithm\Random\LCG.h" />
     <ClInclude Include="Libs\MathGeoLib\include\Geometry\AABB.h" />
     <ClInclude Include="Libs\MathGeoLib\include\Geometry\AABB2D.h" />
@@ -195,6 +196,7 @@
     <ClCompile Include="FileSystem.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="glmath.cpp" />
+    <ClCompile Include="GnJSON.cpp" />
     <ClCompile Include="Libs\ImGui\imgui.cpp" />
     <ClCompile Include="Libs\ImGui\imgui_demo.cpp" />
     <ClCompile Include="Libs\ImGui\imgui_draw.cpp" />
@@ -248,7 +250,7 @@
     <ClCompile Include="Transform.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Engine\Assets\Config\config.json" />
+    <None Include="..\Engine\Library\Config\config.json" />
     <None Include="Libs\MathGeoLib\include\Geometry\KDTree.inl" />
     <None Include="Libs\MathGeoLib\include\Geometry\QuadTree.inl" />
     <None Include="Libs\MathGeoLib\include\Geometry\TriangleMesh_IntersectRay_AVX.inl" />

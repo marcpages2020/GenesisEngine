@@ -167,6 +167,9 @@
     <ClCompile Include="Libs\MathGeoLib\include\Algorithm\Random\LCG.cpp">
       <Filter>Libs\MathGeoLib\Algorithm</Filter>
     </ClCompile>
+    <ClCompile Include="GnJSON.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
@@ -440,6 +443,9 @@
     <ClInclude Include="Libs\MathGeoLib\include\Algorithm\Random\LCG.h">
       <Filter>Libs\MathGeoLib\Algorithm</Filter>
     </ClInclude>
+    <ClInclude Include="GnJSON.h">
+      <Filter>Tools</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Modules">
@@ -501,6 +507,8 @@
     <None Include="Libs\MathGeoLib\include\Geometry\TriangleMesh_IntersectRay_SSE.inl">
       <Filter>Libs\MathGeoLib\Geometry</Filter>
     </None>
-    <None Include="..\Engine\Assets\Config\config.json" />
+    <None Include="..\Engine\Library\Config\config.json">
+      <Filter>Tools</Filter>
+    </None>
   </ItemGroup>
 </Project>

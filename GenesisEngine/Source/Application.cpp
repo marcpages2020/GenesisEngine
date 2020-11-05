@@ -3,6 +3,8 @@
 #include "Globals.h"
 #include "FileSystem.h"
 
+#include "GnJSON.h"
+
 #include "parson/parson.h"
 
 Application::Application(int argc, char* args[]) : argc(argc), args(args)
@@ -27,8 +29,6 @@ Application::Application(int argc, char* args[]) : argc(argc), args(args)
 
 	int cap = 60;
 	capped_ms = 1000 / cap;
-
-	config_path = "jsons";
 }
 
 Application::~Application()
@@ -50,19 +50,20 @@ bool Application::Init()
 
 	char* buffer = nullptr;
 
-	uint size = FileSystem::Load("Assets/Config/config.json", &buffer);
+	uint size = FileSystem::Load("Library/Config/config.json", &buffer);
+	GnJSONObj* config = new GnJSONObj(buffer);
 
-	JSON_Value* config_root = nullptr;
-	JSON_Array* modules_array = JSONParser::LoadConfig(buffer, config_root);
+	GnJSONArray* modules_array = config->GetArray("modules_config");
 	
-	LoadConfig(JSONParser::GetJSONObjectByName("app", modules_array));
+	//LoadConfig(JSONParser::GetJSONObjectByName("app", modules_array));
 
 	// Call Init() in all modules
 	for (int i = 0; i < modules_vector.size() && ret == true; i++)
 	{
-		JSON_Object* module_object = JSONParser::GetJSONObjectByName(modules_vector[i]->name, modules_array);
+		GnJSONObj* module_config = modules_array->GetObjectInArray(modules_vector[i]->name);
+		//JSON_Object* module_object = JSONParser::GetJSONObjectByName(, modules_array);
 
-		ret = modules_vector[i]->LoadConfig(module_object);
+		//ret = modules_vector[i]->LoadConfig(module_config);
 		ret = modules_vector[i]->Init();
 	}
 
@@ -72,9 +73,9 @@ bool Application::Init()
 	{
 		ret = modules_vector[i]->Start();
 	}
-
-	if(config_root)
-		json_value_free(config_root);
+	
+	delete config;
+	config = nullptr;
 
 	RELEASE_ARRAY(buffer);
 

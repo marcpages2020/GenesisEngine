@@ -510,14 +510,14 @@ void MeshImporter::Import(const aiMesh* aimesh, GnMesh* mesh)
 	mesh->vertices_amount = aimesh->mNumVertices;
 	mesh->vertices = new float[mesh->vertices_amount * 3]();
 	memcpy(mesh->vertices, aimesh->mVertices, sizeof(float) * mesh->vertices_amount * 3);
-	LOG("%s loaded with %d vertices", aimesh->mName.C_Str(), mesh->vertices_amount);
+	LOG("%s imported with %d vertices", aimesh->mName.C_Str(), mesh->vertices_amount);
 
 	//indices copying
 	if (aimesh->HasFaces())
 	{
 		mesh->indices_amount = aimesh->mNumFaces * 3;
 		mesh->indices = new uint[mesh->indices_amount]();
-		LOG("%s loaded with %d indices", aimesh->mName.C_Str(), mesh->indices_amount);
+		LOG("%s imported with %d indices", aimesh->mName.C_Str(), mesh->indices_amount);
 
 		for (size_t f = 0; f < aimesh->mNumFaces; f++)
 		{
@@ -672,11 +672,9 @@ void MeshImporter::Load(const char* fileBuffer, GnMesh* mesh)
 	memcpy(mesh->texcoords, cursor, bytes);
 	cursor += bytes;
 
+	LOG("%s loaded in %.3f s", fileBuffer, timer.ReadSec());
+
 	mesh->GenerateBuffers();
-
-	//RELEASE_ARRAY(buffer);
-
-	LOG("%s loaded in %.3f s", mesh->name, timer.ReadSec());
 }
 
 GameObject* MeshImporter::ImportFBX(const char* full_path)
@@ -911,6 +909,9 @@ JSON_Object* JSONParser::GetJSONObjectByName(const char* name, JSON_Array* modul
 
 void MaterialImporter::Import(const aiMaterial* aimaterial, Material* material, const char* folder_path)
 {
+	Timer timer;
+	timer.Start();
+
 	aiString path;
 	aimaterial->GetTexture(aiTextureType_DIFFUSE, 0, &path);
 
@@ -921,6 +922,8 @@ void MaterialImporter::Import(const aiMaterial* aimaterial, Material* material, 
 		GnTexture* texture = LoadTexture(file_path.c_str());
 
 		material->SetTexture(texture);
+
+		LOG("%s imported in %.3f s", texture->path, timer.ReadSec());
 	}
 }
 
@@ -1000,7 +1003,6 @@ void MaterialImporter::Load(const char* fileBuffer, Material* material)
 	else
 	{
 		GnTexture* texture = new GnTexture();
-		LOG("Texture loaded successfully from: %s in %.3f s", fileBuffer, timer.ReadSec());
 
 		texture->id = (uint)(imageID);
 		//texture->name = FileSystem::GetFile(f) + format;
@@ -1010,6 +1012,8 @@ void MaterialImporter::Load(const char* fileBuffer, Material* material)
 		texture->path = fileBuffer;
 
 		material->SetTexture(texture);
+
+		LOG("Texture loaded successfully from: %s in %.3f s", fileBuffer, timer.ReadSec());
 	}
 
 	ilBindImage(0);
