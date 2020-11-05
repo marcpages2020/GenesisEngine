@@ -8,7 +8,7 @@
 #include <vector>
 #include "FileSystem.h"
 
-#include "parson/parson.h"
+#include "GnJSON.h"
 
 #include "ModuleWindow.h"
 #include "ModuleRenderer3D.h"
@@ -172,13 +172,13 @@ bool ModuleRenderer3D::Init()
 	return ret;
 }
 
-bool ModuleRenderer3D::LoadConfig(JSON_Object* config)
+bool ModuleRenderer3D::LoadConfig(GnJSONObj& config)
 {
-	debug = json_object_get_string(config, "debug");
-	vsync = json_object_get_boolean(config, "vsync");
+	debug = config.GetBool("debug");
+	vsync = config.GetBool("vsync");
 
-	draw_vertex_normals = json_object_get_boolean(config, "draw_vertex_normals");
-	draw_face_normals = json_object_get_boolean(config, "draw_face_normals");
+	draw_vertex_normals = config.GetBool("draw_vertex_normals");
+	draw_face_normals = config.GetBool("draw_face_normals");
 
 	return true;
 }

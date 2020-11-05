@@ -1,7 +1,7 @@
 #include "Globals.h"
 #include "Application.h"
 #include "ModuleScene.h"
-#include "parson/parson.h"
+#include "GnJSON.h"
 #include "Mesh.h"
 #include "FileSystem.h"
 #include "GameObject.h"
@@ -101,9 +101,9 @@ void ModuleScene::SetDroppedTexture(GnTexture* texture)
 	}
 }
 
-bool ModuleScene::LoadConfig(JSON_Object* config)
+bool ModuleScene::LoadConfig(GnJSONObj& config)
 {
-	show_grid = json_object_get_boolean(config, "show_grid");
+	show_grid = config.GetBool("show_grid");
 
 	return true;
 }

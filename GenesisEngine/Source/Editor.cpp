@@ -1,6 +1,6 @@
 #include "Application.h"
 #include "Editor.h"
-#include "parson/parson.h"
+#include "GnJSON.h"
 #include "Mesh.h"
 #include "ModuleScene.h"
 #include "GameObject.h"
@@ -182,34 +182,34 @@ bool Editor::CleanUp()
 	return true;
 }
 
-bool Editor::LoadConfig(JSON_Object* object)
+bool Editor::LoadConfig(GnJSONObj& config)
 {
-	JSON_Array* windows = json_object_get_array(object, "windows");
+	GnJSONArray windows(config.GetParsonArray("windows"));
 	
-	JSON_Object* window = json_array_get_object_by_name(windows, "scene");
-	show_scene_window = json_object_get_boolean(window, "visible");
+	GnJSONObj window = windows.GetObjectInArray("scene");
+	show_scene_window = window.GetBool("visible");
 
-	window = json_array_get_object_by_name(windows, "inspector");
-	show_inspector_window = json_object_get_boolean(window, "visible");
+	window = windows.GetObjectInArray("inspector");
+	show_inspector_window = window.GetBool("visible");
 
-	window = json_array_get_object_by_name(windows, "hierarchy");
-	show_hierarchy_window = json_object_get_boolean(window, "visible");
+	window = windows.GetObjectInArray("hierarchy");
+	show_hierarchy_window = window.GetBool("visible");
 
-	window = json_array_get_object_by_name(windows, "project");
-	show_project_window = json_object_get_boolean(window, "visible");
+	window = windows.GetObjectInArray("project");
+	show_project_window = window.GetBool("visible");
 
-	window = json_array_get_object_by_name(windows, "console");
-	show_console_window = json_object_get_boolean(window, "visible");
+	window = windows.GetObjectInArray("console");
+	show_console_window = window.GetBool("visible");
 
-	window = json_array_get_object_by_name(windows, "configuration");
-	show_configuration_window = json_object_get_boolean(window, "visible");
+	window = windows.GetObjectInArray("configuration");
+	show_configuration_window = window.GetBool("visible");
 
-	window = json_array_get_object_by_name(windows, "preferences");
-	show_preferences_window = json_object_get_boolean(window, "visible");
+	window = windows.GetObjectInArray("preferences");
+	show_preferences_window = window.GetBool("visible");
 
-	window = json_array_get_object_by_name(windows, "about");
-	show_about_window = json_object_get_boolean(window, "visible");
-
+	window = windows.GetObjectInArray("about");
+	show_about_window = window.GetBool("visible");
+	
 	return true;
 }
 
@@ -764,8 +764,7 @@ void Editor::ShowAboutWindow()
 {
 	if (ImGui::Begin("About", &show_about_window))
 	{
-		static const char* engine_version = App->GetEngineVersion();
-		ImGui::Text("%s v%s", App->engine_name, engine_version);
+		ImGui::Text("%s v%s", App->engine_name, App->engine_version);
 		ImGui::Text("The first chapter of your creation");
 		ImGui::Spacing();
 

@@ -20,7 +20,6 @@ public:
 	~ModuleInput();
 
 	bool Init();
-	bool LoadConfig(JSON_Object* config) override;
 	update_status PreUpdate(float dt);
 	bool CleanUp();
 

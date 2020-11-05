@@ -2,8 +2,7 @@
 
 class Application;
 
-struct json_object_t;
-typedef struct json_object_t JSON_Object;
+class GnJSONObj;
 
 class Module
 {
@@ -11,7 +10,7 @@ private :
 	bool enabled;
 
 public: 
-	const char* name;
+	const char* name = "No Name Module";
 
 public:
 
@@ -28,7 +27,7 @@ public:
 		return true; 
 	}
 
-	virtual bool LoadConfig(JSON_Object* object)
+	virtual bool LoadConfig(GnJSONObj& object)
 	{
 		return true;
 	}

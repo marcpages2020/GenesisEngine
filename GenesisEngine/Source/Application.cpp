@@ -21,7 +21,6 @@ Application::Application(int argc, char* args[]) : argc(argc), args(args)
 	AddModule(camera);
 	AddModule(input);
 	AddModule(scene);
-
 	AddModule(editor);
 
 	// Renderer last!
@@ -51,19 +50,19 @@ bool Application::Init()
 	char* buffer = nullptr;
 
 	uint size = FileSystem::Load("Library/Config/config.json", &buffer);
-	GnJSONObj* config = new GnJSONObj(buffer);
+	GnJSONObj config(buffer);
 
-	GnJSONArray* modules_array = config->GetArray("modules_config");
-	
-	//LoadConfig(JSONParser::GetJSONObjectByName("app", modules_array));
+	engine_name = config.GetC_Str("engineName");
+	engine_version = config.GetC_Str("version");
+
+	GnJSONArray modules_array(config.GetParsonArray("modules_config"));
 
 	// Call Init() in all modules
 	for (int i = 0; i < modules_vector.size() && ret == true; i++)
 	{
-		GnJSONObj* module_config = modules_array->GetObjectInArray(modules_vector[i]->name);
-		//JSON_Object* module_object = JSONParser::GetJSONObjectByName(, modules_array);
+		GnJSONObj module_config = modules_array.GetObjectInArray(modules_vector[i]->name);
 
-		//ret = modules_vector[i]->LoadConfig(module_config);
+		ret = modules_vector[i]->LoadConfig(module_config);
 		ret = modules_vector[i]->Init();
 	}
 
@@ -74,8 +73,6 @@ bool Application::Init()
 		ret = modules_vector[i]->Start();
 	}
 	
-	delete config;
-	config = nullptr;
 
 	RELEASE_ARRAY(buffer);
 
@@ -140,16 +137,6 @@ bool Application::CleanUp()
 	return ret;
 }
 
-bool Application::LoadConfig(JSON_Object* object)
-{
-	bool ret = true;
-
-	engine_name = json_object_get_string(object, "engine name");
-	version = json_object_get_string(object, "version");
-
-	return ret;
-}
-
 void Application::AddModule(Module* mod)
 {
 	modules_vector.push_back(mod);
@@ -210,9 +197,5 @@ HardwareSpecs Application::GetHardware()
 	return specs;
 }
 
-const char* Application::GetEngineVersion()
-{
-	return version;
-}
 
 

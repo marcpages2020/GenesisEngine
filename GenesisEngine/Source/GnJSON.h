@@ -17,12 +17,17 @@ class GnJSONObj
 {
 public:
 	GnJSONObj();
-	GnJSONObj(char* buffer);
+	GnJSONObj(const char* buffer);
 	GnJSONObj(JSON_Object* object);
 
 	~GnJSONObj();
 
-	GnJSONArray* GetArray(const char* name);
+	JSON_Array* GetParsonArray(const char* name);
+
+	int GetInt(const char* name);
+	float GetFloat(const char* name);
+	bool GetBool(const char* name);
+	const char* GetC_Str(const char* name);
 
 private:
 	JSON_Object* _object;
@@ -36,7 +41,7 @@ public:
 	GnJSONArray(JSON_Array* array);
 	~GnJSONArray();
 
-	GnJSONObj* GetObjectInArray(const char* name);
+	GnJSONObj GetObjectInArray(const char* name);
 
 private: 
 	JSON_Array* array;

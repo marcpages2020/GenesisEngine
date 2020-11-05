@@ -1,7 +1,7 @@
 #include "Globals.h"
 #include "Application.h"
 #include "ModuleWindow.h"
-#include "parson/parson.h"
+#include "GnJSON.h"
 
 #include "SDL/include/SDL_video.h"
 
@@ -36,8 +36,6 @@ bool ModuleWindow::Init()
 	else
 	{
 		//Create window
-		//int width = SCREEN_WIDTH * SCREEN_SIZE;
-		//int height = SCREEN_HEIGHT * SCREEN_SIZE;
 		Uint32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
 
 		//Use OpenGL 2.1
@@ -70,7 +68,7 @@ bool ModuleWindow::Init()
 
 		static char title[2048] = { 0 };
 		memset(title, 0, sizeof(title));
-		sprintf_s(title, "%s v%s", App->engine_name, App->GetEngineVersion());
+		sprintf_s(title, "%s v%s", App->engine_name, App->engine_version);
 
 		window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, flags);
 
@@ -93,16 +91,17 @@ bool ModuleWindow::Init()
 	return ret;
 }
 
-bool ModuleWindow::LoadConfig(JSON_Object* config)
+bool ModuleWindow::LoadConfig(GnJSONObj& config)
 {
 	//Get Json attributes
-	width = json_object_get_number(config, "width");
-	height = json_object_get_number(config, "height");
+	width = config.GetInt("width");
+	
+	height = config.GetInt("height");
 
-	fullscreen = json_object_get_boolean(config, "fullscreen");
-	fullscreen_desktop = json_object_get_boolean(config, "fullscreen_desktop");
-	resizable = json_object_get_boolean(config, "resizable");
-	borderless = json_object_get_boolean(config, "borderless");
+	fullscreen = config.GetBool("fullscreen");
+	fullscreen_desktop = config.GetBool("fullscreen_desktop");
+	resizable = config.GetBool("resizable");
+	borderless = config.GetBool("borderless");
 
 	return true;
 }

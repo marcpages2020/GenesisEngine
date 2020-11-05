@@ -26,7 +26,7 @@ public:
 	~ModuleRenderer3D();
 
 	bool Init();
-	bool LoadConfig(JSON_Object* config) override;
+	bool LoadConfig(GnJSONObj& config) override;
 	update_status PreUpdate(float dt) override;
 	update_status Update(float dt) override;
 	update_status PostUpdate(float dt) override;

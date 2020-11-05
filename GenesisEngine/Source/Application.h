@@ -60,6 +60,7 @@ public:
 	ModuleRenderer3D* renderer3D;
 
 	const char* engine_name;
+	const char* engine_version;
 
 public:
 
@@ -70,8 +71,6 @@ public:
 	update_status Update();
 	bool CleanUp();
 
-	bool LoadConfig(JSON_Object* object);
-
 public:
 	float GetFPS();
 	float GetLastDt();
@@ -79,7 +78,6 @@ public:
 	void SetFPSCap(int fps_cap);
 
 	HardwareSpecs GetHardware();
-	const char* GetEngineVersion();
 
 private:
 
@@ -96,8 +94,6 @@ private:
 	float	fps;
 	float	capped_ms;
 	std::vector<Module*> modules_vector;
-
-	const char* version;
 
 	const char* config_path;
 };

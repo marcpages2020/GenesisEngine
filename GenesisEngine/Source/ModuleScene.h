@@ -13,7 +13,7 @@ public:
 
 	bool Start();
 	bool Init();
-	bool LoadConfig(JSON_Object* config) override;
+	bool LoadConfig(GnJSONObj& config) override;
 	update_status Update(float dt);
 	bool CleanUp();
 

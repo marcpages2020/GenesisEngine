@@ -4,7 +4,7 @@
 #include "GameObject.h"
 #include "Transform.h"
 
-#include "parson/parson.h"
+#include "GnJSON.h"
 
 ModuleCamera3D::ModuleCamera3D(bool start_enabled) : Module(start_enabled)
 {
@@ -38,12 +38,12 @@ bool ModuleCamera3D::Start()
 	return ret;
 }
 
-bool ModuleCamera3D::LoadConfig(JSON_Object* config)
+bool ModuleCamera3D::LoadConfig(GnJSONObj& config)
 {
-	move_speed = json_object_get_number(config, "move_speed");
-	drag_speed = json_object_get_number(config, "drag_speed");
-	zoom_speed = json_object_get_number(config, "zoom_speed");
-	sensitivity = json_object_get_number(config, "sensitivity");
+	move_speed = config.GetFloat("move_speed");
+	drag_speed = config.GetFloat("drag_speed");
+	zoom_speed = config.GetFloat("zoom_speed");
+	sensitivity = config.GetFloat("sensitivity");
 
 	return true;
 }

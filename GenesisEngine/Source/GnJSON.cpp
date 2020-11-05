@@ -3,16 +3,19 @@
 
 //GnJSONObject ====================================================
 
-GnJSONObj::GnJSONObj() : _object(nullptr), _root(nullptr) {}
+GnJSONObj::GnJSONObj()
+{
+	_root = nullptr;
+	_object = nullptr;
+}
 
-GnJSONObj::GnJSONObj(char* buffer)
+GnJSONObj::GnJSONObj(const char* buffer) : _object(nullptr)
 {
 	_root = json_parse_string(buffer);
-	_object = json_value_get_object(_root);
-	//JSON_Array* modules = json_object_get_array(_object, "modules");
 
 	if (_root != NULL)
 	{
+		_object = json_value_get_object(_root);
 		LOG("Config file loaded successfully");
 	}
 	else
@@ -24,21 +27,40 @@ GnJSONObj::GnJSONObj(char* buffer)
 GnJSONObj::GnJSONObj(JSON_Object* object)
 {
 	_object = object;
+	_root = nullptr;
 }
 
 GnJSONObj::~GnJSONObj() 
 {
-	delete _object;
-	_object = nullptr;
-
-	if(_root != nullptr)
-	 json_value_free(_root);
+	if (_root != nullptr)
+	{
+//		json_value_free(_root);
+	}
 }
 
-GnJSONArray* GnJSONObj::GetArray(const char* name)
+JSON_Array* GnJSONObj::GetParsonArray(const char* name)
 {
-	GnJSONArray* array = new GnJSONArray(json_object_get_array(_object, name));
-	return array;
+	return json_object_get_array(_object, name);
+}
+
+int GnJSONObj::GetInt(const char* name)
+{
+	return json_object_get_number(_object, name);
+}
+
+float GnJSONObj::GetFloat(const char* name)
+{
+	return json_object_get_number(_object, name);
+}
+
+bool GnJSONObj::GetBool(const char* name)
+{
+	return json_object_get_boolean(_object, name);
+}
+
+const char* GnJSONObj::GetC_Str(const char* name)
+{
+	return json_object_get_string(_object, name);
 }
 
 //GnJSONArray =====================================================
@@ -56,15 +78,18 @@ GnJSONArray::~GnJSONArray()
 	array = nullptr;
 }
 
-GnJSONObj* GnJSONArray::GetObjectInArray(const char* name)
+GnJSONObj GnJSONArray::GetObjectInArray(const char* name)
 {
-	for (size_t i = 0; i < json_array_get_count(array); i++)
+	int count = json_array_get_count(array);
+
+	for (size_t i = 0; i < count; i++)
 	{
 		JSON_Object* object = json_array_get_object(array, i);
-		if (strcmp(name, json_object_get_string(object, "name")) == 0)
-			return new GnJSONObj(object);
+		const char* object_name = json_object_get_string(object, "name");
+
+		if (strcmp(name, object_name) == 0)
+		return GnJSONObj(object);
 	}
 
 	LOG_ERROR("JSON object %s could not be found", name);
-	return NULL;
 }

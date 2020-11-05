@@ -16,7 +16,7 @@ public:
 	virtual ~ModuleWindow();
 
 	bool Init();
-	bool LoadConfig(JSON_Object* config) override;
+	bool LoadConfig(GnJSONObj& config) override;
 	bool CleanUp();
 
 	void GetSize(int& width, int& height);

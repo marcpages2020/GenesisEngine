@@ -36,11 +36,6 @@ bool ModuleInput::Init()
 	return ret;
 }
 
-bool ModuleInput::LoadConfig(JSON_Object* config)
-{
-	return true;
-}
-
 // Called every draw update
 update_status ModuleInput::PreUpdate(float dt)
 {
