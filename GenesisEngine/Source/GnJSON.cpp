@@ -28,6 +28,7 @@ GnJSONObj::GnJSONObj(JSON_Object* object)
 {
 	_object = object;
 	_root = json_value_init_object();
+	//_root_object = root_object;
 }
 
 GnJSONObj::~GnJSONObj() 
@@ -50,7 +51,7 @@ JSON_Value* GnJSONObj::GetValue()
 
 uint GnJSONObj::Save(char** buffer)
 {
-	uint size = json_serialization_size_pretty(_root);
+ 	uint size = json_serialization_size_pretty(_root);
 	*buffer = new char[size];
 	json_serialize_to_buffer_pretty(_root, *buffer, size);
 	return size;
@@ -76,7 +77,7 @@ bool GnJSONObj::GetBool(const char* name)
 	return json_object_get_boolean(_object, name);
 }
 
-const char* GnJSONObj::GetC_Str(const char* name)
+const char* GnJSONObj::GetString(const char* name)
 {
 	return json_object_get_string(_object, name);
 }
@@ -96,24 +97,40 @@ void GnJSONObj::AddBool(const char* name, bool boolean)
 	json_object_set_boolean(_object, name, boolean);
 }
 
-void GnJSONObj::AddC_Str(const char* name, const char* string)
+void GnJSONObj::AddString(const char* name, const char* string)
 {
 	json_object_set_string(_object, name, string);
 }
 
-GnJSONArray GnJSONObj::AddArray(const char* name)
+GnJSONArray GnJSONObj::AddArray(const char* name, bool nested)
 {
 	json_object_set_value(_object, name, json_value_init_array());
-	return GnJSONArray(json_object_get_array(_object, name));
+	JSON_Array* array = json_object_get_array(_object, name);
+
+	return GnJSONArray(array, _root_object);
+}
+
+GnJSONArray GnJSONObj::AddArray(GnJSONArray array)
+{
+	return GnJSONArray();
 }
 
 //GnJSONArray =====================================================
 
-GnJSONArray::GnJSONArray() : _array(nullptr) {}
+GnJSONArray::GnJSONArray() : _array(nullptr), _nested(false) {}
 
-GnJSONArray::GnJSONArray(JSON_Array* g_array)
+GnJSONArray::GnJSONArray(JSON_Array* array, JSON_Object* root_object)
 {
-	_array = g_array;
+	_array = array;
+	_root = root_object;
+}
+
+GnJSONArray::GnJSONArray(JSON_Array* array) : _array(array), _root(nullptr) {}
+
+GnJSONArray::GnJSONArray(const char* name) : _nested(false)
+{
+	JSON_Value* value = json_value_init_array();
+	json_value_get_array(value);
 }
 
 GnJSONArray::~GnJSONArray() 
@@ -138,7 +155,22 @@ GnJSONObj GnJSONArray::GetObjectInArray(const char* name)
 	LOG_ERROR("JSON object %s could not be found", name);
 }
 
+JSON_Object* GnJSONArray::GetRoot()
+{
+	return _root;
+}
+
 void GnJSONArray::AddObject(GnJSONObj object)
 {
 	json_array_append_value(_array, object.GetValue());
+}
+
+void GnJSONArray::AddFloat(float number)
+{
+	json_array_append_number(_array, number);
+}
+
+void GnJSONArray::AddString(const char* string)
+{
+	json_array_append_string(_array, string);
 }

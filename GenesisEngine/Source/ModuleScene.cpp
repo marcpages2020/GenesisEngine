@@ -107,12 +107,13 @@ bool ModuleScene::Save()
 
 	GnJSONObj save_file;
 
-	save_file.AddC_Str("name", "Save File");
-	GnJSONArray gameObjects(save_file.AddArray("Game Objects"));
+	save_file.AddString("name", "Save File");
+
+	GnJSONArray gameObjects = save_file.AddArray("Game Objects");
 
 	root->Save(gameObjects);
 
-	char* buffer;
+	char* buffer = NULL;
 	uint size = save_file.Save(&buffer);
 
 	FileSystem::Save("Library/Config/save_file.save", buffer, size);

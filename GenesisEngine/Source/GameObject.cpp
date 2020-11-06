@@ -88,7 +88,9 @@ void GameObject::Save(GnJSONArray& save_array)
 	if(parent != nullptr)
 		save_object.AddInt("Parent UUID",parent->UUID);
 
-	save_object.AddC_Str("Name", name.c_str());
+	save_object.AddString("Name", name.c_str());
+
+	//GnJSONArray components = save_object.AddArray("Components");
 
 	save_array.AddObject(save_object);
 

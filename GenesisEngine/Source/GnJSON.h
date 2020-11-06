@@ -31,16 +31,18 @@ public:
 	int GetInt(const char* name);
 	float GetFloat(const char* name);
 	bool GetBool(const char* name);
-	const char* GetC_Str(const char* name);
+	const char* GetString(const char* name);
 
 	void AddInt(const char* name, int number);
 	void AddFloat(const char* name, float number);
 	void AddBool(const char* name, bool boolean);
-	void AddC_Str(const char* name, const char* string);
-	GnJSONArray AddArray(const char* name);
+	void AddString(const char* name, const char* string);
+	GnJSONArray AddArray(const char* name, bool nested = false);
+	GnJSONArray AddArray(GnJSONArray array);
 
 private:
 	JSON_Object* _object;
+	JSON_Object* _root_object;
 	JSON_Value* _root;
 };
 
@@ -49,12 +51,19 @@ class GnJSONArray
 public:
 	GnJSONArray();
 	GnJSONArray(JSON_Array* array);
+	GnJSONArray(JSON_Array* array, JSON_Object* root_object);
+	GnJSONArray(const char* name);
 	~GnJSONArray();
 
 	GnJSONObj GetObjectInArray(const char* name);
+	JSON_Object* GetRoot();
 
 	void AddObject(GnJSONObj object);
+	void AddFloat(float number);
+	void AddString(const char* string);
 
 private: 
 	JSON_Array* _array;
+	JSON_Object* _root;
+	bool _nested;
 };

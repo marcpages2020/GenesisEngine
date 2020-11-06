@@ -52,8 +52,8 @@ bool Application::Init()
 	uint size = FileSystem::Load("Library/Config/config.json", &buffer);
 	GnJSONObj config(buffer);
 
-	engine_name = config.GetC_Str("engineName");
-	engine_version = config.GetC_Str("version");
+	engine_name = config.GetString("engineName");
+	engine_version = config.GetString("version");
 
 	GnJSONArray modules_array(config.GetParsonArray("modules_config"));
 
