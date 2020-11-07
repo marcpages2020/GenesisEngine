@@ -5,6 +5,7 @@
 #include "Material.h"
 #include "GameObject.h"
 #include "Transform.h"
+#include "GnJSON.h"
 
 #include "glew/include/glew.h"
 #include "ImGui/imgui.h"
@@ -45,6 +46,15 @@ GnMesh::~GnMesh(){
 	glDeleteTextures(1, &textureID);
 
 	texture = nullptr;
+}
+
+void GnMesh::Save(GnJSONArray& save_array)
+{
+	GnJSONObj save_object;
+
+	save_object.AddString("Type", "Mesh");
+
+	save_array.AddObject(save_object);
 }
 
 void GnMesh::GenerateBuffers()

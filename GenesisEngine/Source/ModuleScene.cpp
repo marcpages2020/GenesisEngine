@@ -116,8 +116,9 @@ bool ModuleScene::Save()
 	char* buffer = NULL;
 	uint size = save_file.Save(&buffer);
 
-	FileSystem::Save("Library/Config/save_file.save", buffer, size);
+	FileSystem::Save("Library/Config/save_file.json", buffer, size);
 
+	save_file.Release();
 	return ret;
 }
 

@@ -23,6 +23,7 @@ public:
 
 	JSON_Object* GetJSONObject();
 	JSON_Value* GetValue();
+	void Release();
 
 	uint Save(char** buffer);
 
@@ -37,12 +38,11 @@ public:
 	void AddFloat(const char* name, float number);
 	void AddBool(const char* name, bool boolean);
 	void AddString(const char* name, const char* string);
-	GnJSONArray AddArray(const char* name, bool nested = false);
+	GnJSONArray AddArray(const char* name);
 	GnJSONArray AddArray(GnJSONArray array);
 
 private:
 	JSON_Object* _object;
-	JSON_Object* _root_object;
 	JSON_Value* _root;
 };
 
@@ -56,14 +56,13 @@ public:
 	~GnJSONArray();
 
 	GnJSONObj GetObjectInArray(const char* name);
-	JSON_Object* GetRoot();
 
-	void AddObject(GnJSONObj object);
+	void AddObject(GnJSONObj& object);
 	void AddFloat(float number);
 	void AddString(const char* string);
 
 private: 
 	JSON_Array* _array;
-	JSON_Object* _root;
+	JSON_Value* _value;
 	bool _nested;
 };

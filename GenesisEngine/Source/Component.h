@@ -2,6 +2,8 @@
 
 class GameObject;
 
+class GnJSONArray;
+
 enum class ComponentType {
 	TRANSFORM,
 	MESH,
@@ -15,6 +17,8 @@ public:
 	virtual void Update();
 	virtual void Enable();
 	virtual void Disable();
+
+	virtual void Save(GnJSONArray& save_array) {};
 
 	bool IsEnabled();
 	ComponentType GetType();

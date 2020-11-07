@@ -90,7 +90,17 @@ void GameObject::Save(GnJSONArray& save_array)
 
 	save_object.AddString("Name", name.c_str());
 
-	//GnJSONArray components = save_object.AddArray("Components");
+	GnJSONArray translation = save_object.AddArray("Translation");
+	translation.AddFloat(0.0f);
+	translation.AddFloat(0.0f);
+	translation.AddFloat(0.0f);
+
+	GnJSONArray componentsSave = save_object.AddArray("Components");
+
+	for (size_t i = 0; i < components.size(); i++)
+	{
+		components[i]->Save(componentsSave);
+	}
 
 	save_array.AddObject(save_object);
 

@@ -60,7 +60,7 @@ bool Application::Init()
 	// Call Init() in all modules
 	for (int i = 0; i < modules_vector.size() && ret == true; i++)
 	{
-		GnJSONObj module_config = modules_array.GetObjectInArray(modules_vector[i]->name);
+		GnJSONObj module_config(modules_array.GetObjectInArray(modules_vector[i]->name));
 
 		ret = modules_vector[i]->LoadConfig(module_config);
 		ret = modules_vector[i]->Init();
@@ -74,6 +74,7 @@ bool Application::Init()
 	}
 	
 
+	config.Release();
 	RELEASE_ARRAY(buffer);
 
 	ms_timer.Start();

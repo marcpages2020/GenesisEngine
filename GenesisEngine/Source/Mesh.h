@@ -13,16 +13,17 @@ public:
 	GnMesh();
 	virtual ~GnMesh();
 
+	void Save(GnJSONArray& save_array);
+
 	void GenerateBuffers();
 
 	bool SetTexture(GnTexture* texture);
+	void RemoveTexture();
 	void AssignCheckersImage();
 
 	virtual void Update() override;
 	virtual void Render();
 	virtual void OnEditor() override;
-
-	void RemoveTexture();
 
 	void DrawVertexNormals();
 	void DrawFaceNormals();
