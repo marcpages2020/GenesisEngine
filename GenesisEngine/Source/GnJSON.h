@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Globals.h"
+#include "MathGeoLib/include/MathGeoLib.h"
 
 struct json_array_t;
 typedef json_array_t JSON_Array;
@@ -36,6 +37,8 @@ public:
 
 	void AddInt(const char* name, int number);
 	void AddFloat(const char* name, float number);
+	void AddFloat3(const char* name, math::float3 number);
+	void AddQuaternion(const char* name, math::Quat number);
 	void AddBool(const char* name, bool boolean);
 	void AddString(const char* name, const char* string);
 	GnJSONArray AddArray(const char* name);

@@ -30,6 +30,7 @@ public:
 
 public:
 	const char* name;
+	char* path;
 
 	uint vertices_buffer = -1;
 	uint vertices_amount = -1;

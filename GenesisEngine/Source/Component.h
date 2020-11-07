@@ -4,7 +4,7 @@ class GameObject;
 
 class GnJSONArray;
 
-enum class ComponentType {
+enum ComponentType {
 	TRANSFORM,
 	MESH,
 	MATERIAL

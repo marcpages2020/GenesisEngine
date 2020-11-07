@@ -1,5 +1,6 @@
 #include "GnJSON.h"
 #include "parson/parson.h"
+#include "MathGeoLib/include/MathGeoLib.h"
 
 //GnJSONObject ====================================================
 
@@ -98,6 +99,29 @@ void GnJSONObj::AddFloat(const char* name, float number)
 	json_object_set_number(_object, name, number);
 }
 
+void GnJSONObj::AddFloat3(const char* name, math::float3 number)
+{
+	JSON_Value* value = json_value_init_array();
+	JSON_Status status = json_object_set_value(_object, name, value);
+	JSON_Array* _array = json_object_get_array(_object, name);
+
+	json_array_append_number(_array, number.x);
+	json_array_append_number(_array, number.y);
+	json_array_append_number(_array, number.z);
+}
+
+void GnJSONObj::AddQuaternion(const char* name, math::Quat number)
+{
+	JSON_Value* value = json_value_init_array();
+	JSON_Status status = json_object_set_value(_object, name, value);
+	JSON_Array* _array = json_object_get_array(_object, name);
+
+	json_array_append_number(_array, number.x);
+	json_array_append_number(_array, number.y);
+	json_array_append_number(_array, number.z);
+	json_array_append_number(_array, number.w);
+}
+
 void GnJSONObj::AddBool(const char* name, bool boolean)
 {
 	json_object_set_boolean(_object, name, boolean);
@@ -179,3 +203,4 @@ void GnJSONArray::AddString(const char* string)
 {
 	json_array_append_string(_array, string);
 }
+

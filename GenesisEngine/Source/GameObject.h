@@ -8,7 +8,7 @@
 class Component;
 class Transform;
 class GnMesh;
-enum class ComponentType;
+enum ComponentType;
 
 class GnJSONObj;
 class GnJSONArray;

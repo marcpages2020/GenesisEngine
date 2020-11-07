@@ -2,6 +2,7 @@
 #include "Mesh.h"
 #include "ImGui/imgui.h"
 #include "FileSystem.h"
+#include "GnJSON.h"
 
 Material::Material() : Component(), mesh(nullptr), checkers_image(true), diffuse_texture(nullptr) {
 	type = ComponentType::MATERIAL;
@@ -31,6 +32,18 @@ Material::~Material()
 	}
 
 	mesh = nullptr;
+}
+
+void Material::Save(GnJSONArray& save_array)
+{
+	GnJSONObj save_object;
+
+	save_object.AddInt("Type", type);
+
+	if (diffuse_texture != nullptr)
+		save_object.AddString("Path", diffuse_texture->path.c_str());
+
+	save_array.AddObject(save_object);
 }
 
 void Material::OnEditor()

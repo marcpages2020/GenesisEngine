@@ -52,7 +52,8 @@ void GnMesh::Save(GnJSONArray& save_array)
 {
 	GnJSONObj save_object;
 
-	save_object.AddString("Type", "Mesh");
+	save_object.AddInt("Type", type);
+	save_object.AddString("Path", path);
 
 	save_array.AddObject(save_object);
 }
@@ -78,9 +79,6 @@ void GnMesh::GenerateBuffers()
 	glGenBuffers(1, (GLuint*)&(indices_buffer));
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * indices_amount, indices, GL_STATIC_DRAW);
-
-	//texture = FileSystem::LoadTexture("Assets/Models/baker_house/Baker_house.png");
-	//texture = FileSystem::LoadTexture("Assets/Textures/Lenna.png");
 
 	//textures
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);

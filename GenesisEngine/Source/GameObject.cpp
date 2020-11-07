@@ -90,10 +90,15 @@ void GameObject::Save(GnJSONArray& save_array)
 
 	save_object.AddString("Name", name.c_str());
 
-	GnJSONArray translation = save_object.AddArray("Translation");
-	translation.AddFloat(0.0f);
-	translation.AddFloat(0.0f);
-	translation.AddFloat(0.0f);
+	//GnJSONArray translationArray = save_object.AddArray("Translation");
+	math::float3 position = transform->GetPosition();
+	save_object.AddFloat3("Translation", position);
+
+	math::Quat rotation = transform->GetRotation();
+	save_object.AddQuaternion("Rotation", rotation);
+
+	math::float3 scale = transform->GetScale();
+	save_object.AddFloat3("Scale", scale);
 
 	GnJSONArray componentsSave = save_object.AddArray("Components");
 

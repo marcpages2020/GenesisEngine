@@ -12,6 +12,7 @@
 #include <Shlwapi.h>
 
 #include "Timer.h"
+#include "GnJSON.h"
 #include "parson/parson.h"
 
 #include "PhysFS/include/physfs.h"
@@ -91,6 +92,7 @@ void FileSystem::CreateLibraryDirectories()
 	CreateDir("Library/Config/");
 	CreateDir("Library/Textures/");
 	CreateDir("Library/Meshes/");
+	CreateDir("Library/Models/");
 	//CreateDir("Materials/");
 	//CreateDir(ANIMATIONS_PATH);
 	//CreateDir(PARTICLES_PATH);
@@ -674,6 +676,9 @@ void MeshImporter::Load(const char* fileBuffer, GnMesh* mesh)
 
 	LOG("%s loaded in %.3f s", fileBuffer, timer.ReadSec());
 
+	mesh->path = new char[strlen(fileBuffer)];
+	strcpy(mesh->path, fileBuffer);
+
 	mesh->GenerateBuffers();
 }
 
@@ -708,10 +713,24 @@ GameObject* MeshImporter::ImportFBX(const char* full_path)
 	{
 		aiNode* rootNode = scene->mRootNode;
 
+		GnJSONObj save_file;
+		char* buffer = nullptr;
+
+		GnJSONArray meshes = save_file.AddArray("Meshes");
+
+		//root->Save(meshes);
+		//char* buffer = NULL;
+		//uint size = save_file.Save(&buffer);
+
+		//FileSystem::Save("Library/Config/model.model", buffer, size);
+
 		root = PreorderChildren(scene, rootNode, nullptr, nullptr, folder.c_str());
 		root->SetName(file.c_str());
 
 		aiReleaseImport(scene);
+		RELEASE_ARRAY(buffer);
+		save_file.Release();
+
 		LOG("%s loaded in %.3f s", full_path, timer.ReadSec());
 	}
 	else

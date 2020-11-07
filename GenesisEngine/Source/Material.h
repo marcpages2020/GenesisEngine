@@ -6,6 +6,7 @@
 
 typedef unsigned char GLubyte;
 class GnMesh;
+class GnJSONArray;
 
 struct GnTexture 
 {
@@ -30,6 +31,8 @@ public:
 	Material();
 	Material(GnMesh* mesh, GnTexture* diffuse_texture);
 	~Material();
+
+	void Save(GnJSONArray& save_array);
 	void OnEditor() override;
 
 	void SetTexture(GnTexture* texture);
