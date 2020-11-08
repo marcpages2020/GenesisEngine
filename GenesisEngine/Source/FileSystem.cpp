@@ -90,9 +90,10 @@ void FileSystem::CreateLibraryDirectories()
 	CreateDir("Assets/Models/");
 
 	CreateDir("Library/Config/");
-	CreateDir("Library/Textures/");
-	CreateDir("Library/Meshes/");
 	CreateDir("Library/Models/");
+	CreateDir("Library/Meshes/");
+	CreateDir("Library/Textures/");
+	CreateDir("Library/Scenes/");
 	//CreateDir("Materials/");
 	//CreateDir(ANIMATIONS_PATH);
 	//CreateDir(PARTICLES_PATH);
@@ -480,6 +481,22 @@ void FileSystem::LoadFile(const char* file_path, bool drag_and_drop)
 			//App->scene->SetDroppedTexture(TextureImporter::LoadTexture(processed_path.c_str()));
 		}
 	}
+	else if (extension == ".scene")
+	{
+		App->scene->Load(file_path);
+	}
+	else if (extension == ".model") 
+	{
+		//LOAD MODEL
+	}
+	else if (extension == ".mesh")
+	{
+		//LOAD MESH
+	}
+	else if (extension == ".dds")
+	{
+		//LOAD TEXTURE
+	}
 }
 
 std::string FileSystem::GetFileFormat(const char* path)
@@ -714,18 +731,21 @@ GameObject* MeshImporter::ImportFBX(const char* full_path)
 		aiNode* rootNode = scene->mRootNode;
 
 		GnJSONObj save_file;
-		char* buffer = nullptr;
 
 		GnJSONArray meshes = save_file.AddArray("Meshes");
+		//GnJSONArray textures = save_file.AddArray("Textures");
 
 		//root->Save(meshes);
-		//char* buffer = NULL;
-		//uint size = save_file.Save(&buffer);
 
-		//FileSystem::Save("Library/Config/model.model", buffer, size);
-
-		root = PreorderChildren(scene, rootNode, nullptr, nullptr, folder.c_str());
+		root = ImportChildren(scene, rootNode, nullptr, nullptr, folder.c_str(), meshes);
 		root->SetName(file.c_str());
+
+		char* buffer = nullptr;
+		uint size = save_file.Save(&buffer);
+		path = "Library/Models/";
+		path += file.c_str();
+		path += ".model";
+		FileSystem::Save(path.c_str(), buffer, size);
 
 		aiReleaseImport(scene);
 		RELEASE_ARRAY(buffer);
@@ -741,9 +761,10 @@ GameObject* MeshImporter::ImportFBX(const char* full_path)
 	return root;
 }
 
-GameObject* MeshImporter::PreorderChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, GameObject* parentGameObject, const char* path)
+GameObject* MeshImporter::ImportChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, GameObject* parentGameObject, const char* path, GnJSONArray& meshes_array)
 {
 	GameObject* gameObject = new GameObject();
+	GnJSONObj save_object;
 
 	if (parentGameObject != nullptr)
 	{
@@ -764,17 +785,16 @@ GameObject* MeshImporter::PreorderChildren(const aiScene* scene, aiNode* node, a
 		Import(aimesh, mesh);
 		uint size = Save(mesh, &meshBuffer);
 
-		std::string file_path = "Library/Meshes/";
-		file_path += node->mName.C_Str();
-		file_path += ".gnMesh";
-
-		FileSystem::Save(file_path.c_str(), meshBuffer, size);
+		char file_path[128];
+		sprintf_s(file_path, 128, "Library/Meshes/%s.mesh", node->mName.C_Str());
+		FileSystem::Save(file_path, meshBuffer, size);
+		save_object.AddString("Mesh: ", file_path);
 
 		delete mesh;
 		mesh = nullptr;
 
 		mesh = new GnMesh();
-		Load(file_path.c_str(), mesh);
+		Load(file_path, mesh);
 		gameObject->AddComponent(mesh);
 
 		RELEASE_ARRAY(meshBuffer);
@@ -791,18 +811,19 @@ GameObject* MeshImporter::PreorderChildren(const aiScene* scene, aiNode* node, a
 		size = MaterialImporter::Save(material, &texBuffer);
 
 		//Set own format path
-		file_path = "Library/Textures/";
+		std::string textures_path = "Library/Textures/";
 		std::string file = FileSystem::GetFile(material->GetDiffuseTexture()->name.c_str());
-		file_path += file;
-		file_path += ".dds";
+		textures_path += file;
+		textures_path += ".dds";
 
-		FileSystem::Save(file_path.c_str(), texBuffer, size);
+		FileSystem::Save(textures_path.c_str(), texBuffer, size);
+		save_object.AddString("Diffuse Texture: ", textures_path.c_str());
 
 		delete material;
 		material = nullptr;
 		material = new Material();
 
-		MaterialImporter::Load(file_path.c_str(), material);
+		MaterialImporter::Load(textures_path.c_str(), material);
 
 		material->SetMesh(mesh);
 		gameObject->AddComponent(material);
@@ -811,12 +832,14 @@ GameObject* MeshImporter::PreorderChildren(const aiScene* scene, aiNode* node, a
 
 		//Transform------------------------------------------------------------
 		LoadTransform(node, gameObject->GetTransform());
+
+		meshes_array.AddObject(save_object);	
 	}
 
 
 	for (size_t i = 0; i < node->mNumChildren; i++)
 	{
-		PreorderChildren(scene, node->mChildren[i], node, gameObject, path);
+		ImportChildren(scene, node->mChildren[i], node, gameObject, path, meshes_array);
 	}
 
 	return gameObject;
@@ -889,6 +912,8 @@ void TextureImporter::UnloadTexture(uint imageID)
 
 #pragma endregion
 
+//TODELETE
+/*
 #pragma region JSONParser
 
 JSON_Array* JSONParser::LoadConfig(char* buffer, JSON_Value* root)
@@ -925,6 +950,7 @@ JSON_Object* JSONParser::GetJSONObjectByName(const char* name, JSON_Array* modul
 }
 
 #pragma endregion
+*/
 
 void MaterialImporter::Import(const aiMaterial* aimaterial, Material* material, const char* folder_path)
 {

@@ -50,6 +50,9 @@ private:
 	void ShowAboutWindow();
 	void ShowPreferencesWindow();
 
+	void LoadFile(const char* filter_extension, const char* from_dir);
+	void DrawDirectoryRecursive(const char* directory, const char* filter_extension);
+
 	void ChangeTheme(std::string theme);
 	void GetMemoryStatistics(const char* gpu_brand, GLint& vram_budget, GLint& vram_usage, GLint& vram_available, GLint& vram_reserved);
 
@@ -70,6 +73,7 @@ private:
 	//edit subwindows
 	bool show_preferences_window;
 	bool show_about_window;
+
 	//menus
 	bool* open_dockspace;
 	bool scene_window_focused;
@@ -82,6 +86,15 @@ private:
 	std::vector<log_message> console_log;
 
 	AspectRatio aspect_ratio;
+
+	enum
+	{
+		closed,
+		opened,
+		ready_to_close
+	} file_dialog = closed;
+	bool in_modal = false;
+	char selected_file[256];
 };
 
 #endif // !_EDITOR_H_

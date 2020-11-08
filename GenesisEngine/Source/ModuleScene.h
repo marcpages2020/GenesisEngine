@@ -21,7 +21,11 @@ public:
 	void DeleteGameObject(GameObject* gameObject);
 	GameObject* GetRoot() { return root; }
 	void SetDroppedTexture(GnTexture* texture);
+
+	bool ClearScene();
+
 	bool Save();
+	bool Load(const char* scene_file);
 
 public:
 	bool show_grid;

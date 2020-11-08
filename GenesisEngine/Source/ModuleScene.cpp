@@ -101,6 +101,19 @@ void ModuleScene::SetDroppedTexture(GnTexture* texture)
 	}
 }
 
+bool ModuleScene::ClearScene()
+{
+	bool ret = true;
+
+	root->DeleteChildren();
+
+	root = new GameObject();
+	selectedGameObject = root;
+	root->SetName("Root");
+
+	return ret;
+}
+
 bool ModuleScene::Save()
 {
 	bool ret = true;
@@ -114,9 +127,23 @@ bool ModuleScene::Save()
 	char* buffer = NULL;
 	uint size = save_file.Save(&buffer);
 
-	FileSystem::Save("Library/Config/save_file.save", buffer, size);
+	FileSystem::Save("Library/Scenes/new_scene.scene", buffer, size);
 
 	save_file.Release();
+	return ret;
+}
+
+bool ModuleScene::Load(const char* scene_file)
+{
+	bool ret = true;
+
+	ClearScene();
+
+	char* buffer = NULL;
+	FileSystem::Load(scene_file, &buffer);
+
+	GnJSONObj scene(buffer);
+
 	return ret;
 }
 

@@ -6,10 +6,12 @@
 #include "GameObject.h"
 #include "FileSystem.h"
 
+#include <vector>
+#include <string>
+#include <algorithm>
+
 #include "Assimp/Assimp/include/version.h"
-
 #include "glew/include/glew.h"
-
 #include "ImGui/imgui_impl_sdl.h"
 #include "ImGui/imgui_impl_opengl3.h"
 
@@ -24,7 +26,6 @@
 Editor::Editor(bool start_enabled) : Module(start_enabled), aspect_ratio(AspectRatio::FREE_ASPECT)
 {
 	name = "editor";
-	//*open_dockspace = true;
 
 	show_scene_window = true;
 	show_inspector_window = true;
@@ -57,8 +58,7 @@ bool Editor::Init()
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
-	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_NavEnableSetMousePos;
 	//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
 	ImGui::StyleColorsDark();
@@ -161,6 +161,9 @@ update_status Editor::Draw()
 	{
 		ShowAboutWindow();
 	}
+
+	if (file_dialog == opened)
+		LoadFile(nullptr, "Library/");
 
 	ImGui::Render();
 
@@ -323,13 +326,17 @@ bool Editor::CreateMainMenuBar() {
 	{
 		if (ImGui::BeginMenu("File"))
 		{
-			if (ImGui::MenuItem("Exit"))
-			{
-				ret = false;
-			}
-			else if (ImGui::MenuItem("Save"))
+			if (ImGui::MenuItem("Save Scene"))
 			{
 				App->Save();
+			}
+			else if (ImGui::MenuItem("Load Scene"))
+			{
+				file_dialog = opened;
+			}
+			else if (ImGui::MenuItem("Exit"))
+			{
+				ret = false;
 			}
 			ImGui::EndMenu();
 		}
@@ -594,6 +601,7 @@ void Editor::ShowConfigurationWindow()
 			fps_log.push_back(App->GetFPS());
 			//if (fps_log[fps_log.size() - 1] != 0) {
 			sprintf_s(title, 25, "Framerate %.1f", fps_log[fps_log.size() - 1]);
+			sprintf_s(title, 25, "Framerate %.1f", fps_log[fps_log.size() - 1]);
 			ImGui::PlotHistogram("##framerate", &fps_log[0], fps_log.size(), 0, title, 0.0f, 100.0f, ImVec2(310, 100));
 			//}
 
@@ -743,16 +751,6 @@ void Editor::ShowConfigurationWindow()
 			ImGui::SameLine();
 			ImGui::TextColored(values_color, "%.1f Mb", vram_available * 0.001f);
 
-			/*
-			ImGui::Text("VRAM Usage:");
-			ImGui::SameLine();
-			ImGui::TextColored(values_color, "%.1f Mb", vram_usage * 0.001f);
-
-			ImGui::Text("VRAM Reserved:");
-			ImGui::SameLine();
-			ImGui::TextColored(values_color, "%.1f Mb", vram_reserved * 0.001f);
-			*/
-
 		}
 
 		if (ImGui::CollapsingHeader("File System")) 
@@ -867,6 +865,86 @@ void Editor::ShowPreferencesWindow()
 			}
 	}
 	ImGui::End();
+}
+
+void Editor::LoadFile(const char* filter_extension, const char* from_dir)
+{
+	ImGui::OpenPopup("Load File");
+	if (ImGui::BeginPopupModal("Load File", nullptr))
+	{
+		in_modal = true;
+
+		ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
+		ImGui::BeginChild("File Browser", ImVec2(0, 300), true);
+		 DrawDirectoryRecursive(from_dir, filter_extension);
+		ImGui::EndChild();
+		ImGui::PopStyleVar();
+
+		ImGui::PushItemWidth(250.f);
+		if (ImGui::InputText("##file_selector", selected_file, 256, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll))
+			file_dialog = ready_to_close;
+
+		ImGui::PopItemWidth();
+		ImGui::SameLine();
+		if (ImGui::Button("Ok", ImVec2(50, 20)))
+			file_dialog = ready_to_close;
+		ImGui::SameLine();
+
+		if (ImGui::Button("Cancel", ImVec2(50, 20)))
+		{
+			file_dialog = ready_to_close;
+			selected_file[0] = '\0';
+		}
+
+		ImGui::EndPopup();
+	}
+}
+
+void Editor::DrawDirectoryRecursive(const char* directory, const char* filter_extension)
+{
+	std::vector<std::string> files;
+	std::vector<std::string> dirs;
+
+	std::string dir((directory) ? directory : "");
+	dir += "/";
+
+	FileSystem::DiscoverFiles(dir.c_str(), files, dirs);
+
+	for (std::vector<std::string>::const_iterator it = dirs.begin(); it != dirs.end(); ++it)
+	{
+		if (ImGui::TreeNodeEx((dir + (*it)).c_str(), 0, "%s/", (*it).c_str()))
+		{
+			DrawDirectoryRecursive((dir + (*it)).c_str(), filter_extension);
+			ImGui::TreePop();
+		}
+	}
+
+	std::sort(files.begin(), files.end());
+
+	for (std::vector<std::string>::const_iterator it = files.begin(); it != files.end(); ++it)
+	{
+		const std::string& str = *it;
+
+		bool ok = true;
+
+		if (filter_extension && str.substr(str.find_last_of(".") + 1) != filter_extension)
+			ok = false;
+
+		if (ok && ImGui::TreeNodeEx(str.c_str(), ImGuiTreeNodeFlags_Leaf))
+		{
+			if (ImGui::IsItemClicked()) {
+				sprintf_s(selected_file, 256, "%s%s", dir.c_str(), str.c_str());
+
+				if (ImGui::IsMouseDoubleClicked(0))
+				{
+					file_dialog = ready_to_close;
+					FileSystem::LoadFile(selected_file);
+				}
+			}
+
+			ImGui::TreePop();
+		}
+	}
 }
 
 void Editor::OnResize(ImVec2 window_size)

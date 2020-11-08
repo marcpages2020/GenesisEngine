@@ -17,6 +17,8 @@ class aiScene;
 struct aiNode;
 class aiMaterial;
 
+class GnJSONArray;
+
 struct json_array_t;
 typedef json_array_t JSON_Array;
 
@@ -83,7 +85,7 @@ namespace MeshImporter
 	void Load(const char* fileBuffer, GnMesh* mesh);
 
 	GameObject* ImportFBX(const char* path);
-	GameObject* PreorderChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, GameObject* parentGameObject, const char* path);
+	GameObject* ImportChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, GameObject* parentGameObject, const char* path, GnJSONArray& mesh_array);
 	void LoadTransform(aiNode* node, Transform* transform);
 }
 
@@ -102,10 +104,13 @@ namespace MaterialImporter
 	GnTexture* LoadTexture(const char* path);
 }
 
+//TODELETE
+/*
 namespace JSONParser
 {
 	JSON_Array* LoadConfig(char* buffer, JSON_Value* root);
 	JSON_Object* GetJSONObjectByName(const char* name, JSON_Array* modules_array);
 }
+*/
 
 
