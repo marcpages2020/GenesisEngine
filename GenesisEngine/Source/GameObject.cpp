@@ -115,6 +115,15 @@ void GameObject::Save(GnJSONArray& save_array)
 	}
 }
 
+uint GameObject::Load(GnJSONObj* object)
+{
+	UUID = object->GetInt("UUID");
+	name = object->GetString("Name");
+
+	uint parentUUID = object->GetInt("Parent UUID");
+	return parentUUID;
+}
+
 Component* GameObject::GetComponent(ComponentType component)
 {
 	for (size_t i = 0; i < components.size(); i++)

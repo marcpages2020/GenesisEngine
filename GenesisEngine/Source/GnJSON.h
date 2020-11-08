@@ -58,7 +58,9 @@ public:
 	GnJSONArray(const char* name);
 	~GnJSONArray();
 
+	int Size();
 	GnJSONObj GetObjectInArray(const char* name);
+	GnJSONObj GetObjectAt(int index);
 
 	void AddObject(GnJSONObj& object);
 	void AddFloat(float number);

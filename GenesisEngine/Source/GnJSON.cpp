@@ -175,6 +175,11 @@ GnJSONArray::~GnJSONArray()
 	_array = nullptr;
 }
 
+int GnJSONArray::Size()
+{
+	return json_array_get_count(_array);
+}
+
 GnJSONObj GnJSONArray::GetObjectInArray(const char* name)
 {
 	for (size_t i = 0; i < json_array_get_count(_array); i++)
@@ -187,6 +192,12 @@ GnJSONObj GnJSONArray::GetObjectInArray(const char* name)
 	}
 
 	LOG_ERROR("JSON object %s could not be found", name);
+}
+
+GnJSONObj GnJSONArray::GetObjectAt(int index)
+{
+	JSON_Object* object = json_array_get_object(_array, index);
+	return GnJSONObj(object);
 }
 
 void GnJSONArray::AddObject(GnJSONObj& object)

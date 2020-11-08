@@ -23,6 +23,7 @@ public:
 	void OnEditor();
 
 	void Save(GnJSONArray& save_array);
+	uint Load(GnJSONObj* object);
 
 	Component* GetComponent(ComponentType component);
 	Component* AddComponent(ComponentType type);
