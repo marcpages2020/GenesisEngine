@@ -58,6 +58,11 @@ void GnMesh::Save(GnJSONArray& save_array)
 	save_array.AddObject(save_object);
 }
 
+void GnMesh::Load(GnJSONObj& load_object)
+{
+	MeshImporter::Load(load_object.GetString("Path"), this);
+}
+
 void GnMesh::GenerateBuffers()
 {
 	//vertices
@@ -165,7 +170,7 @@ void GnMesh::Render()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
 
 	glPushMatrix();
-	glMultMatrixf((float*)&gameObject->GetTransform()->GetGlobalTransform());
+	glMultMatrixf((float*)&_gameObject->GetTransform()->GetGlobalTransform());
 
 	glDrawElements(GL_TRIANGLES, indices_amount, GL_UNSIGNED_INT, NULL);
 

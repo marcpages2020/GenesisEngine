@@ -26,6 +26,7 @@ public:
 	uint Load(GnJSONObj* object);
 
 	Component* GetComponent(ComponentType component);
+	std::vector<Component*> GetComponents();
 	Component* AddComponent(ComponentType type);
 	void AddComponent(Component* component);
 	bool RemoveComponent(Component* component);

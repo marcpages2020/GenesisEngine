@@ -1,10 +1,15 @@
 #include "Component.h"
 
-Component::Component() : enabled(true), gameObject(nullptr) {}
+Component::Component() : enabled(true), _gameObject(nullptr) {}
+
+Component::Component(GameObject* gameObject) 
+{
+    _gameObject = gameObject;
+}
 
 Component::~Component()
 {
-    gameObject = nullptr;
+    _gameObject = nullptr;
 }
 
 void Component::Update(){}
@@ -25,10 +30,10 @@ ComponentType Component::GetType()
 
 void Component::SetGameObject(GameObject* g_gameObject)
 {
-    gameObject = g_gameObject;
+    _gameObject = g_gameObject;
 }
 
 GameObject* Component::GetGameObject()
 {
-    return gameObject;
+    return _gameObject;
 }

@@ -13,7 +13,8 @@ public:
 	GnMesh();
 	virtual ~GnMesh();
 
-	void Save(GnJSONArray& save_array);
+	void Save(GnJSONArray& save_array) override;
+	void Load(GnJSONObj& load_object) override;
 
 	void GenerateBuffers();
 

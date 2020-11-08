@@ -187,7 +187,7 @@ bool Editor::CleanUp()
 
 bool Editor::LoadConfig(GnJSONObj& config)
 {
-	GnJSONArray windows(config.GetParsonArray("windows"));
+	GnJSONArray windows(config.GetArray("windows"));
 	
 	GnJSONObj window = windows.GetObjectInArray("scene");
 	show_scene_window = window.GetBool("visible");

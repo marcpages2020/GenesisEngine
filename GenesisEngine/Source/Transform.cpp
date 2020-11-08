@@ -2,6 +2,7 @@
 #include "ImGui/imgui.h"
 #include "Globals.h"
 #include "GameObject.h"
+#include "GnJSON.h"
 
 Transform::Transform() : Component()
 {
@@ -82,6 +83,30 @@ void Transform::OnEditor()
 
 		ImGui::Spacing();
 	}
+}
+
+void Transform::Save(GnJSONArray& save_array)
+{
+	GnJSONObj save_object;
+	save_object.AddInt("Type", type);
+
+	save_object.AddFloat3("Position", position);
+
+	save_object.AddQuaternion("Rotation", rotation);
+
+	save_object.AddFloat3("Scale", scale);
+
+	save_array.AddObject(save_object);
+}
+
+void Transform::Load(GnJSONObj& load_object)
+{
+	position = load_object.GetFloat3("Position");
+	rotation = load_object.GetQuaternion("Rotation");
+	scale = load_object.GetFloat3("Scale");
+
+	UpdateEulerRotation();
+	UpdateLocalTransform();
 }
 
 void Transform::Set(float4x4 g_transform)
@@ -182,6 +207,12 @@ void Transform::SetRotation(float x, float y, float z, float w)
 Quat Transform::GetRotation()
 {
 	return rotation;
+}
+
+void Transform::UpdateEulerRotation()
+{
+	eulerRotation = rotation.ToEulerXYZ();
+	eulerRotation *= RADTODEG;
 }
 
 void Transform::SetScale(float x, float y, float z)

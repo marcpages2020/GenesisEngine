@@ -106,12 +106,7 @@ bool ModuleScene::ClearScene()
 	bool ret = true;
 
 	root->DeleteChildren();
-
-	/*
-	root = new GameObject();
-	selectedGameObject = root;
-	root->SetName("Root");
-	*/
+	root = nullptr;
 
 	return ret;
 }
@@ -145,7 +140,7 @@ bool ModuleScene::Load(const char* scene_file)
 	FileSystem::Load(scene_file, &buffer);
 	
 	GnJSONObj base_object(buffer);
-	GnJSONArray gameObjects(base_object.GetParsonArray("Game Objects"));
+	GnJSONArray gameObjects(base_object.GetArray("Game Objects"));
 
 	std::vector<GameObject*> createdObjects;
 
@@ -157,8 +152,10 @@ bool ModuleScene::Load(const char* scene_file)
 		createdObjects.push_back(gameObject);
 
 		//check if it's the root game object
-		if (strcmp(gameObject->GetName(), "Root") == 0)
+		if (strcmp(gameObject->GetName(), "Root") == 0) {
 			root = gameObject;
+			selectedGameObject = root;
+		}
 
 		//Get game object's parent
 		for (size_t i = 0; i < createdObjects.size(); i++)
@@ -170,6 +167,9 @@ bool ModuleScene::Load(const char* scene_file)
 			}
 		}
 	}
+
+	if (root != nullptr)
+		LOG("Scene loaded successfully");
 
 	return ret;
 }

@@ -77,6 +77,7 @@ public:
 	int GetFPSCap();
 	void SetFPSCap(int fps_cap);
 	void Save();
+	void Load(const char* filePath);
 
 	HardwareSpecs GetHardware();
 
@@ -98,6 +99,8 @@ private:
 
 	const char* config_path;
 	bool want_to_save;
+	bool want_to_load;
+	const char* file_to_load;
 };
 
 extern Application* App;

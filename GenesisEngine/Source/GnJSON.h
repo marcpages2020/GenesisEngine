@@ -28,12 +28,14 @@ public:
 
 	uint Save(char** buffer);
 
-	JSON_Array* GetParsonArray(const char* name);
+	JSON_Array* GetArray(const char* name);
 
 	int GetInt(const char* name);
 	float GetFloat(const char* name);
 	bool GetBool(const char* name);
 	const char* GetString(const char* name);
+	math::float3 GetFloat3(const char* name);
+	Quat GetQuaternion(const char* name);
 
 	void AddInt(const char* name, int number);
 	void AddFloat(const char* name, float number);

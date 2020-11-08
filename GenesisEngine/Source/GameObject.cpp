@@ -10,9 +10,9 @@
 
 #include <vector>
 
-GameObject::GameObject() : enabled(true), name("Empty Game Object"), parent(nullptr), to_delete(false)
+GameObject::GameObject() : enabled(true), name("Empty Game Object"), parent(nullptr), to_delete(false), transform(nullptr)
 {
-	transform = (Transform*)AddComponent(ComponentType::TRANSFORM);
+	transform = (Transform*)AddComponent(TRANSFORM);
 	UUID = LCG().Int();
 }
 
@@ -22,7 +22,8 @@ GameObject::GameObject(GnMesh* mesh) : GameObject()
 	AddComponent((Component*)mesh);
 }
 
-GameObject::~GameObject(){
+GameObject::~GameObject()
+{
 	parent = nullptr;
 
 	for (size_t i = 0; i < components.size(); i++)
@@ -30,11 +31,12 @@ GameObject::~GameObject(){
 		delete components[i];
 		components[i] = nullptr;
 	}
-	transform = nullptr;
 
+	transform = nullptr;
 	components.clear();
 	children.clear();
 	name.clear();
+	UUID = 0;
 }
 
 void GameObject::Update()
@@ -90,15 +92,14 @@ void GameObject::Save(GnJSONArray& save_array)
 
 	save_object.AddString("Name", name.c_str());
 
-	//GnJSONArray translationArray = save_object.AddArray("Translation");
-	math::float3 position = transform->GetPosition();
-	save_object.AddFloat3("Translation", position);
+	//math::float3 position = transform->GetPosition();
+	//save_object.AddFloat3("Position", position);
 
-	math::Quat rotation = transform->GetRotation();
-	save_object.AddQuaternion("Rotation", rotation);
+	//math::Quat rotation = transform->GetRotation();
+	//save_object.AddQuaternion("Rotation", rotation);
 
-	math::float3 scale = transform->GetScale();
-	save_object.AddFloat3("Scale", scale);
+	//math::float3 scale = transform->GetScale();
+	//save_object.AddFloat3("Scale", scale);
 
 	GnJSONArray componentsSave = save_object.AddArray("Components");
 
@@ -119,8 +120,17 @@ uint GameObject::Load(GnJSONObj* object)
 {
 	UUID = object->GetInt("UUID");
 	name = object->GetString("Name");
-
 	uint parentUUID = object->GetInt("Parent UUID");
+
+	GnJSONArray componentsArray = object->GetArray("Components");
+
+	for (size_t i = 0; i < componentsArray.Size(); i++)
+	{
+		GnJSONObj componentObject = componentsArray.GetObjectAt(i);
+		Component* component = AddComponent((ComponentType)componentObject.GetInt("Type"));
+		component->Load(componentObject);
+	}
+
 	return parentUUID;
 }
 
@@ -137,29 +147,38 @@ Component* GameObject::GetComponent(ComponentType component)
 	return nullptr;
 }
 
+std::vector<Component*> GameObject::GetComponents()
+{
+	return components;
+}
+
 Component* GameObject::AddComponent(ComponentType type)
 {
+	Component* component = nullptr;
+
 	if (type == ComponentType::TRANSFORM) 
 	{
-		Transform* transform = new Transform();
-		transform->SetGameObject(this);
-		components.push_back(transform);
-		return transform;
+		if (transform != nullptr)
+		{
+			RemoveComponent(transform);
+		}
+
+		transform = new Transform();
+		component = transform;
 	}
 	else if (type == ComponentType::MESH)
 	{
-		GnMesh* mesh = new GnMesh();
-		components.push_back(mesh);
-		return mesh;
+		component = new GnMesh();
 	}
 	else if (type == ComponentType::MATERIAL)
 	{
-		Material* material = new Material();
-		components.push_back(material);
-		return material;
+		component = new Material(this);
 	}
 
-	return nullptr;
+	component->SetGameObject(this);
+	components.push_back(component);
+
+	return component;
 }
 
 void GameObject::AddComponent(Component* component)

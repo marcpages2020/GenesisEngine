@@ -7,7 +7,7 @@
 
 #include "parson/parson.h"
 
-Application::Application(int argc, char* args[]) : argc(argc), args(args), want_to_save(false)
+Application::Application(int argc, char* args[]) : argc(argc), args(args), want_to_save(false), want_to_load(false)
 {
 	window = new ModuleWindow(true);
 	input = new ModuleInput(true);
@@ -55,7 +55,7 @@ bool Application::Init()
 	engine_name = config.GetString("engineName");
 	engine_version = config.GetString("version");
 
-	GnJSONArray modules_array(config.GetParsonArray("modules_config"));
+	GnJSONArray modules_array(config.GetArray("modules_config"));
 
 	// Call Init() in all modules
 	for (int i = 0; i < modules_vector.size() && ret == true; i++)
@@ -126,6 +126,11 @@ update_status Application::Update()
 		scene->Save();
 		want_to_save = false;
 	}
+	else if (want_to_load)
+	{
+		scene->Load(file_to_load);
+		want_to_load = false;
+	}
 
 	FinishUpdate();
 	return ret;
@@ -166,6 +171,12 @@ void Application::SetFPSCap(int fps_cap)
 void Application::Save()
 {
 	want_to_save = true;
+}
+
+void Application::Load(const char* filePath)
+{
+	want_to_load = true;
+	file_to_load = filePath;
 }
 
 HardwareSpecs Application::GetHardware()

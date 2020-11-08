@@ -2,6 +2,7 @@
 
 class GameObject;
 
+class GnJSONObj;
 class GnJSONArray;
 
 enum ComponentType {
@@ -13,12 +14,14 @@ enum ComponentType {
 class Component {
 public: 
 	Component();
+	Component(GameObject* gameObject);
 	virtual ~Component();
 	virtual void Update();
 	virtual void Enable();
 	virtual void Disable();
 
 	virtual void Save(GnJSONArray& save_array) {};
+	virtual void Load(GnJSONObj& load_object) {};
 
 	bool IsEnabled();
 	ComponentType GetType();
@@ -29,6 +32,6 @@ public:
 
 protected:
 	ComponentType type;
-	GameObject* gameObject;
+	GameObject* _gameObject;
 	bool enabled;
 };

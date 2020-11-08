@@ -2,8 +2,10 @@
 #define __TRANSFORM_H__
 
 #include "Component.h"
-
 #include "MathGeoLib/include/MathGeoLib.h"
+
+class GnMesh;
+class GnJSONArray;
 
 class Transform : public Component {
 public:
@@ -13,6 +15,9 @@ public:
 
 	void Update() override;
 	void OnEditor() override;
+
+	void Save(GnJSONArray& save_array) override;
+	void Load(GnJSONObj& load_object) override;
 
 	void Set(float4x4 transform);
 
@@ -32,6 +37,7 @@ public:
 	void SetRotation(Quat new_rotation);
 	void SetRotation(float i, float j, float k, float w);
 	Quat GetRotation();
+	void UpdateEulerRotation();
 
 	void SetScale(float x, float y, float z);
 	void SetScale(float3 new_scale);

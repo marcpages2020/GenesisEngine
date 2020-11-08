@@ -29,10 +29,12 @@ struct GnTexture
 class Material : public Component {
 public: 
 	Material();
+	Material(GameObject* gameObject);
 	Material(GnMesh* mesh, GnTexture* diffuse_texture);
 	~Material();
 
-	void Save(GnJSONArray& save_array);
+	void Save(GnJSONArray& save_array) override;
+	void Load(GnJSONObj& load_object) override;
 	void OnEditor() override;
 
 	void SetTexture(GnTexture* texture);

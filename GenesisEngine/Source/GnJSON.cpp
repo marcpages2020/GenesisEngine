@@ -17,7 +17,7 @@ GnJSONObj::GnJSONObj(const char* buffer) : _object(nullptr)
 	if (_root != NULL)
 	{
 		_object = json_value_get_object(_root);
-		LOG("Config file loaded successfully");
+		LOG("File parsed successfully");
 	}
 	else
 	{
@@ -64,7 +64,7 @@ uint GnJSONObj::Save(char** buffer)
 	return size;
 }
 
-JSON_Array* GnJSONObj::GetParsonArray(const char* name)
+JSON_Array* GnJSONObj::GetArray(const char* name)
 {
 	return json_object_get_array(_object, name);
 }
@@ -87,6 +87,35 @@ bool GnJSONObj::GetBool(const char* name)
 const char* GnJSONObj::GetString(const char* name)
 {
 	return json_object_get_string(_object, name);
+}
+
+math::float3 GnJSONObj::GetFloat3(const char* name)
+{
+	math::float3 number;
+
+	JSON_Array* array;
+	array = json_object_get_array(_object, name);
+
+	number.x = json_array_get_number(array, 0);
+	number.y = json_array_get_number(array, 1);
+	number.z = json_array_get_number(array, 2);
+
+	return number;
+}
+
+Quat GnJSONObj::GetQuaternion(const char* name)
+{
+	math::Quat quaternion;
+
+	JSON_Array* array;
+	array = json_object_get_array(_object, name);
+
+	quaternion.x = json_array_get_number(array, 0);
+	quaternion.y = json_array_get_number(array, 1);
+	quaternion.z = json_array_get_number(array, 2);
+	quaternion.w = json_array_get_number(array, 3);
+
+	return quaternion;
 }
 
 void GnJSONObj::AddInt(const char* name, int number)

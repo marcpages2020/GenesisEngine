@@ -483,7 +483,7 @@ void FileSystem::LoadFile(const char* file_path, bool drag_and_drop)
 	}
 	else if (extension == ".scene")
 	{
-		App->scene->Load(file_path);
+		App->Load(file_path);
 	}
 	else if (extension == ".model") 
 	{
