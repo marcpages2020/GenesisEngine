@@ -25,6 +25,7 @@ public:
 	float4x4 GetGlobalTransform();
 
 	void UpdateLocalTransform();
+	void UpdateGlobalTransform();
 	void UpdateGlobalTransform(float4x4 parentGlobalTransform);
 
 	void Reset();
@@ -45,13 +46,14 @@ public:
 	float3 GetScale();
 
 private:
-	float4x4 localTransform;
-	float4x4 globalTransform;
+	float4x4 _localTransform = float4x4::identity;
+	float4x4 _globalTransform = float4x4::identity;
+	float4x4 _parentGlobalTransform = float4x4::identity;
 
-	float3 position;
-	float3 scale;
-	float3 eulerRotation;
-	Quat rotation;
+	float3 _position;
+	Quat _rotation;
+	float3 _scale;
+	float3 _eulerRotation;
 };
 
 #endif //__TRANSFORM_H__

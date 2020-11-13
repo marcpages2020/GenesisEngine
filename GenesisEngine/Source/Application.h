@@ -11,17 +11,10 @@
 #include "ModuleCamera3D.h"
 #include "ModuleScene.h"
 #include "Editor.h"
+#include "ModuleResources.h"
 
 #include <string>
 
-struct json_array_t;
-typedef json_array_t JSON_Array;
-
-struct json_value_t;
-typedef json_value_t JSON_Value;
-
-struct json_object_t;
-typedef json_object_t JSON_Object;
 
 struct HardwareSpecs
 {
@@ -58,6 +51,7 @@ public:
 	ModuleScene* scene;
 	Editor* editor;
 	ModuleRenderer3D* renderer3D;
+	ModuleResources* resources;
 
 	const char* engine_name;
 	const char* engine_version;

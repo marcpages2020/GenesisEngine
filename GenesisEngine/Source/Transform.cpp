@@ -8,25 +8,29 @@ Transform::Transform() : Component()
 {
 	type = ComponentType::TRANSFORM;
 
-	position.x = position.y = position.z = 0.0f;
-	rotation = Quat::identity;
-	eulerRotation = float3::zero;
-	scale.x = scale.y = scale.z = 1.0f;
+	_position = float3::zero;
+	_rotation = Quat::identity;
+	_eulerRotation = float3::zero;
+	_scale = float3::one;
 
-	localTransform = float4x4::FromTRS(position, rotation, scale);
-	globalTransform = localTransform;
+	_localTransform = float4x4::FromTRS(_position, _rotation, _scale);
+	_globalTransform = _localTransform;
+	_parentGlobalTransform = float4x4::identity;
 }
 
-Transform::Transform(float3 g_position, Quat g_rotation, float3 g_scale) : Component()
+Transform::Transform(float3 position, Quat rotation, float3 scale) : Component()
 {
-	position = g_position;
-	rotation = g_rotation;
-	eulerRotation = rotation.ToEulerXYZ();
-	eulerRotation *= RADTODEG;
-	scale = g_scale;
+	type = ComponentType::TRANSFORM;
 
-	localTransform = float4x4::FromTRS(g_position, g_rotation, g_scale);
-	globalTransform = localTransform;
+	_position = position;
+	_rotation = rotation;
+	_eulerRotation = rotation.ToEulerXYZ();
+	_eulerRotation *= RADTODEG;
+	_scale = scale;
+
+	_localTransform = float4x4::FromTRS(_position, _rotation, _scale);
+	_globalTransform = _localTransform;
+	_parentGlobalTransform = float4x4::identity;
 }
 
 Transform::~Transform() {}
@@ -37,40 +41,43 @@ void Transform::OnEditor()
 {
 	if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		float position4f[4] = { position.x, position.y, position.z, 1.0f };
+		float position4f[4] = { _position.x, _position.y, _position.z, 1.0f };
 		if (ImGui::DragFloat3("Position", position4f, 0.1f, -10000.0f, 10000.0f))
 		{
-			position.x = position4f[0];
-			position.y = position4f[1];
-			position.z = position4f[2];
+			_position.x = position4f[0];
+			_position.y = position4f[1];
+			_position.z = position4f[2];
 
-			SetPosition(position);
-			UpdateLocalTransform();
+			SetPosition(_position);
+			UpdateGlobalTransform();
+			_gameObject->UpdateChildrenTransforms();
 		}
 
-		float rotation4f[4] = { eulerRotation.x, eulerRotation.y, eulerRotation.z, 1.0f };
+		float rotation4f[4] = { _eulerRotation.x, _eulerRotation.y, _eulerRotation.z, 1.0f };
 		if (ImGui::DragFloat3("Rotation", rotation4f, 0.1f, -360.0f, 360.0f))
 		{
-			eulerRotation.x = rotation4f[0];
-			eulerRotation.y = rotation4f[1];
-			eulerRotation.z = rotation4f[2];
+			_eulerRotation.x = rotation4f[0];
+			_eulerRotation.y = rotation4f[1];
+			_eulerRotation.z = rotation4f[2];
 
-			SetRotation(eulerRotation.x, eulerRotation.y, eulerRotation.z);
-			UpdateLocalTransform();
+			SetRotation(_eulerRotation.x, _eulerRotation.y, _eulerRotation.z);
+			UpdateGlobalTransform();
+			_gameObject->UpdateChildrenTransforms();
 		}
 
-		float scale4f[4] = { scale.x, scale.y, scale.z, 1.0f };
+		float scale4f[4] = { _scale.x, _scale.y, _scale.z, 1.0f };
 		if (ImGui::DragFloat3("Scale", scale4f, 0.01f, -10000.0f, 10000.0f))
 		{
-			scale.x = scale4f[0];
-			scale.y = scale4f[1];
-			scale.z = scale4f[2];
+			_scale.x = scale4f[0];
+			_scale.y = scale4f[1];
+			_scale.z = scale4f[2];
 
-			SetScale(scale);
-			UpdateLocalTransform();
+			SetScale(_scale);
+			UpdateGlobalTransform();
+			_gameObject->UpdateChildrenTransforms();
 		};
 
-		float scale_multiplier = scale.x;
+		float scale_multiplier = _scale.x;
 		if (ImGui::DragFloat("Scale Multiplier", &scale_multiplier, 0.01f, 0.0f, 10.0f)) 
 		{
 			SetProportionalScale(scale_multiplier);
@@ -90,156 +97,150 @@ void Transform::Save(GnJSONArray& save_array)
 	GnJSONObj save_object;
 	save_object.AddInt("Type", type);
 
-	save_object.AddFloat3("Position", position);
+	save_object.AddFloat3("Position", _position);
 
-	save_object.AddQuaternion("Rotation", rotation);
+	save_object.AddQuaternion("Rotation", _rotation);
 
-	save_object.AddFloat3("Scale", scale);
+	save_object.AddFloat3("Scale", _scale);
 
 	save_array.AddObject(save_object);
 }
 
 void Transform::Load(GnJSONObj& load_object)
 {
-	position = load_object.GetFloat3("Position");
-	rotation = load_object.GetQuaternion("Rotation");
-	scale = load_object.GetFloat3("Scale");
+	_position = load_object.GetFloat3("Position");
+	_rotation = load_object.GetQuaternion("Rotation");
+	_scale = load_object.GetFloat3("Scale");
 
 	UpdateEulerRotation();
-	UpdateLocalTransform();
+	UpdateGlobalTransform();
 }
 
 void Transform::Set(float4x4 g_transform)
 {
-	localTransform = g_transform;
+	_localTransform = g_transform;
 }
 
 float4x4 Transform::GetLocalTransform()
 {
-	return localTransform;
+	return _localTransform;
 }
 
 float4x4 Transform::GetGlobalTransform()
 {
-	return globalTransform;
+	return _globalTransform;
 }
 
 void Transform::UpdateLocalTransform()
 {
-	localTransform = float4x4::FromTRS(position, rotation, scale);
-	globalTransform = localTransform;
+	_localTransform = float4x4::FromTRS(_position, _rotation, _scale);
+}
 
-	/*if (gameObject->GetParent() == nullptr)
-		globalTransform = localTransform;
-	else
-	{
-		float4x4 parentGlobal = gameObject->GetParent()->GetTransform()->GetGlobalTransform();
-		UpdateGlobalTransform(parentGlobal);
-	}*/
-
+void Transform::UpdateGlobalTransform()
+{
+	UpdateLocalTransform();
+	_globalTransform = _parentGlobalTransform * _localTransform;
 }
 
 void Transform::UpdateGlobalTransform(float4x4 parentGlobalTransform)
 {
-	localTransform = float4x4::FromTRS(position, rotation, scale);
-	//globalTransform = localTransform;
-	globalTransform = parentGlobalTransform * localTransform;
+	UpdateLocalTransform();
+	_parentGlobalTransform = parentGlobalTransform;
+	_globalTransform = _parentGlobalTransform * _localTransform;
 }
 
 void Transform::Reset()
 {
-	position = float3::zero;
-	rotation = Quat::identity;
-	scale = float3::one;
-	eulerRotation = float3::zero;
+	_position = float3::zero;
+	_rotation = Quat::identity;
+	_scale = float3::one;
+	_eulerRotation = float3::zero;
 
-	localTransform = float4x4::FromTRS(position, rotation, scale);
-	globalTransform = localTransform;
+	UpdateGlobalTransform();
 }
 
 void Transform::SetPosition(float x, float y, float z)
 {
-	position.x = x;
-	position.y = y;
-	position.z = z;
+	_position.x = x;
+	_position.y = y;
+	_position.z = z;
 
-	//UpdateLocalTransform();
+	UpdateLocalTransform();
 }
 
 void Transform::SetPosition(float3 new_position)
 {
-	position = new_position;
-
-	//UpdateLocalTransform();
+	_position = new_position;
+	UpdateLocalTransform();
 }
 
 float3 Transform::GetPosition()
 {
-	return position;
+	return _position;
 }
 
 //Set rotation from Euler angles
 void Transform::SetRotation(float x, float y, float z)
 {
-	eulerRotation = float3(x, y, z);
-	rotation = Quat::FromEulerXYZ(x * DEGTORAD, y * DEGTORAD, z * DEGTORAD);
-	//UpdateLocalTransform();
+	_eulerRotation = float3(x, y, z);
+	_rotation = Quat::FromEulerXYZ(x * DEGTORAD, y * DEGTORAD, z * DEGTORAD);
+	UpdateLocalTransform();
 }
 
 void Transform::SetRotation(Quat new_rotation)
 {
-	rotation = new_rotation;
-	eulerRotation = rotation.ToEulerXYZ() * RADTODEG;
+	_rotation = new_rotation;
+	_eulerRotation = _rotation.ToEulerXYZ() * RADTODEG;
 
-	//UpdateLocalTransform();
+	UpdateLocalTransform();
 }
 
 void Transform::SetRotation(float x, float y, float z, float w)
 {
-	rotation.x = x;
-	rotation.y = y;
-	rotation.z = z;
-	rotation.w = w;
+	_rotation.x = x;
+	_rotation.y = y;
+	_rotation.z = z;
+	_rotation.w = w;
 
-	//UpdateLocalTransform();
+	UpdateLocalTransform();
 }
 
 Quat Transform::GetRotation()
 {
-	return rotation;
+	return _rotation;
 }
 
 void Transform::UpdateEulerRotation()
 {
-	eulerRotation = rotation.ToEulerXYZ();
-	eulerRotation *= RADTODEG;
+	_eulerRotation = _rotation.ToEulerXYZ();
+	_eulerRotation *= RADTODEG;
 }
 
 void Transform::SetScale(float x, float y, float z)
 {
-	scale.x = x;
-	scale.y = y;
-	scale.z = z;
+	_scale.x = x;
+	_scale.y = y;
+	_scale.z = z;
 
-	//UpdateLocalTransform();
+	UpdateLocalTransform();
 }
 
 void Transform::SetScale(float3 new_scale)
 {
-	scale = new_scale;
+	_scale = new_scale;
 
-	//UpdateLocalTransform();
+	UpdateLocalTransform();
 }
 
 void Transform::SetProportionalScale(float multiplier)
 {
-	scale.x = scale.y = scale.z = multiplier;
+	_scale.x = _scale.y = _scale.z = multiplier;
 
 	UpdateLocalTransform();
 }
 
 float3 Transform::GetScale()
 {
-	return scale;
+	return _scale;
 }
 

@@ -56,7 +56,8 @@ void Material::Save(GnJSONArray& save_array)
 
 void Material::Load(GnJSONObj& load_object)
 {
-	MaterialImporter::Load(load_object.GetString("Path"), this);
+	//TODO
+	//MaterialImporter::Load(load_object.GetString("Path"), this);
 
 	if (diffuse_texture != nullptr && mesh != nullptr)
 		mesh->SetTexture(diffuse_texture);
@@ -140,7 +141,8 @@ bool Material::DeleteTexture()
 {
 	bool ret = true;
 
-	TextureImporter::UnloadTexture(diffuse_texture->id);
+	//TODO
+	//TextureImporter::UnloadTexture(diffuse_texture->id);
 	delete diffuse_texture;
 	diffuse_texture = nullptr;
 

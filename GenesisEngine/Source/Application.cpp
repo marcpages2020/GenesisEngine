@@ -15,9 +15,11 @@ Application::Application(int argc, char* args[]) : argc(argc), args(args), want_
 	camera = new ModuleCamera3D(true);
 	scene = new ModuleScene(true);
 	editor = new Editor(true);
+	resources = new ModuleResources(true);
 
 	// Main Modules
 	AddModule(window);
+	AddModule(resources);
 	AddModule(camera);
 	AddModule(input);
 	AddModule(scene);

@@ -60,7 +60,8 @@ void GnMesh::Save(GnJSONArray& save_array)
 
 void GnMesh::Load(GnJSONObj& load_object)
 {
-	MeshImporter::Load(load_object.GetString("Path"), this);
+	//TODO
+	//MeshImporter::Load(load_object.GetString("Path"), this);
 }
 
 void GnMesh::GenerateBuffers()

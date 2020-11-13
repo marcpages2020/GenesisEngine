@@ -1,7 +1,7 @@
 #include "Globals.h"
 #include "Application.h"
 #include "ModuleInput.h"
-#include "FileSystem.h"
+#include "ModuleResources.h"
 
 #define MAX_KEYS 300
 
@@ -113,7 +113,7 @@ update_status ModuleInput::PreUpdate(float dt)
 
 			case SDL_DROPFILE:
 				dropped_filedir = e.drop.file;
-				FileSystem::LoadFile(dropped_filedir, true);
+				App->resources->ImportFile(dropped_filedir, true);
 				SDL_free(dropped_filedir);
 				break;
 
