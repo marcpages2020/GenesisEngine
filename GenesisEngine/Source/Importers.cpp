@@ -1,6 +1,10 @@
 #include "Importers.h"
 #include "Timer.h"
 #include "FileSystem.h"
+#include "Application.h"
+
+#include "Resource.h"
+#include "ResourceTexture.h"
 
 #include "Mesh.h"
 #include "GameObject.h"
@@ -25,23 +29,19 @@
 
 #pragma region ModelImporter
 
-GameObject* ModelImporter::Import(const char* full_path)
+GameObject* ModelImporter::Import(const char* assets_path)
 {
 	Timer timer;
 	timer.Start();
 
 	GameObject* root = nullptr;
 
-	std::string folder, file;
-	FileSystem::SplitFilePath(full_path, &folder, &file);
-	std::string path = FileSystem::GetPathRelativeToAssets(full_path);
-
 	const aiScene* scene = nullptr;
 
-	if (FileSystem::Exists(path.c_str()))
+	if (FileSystem::Exists(assets_path))
 	{
 		char* buffer = nullptr;
-		uint size = FileSystem::Load(path.c_str(), &buffer);
+		uint size = FileSystem::Load(assets_path, &buffer);
 
 		scene = aiImportFileFromMemory(buffer, size, aiProcessPreset_TargetRealtime_MaxQuality, NULL);
 
@@ -49,7 +49,8 @@ GameObject* ModelImporter::Import(const char* full_path)
 	}
 	else
 	{
-		scene = aiImportFile(path.c_str(), aiProcessPreset_TargetRealtime_MaxQuality);
+		LOG_ERROR("Could not find %s in assets folder. If the file is out of it, please copy the file into the assets folder");
+		//scene = aiImportFile(path.c_str(), aiProcessPreset_TargetRealtime_MaxQuality);
 	}
 
 	if (scene != nullptr && scene->HasMeshes())
@@ -59,24 +60,24 @@ GameObject* ModelImporter::Import(const char* full_path)
 		GnJSONObj save_file;
 		GnJSONArray meshes = save_file.AddArray("Meshes");
 
-		root = ImportChildren(scene, rootNode, nullptr, nullptr, folder.c_str(), meshes);
-		root->SetName(file.c_str());
+		root = ImportChildren(scene, rootNode, nullptr, nullptr, assets_path, meshes);
+		//root->SetName(file.c_str());
 
 		char* buffer = nullptr;
 		uint size = save_file.Save(&buffer);
-		path = "Library/Models/";
-		path += file.c_str();
-		path += ".model";
-		FileSystem::Save(path.c_str(), buffer, size);
+
+		char library_path[128];
+		sprintf_s(library_path, 128, "Library/Models/%d", 2);
+		FileSystem::Save(library_path, buffer, size);
 
 		aiReleaseImport(scene);
 		RELEASE_ARRAY(buffer);
 		save_file.Release();
 
-		LOG("%s loaded in %.3f s", full_path, timer.ReadSec());
+		LOG("%s loaded in %.3f s", assets_path, timer.ReadSec());
 	}
 	else
-		LOG_ERROR("Error loading scene %s", full_path);
+		LOG_ERROR("Error loading scene %s", assets_path);
 
 	//root->UpdateChildrenTransforms();
 
@@ -104,6 +105,8 @@ GameObject* ModelImporter::ImportChildren(const aiScene* scene, aiNode* node, ai
 		gameObject->GetTransform()->UpdateGlobalTransform(parentGameObject->GetTransform()->GetGlobalTransform());
 
 		//Mesh --------------------------------------------------------------
+
+		//App->resources->ImportFile(path);
 
 		char* meshBuffer = nullptr;
 		GnMesh* mesh = new GnMesh();
@@ -158,7 +161,7 @@ GameObject* ModelImporter::ImportChildren(const aiScene* scene, aiNode* node, ai
 
 		RELEASE_ARRAY(texBuffer);
 
-		meshes_array.AddObject(save_object);
+		//meshes_array.AddObject(save_object);
 	}
 
 	for (size_t i = 0; i < node->mNumChildren; i++)
@@ -392,15 +395,22 @@ void MeshImporter::Load(const char* fileBuffer, GnMesh* mesh)
 
 #pragma region TextureImporter
 
+void TextureImporter::Init()
+{
+	ilInit();
+	iluInit();
 
+	if (ilutRenderer(ILUT_OPENGL))
+		LOG("DevIL initted correctly");
+}
 
-void TextureImporter::Import(const char* path)
+void TextureImporter::Import(char* fileBuffer, Resource* resource, uint size)
 {
 	Timer timer;
 	timer.Start();
 
 	ILuint imageID = 0;
-	ILenum error;
+	ILenum error = IL_NO_ERROR;
 
 	ilGenImages(1, &imageID);
 	ilBindImage(imageID);
@@ -408,47 +418,27 @@ void TextureImporter::Import(const char* path)
 	ilEnable(IL_ORIGIN_SET);
 	ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
 
-	GnTexture* texture = new GnTexture();
-
 	error = ilGetError();
 	if (error != IL_NO_ERROR)
 	{
-		error = ilGetError();
-		LOG_ERROR("Could not create a texture buffer to load: %s, %d %s", path, ilGetError(), iluErrorString(error));
+		LOG_ERROR("Could not create a texture buffer to load: %s, %d %s", resource->assetsFile, ilGetError(), iluErrorString(error));
+		return;
 	}
 
-	ILenum file_format = GetFileFormat(path);
+	ILenum file_format = GetFileFormat(resource->assetsFile.c_str());
 
-	if (FileSystem::Exists(path))
+	if (ilLoadL(file_format, fileBuffer, size) == IL_FALSE)
 	{
-		char* buffer;
-		uint size = FileSystem::Load(path, &buffer);
+		LOG_ERROR("Error importing texture %s - %d: %s", resource->assetsFile, ilGetError(), iluErrorString(ilGetError()));
 
-		if (ilLoadL(file_format, buffer, size) == IL_FALSE)
-		{
-			LOG_WARNING("Warning: Trying to load the texture %s into buffer, %d: %s", path, ilGetError(), iluErrorString(ilGetError()));
-			buffer = nullptr;
-
-			//Reset Image
-			ilBindImage(0);
-			ilDeleteImages(1, &imageID);
-			//return nullptr;
-		}
-
-		if (buffer != NULL)
-			RELEASE_ARRAY(buffer);
-	}
-	else
-	{
-		if (ilLoadImage(path) == IL_FALSE)
-		{
-			LOG_ERROR("Error trying to load the texture directly from %s", path);
-		}
+		ilBindImage(0);
+		ilDeleteImages(1, &imageID);
+		return;
 	}
 
 	ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
-	error = ilGetError();
 
+	error = ilGetError();
 	if (error != IL_NO_ERROR)
 	{
 		ilBindImage(0);
@@ -457,19 +447,53 @@ void TextureImporter::Import(const char* path)
 	}
 	else
 	{
-		LOG("Texture loaded successfully from: %s in %.3f s", path, timer.ReadSec());
+		LOG("Texture loaded successfully from: %s in %d ms", resource->assetsFile, timer.Read());
 
-		texture->id = (uint)(imageID);
-		texture->name = FileSystem::GetFile(path);
+		ResourceTexture* texture = (ResourceTexture*)resource;
+
 		texture->data = ilGetData();
+		texture->id = (uint)(imageID);
 		texture->width = ilGetInteger(IL_IMAGE_WIDTH);
 		texture->height = ilGetInteger(IL_IMAGE_HEIGHT);
-		texture->path = path;
+
+		resource = texture;
+	}
+
+	ilBindImage(0);
+}
+
+uint TextureImporter::Save(char** fileBuffer, ResourceTexture* texture)
+{
+	ILuint size;
+	ILubyte* data;
+
+	ilBindImage(texture->id);
+
+	ilSetInteger(IL_DXTC_DATA_FORMAT, IL_DXT5);
+	size = ilSaveL(IL_DDS, nullptr, 0);
+
+	if (size > 0)
+	{
+		data = new ILubyte[size];
+		if (ilSaveL(IL_DDS, data, size) > 0)
+			*fileBuffer = (char*)data;
+
+		//RELEASE_ARRAY(data);
+	}
+	else
+	{
+		ILenum error;
+		error = ilGetError();
+
+		if (error != IL_NO_ERROR)
+		{
+			LOG_ERROR("Error when saving %s - %d: %s", texture->assetsFile, error, iluErrorString(error));
+		}
 	}
 
 	ilBindImage(0);
 
-	//return texture;
+	return size;
 }
 
 std::string TextureImporter::FindTexture(const char* texture_name, const char* model_directory)
@@ -530,15 +554,6 @@ ILenum TextureImporter::GetFileFormat(const char* file)
 
 #pragma region MaterialImporter
 
-void MaterialImporter::Init()
-{
-	ilInit();
-	iluInit();
-
-	if (ilutRenderer(ILUT_OPENGL))
-		LOG("DevIL initted correctly");
-}
-
 void MaterialImporter::Import(const aiMaterial* aimaterial, Material* material, const char* folder_path)
 {
 	Timer timer;
@@ -564,7 +579,7 @@ uint64 MaterialImporter::Save(Material* ourMaterial, char** fileBuffer)
 	ILuint size;
 	ILubyte* data;
 
-	ilBindImage(ourMaterial->GetDiffuseTexture()->id);
+	//ilBindImage(ourMaterial->GetDiffuseTexture()->id);
 
 	ilSetInteger(IL_DXTC_DATA_FORMAT, IL_DXT5);
 	size = ilSaveL(IL_DDS, nullptr, 0);
@@ -638,12 +653,12 @@ void MaterialImporter::Load(const char* fileBuffer, Material* material)
 	{
 		GnTexture* texture = new GnTexture();
 
-		texture->id = (uint)(imageID);
-		//texture->name = FileSystem::GetFile(f) + format;
-		texture->data = ilGetData();
-		texture->width = ilGetInteger(IL_IMAGE_WIDTH);
-		texture->height = ilGetInteger(IL_IMAGE_HEIGHT);
-		texture->path = fileBuffer;
+		//texture->id = (uint)(imageID);
+		////texture->name = FileSystem::GetFile(f) + format;
+		//texture->data = ilGetData();
+		//texture->width = ilGetInteger(IL_IMAGE_WIDTH);
+		//texture->height = ilGetInteger(IL_IMAGE_HEIGHT);
+		//texture->path = fileBuffer;
 
 		material->SetTexture(texture);
 
@@ -731,12 +746,12 @@ GnTexture* MaterialImporter::LoadTexture(const char* full_path)
 	{
 		LOG("Texture loaded successfully from: %s in %.3f s", full_path, timer.ReadSec());
 
-		texture->id = (uint)(imageID);
+		/*texture->id = (uint)(imageID);
 		texture->name = FileSystem::GetFile(full_path) + format;
 		texture->data = ilGetData();
 		texture->width = ilGetInteger(IL_IMAGE_WIDTH);
 		texture->height = ilGetInteger(IL_IMAGE_HEIGHT);
-		texture->path = normalized_path.c_str();
+		texture->path = normalized_path.c_str();*/
 	}
 
 	ilBindImage(0);

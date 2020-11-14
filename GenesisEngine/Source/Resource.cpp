@@ -8,8 +8,8 @@ Resource::Resource(uint uid, ResourceType type)
 
 Resource::~Resource()
 {
-	_assetsFile.clear();
-	_libraryFile.clear();
+	assetsFile.clear();
+	libraryFile.clear();
 }
 
 ResourceType Resource::GetType()

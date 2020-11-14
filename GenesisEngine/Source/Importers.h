@@ -6,6 +6,9 @@
 
 #pragma region ForwardDeclarations
 
+class Resource;
+class ResourceTexture;
+
 class GnJSONArray;
 class GameObject;
 struct GnTexture;
@@ -41,8 +44,10 @@ namespace MeshImporter
 
 namespace TextureImporter
 {
-	void Import(const char* path);
-	void Save(uint id, char** fileBuffer);
+	void Init();
+
+	void Import(char* fileBuffer, Resource* resource, uint size);
+	uint Save(char** fileBuffer, ResourceTexture* texture);
 	void Load(const char* path);
 
 	std::string FindTexture(const char* texture_name, const char* model_directory);
@@ -52,7 +57,6 @@ namespace TextureImporter
 
 namespace MaterialImporter
 {
-	void Init();
 	void Import(const aiMaterial* material, Material* ourMaterial, const char* folder_path);
 	uint64 Save(Material* ourMaterial, char** fileBuffer);
 	void Load(const char* fileBuffer, Material* material);

@@ -7,11 +7,11 @@ class GnJSONObj;
 
 enum ResourceType 
 {
-	TEXTURE,
-	MESH,
-	SCENE,
-	MODEL,
-	UNKNOWN
+	RESOURCE_TEXTURE,
+	RESOURCE_MESH,
+	RESOURCE_SCENE,
+	RESOURCE_MODEL,
+	RESOURCE_UNKNOWN
 };
 
 class Resource 
@@ -27,12 +27,12 @@ public:
 	virtual void Load(GnJSONObj& base_object) {};
 
 public: 
-	std::string _assetsFile;
-	std::string _libraryFile;
+	std::string assetsFile;
+	std::string libraryFile;
 
 protected:
 	uint _uid = 0;
 
-	ResourceType _type = UNKNOWN;
+	ResourceType _type = RESOURCE_UNKNOWN;
 	uint _referenceCount = 0;
 };

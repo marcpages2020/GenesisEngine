@@ -15,9 +15,9 @@ public:
 
 	bool Init() override;
 
-	uint ImportFile(const char* assets_file, bool drag_and_drop = false);
+	uint ImportFile(const char* assets_file);
 	Resource* CreateResource(const char* assetsPath, ResourceType type);
-	bool SaveResource(Resource* resource);
+	bool SaveResource(char* fileBuffer, uint size, Resource* resource);
 
 	ResourceType GetResourceTypeFromPath(const char* path);
 	uint GenerateUID();

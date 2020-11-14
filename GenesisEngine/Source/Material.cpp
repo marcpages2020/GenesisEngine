@@ -21,15 +21,15 @@ Material::Material(GnMesh* g_mesh, GnTexture* g_diffuse_texture) : Component(), 
 	mesh = g_mesh;
 	type = ComponentType::MATERIAL;
 
-	if (g_diffuse_texture->data != nullptr)
-	{
-		SetTexture(g_diffuse_texture);
-		checkers_image = false;
-	}
-	else
-	{
-		mesh->AssignCheckersImage();
-	}
+	//if (g_diffuse_texture->data != nullptr)
+	//{
+	//	SetTexture(g_diffuse_texture);
+	//	checkers_image = false;
+	//}
+	//else
+	//{
+	//	mesh->AssignCheckersImage();
+	//}
 }
 
 Material::~Material()
@@ -87,6 +87,7 @@ void Material::OnEditor()
 
 		ImGui::Separator();
 
+		/*
 		if(diffuse_texture != nullptr)
 		{
 			ImGui::Text("Diffuse Texture: %s", diffuse_texture->name.c_str());
@@ -104,7 +105,7 @@ void Material::OnEditor()
 				mesh->RemoveTexture();
 			}
 		}
-
+		*/
 		ImGui::Spacing();
 	}
 }

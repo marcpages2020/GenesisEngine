@@ -113,7 +113,7 @@ update_status ModuleInput::PreUpdate(float dt)
 
 			case SDL_DROPFILE:
 				dropped_filedir = e.drop.file;
-				App->resources->ImportFile(dropped_filedir, true);
+				App->resources->ImportFile(dropped_filedir);
 				SDL_free(dropped_filedir);
 				break;
 

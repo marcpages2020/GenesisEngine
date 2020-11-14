@@ -4,7 +4,6 @@
 
 #include <string>
 
-typedef unsigned char GLubyte;
 class GnMesh;
 class GnJSONArray;
 
@@ -12,17 +11,12 @@ struct GnTexture
 {
 	std::string name = "Unnamed Texture";
 	std::string path = "Unknown path";
-	uint id = -1;
-	GLubyte* data = nullptr;
-	int width = -1;
-	int height = -1;
 
 	~GnTexture()
 	{
 		name.clear();
 		path.clear();
 		//delete data;
-		data = nullptr;
 	}
 };
 
