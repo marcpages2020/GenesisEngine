@@ -34,6 +34,9 @@ bool ModuleResources::Init()
 uint ModuleResources::ImportFile(const char* assets_file)
 {
 	std::string processed_path = FileSystem::ProcessPath(assets_file);
+
+	//uint uid = 
+
 	ResourceType type = GetResourceTypeFromPath(assets_file);
 
 	Resource* resource = CreateResource(assets_file, type);
@@ -45,7 +48,7 @@ uint ModuleResources::ImportFile(const char* assets_file)
 	switch (type)
 	{
 	case RESOURCE_MODEL:
-		ModelImporter::Import(processed_path.c_str());
+		ModelImporter::Import(fileBuffer, resource, size);
 		break;
 	case RESOURCE_MESH:
 		//MeshImporter::Import(processed_path.c_str());
@@ -107,6 +110,12 @@ Resource* ModuleResources::CreateResource(const char* assetsPath, ResourceType t
 	return resource;
 }
 
+void ModuleResources::ReleaseResource(uint UID)
+{
+	delete resources[UID];
+	resources[UID] = nullptr;
+}
+
 bool ModuleResources::SaveResource(char* fileBuffer, uint size, Resource* resource)
 {
 	bool ret = true;
@@ -114,11 +123,15 @@ bool ModuleResources::SaveResource(char* fileBuffer, uint size, Resource* resour
 	GnJSONObj base_object;
 	resource->Save(base_object);
 	
-	//char* buffer = NULL;
-	//uint size = base_object.Save(&buffer);
+	char* meta_buffer = NULL;
+	uint meta_size = base_object.Save(&meta_buffer);
+
+	std::string meta_file_name = resource->assetsFile + ".meta";
+
+	FileSystem::Save(meta_file_name.c_str(), meta_buffer, meta_size);
 	FileSystem::Save(resource->libraryFile.c_str(), fileBuffer, size);
 
-	base_object.Release();
+	//base_object.Release();
 	//RELEASE_ARRAY(buffer);
 
 	return ret;

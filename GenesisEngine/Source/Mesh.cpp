@@ -7,14 +7,14 @@
 #include "Transform.h"
 #include "GnJSON.h"
 
+#include "ResourceMesh.h"
+
 #include "glew/include/glew.h"
 #include "ImGui/imgui.h"
 
 // GnMesh =========================================================================================================================
 
-GnMesh::GnMesh() : Component(),  vertices_buffer(-1), vertices_amount(-1), vertices(nullptr), indices_buffer(-1), indices_amount(-1), indices(nullptr), 
- normals_buffer(-1), texture_buffer(-1),  textureID(-1), texcoords(nullptr), normals(nullptr), colors(nullptr), draw_face_normals(false), draw_vertex_normals(false),
- name("No name"), texture(nullptr)
+GnMesh::GnMesh() : Component(), draw_face_normals(false), draw_vertex_normals(false), textureID(-1), texture_buffer(-1), name("No name")
 {
 	type = ComponentType::MESH;
 }
@@ -22,30 +22,16 @@ GnMesh::GnMesh() : Component(),  vertices_buffer(-1), vertices_amount(-1), verti
 GnMesh::~GnMesh(){
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glDeleteBuffers(1, &vertices_buffer);
-	delete vertices;
-	vertices = nullptr;
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glDeleteBuffers(1, &indices_buffer);
-	delete indices;
-	indices = nullptr;
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glDeleteBuffers(1, &normals_buffer);
-	delete normals;
-	normals = nullptr;
-
-	delete colors;
-	colors = nullptr;
-
-	delete texcoords;
-	texcoords = nullptr;
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glDeleteBuffers(1, &texture_buffer);
 	glDeleteTextures(1, &textureID);
-
-	texture = nullptr;
 }
 
 void GnMesh::Save(GnJSONArray& save_array)
@@ -69,22 +55,22 @@ void GnMesh::GenerateBuffers()
 	//vertices
 	glGenBuffers(1, (GLuint*)&(vertices_buffer));
 	glBindBuffer(GL_ARRAY_BUFFER, vertices_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices_amount * 3, vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * resource->vertices_amount * 3, resource->vertices, GL_STATIC_DRAW);
 
 	//normals
 	glGenBuffers(1, (GLuint*)&(normals_buffer));
 	glBindBuffer(GL_NORMAL_ARRAY, normals_buffer);
-	glBufferData(GL_NORMAL_ARRAY, sizeof(float) * vertices_amount * 3, normals, GL_STATIC_DRAW);
+	glBufferData(GL_NORMAL_ARRAY, sizeof(float) * resource->vertices_amount * 3, resource->normals, GL_STATIC_DRAW);
 
 	//textures
 	glGenBuffers(1, (GLuint*)&(texture_buffer));
 	glBindBuffer(GL_ARRAY_BUFFER, texture_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices_amount * 2, texcoords, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * resource->vertices_amount * 2, resource->texcoords, GL_STATIC_DRAW);
 
 	//indices
 	glGenBuffers(1, (GLuint*)&(indices_buffer));
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * indices_amount, indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * resource->indices_amount, resource->indices, GL_STATIC_DRAW);
 
 	//textures
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -173,7 +159,7 @@ void GnMesh::Render()
 	glPushMatrix();
 	glMultMatrixf((float*)&_gameObject->GetTransform()->GetGlobalTransform());
 
-	glDrawElements(GL_TRIANGLES, indices_amount, GL_UNSIGNED_INT, NULL);
+	glDrawElements(GL_TRIANGLES, resource->indices_amount, GL_UNSIGNED_INT, NULL);
 
 	if(draw_vertex_normals ||App->renderer3D->draw_vertex_normals)
 		DrawVertexNormals();
@@ -200,7 +186,7 @@ void GnMesh::OnEditor()
 	{
 		ImGui::Checkbox(" Enabled", &enabled);
 
-		ImGui::Text("Vertices: %d Indices: %d", vertices_amount, indices_amount);
+		ImGui::Text("Vertices: %d Indices: %d", resource->vertices_amount, resource->indices_amount);
 		ImGui::Spacing();
 
 		ImGui::Checkbox("Vertex Normals", &draw_vertex_normals);
@@ -213,7 +199,7 @@ void GnMesh::RemoveTexture()
 {
 	//TextureImporter::UnloadTexture(texture->id);
 	//delete texture;
-	texture = nullptr;
+	//texture = nullptr;
 
 	AssignCheckersImage();
 }
@@ -227,15 +213,15 @@ void GnMesh::DrawVertexNormals()
 
 	//vertices normals
 	glBegin(GL_LINES);
-	for (size_t i = 0, c = 0; i < vertices_amount * 3; i += 3, c+= 4)
+	for (size_t i = 0, c = 0; i < resource->vertices_amount * 3; i += 3, c+= 4)
 	{
 		glColor3f(0.0f, 0.85f, 0.85f);
 		//glColor4f(colors[c], colors[c + 1], colors[c + 2], colors[c + 3]);
-		glVertex3f(vertices[i], vertices[i + 1], vertices[i + 2]);
+		glVertex3f(resource->vertices[i], resource->vertices[i + 1], resource->vertices[i + 2]);
 
-		glVertex3f(vertices[i] + (normals[i] * normal_lenght),
-			   vertices[i + 1] + (normals[i + 1] * normal_lenght),
-			   vertices[i + 2] + (normals[i + 2]) * normal_lenght);
+		glVertex3f(resource->vertices[i] + (resource->normals[i] * normal_lenght),
+			       resource->vertices[i + 1] + (resource->normals[i + 1] * normal_lenght),
+			       resource->vertices[i + 2] + (resource->normals[i + 2]) * normal_lenght);
 	}
 
 	glColor3f(1.0f, 1.0f, 1.0f);
@@ -251,22 +237,22 @@ void GnMesh::DrawFaceNormals()
 
 	//vertices normals
 	glBegin(GL_LINES);
-	for (size_t i = 0; i < vertices_amount * 3; i += 3)
+	for (size_t i = 0; i < resource->vertices_amount * 3; i += 3)
 	{
 		glColor3f(1.0f, 0.85f, 0.0f);
-		float vx =  (vertices[i] + vertices[i + 3] + vertices[i+ 6]) / 3;
-		float vy = (vertices[i + 1] + vertices[i + 4] + vertices[i + 7]) / 3;
-		float vz = (vertices[i + 2] + vertices[i + 5] + vertices[i + 8]) / 3;
+		float vx = (resource->vertices[i] + resource->vertices[i + 3] + resource->vertices[i+ 6]) / 3;
+		float vy = (resource->vertices[i + 1] + resource->vertices[i + 4] + resource->vertices[i + 7]) / 3;
+		float vz = (resource->vertices[i + 2] + resource->vertices[i + 5] + resource->vertices[i + 8]) / 3;
 
-		float nx = (normals[i] +     normals[i + 3] + normals[i + 6]) / 3;
-		float ny = (normals[i + 1] + normals[i + 4] + normals[i + 7]) / 3;
-		float nz = (normals[i + 2] + normals[i + 5] + normals[i + 8]) / 3;
+		float nx = (resource->normals[i] +     resource->normals[i + 3] + resource->normals[i + 6]) / 3;
+		float ny = (resource->normals[i + 1] + resource->normals[i + 4] + resource->normals[i + 7]) / 3;
+		float nz = (resource->normals[i + 2] + resource->normals[i + 5] + resource->normals[i + 8]) / 3;
 
 		glVertex3f(vx, vy, vz);
 
-		glVertex3f(vx + (normals[i] * normal_lenght),
-			       vy + (normals[i + 1] * normal_lenght),
-			       vz + (normals[i + 2]) * normal_lenght);
+		glVertex3f(vx + (resource->normals[i] * normal_lenght),
+			       vy + (resource->normals[i + 1] * normal_lenght),
+			       vz + (resource->normals[i + 2]) * normal_lenght);
 	}
 
 	glColor3f(1.0f, 1.0f, 1.0f);
@@ -282,52 +268,52 @@ GnCube::GnCube() : GnMesh()
 {
 	name = {"Cube"};
 
-	vertices = new float[24] 
-	{
-		//Bottom Vertices
-		0.0f ,0.0f, 0.0f,
-		1.0f ,0.0f, 0.0f,
-		1.0f ,0.0f, 1.0f,
-		0.0f ,0.0f, 1.0f,
+	////vertices = new float[24] 
+	//{
+	//	//Bottom Vertices
+	//	0.0f ,0.0f, 0.0f,
+	//	1.0f ,0.0f, 0.0f,
+	//	1.0f ,0.0f, 1.0f,
+	//	0.0f ,0.0f, 1.0f,
 
-		//Top Vertices
-		0.0f, 1.0f, 0.0f,
-		1.0f, 1.0f, 0.0f,
-		1.0f, 1.0f, 1.0f,
-		0.0f, 1.0f, 1.0f
-	};
+	//	//Top Vertices
+	//	0.0f, 1.0f, 0.0f,
+	//	1.0f, 1.0f, 0.0f,
+	//	1.0f, 1.0f, 1.0f,
+	//	0.0f, 1.0f, 1.0f
+	//};
 
-	indices = new uint[36] 
-	{
-		//Bottom face
-		0,1,2, 2,3,0,
-		//Front Face
-		3,2,6, 6,7,3,
-		//Left face
-		7,4,0, 0,3,7,
-		//Right face
-		2,1,5, 5,6,2,
-		//Back face
-		1,0,4, 4,5,1,
-		//Top face
-		5,4,7, 7,6,5
-	};
+	//indices = new uint[36] 
+	//{
+	//	//Bottom face
+	//	0,1,2, 2,3,0,
+	//	//Front Face
+	//	3,2,6, 6,7,3,
+	//	//Left face
+	//	7,4,0, 0,3,7,
+	//	//Right face
+	//	2,1,5, 5,6,2,
+	//	//Back face
+	//	1,0,4, 4,5,1,
+	//	//Top face
+	//	5,4,7, 7,6,5
+	//};
 
-	texcoords = new float[16]
-	{
-		0.0f, 0.0f, 
-		1.0f, 0.0f,
-		1.0f, 1.0f, 
-		0.0f, 1.0f,
+	//texcoords = new float[16]
+	//{
+	//	0.0f, 0.0f, 
+	//	1.0f, 0.0f,
+	//	1.0f, 1.0f, 
+	//	0.0f, 1.0f,
 
-		0.0f, 1.0f,
-		1.0f, 1.0f,
-		1.0f, 0.0f,
-		0.0f, 0.0f
-	};
+	//	0.0f, 1.0f,
+	//	1.0f, 1.0f,
+	//	1.0f, 0.0f,
+	//	0.0f, 0.0f
+	//};
 
-	vertices_amount = 8;
-	indices_amount = 36;
+	//vertices_amount = 8;
+	//indices_amount = 36;
 
 	GenerateBuffers();
 }
@@ -340,7 +326,7 @@ GnCube::~GnCube(){}
 
 GnPlane::GnPlane() : GnMesh() 
 {
-	name = { "Plane" };
+	/*name = { "Plane" };
 
 	vertices = new float[12]{
 	0.0f ,0.0f, 0.0f,
@@ -355,7 +341,7 @@ GnPlane::GnPlane() : GnMesh()
 	};
 
 	vertices_amount = 4;
-	indices_amount = 6;
+	indices_amount = 6;*/
 
 	GenerateBuffers();
 }
@@ -370,28 +356,28 @@ GnPyramid::GnPyramid() : GnMesh()
 {
 	name = { "Pyramid" };
 
-	vertices = new float[15] {
-		//Top
-		0.5f, 0.85f, 0.5f,
+	//vertices = new float[15] {
+	//	//Top
+	//	0.5f, 0.85f, 0.5f,
 
-		//Bottom 
-		0.0f ,0.0f, 0.0f,
-		1.0f ,0.0f, 0.0f,
-		1.0f ,0.0f, 1.0f,
-		0.0f ,0.0f, 1.0f
-	};
+	//	//Bottom 
+	//	0.0f ,0.0f, 0.0f,
+	//	1.0f ,0.0f, 0.0f,
+	//	1.0f ,0.0f, 1.0f,
+	//	0.0f ,0.0f, 1.0f
+	//};
 
-	indices = new uint[18] {
-		0, 4, 3, // Front
-		0, 3, 2, // Left
-		0, 2, 1, // Right
-		0, 1, 4,  // Back
+	//indices = new uint[18] {
+	//	0, 4, 3, // Front
+	//	0, 3, 2, // Left
+	//	0, 2, 1, // Right
+	//	0, 1, 4,  // Back
 
-		1, 3, 4,  1, 2, 3 //Bottom
-	};
+	//	1, 3, 4,  1, 2, 3 //Bottom
+	//};
 
-	vertices_amount = 5;
-	indices_amount = 18;
+	//vertices_amount = 5;
+	//indices_amount = 18;
 
 	GenerateBuffers();
 }
@@ -404,7 +390,7 @@ GnPyramid::~GnPyramid() {}
 
 GnSphere::GnSphere() : GnMesh() 
 {
-	name = { "Sphere" };
+	/*name = { "Sphere" };
 
 	float radius = 1;
 	unsigned int rings = 12;
@@ -443,21 +429,21 @@ GnSphere::GnSphere() : GnMesh()
 			*i++ = r * sectors + (s + 1);
 			*i++ = r * sectors + s;
 		}
-	}
+	}*/
 }
 
 GnSphere::~GnSphere()
 {
-	vertices.clear();
-	indices.clear();
+	//vertices.clear();
+	//indices.clear();
 }
 
 void GnSphere::Render()
 {
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, &vertices[0]);
-	glDrawElements(GL_QUADS, indices.size() , GL_UNSIGNED_SHORT, &indices[0]);
-	glDisableClientState(GL_VERTEX_ARRAY);
+	//glEnableClientState(GL_VERTEX_ARRAY);
+	//glVertexPointer(3, GL_FLOAT, 0, &vertices[0]);
+	//glDrawElements(GL_QUADS, indices.size() , GL_UNSIGNED_SHORT, &indices[0]);
+	//glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------
@@ -479,118 +465,118 @@ GnCylinder::~GnCylinder() {}
 
 void GnCylinder::CalculateGeometry()
 {
-	float current_angle = 0;
-	float angle_increase = 2 * M_PI / sides;
+	//float current_angle = 0;
+	//float angle_increase = 2 * M_PI / sides;
 
-	//Vertices ------------------------------------------------
+	////Vertices ------------------------------------------------
 
-	std::vector<float> vertices_vector;
+	//std::vector<float> vertices_vector;
 
-	//Top center
-	vertices_vector.push_back(0);
-	vertices_vector.push_back(height * 0.5f);
-	vertices_vector.push_back(0);
+	////Top center
+	//vertices_vector.push_back(0);
+	//vertices_vector.push_back(height * 0.5f);
+	//vertices_vector.push_back(0);
 
-	//Top face
-	for (int i = 0; i < sides; i++)
-	{
-		vertices_vector.push_back(radius * cos(current_angle));//x
-		vertices_vector.push_back(height * 0.5f);		       //y
-		vertices_vector.push_back(radius * sin(current_angle));//z
+	////Top face
+	//for (int i = 0; i < sides; i++)
+	//{
+	//	vertices_vector.push_back(radius * cos(current_angle));//x
+	//	vertices_vector.push_back(height * 0.5f);		       //y
+	//	vertices_vector.push_back(radius * sin(current_angle));//z
 
-		//anticlockwise
-		current_angle -= angle_increase;
-	}
+	//	//anticlockwise
+	//	current_angle -= angle_increase;
+	//}
 
-	current_angle = 0;
+	//current_angle = 0;
 
-	//Bottom Center
-	vertices_vector.push_back(0);
-	vertices_vector.push_back(-height * 0.5f);
-	vertices_vector.push_back(0);
+	////Bottom Center
+	//vertices_vector.push_back(0);
+	//vertices_vector.push_back(-height * 0.5f);
+	//vertices_vector.push_back(0);
 
-	//Bottom face
-	for (int i = 0; i < sides; i++)
-	{
-		vertices_vector.push_back(radius * cos(current_angle)); //x
-		vertices_vector.push_back(-height * 0.5f);			    //y
-		vertices_vector.push_back(radius * sin(current_angle)); //z
+	////Bottom face
+	//for (int i = 0; i < sides; i++)
+	//{
+	//	vertices_vector.push_back(radius * cos(current_angle)); //x
+	//	vertices_vector.push_back(-height * 0.5f);			    //y
+	//	vertices_vector.push_back(radius * sin(current_angle)); //z
 
-		//clockwise
-		current_angle -= angle_increase;
-	}
+	//	//clockwise
+	//	current_angle -= angle_increase;
+	//}
 
-	// Indices ----------------------------------------------
+	//// Indices ----------------------------------------------
 
-	std::vector<uint> indices_vector;
+	//std::vector<uint> indices_vector;
 
-	//Top Face
-	for (int i = 1; i < sides; i++)
-	{
-		indices_vector.push_back(0);
-		indices_vector.push_back(i);
-		indices_vector.push_back(i + 1);
-	}
+	////Top Face
+	//for (int i = 1; i < sides; i++)
+	//{
+	//	indices_vector.push_back(0);
+	//	indices_vector.push_back(i);
+	//	indices_vector.push_back(i + 1);
+	//}
 
-	indices_vector.push_back(0);
-	indices_vector.push_back(sides);
-	indices_vector.push_back(1);
+	//indices_vector.push_back(0);
+	//indices_vector.push_back(sides);
+	//indices_vector.push_back(1);
 
-	//Sides
-	for (int i = 1; i < sides; i++)
-	{
-		//Left triangle
-		indices_vector.push_back(i);
-		indices_vector.push_back(sides + i + 1);
-		indices_vector.push_back(sides + i + 2);
+	////Sides
+	//for (int i = 1; i < sides; i++)
+	//{
+	//	//Left triangle
+	//	indices_vector.push_back(i);
+	//	indices_vector.push_back(sides + i + 1);
+	//	indices_vector.push_back(sides + i + 2);
 
-		//Right triangle
-		indices_vector.push_back(i + sides + 2);
-		indices_vector.push_back(i + 1);
-		indices_vector.push_back(i);
-	}
+	//	//Right triangle
+	//	indices_vector.push_back(i + sides + 2);
+	//	indices_vector.push_back(i + 1);
+	//	indices_vector.push_back(i);
+	//}
 
-	indices_vector.push_back(sides);
-	indices_vector.push_back(2 * sides + 1);
-	indices_vector.push_back(sides + 2);
+	//indices_vector.push_back(sides);
+	//indices_vector.push_back(2 * sides + 1);
+	//indices_vector.push_back(sides + 2);
 
-	indices_vector.push_back(sides + 2);
-	indices_vector.push_back(1);
-	indices_vector.push_back(sides);
+	//indices_vector.push_back(sides + 2);
+	//indices_vector.push_back(1);
+	//indices_vector.push_back(sides);
 
-	//Bottom Face
-	int k = sides + 1;
-	for (int i = 1; i < sides; i++)
-	{
-		indices_vector.push_back(k);
-		indices_vector.push_back(k + i + 1);
-		indices_vector.push_back(k + i);
-	}
+	////Bottom Face
+	//int k = sides + 1;
+	//for (int i = 1; i < sides; i++)
+	//{
+	//	indices_vector.push_back(k);
+	//	indices_vector.push_back(k + i + 1);
+	//	indices_vector.push_back(k + i);
+	//}
 
-	indices_vector.push_back(k);
-	indices_vector.push_back(sides + 2);
-	indices_vector.push_back(2 * sides + 1);
+	//indices_vector.push_back(k);
+	//indices_vector.push_back(sides + 2);
+	//indices_vector.push_back(2 * sides + 1);
 
-	vertices_amount = vertices_vector.size();
-	vertices = new float[vertices_amount]();
+	//vertices_amount = vertices_vector.size();
+	//vertices = new float[vertices_amount]();
 
-	for (size_t i = 0; i < vertices_amount; i++)
-	{
-		vertices[i] = vertices_vector[i];
-	}
+	//for (size_t i = 0; i < vertices_amount; i++)
+	//{
+	//	vertices[i] = vertices_vector[i];
+	//}
 
-	indices_amount = indices_vector.size();
-	indices = new uint[indices_amount]();
+	//indices_amount = indices_vector.size();
+	//indices = new uint[indices_amount]();
 
-	for (size_t i = 0; i < indices_amount; i++)
-	{
-		indices[i] = indices_vector[i];
-	}
+	//for (size_t i = 0; i < indices_amount; i++)
+	//{
+	//	indices[i] = indices_vector[i];
+	//}
 
-	vertices_vector.clear();
-	indices_vector.clear();
+	//vertices_vector.clear();
+	//indices_vector.clear();
 
-	GenerateBuffers();
+	//GenerateBuffers();
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -648,120 +634,83 @@ GnCone::~GnCone() {}
 
 void GnCone::CalculateGeometry(int sides) 
 {
-	//Verices -------------------------------------------------------
-	std::vector<GLfloat> vertices_vector;
+	////Verices -------------------------------------------------------
+	//std::vector<GLfloat> vertices_vector;
 
-	//Top vertex
-	vertices_vector.push_back(0);
-	vertices_vector.push_back(height * 0.5f);
-	vertices_vector.push_back(0);
+	////Top vertex
+	//vertices_vector.push_back(0);
+	//vertices_vector.push_back(height * 0.5f);
+	//vertices_vector.push_back(0);
 
-	float current_angle = 0;
-	float angle_increment = 2 * M_PI / sides;
+	//float current_angle = 0;
+	//float angle_increment = 2 * M_PI / sides;
 
-	//Circle vertices
-	for (size_t i = 0; i < sides; i++)
-	{
-		vertices_vector.push_back(radius * cos(current_angle)); //x
-		vertices_vector.push_back(-height * 0.5f);			    //y
-		vertices_vector.push_back(radius * sin(current_angle)); //z
+	////Circle vertices
+	//for (size_t i = 0; i < sides; i++)
+	//{
+	//	vertices_vector.push_back(radius * cos(current_angle)); //x
+	//	vertices_vector.push_back(-height * 0.5f);			    //y
+	//	vertices_vector.push_back(radius * sin(current_angle)); //z
 
-		//clockwise
-		current_angle -= angle_increment;
-	}
+	//	//clockwise
+	//	current_angle -= angle_increment;
+	//}
 
-	//Circle center Vertex
-	vertices_vector.push_back(0);
-	vertices_vector.push_back(-height * 0.5f);
-	vertices_vector.push_back(0);
+	////Circle center Vertex
+	//vertices_vector.push_back(0);
+	//vertices_vector.push_back(-height * 0.5f);
+	//vertices_vector.push_back(0);
 
-	//Indices -------------------------------------------------------
+	////Indices -------------------------------------------------------
 
-	std::vector<GLuint> indices_vector;
+	//std::vector<GLuint> indices_vector;
 
-	//Sides
-	for (size_t i = 0; i < sides; i++)
-	{
-		indices_vector.push_back(0);
-		indices_vector.push_back(i);
-		indices_vector.push_back(i + 1);
-	}
-	//Last Side
-	indices_vector.push_back(0);
-	indices_vector.push_back(sides);
-	indices_vector.push_back(1);
+	////Sides
+	//for (size_t i = 0; i < sides; i++)
+	//{
+	//	indices_vector.push_back(0);
+	//	indices_vector.push_back(i);
+	//	indices_vector.push_back(i + 1);
+	//}
+	////Last Side
+	//indices_vector.push_back(0);
+	//indices_vector.push_back(sides);
+	//indices_vector.push_back(1);
 
-	//Bottom Face
-	for (size_t i = 1; i < sides; i++)
-	{
-		indices_vector.push_back(i + 1);
-		indices_vector.push_back(i);
-		indices_vector.push_back(sides + 1);
-	}
+	////Bottom Face
+	//for (size_t i = 1; i < sides; i++)
+	//{
+	//	indices_vector.push_back(i + 1);
+	//	indices_vector.push_back(i);
+	//	indices_vector.push_back(sides + 1);
+	//}
 
-	indices_vector.push_back(1);
-	indices_vector.push_back(sides);
-	indices_vector.push_back(sides + 1);
+	//indices_vector.push_back(1);
+	//indices_vector.push_back(sides);
+	//indices_vector.push_back(sides + 1);
 
-	//Copy into default class containers
+	////Copy into default class containers
 
-	//vertices
-	vertices_amount = vertices_vector.size();
-	vertices = new float[vertices_amount]();
+	////vertices
+	//vertices_amount = vertices_vector.size();
+	//vertices = new float[vertices_amount]();
 
-	for (size_t i = 0; i < vertices_amount; i++)
-	{
-		vertices[i] = vertices_vector[i];
-	}
+	//for (size_t i = 0; i < vertices_amount; i++)
+	//{
+	//	vertices[i] = vertices_vector[i];
+	//}
 
-	indices_amount = indices_vector.size();
-	indices = new uint[indices_amount]();
+	//indices_amount = indices_vector.size();
+	//indices = new uint[indices_amount]();
 
-	for (size_t i = 0; i < indices_amount; i++)
-	{
-		indices[i] = indices_vector[i];
-	}
+	//for (size_t i = 0; i < indices_amount; i++)
+	//{
+	//	indices[i] = indices_vector[i];
+	//}
 
-	vertices_vector.clear();
-	indices_vector.clear();
+	//vertices_vector.clear();
+	//indices_vector.clear();
 
-	GenerateBuffers();
+	//GenerateBuffers();
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------
-
-// GnMesh Collection ==============================================================================================================
-
-GnMeshCollection::GnMeshCollection() : Component() {}
-
-GnMeshCollection::~GnMeshCollection()
-{
-	for (size_t i = 0; i < meshes.size(); i++)
-	{
-		delete meshes[i];
-		meshes[i] = nullptr;
-	}
-
-	meshes.clear();
-}
-
-void GnMeshCollection::GenerateBuffers()
-{
-	for (size_t i = 0; i < meshes.size(); i++)
-	{
-		meshes[i]->GenerateBuffers();
-	}
-}
-
-void GnMeshCollection::Update()
-{
-	Render();
-}
-
-void GnMeshCollection::Render()
-{
-	for (size_t i = 0; i < meshes.size(); i++)
-	{
-		meshes[i]->Render();
-	}
-}

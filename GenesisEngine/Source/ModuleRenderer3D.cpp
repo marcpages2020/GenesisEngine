@@ -210,7 +210,6 @@ update_status ModuleRenderer3D::Update(float dt)
 {
 	update_status ret = UPDATE_CONTINUE;
 
-	DrawMeshes();
 	//DrawDirectModeCube();
 
 	return ret;
@@ -241,9 +240,6 @@ bool ModuleRenderer3D::CleanUp()
 {
 	LOG("Destroying 3D Renderer");
 
-	meshes.clear();
-	mesh_collections.clear();
-
 	glDeleteFramebuffers(1, &frameBuffer);
 	glDeleteTextures(1, &texColorBuffer);
 
@@ -252,28 +248,6 @@ bool ModuleRenderer3D::CleanUp()
 	return true;
 }
 
-void ModuleRenderer3D::AddMesh(GnMesh* mesh)
-{
-	meshes.push_back(mesh);
-}
-
-void ModuleRenderer3D::AddMeshCollection(GnMeshCollection* mesh)
-{
-	mesh_collections.push_back(mesh);
-}
-
-void ModuleRenderer3D::DrawMeshes()
-{
-	for (size_t i = 0; i < meshes.size(); i++)
-	{
-		meshes[i]->Render();
-	}
-
-	for (size_t i = 0; i < mesh_collections.size(); i++)
-	{
-		mesh_collections[i]->Render();
-	}
-}
 
 void ModuleRenderer3D::OnResize(int width, int height)
 {

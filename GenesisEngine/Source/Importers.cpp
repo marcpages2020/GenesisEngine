@@ -4,6 +4,7 @@
 #include "Application.h"
 
 #include "Resource.h"
+#include "ResourceMesh.h"
 #include "ResourceTexture.h"
 
 #include "Mesh.h"
@@ -29,7 +30,7 @@
 
 #pragma region ModelImporter
 
-GameObject* ModelImporter::Import(const char* assets_path)
+void ModelImporter::Import(char* fileBuffer, Resource* resource, uint size)
 {
 	Timer timer;
 	timer.Start();
@@ -37,21 +38,7 @@ GameObject* ModelImporter::Import(const char* assets_path)
 	GameObject* root = nullptr;
 
 	const aiScene* scene = nullptr;
-
-	if (FileSystem::Exists(assets_path))
-	{
-		char* buffer = nullptr;
-		uint size = FileSystem::Load(assets_path, &buffer);
-
-		scene = aiImportFileFromMemory(buffer, size, aiProcessPreset_TargetRealtime_MaxQuality, NULL);
-
-		RELEASE_ARRAY(buffer);
-	}
-	else
-	{
-		LOG_ERROR("Could not find %s in assets folder. If the file is out of it, please copy the file into the assets folder");
-		//scene = aiImportFile(path.c_str(), aiProcessPreset_TargetRealtime_MaxQuality);
-	}
+	scene = aiImportFileFromMemory(fileBuffer, size, aiProcessPreset_TargetRealtime_MaxQuality, NULL);
 
 	if (scene != nullptr && scene->HasMeshes())
 	{
@@ -60,116 +47,90 @@ GameObject* ModelImporter::Import(const char* assets_path)
 		GnJSONObj save_file;
 		GnJSONArray meshes = save_file.AddArray("Meshes");
 
-		root = ImportChildren(scene, rootNode, nullptr, nullptr, assets_path, meshes);
+		ImportChildren(scene, rootNode, nullptr, resource->assetsFile.c_str(), meshes);
 		//root->SetName(file.c_str());
 
 		char* buffer = nullptr;
 		uint size = save_file.Save(&buffer);
 
 		char library_path[128];
-		sprintf_s(library_path, 128, "Library/Models/%d", 2);
+		sprintf_s(library_path, 128, "Library/Models/%d.model", App->resources->GenerateUID());
 		FileSystem::Save(library_path, buffer, size);
 
 		aiReleaseImport(scene);
 		RELEASE_ARRAY(buffer);
 		save_file.Release();
 
-		LOG("%s loaded in %.3f s", assets_path, timer.ReadSec());
+		LOG("%s loaded in %d ms", resource->assetsFile.c_str(), timer.Read());
 	}
 	else
-		LOG_ERROR("Error loading scene %s", assets_path);
-
-	//root->UpdateChildrenTransforms();
-
-	return root;
+		LOG_ERROR("Error loading scene %s", resource->assetsFile.c_str());
 }
 
-GameObject* ModelImporter::ImportChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, GameObject* parentGameObject, const char* path, GnJSONArray& meshes_array)
+void ModelImporter::ImportChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, const char* path, GnJSONArray& meshes_array)
 {
-	GameObject* gameObject = new GameObject();
-	gameObject->SetName(node->mName.C_Str());
-
 	GnJSONObj save_object;
-
-	if (parentGameObject != nullptr)
-	{
-		parentGameObject->AddChild(gameObject);
-		gameObject->SetParent(parentGameObject);
-	}
 
 	if (node->mMeshes != nullptr)
 	{
 		//Transform------------------------------------------------------------
 
-		LoadTransform(node, gameObject->GetTransform());
-		gameObject->GetTransform()->UpdateGlobalTransform(parentGameObject->GetTransform()->GetGlobalTransform());
+		//LoadTransform(node, gameObject->GetTransform());
+		//gameObject->GetTransform()->UpdateGlobalTransform(parentGameObject->GetTransform()->GetGlobalTransform());
 
 		//Mesh --------------------------------------------------------------
 
-		//App->resources->ImportFile(path);
-
-		char* meshBuffer = nullptr;
-		GnMesh* mesh = new GnMesh();
 		aiMesh* aimesh = scene->mMeshes[*node->mMeshes];
+		ResourceMesh* mesh = (ResourceMesh*)App->resources->CreateResource(path, ResourceType::RESOURCE_MESH);
 
 		MeshImporter::Import(aimesh, mesh);
-		uint size = MeshImporter::Save(mesh, &meshBuffer);
 
-		char file_path[128];
-		sprintf_s(file_path, 128, "Library/Meshes/%s.mesh", node->mName.C_Str());
-		FileSystem::Save(file_path, meshBuffer, size);
-		save_object.AddString("Mesh: ", file_path);
+		char* buffer;
+		uint size = MeshImporter::Save(mesh, &buffer);
+		App->resources->SaveResource(buffer, size, mesh);
+		save_object.AddInt("UID", mesh->GetUID());
 
-		delete mesh;
-		mesh = nullptr;
+		App->resources->ReleaseResource(mesh->GetUID());
 
-		mesh = new GnMesh();
-		MeshImporter::Load(file_path, mesh);
-		gameObject->AddComponent(mesh);
-
-		RELEASE_ARRAY(meshBuffer);
+		RELEASE_ARRAY(buffer);
 
 		//Materials ----------------------------------------------------------
 
-		char* texBuffer = nullptr;
+		//Material* material = new Material();
+		//aiMaterial* aimaterial = scene->mMaterials[aimesh->mMaterialIndex];
 
-		Material* material = new Material();
-		aiMaterial* aimaterial = scene->mMaterials[aimesh->mMaterialIndex];
+		////Import Material
+		//MaterialImporter::Import(aimaterial, material, path);
+		//size = MaterialImporter::Save(material, &texBuffer);
 
-		//Import Material
-		MaterialImporter::Import(aimaterial, material, path);
-		size = MaterialImporter::Save(material, &texBuffer);
+		////Set own format path
+		//std::string textures_path = "Library/Textures/";
+		//std::string file = FileSystem::GetFile(material->GetDiffuseTexture()->name.c_str());
+		//textures_path += file;
+		//textures_path += ".dds";
 
-		//Set own format path
-		std::string textures_path = "Library/Textures/";
-		std::string file = FileSystem::GetFile(material->GetDiffuseTexture()->name.c_str());
-		textures_path += file;
-		textures_path += ".dds";
+		////Save into Library
+		//FileSystem::Save(textures_path.c_str(), texBuffer, size);
+		//save_object.AddString("Diffuse Texture: ", textures_path.c_str());
 
-		//Save into Library
-		FileSystem::Save(textures_path.c_str(), texBuffer, size);
-		save_object.AddString("Diffuse Texture: ", textures_path.c_str());
+		//delete material;
+		//material = nullptr;
+		//material = new Material();
 
-		delete material;
-		material = nullptr;
-		material = new Material();
+		//MaterialImporter::Load(textures_path.c_str(), material);
 
-		MaterialImporter::Load(textures_path.c_str(), material);
+		//material->SetMesh(mesh);
+		//gameObject->AddComponent(material);
 
-		material->SetMesh(mesh);
-		gameObject->AddComponent(material);
+		//RELEASE_ARRAY(texBuffer);
 
-		RELEASE_ARRAY(texBuffer);
-
-		//meshes_array.AddObject(save_object);
+		meshes_array.AddObject(save_object);
 	}
 
 	for (size_t i = 0; i < node->mNumChildren; i++)
 	{
-		ImportChildren(scene, node->mChildren[i], node, gameObject, path, meshes_array);
+		ImportChildren(scene, node->mChildren[i], node, path, meshes_array);
 	}
-
-	return gameObject;
 }
 
 void ModelImporter::LoadTransform(aiNode* node, Transform* transform)
@@ -210,12 +171,10 @@ void MeshImporter::CleanUp()
 	aiDetachAllLogStreams();
 }
 
-void MeshImporter::Import(const aiMesh* aimesh, GnMesh* mesh)
+void MeshImporter::Import(const aiMesh* aimesh, ResourceMesh* mesh)
 {
 	Timer timer;
 	timer.Start();
-
-	mesh->name = aimesh->mName.C_Str();
 
 	//vertex copying
 	mesh->vertices_amount = aimesh->mNumVertices;
@@ -294,10 +253,10 @@ void MeshImporter::Import(const aiMesh* aimesh, GnMesh* mesh)
 		}
 	}
 
-	LOG("Mesh imported from Assimp in %.3f s", timer.ReadSec());
+	LOG("Mesh imported in %d ms", timer.Read());
 }
 
-uint64 MeshImporter::Save(GnMesh* mesh, char** fileBuffer)
+uint64 MeshImporter::Save(ResourceMesh* mesh, char** fileBuffer)
 {
 	uint ranges[4] = { mesh->indices_amount, mesh->vertices_amount, mesh->normals_amount, mesh->texcoords_amount };
 
@@ -329,16 +288,13 @@ uint64 MeshImporter::Save(GnMesh* mesh, char** fileBuffer)
 	//store texcoords
 	bytes = sizeof(float) * mesh->texcoords_amount * 2;
 	memcpy(cursor, mesh->texcoords, bytes);
-	//cursor += bytes;
 
 	*fileBuffer = buffer;
-
-	//RELEASE_ARRAY(buffer);
 
 	return size;
 }
 
-void MeshImporter::Load(const char* fileBuffer, GnMesh* mesh)
+void MeshImporter::Load(const char* fileBuffer, ResourceMesh* mesh)
 {
 	Timer timer;
 	timer.Start();
@@ -385,10 +341,10 @@ void MeshImporter::Load(const char* fileBuffer, GnMesh* mesh)
 
 	LOG("%s loaded in %.3f s", fileBuffer, timer.ReadSec());
 
-	mesh->path = new char[strlen(fileBuffer)];
-	strcpy(mesh->path, fileBuffer);
+	//mesh->assetsFile = new char[strlen(fileBuffer)];
+	//strcpy(mesh->assetsFile.c_str(), fileBuffer);
 
-	mesh->GenerateBuffers();
+	//mesh->GenerateBuffers();
 }
 
 #pragma endregion 

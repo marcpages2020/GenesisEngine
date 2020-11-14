@@ -27,8 +27,8 @@ bool ModuleScene::Start()
 	root->SetName("Root");
 
 	//GameObject* house = 
-	//uint baker_house = App->resources->ImportFile("Assets/Models/baker_house/BakerHouse.FBX");
-	uint baker_house_texture = App->resources->ImportFile("Assets/Textures/Baker_house.png");
+	uint baker_house = App->resources->ImportFile("Assets/Models/baker_house/BakerHouse.FBX");
+	//uint baker_house_texture = App->resources->ImportFile("Assets/Textures/Baker_house.png");
 	//AddGameObject(house);
 
 	//GameObject* rayman = MeshImporter::ImportFBX("Assets/Models/rayman/rayman.fbx");

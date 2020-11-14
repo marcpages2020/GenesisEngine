@@ -32,9 +32,6 @@ public:
 	update_status PostUpdate(float dt) override;
 	bool CleanUp();
 	
-	void AddMesh(GnMesh* mesh);
-	void AddMeshCollection(GnMeshCollection* mesh);
-	void DrawMeshes();
 	void OnResize(int width, int height);
 
 	DisplayMode GetDisplayMode();
@@ -61,9 +58,6 @@ public:
 	mat3x3 NormalMatrix;
 	mat4x4 ModelMatrix, ViewMatrix, ProjectionMatrix;
 	DisplayMode display_mode;
-
-	std::vector<GnMesh*> meshes;
-	std::vector<GnMeshCollection*> mesh_collections;
 
 	bool draw_vertex_normals;
 	bool draw_face_normals;

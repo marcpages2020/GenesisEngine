@@ -4,6 +4,8 @@
 #include <vector>;
 #include "Material.h"
 
+class ResourceMesh;
+
 typedef float GLfloat;
 typedef unsigned short GLushort;
 typedef unsigned char GLubyte;
@@ -33,29 +35,18 @@ public:
 	const char* name;
 	char* path;
 
-	uint vertices_buffer = -1;
-	uint vertices_amount = -1;
-	float* vertices = nullptr;
-
-	uint indices_buffer = -1;
-	uint indices_amount = -1;
-	uint* indices = nullptr;
-
-	uint normals_buffer;
-	float* normals;
-	uint normals_amount = -1;
-
 	uint texture_buffer = -1;
 	uint textureID;
-	GnTexture* texture;
-	float* texcoords = nullptr;
-	uint texcoords_amount = -1;
-
-	float* colors;
 
 private:
+	uint vertices_buffer = -1;
+	uint indices_buffer = -1;
+	uint normals_buffer;
+
 	bool draw_vertex_normals;
 	bool draw_face_normals;
+	ResourceMesh* resource;
+	
 };
 
 class GnCube : public GnMesh {
@@ -124,23 +115,3 @@ private:
 	float radius;
 	float height;
 };
-
-class GnMeshCollection : public Component{
-public:
-	GnMeshCollection();
-	~GnMeshCollection();
-
-	void GenerateBuffers();
-	virtual void Update() override;
-	void Render();
-
-public:
-	std::vector<GnMesh*> meshes;
-};
-
-/*
-class Frustum : public GnMesh {
-public:
-private:
-};
-*/

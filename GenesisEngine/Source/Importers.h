@@ -7,6 +7,7 @@
 #pragma region ForwardDeclarations
 
 class Resource;
+class ResourceMesh;
 class ResourceTexture;
 
 class GnJSONArray;
@@ -27,8 +28,8 @@ typedef unsigned int ILenum;
 
 namespace ModelImporter
 {
-	GameObject* Import(const char* path);
-	GameObject* ImportChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, GameObject* parentGameObject, const char* path, GnJSONArray& mesh_array);
+	void Import(char* fileBuffer, Resource* resource, uint size);
+	void ImportChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, const char* path, GnJSONArray& meshes_array);
 	void LoadTransform(aiNode* node, Transform* transform);
 }
 
@@ -37,9 +38,9 @@ namespace MeshImporter
 	void Init();
 	void CleanUp();
 
-	void Import(const aiMesh* aimesh, GnMesh* mesh);
-	uint64 Save(GnMesh* mesh, char** fileBuffer);
-	void Load(const char* fileBuffer, GnMesh* mesh);
+	void Import(const aiMesh* aimesh, ResourceMesh* mesh);
+	uint64 Save(ResourceMesh* mesh, char** fileBuffer);
+	void Load(const char* fileBuffer, ResourceMesh* mesh);
 }
 
 namespace TextureImporter

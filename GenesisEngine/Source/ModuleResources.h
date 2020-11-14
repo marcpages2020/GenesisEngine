@@ -15,8 +15,10 @@ public:
 
 	bool Init() override;
 
+	//uint FindMetaFile(const char* )
 	uint ImportFile(const char* assets_file);
 	Resource* CreateResource(const char* assetsPath, ResourceType type);
+	void ReleaseResource(uint UID);
 	bool SaveResource(char* fileBuffer, uint size, Resource* resource);
 
 	ResourceType GetResourceTypeFromPath(const char* path);

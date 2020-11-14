@@ -13,6 +13,7 @@ uint ResourceTexture::Save(GnJSONObj& base_object)
 {
 	base_object.AddInt("width", width);
 	base_object.AddInt("height", height);
+	base_object.AddInt("UID", _uid);
 
 	return 1;
 }
