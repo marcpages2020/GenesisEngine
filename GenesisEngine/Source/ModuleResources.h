@@ -13,8 +13,16 @@ public:
 	ModuleResources(bool start_enabled = true);
 	~ModuleResources();
 
-	void ImportFile(const char* file_path, bool drag_and_drop = false);
+	bool Init() override;
+
+	uint ImportFile(const char* assets_file, bool drag_and_drop = false);
+	Resource* CreateResource(const char* assetsPath, ResourceType type);
+	bool SaveResource(Resource* resource);
+
 	ResourceType GetResourceTypeFromPath(const char* path);
+	uint GenerateUID();
+	const char* GenerateLibraryPath(Resource* resource);
+
 
 private:
 	std::map<uint, Resource*> resources;

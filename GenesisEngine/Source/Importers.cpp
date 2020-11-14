@@ -143,6 +143,7 @@ GameObject* ModelImporter::ImportChildren(const aiScene* scene, aiNode* node, ai
 		textures_path += file;
 		textures_path += ".dds";
 
+		//Save into Library
 		FileSystem::Save(textures_path.c_str(), texBuffer, size);
 		save_object.AddString("Diffuse Texture: ", textures_path.c_str());
 
@@ -391,6 +392,86 @@ void MeshImporter::Load(const char* fileBuffer, GnMesh* mesh)
 
 #pragma region TextureImporter
 
+
+
+void TextureImporter::Import(const char* path)
+{
+	Timer timer;
+	timer.Start();
+
+	ILuint imageID = 0;
+	ILenum error;
+
+	ilGenImages(1, &imageID);
+	ilBindImage(imageID);
+
+	ilEnable(IL_ORIGIN_SET);
+	ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
+
+	GnTexture* texture = new GnTexture();
+
+	error = ilGetError();
+	if (error != IL_NO_ERROR)
+	{
+		error = ilGetError();
+		LOG_ERROR("Could not create a texture buffer to load: %s, %d %s", path, ilGetError(), iluErrorString(error));
+	}
+
+	ILenum file_format = GetFileFormat(path);
+
+	if (FileSystem::Exists(path))
+	{
+		char* buffer;
+		uint size = FileSystem::Load(path, &buffer);
+
+		if (ilLoadL(file_format, buffer, size) == IL_FALSE)
+		{
+			LOG_WARNING("Warning: Trying to load the texture %s into buffer, %d: %s", path, ilGetError(), iluErrorString(ilGetError()));
+			buffer = nullptr;
+
+			//Reset Image
+			ilBindImage(0);
+			ilDeleteImages(1, &imageID);
+			//return nullptr;
+		}
+
+		if (buffer != NULL)
+			RELEASE_ARRAY(buffer);
+	}
+	else
+	{
+		if (ilLoadImage(path) == IL_FALSE)
+		{
+			LOG_ERROR("Error trying to load the texture directly from %s", path);
+		}
+	}
+
+	ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
+	error = ilGetError();
+
+	if (error != IL_NO_ERROR)
+	{
+		ilBindImage(0);
+		ilDeleteImages(1, &imageID);
+		LOG_ERROR("%d: %s", error, iluErrorString(error));
+	}
+	else
+	{
+		LOG("Texture loaded successfully from: %s in %.3f s", path, timer.ReadSec());
+
+		texture->id = (uint)(imageID);
+		texture->name = FileSystem::GetFile(path);
+		texture->data = ilGetData();
+		texture->width = ilGetInteger(IL_IMAGE_WIDTH);
+		texture->height = ilGetInteger(IL_IMAGE_HEIGHT);
+		texture->path = path;
+	}
+
+	ilBindImage(0);
+
+	//return texture;
+}
+
 std::string TextureImporter::FindTexture(const char* texture_name, const char* model_directory)
 {
 	std::string path;
@@ -430,6 +511,21 @@ void TextureImporter::UnloadTexture(uint imageID)
 	ilDeleteImages(1, &imageID);
 }
 
+ILenum TextureImporter::GetFileFormat(const char* file)
+{
+	ILenum file_format = IL_TYPE_UNKNOWN;
+	std::string format = FileSystem::GetFileFormat(file);
+
+	if (format == ".png")
+		file_format = IL_PNG;
+	else if (format == ".jpg")
+		file_format = IL_JPG;
+	else if (format == ".bmp")
+		file_format = IL_BMP;
+
+	return file_format;
+}
+
 #pragma endregion
 
 #pragma region MaterialImporter
@@ -438,6 +534,7 @@ void MaterialImporter::Init()
 {
 	ilInit();
 	iluInit();
+
 	if (ilutRenderer(ILUT_OPENGL))
 		LOG("DevIL initted correctly");
 }
@@ -458,7 +555,7 @@ void MaterialImporter::Import(const aiMaterial* aimaterial, Material* material, 
 
 		material->SetTexture(texture);
 
-		LOG("%s imported in %.3f s", texture->path, timer.ReadSec());
+		LOG("%s imported in %.3f s", texture->path.c_str(), timer.ReadSec());
 	}
 }
 
@@ -479,13 +576,15 @@ uint64 MaterialImporter::Save(Material* ourMaterial, char** fileBuffer)
 			*fileBuffer = (char*)data;
 
 		//RELEASE_ARRAY(data);
-
+	}
+	else 
+	{
 		ILenum error;
 		error = ilGetError();
 
 		if (error != IL_NO_ERROR)
 		{
-			//LOG_ERROR("Error when saving %s - %d: %s", ourMaterial->GetDiffuseTexture()->name, error, iluErrorString(error));
+			LOG_ERROR("Error when saving %s - %d: %s", ourMaterial->GetDiffuseTexture()->name, error, iluErrorString(error));
 		}
 	}
 
@@ -526,7 +625,7 @@ void MaterialImporter::Load(const char* fileBuffer, Material* material)
 
 	ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
 
-	ILenum error;
+	ILenum error = IL_NO_ERROR;
 	error = ilGetError();
 
 	if (error != IL_NO_ERROR)
@@ -558,7 +657,9 @@ GnTexture* MaterialImporter::LoadTexture(const char* full_path)
 {
 	Timer timer;
 	timer.Start();
+
 	ILuint imageID = 0;
+	ILenum error;
 
 	std::string normalized_path = FileSystem::NormalizePath(full_path);
 	std::string relative_path = FileSystem::GetPathRelativeToAssets(normalized_path.c_str());
@@ -571,7 +672,12 @@ GnTexture* MaterialImporter::LoadTexture(const char* full_path)
 
 	GnTexture* texture = new GnTexture();
 
-	if (imageID == 0) LOG_ERROR("Could not create a texture buffer to load: %s, %d", full_path, ilGetError());
+	error = ilGetError();
+	if (error != IL_NO_ERROR)
+	{
+		error = ilGetError();
+		LOG_ERROR("Could not create a texture buffer to load: %s, %d %s", full_path, ilGetError(), iluErrorString(error));
+	}
 
 	ILenum file_format = IL_TYPE_UNKNOWN;
 	std::string format = FileSystem::GetFileFormat(full_path);
@@ -612,7 +718,7 @@ GnTexture* MaterialImporter::LoadTexture(const char* full_path)
 
 	ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
 
-	ILenum error;
+
 	error = ilGetError();
 
 	if (error != IL_NO_ERROR)

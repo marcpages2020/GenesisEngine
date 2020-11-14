@@ -3,6 +3,9 @@
   "version": "0.1",
   "modules_config": [
     {
+      "name" :  "resources"
+    },
+    {
       "name": "camera",
       "move_speed": 5,
       "drag_speed": 0.75,

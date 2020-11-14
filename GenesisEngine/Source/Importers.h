@@ -18,6 +18,8 @@ class aiScene;
 struct aiNode;
 class aiMaterial;
 
+typedef unsigned int ILenum;
+
 #pragma endregion
 
 namespace ModelImporter
@@ -39,8 +41,13 @@ namespace MeshImporter
 
 namespace TextureImporter
 {
+	void Import(const char* path);
+	void Save(uint id, char** fileBuffer);
+	void Load(const char* path);
+
 	std::string FindTexture(const char* texture_name, const char* model_directory);
 	void UnloadTexture(uint imageID);
+	ILenum GetFileFormat(const char* file);
 }
 
 namespace MaterialImporter

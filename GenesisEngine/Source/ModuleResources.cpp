@@ -4,7 +4,15 @@
 #include "Importers.h"
 #include "ModuleScene.h"
 #include "Application.h"
+
+#include "GnJSON.h"
+
 #include "Resource.h"
+#include "ResourceModel.h"
+#include "ResourceMesh.h"
+#include "ResourceTexture.h"
+
+#include "MathGeoLib/include/MathGeoLib.h"
 
 ModuleResources::ModuleResources(bool start_enabled) : Module(start_enabled)
 {
@@ -13,21 +21,39 @@ ModuleResources::ModuleResources(bool start_enabled) : Module(start_enabled)
 
 ModuleResources::~ModuleResources() {}
 
-void ModuleResources::ImportFile(const char* file_path, bool drag_and_drop)
+bool ModuleResources::Init()
 {
-	std::string processed_path = FileSystem::ProcessPath(file_path);
-	ResourceType type = GetResourceTypeFromPath(file_path);
+	bool ret = true;
+
+	MeshImporter::Init();
+	MaterialImporter::Init();
+
+	return ret;
+}
+
+uint ModuleResources::ImportFile(const char* assets_file, bool drag_and_drop)
+{
+	std::string processed_path = FileSystem::ProcessPath(assets_file);
+	ResourceType type = GetResourceTypeFromPath(assets_file);
+
+	Resource* resource = CreateResource(assets_file, type);
+	uint ret = 0;
+	
+	char* fileBuffer;
+	uint size = FileSystem::Load(assets_file, &fileBuffer);
 
 	switch (type)
 	{
-	case TEXTURE:
-		break;
-	case MESH:
-		break;
-	case SCENE:
-		break;
 	case MODEL:
 		ModelImporter::Import(processed_path.c_str());
+		break;
+	case MESH:
+		//MeshImporter::Import(processed_path.c_str());
+		break;
+	case TEXTURE:
+		//TextureImporter
+		break;
+	case SCENE:
 		break;
 	case UNKNOWN:
 		break;
@@ -35,38 +61,66 @@ void ModuleResources::ImportFile(const char* file_path, bool drag_and_drop)
 		break;
 	}
 
-	/*
-	if (extension == ".fbx")
-	{
-		GameObject* imported_fbx = MeshImporter::ImportFBX(processed_path.c_str());
+	SaveResource(resource);
+	ret = resource->GetUID();
+	RELEASE_ARRAY(fileBuffer);
 
-		if (imported_fbx != nullptr)
-			App->scene->AddGameObject(imported_fbx);
-	}
-	else if (extension == ".png" || extension == ".jpg" || extension == ".bmp" || extension == ".tga")
+	return ret;
+}
+
+Resource* ModuleResources::CreateResource(const char* assetsPath, ResourceType type)
+{
+	Resource* resource = nullptr;
+	uint UID = GenerateUID();
+
+	char* buffer;
+	uint size = FileSystem::Load(assetsPath, &buffer);
+
+	switch (type)
 	{
-		if (drag_and_drop)
-		{
-			//App->scene->SetDroppedTexture(TextureImporter::LoadTexture(processed_path.c_str()));
-		}
+	case MODEL:
+		resource = new ResourceModel(UID);
+		break;
+	case MESH:
+		resource = new ResourceMesh(UID);
+		break;
+	case TEXTURE:
+		resource = new ResourceTexture(UID);
+		break;
+	case SCENE:
+		break;
+	case UNKNOWN:
+		break;
+	default:
+		break;
 	}
-	else if (extension == ".scene")
+
+	if (resource != nullptr)
 	{
-		App->Load(file_path);
+		resources[UID] = resource;
+		resource->_assetsFile = assetsPath;
+		resource->_libraryFile = GenerateLibraryPath(resource);
 	}
-	else if (extension == ".model")
-	{
-		//LOAD MODEL
-	}
-	else if (extension == ".mesh")
-	{
-		//LOAD MESH
-	}
-	else if (extension == ".dds")
-	{
-		//LOAD TEXTURE
-	}
-	*/
+
+	RELEASE_ARRAY(buffer);
+	return resource;
+}
+
+bool ModuleResources::SaveResource(Resource* resource)
+{
+	bool ret = true;
+
+	GnJSONObj base_object;
+	resource->Save(base_object);
+	
+	char* buffer = NULL;
+	uint size = base_object.Save(&buffer);
+	FileSystem::Save(resource->_libraryFile.c_str(), buffer, size);
+
+	base_object.Release();
+	RELEASE_ARRAY(buffer);
+
+	return ret;
 }
 
 ResourceType ModuleResources::GetResourceTypeFromPath(const char* path)
@@ -78,3 +132,36 @@ ResourceType ModuleResources::GetResourceTypeFromPath(const char* path)
 	else if (extension == ".mesh") { return ResourceType::MESH; }
 	else if (extension == ".png") { return ResourceType::TEXTURE; }
 }
+
+uint ModuleResources::GenerateUID()
+{
+	return LCG().Int();
+}
+
+const char* ModuleResources::GenerateLibraryPath(Resource* resource)
+{
+	char* library_path = new char[128];
+
+	switch (resource->GetType())
+	{
+	case MODEL:
+		sprintf_s(library_path, 128, "Library/Models/%d.model", resource->GetUID());
+		break;
+	case MESH:
+		sprintf_s(library_path, 128, "Library/Meshes/%d.mesh", resource->GetUID());
+		break;
+	case TEXTURE:
+		sprintf_s(library_path, 128, "Library/Textures/%d.dds", resource->GetUID());
+		break;
+	case SCENE:
+		sprintf_s(library_path, 128, "Library/Scenes/%d.scene", resource->GetUID());
+		break;
+	case UNKNOWN:
+		break;
+	default:
+		break;
+	}
+
+	return library_path;
+}
+

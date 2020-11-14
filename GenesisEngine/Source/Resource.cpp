@@ -11,3 +11,13 @@ Resource::~Resource()
 	_assetsFile.clear();
 	_libraryFile.clear();
 }
+
+ResourceType Resource::GetType()
+{
+	return _type;
+}
+
+uint Resource::GetUID()
+{
+	return _uid;
+}

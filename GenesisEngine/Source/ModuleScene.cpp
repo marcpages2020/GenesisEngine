@@ -27,7 +27,7 @@ bool ModuleScene::Start()
 	root->SetName("Root");
 
 	//GameObject* house = 
-	//App->resources->ImportFile("Assets/Models/baker_house/BakerHouse.FBX");
+	uint baker_house = App->resources->ImportFile("Assets/Models/baker_house/BakerHouse.FBX");
 	//AddGameObject(house);
 
 	//GameObject* rayman = MeshImporter::ImportFBX("Assets/Models/rayman/rayman.fbx");
@@ -128,6 +128,8 @@ bool ModuleScene::Save()
 	FileSystem::Save("Library/Scenes/new_scene.scene", buffer, size);
 
 	save_file.Release();
+	RELEASE_ARRAY(buffer);
+
 	return ret;
 }
 
