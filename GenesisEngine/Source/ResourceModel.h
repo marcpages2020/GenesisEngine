@@ -17,5 +17,6 @@ public:
 	GnJSONObj model_information;
 
 	std::vector<uint> meshes;
+	std::vector<uint> materials;
 	std::vector<uint> textures;
 };

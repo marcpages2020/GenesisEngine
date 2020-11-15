@@ -78,7 +78,6 @@ uint ModuleResources::ImportFile(const char* assets_file)
 		break;
 	case RESOURCE_TEXTURE:
 		TextureImporter::Import(fileBuffer, (ResourceTexture*)resource, size);
-		size = TextureImporter::Save(&fileBuffer, (ResourceTexture*)resource);
 		break;
 	case RESOURCE_SCENE:
 		break;
@@ -88,11 +87,34 @@ uint ModuleResources::ImportFile(const char* assets_file)
 		break;
 	}
 
-	SaveResource(fileBuffer, size, resource);
-	//SaveMetaFile(resource);
+	SaveResource(resource);
 	ret = resource->GetUID();
 	ReleaseResource(ret);
 	RELEASE_ARRAY(fileBuffer);
+
+	return ret;
+}
+
+uint ModuleResources::ImportInternalResource(const char* path, const void* data, ResourceType type)
+{
+	uint ret = 0;
+	Resource* resource = CreateResource(path, type);
+
+	switch (type)
+	{
+	case RESOURCE_MESH:
+		MeshImporter::Import((aiMesh*)data, (ResourceMesh*)resource);
+		break;
+	case RESOURCE_MATERIAL:
+		MaterialImporter::Import((aiMaterial*)data, (ResourceMaterial*)resource);
+		break;
+	default:
+		break;
+	}
+		
+	SaveResource(resource);
+	ret = resource->GetUID();
+	ReleaseResource(ret);
 
 	return ret;
 }
@@ -155,14 +177,39 @@ void ModuleResources::ReleaseResource(uint UID)
 	resources[UID] = nullptr;
 }
 
-bool ModuleResources::SaveResource(char* fileBuffer, uint size, Resource* resource)
+bool ModuleResources::SaveResource(Resource* resource)
 {
 	bool ret = true;
 
-	ret = SaveMetaFile(resource);
+	char* buffer;
+	uint size = 0;
 
-	//if (resource->GetType() != ResourceType::RESOURCE_MODEL && resource->GetType() != ResourceType::RESOURCE_SCENE)
-	FileSystem::Save(resource->libraryFile.c_str(), fileBuffer, size);
+	switch (resource->GetType())
+	{
+	case RESOURCE_MODEL:
+		size = ModelImporter::Save((ResourceModel*)resource, &buffer);
+		break;
+	case RESOURCE_MESH:
+		size = MeshImporter::Save((ResourceMesh*)resource, &buffer);
+		break;
+	case RESOURCE_MATERIAL:
+		size = MaterialImporter::Save((ResourceMaterial*)resource, &buffer);
+		break;
+	case RESOURCE_TEXTURE:
+		size = TextureImporter::Save(&buffer, (ResourceTexture*)resource);
+		break;
+	case RESOURCE_SCENE:
+		break;
+	default:
+		break;
+	}
+
+	if (size > 0) 
+	{
+		FileSystem::Save(resource->libraryFile.c_str(), buffer, size);
+		RELEASE_ARRAY(buffer);
+	}
+	ret = SaveMetaFile(resource);
 
 	return ret;
 }

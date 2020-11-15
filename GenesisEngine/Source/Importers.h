@@ -32,7 +32,8 @@ typedef unsigned int ILenum;
 namespace ModelImporter
 {
 	void Import(char* fileBuffer, ResourceModel* resource, uint size);
-	void ImportChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, uint parentNodeUID, const char* path, GnJSONArray& meshes_array);
+	uint64 Save(ResourceModel* model, char** fileBuffer);
+	void ImportChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, uint parentNodeUID, ResourceModel* model, GnJSONArray& meshes_array);
 	void LoadTransform(aiNode* node, GnJSONObj& node_object);
 }
 
@@ -61,7 +62,7 @@ namespace TextureImporter
 
 namespace MaterialImporter
 {
-	void Import(const aiMaterial* aimaterial, ResourceMaterial* material, const char* folder_path);
+	void Import(const aiMaterial* aimaterial, ResourceMaterial* material);
 	uint64 Save(ResourceMaterial* material, char** fileBuffer);
 	void Load(const char* fileBuffer, Material* material);
 }

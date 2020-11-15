@@ -42,56 +42,27 @@ void ModelImporter::Import(char* fileBuffer, ResourceModel* model, uint size)
 
 	if (scene != nullptr && scene->HasMeshes())
 	{
-		aiNode* rootNode = scene->mRootNode;
 
-		GnJSONObj save_file;
-		GnJSONArray nodes = save_file.AddArray("Nodes");
-		GnJSONArray meshes = save_file.AddArray("Meshes");
-		GnJSONArray materials = save_file.AddArray("Materials");
-		GnJSONArray textures = save_file.AddArray("Textures");
-
-		//Import Meshes
 		for (size_t i = 0; i < scene->mNumMeshes; i++)
 		{
 			aiMesh* aimesh = scene->mMeshes[i];
-			ResourceMesh* mesh = (ResourceMesh*)App->resources->CreateResource(model->assetsFile.c_str(), ResourceType::RESOURCE_MESH);
-			meshes.AddInt(mesh->GetUID());
-
-			MeshImporter::Import(aimesh, mesh);
-
-			char* buffer;
-			uint size = MeshImporter::Save(mesh, &buffer);
-			App->resources->SaveResource(buffer, size, mesh);
-
-			App->resources->ReleaseResource(mesh->GetUID());
-			RELEASE_ARRAY(buffer);
+			model->meshes.push_back(App->resources->ImportInternalResource(model->assetsFile.c_str(), aimesh, ResourceType::RESOURCE_MESH));
 		}
 
 		for (size_t i = 0; i < scene->mNumMaterials; i++)
 		{
 			aiMaterial* aimaterial = scene->mMaterials[i];
-			ResourceMaterial* material = (ResourceMaterial*)App->resources->CreateResource(model->assetsFile.c_str(), ResourceType::RESOURCE_MATERIAL);
-			materials.AddInt(material->GetUID());
-
-			MaterialImporter::Import(aimaterial, material, model->assetsFile.c_str());
-
-			//char* buffer;
-			//uint size = MaterialImporter::Save(material, &buffer);
-			//App->resources->SaveResource(buffer, size, material);
-
-			//App->resources->ReleaseResource(material->GetUID());
-			//RELEASE_ARRAY(buffer);
+			model->materials.push_back(App->resources->ImportInternalResource(model->assetsFile.c_str(), aimaterial, ResourceType::RESOURCE_MATERIAL));
 		}
 
-		ImportChildren(scene, rootNode, nullptr, 0, model->assetsFile.c_str(), nodes);
+		GnJSONObj save_file;
+		GnJSONArray nodes = save_file.AddArray("Nodes");
+		aiNode* rootNode = scene->mRootNode;
+		ImportChildren(scene, rootNode, nullptr, 0, model, nodes);
 
-		char* buffer;
-		uint size = save_file.Save(&buffer);
-		FileSystem::Save(model->libraryFile.c_str(), buffer, size);
-		RELEASE_ARRAY(buffer);
+		model->model_information = save_file;
 
 		aiReleaseImport(scene);
-		save_file.Release();
 
 		LOG("%s loaded in %d ms", model->assetsFile.c_str(), timer.Read());
 	}
@@ -99,7 +70,18 @@ void ModelImporter::Import(char* fileBuffer, ResourceModel* model, uint size)
 		LOG_ERROR("Error loading scene %s", model->assetsFile.c_str());
 }
 
-void ModelImporter::ImportChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, uint parentNodeUID, const char* path, GnJSONArray& meshes_array)
+uint64 ModelImporter::Save(ResourceModel* model, char** fileBuffer)
+{
+	GnJSONObj base_object; 
+
+	char* buffer;
+	uint size = model->model_information.Save(&buffer);
+	*fileBuffer = buffer;
+
+	return size;
+}
+
+void ModelImporter::ImportChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, uint parentNodeUID, ResourceModel* model, GnJSONArray& meshes_array)
 {
 	GnJSONObj node_object;
 
@@ -115,36 +97,19 @@ void ModelImporter::ImportChildren(const aiScene* scene, aiNode* node, aiNode* p
 	if (node->mMeshes != nullptr)
 	{
 		//Mesh --------------------------------------------------------------
-
-		node_object.AddInt("Mesh Index", *node->mMeshes);
+		node_object.AddInt("Mesh", model->meshes[*node->mMeshes]);
 
 		//Materials ----------------------------------------------------------
+		aiMesh* aimesh = scene->mMeshes[*node->mMeshes];
+		node_object.AddInt("Material", model->materials[aimesh->mMaterialIndex]);
 
-//		node_object.AddInt("M")
-
-		/*
-		aiMaterial* aimaterial = scene->mMaterials[aimesh->mMaterialIndex];
-		ResourceMaterial* material = (ResourceMaterial*)App->resources->CreateResource(path, ResourceType::RESOURCE_MATERIAL);
-
-		////Import Material
-		MaterialImporter::Import(aimaterial, material, path);
-
-		char* materialBuffer;
-		size = MaterialImporter::Save(material, &materialBuffer);
-		App->resources->SaveResource(materialBuffer, size, material);
-
-		node_object.AddInt("Material UID", material->GetUID());
-
-		//App->resources->ReleaseResource(material->GetUID());
-		//RELEASE_ARRAY(materialBuffer);
-		*/
 	}
 
 	meshes_array.AddObject(node_object);
 
 	for (size_t i = 0; i < node->mNumChildren; i++)
 	{
-		ImportChildren(scene, node->mChildren[i], node, node_uid, path, meshes_array);
+		ImportChildren(scene, node->mChildren[i], node, node_uid, model, meshes_array);
 	}
 }
 
@@ -510,7 +475,7 @@ ILenum TextureImporter::GetFileFormat(const char* file)
 
 #pragma region MaterialImporter
 
-void MaterialImporter::Import(const aiMaterial* aimaterial, ResourceMaterial* material, const char* folder_path)
+void MaterialImporter::Import(const aiMaterial* aimaterial, ResourceMaterial* material)
 {
 	Timer timer;
 	timer.Start();
@@ -520,8 +485,8 @@ void MaterialImporter::Import(const aiMaterial* aimaterial, ResourceMaterial* ma
 
 	if (path.length > 0)
 	{
-		std::string file_path = folder_path;
-		file_path = TextureImporter::FindTexture(path.C_Str(), folder_path);
+		std::string file_path = material->assetsFile;
+		file_path = TextureImporter::FindTexture(path.C_Str(), material->assetsFile.c_str());
 
 		if(file_path.size() > 0)
 			material->diffuse_texture_uid = App->resources->ImportFile(file_path.c_str());
@@ -532,8 +497,14 @@ void MaterialImporter::Import(const aiMaterial* aimaterial, ResourceMaterial* ma
 
 uint64 MaterialImporter::Save(ResourceMaterial* material, char** fileBuffer)
 {
-	//Save Material as JSON
-	return 0;
+	GnJSONObj base_object;
+	base_object.AddInt("Diffuse Texture", material->diffuse_texture_uid);
+
+	char* buffer;
+	uint size = base_object.Save(&buffer);
+	*fileBuffer = buffer;
+
+	return size;
 }
 
 void MaterialImporter::Load(const char* fileBuffer, Material* material)
