@@ -1,15 +1,11 @@
 #include "ResourceTexture.h"
 #include "GnJSON.h"
 
-ResourceTexture::ResourceTexture(uint UID) : Resource(UID, ResourceType::RESOURCE_TEXTURE), id(0), width(-1), height(-1), data(nullptr) 
-{
-}
+ResourceTexture::ResourceTexture(uint UID) : Resource(UID, ResourceType::RESOURCE_TEXTURE), id(0), width(-1), height(-1), data(nullptr) {}
 
-ResourceTexture::~ResourceTexture()
-{
-}
+ResourceTexture::~ResourceTexture() {}
 
-uint ResourceTexture::Save(GnJSONObj& base_object)
+uint ResourceTexture::SaveMeta(GnJSONObj& base_object, uint last_modification)
 {
 	base_object.AddInt("width", width);
 	base_object.AddInt("height", height);

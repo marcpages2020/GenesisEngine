@@ -7,9 +7,12 @@
 #pragma region ForwardDeclarations
 
 class Resource;
+class ResourceModel;
 class ResourceMesh;
+class ResourceMaterial;
 class ResourceTexture;
 
+class GnJSONObj;
 class GnJSONArray;
 class GameObject;
 struct GnTexture;
@@ -28,9 +31,9 @@ typedef unsigned int ILenum;
 
 namespace ModelImporter
 {
-	void Import(char* fileBuffer, Resource* resource, uint size);
-	void ImportChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, const char* path, GnJSONArray& meshes_array);
-	void LoadTransform(aiNode* node, Transform* transform);
+	void Import(char* fileBuffer, ResourceModel* resource, uint size);
+	void ImportChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, uint parentNodeUID, const char* path, GnJSONArray& meshes_array);
+	void LoadTransform(aiNode* node, GnJSONObj& node_object);
 }
 
 namespace MeshImporter
@@ -47,7 +50,7 @@ namespace TextureImporter
 {
 	void Init();
 
-	void Import(char* fileBuffer, Resource* resource, uint size);
+	void Import(char* fileBuffer, ResourceTexture* resource, uint size);
 	uint Save(char** fileBuffer, ResourceTexture* texture);
 	void Load(const char* path);
 
@@ -58,9 +61,7 @@ namespace TextureImporter
 
 namespace MaterialImporter
 {
-	void Import(const aiMaterial* material, Material* ourMaterial, const char* folder_path);
-	uint64 Save(Material* ourMaterial, char** fileBuffer);
+	void Import(const aiMaterial* aimaterial, ResourceMaterial* material, const char* folder_path);
+	uint64 Save(ResourceMaterial* material, char** fileBuffer);
 	void Load(const char* fileBuffer, Material* material);
-
-	GnTexture* LoadTexture(const char* path);
 }

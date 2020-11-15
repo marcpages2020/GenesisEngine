@@ -4,7 +4,9 @@
 #include "Application.h"
 
 #include "Resource.h"
+#include "ResourceModel.h"
 #include "ResourceMesh.h"
+#include "ResourceMaterial.h"
 #include "ResourceTexture.h"
 
 #include "Mesh.h"
@@ -30,12 +32,10 @@
 
 #pragma region ModelImporter
 
-void ModelImporter::Import(char* fileBuffer, Resource* resource, uint size)
+void ModelImporter::Import(char* fileBuffer, ResourceModel* model, uint size)
 {
 	Timer timer;
 	timer.Start();
-
-	GameObject* root = nullptr;
 
 	const aiScene* scene = nullptr;
 	scene = aiImportFileFromMemory(fileBuffer, size, aiProcessPreset_TargetRealtime_MaxQuality, NULL);
@@ -45,39 +45,40 @@ void ModelImporter::Import(char* fileBuffer, Resource* resource, uint size)
 		aiNode* rootNode = scene->mRootNode;
 
 		GnJSONObj save_file;
-		GnJSONArray meshes = save_file.AddArray("Meshes");
+		GnJSONArray meshes = save_file.AddArray("Nodes");
 
-		ImportChildren(scene, rootNode, nullptr, resource->assetsFile.c_str(), meshes);
+		ImportChildren(scene, rootNode, nullptr, 0, model->assetsFile.c_str(), meshes);
 		//root->SetName(file.c_str());
 
-		char* buffer = nullptr;
+		char* buffer;
 		uint size = save_file.Save(&buffer);
-
-		char library_path[128];
-		sprintf_s(library_path, 128, "Library/Models/%d.model", App->resources->GenerateUID());
-		FileSystem::Save(library_path, buffer, size);
+		FileSystem::Save(model->libraryFile.c_str(), buffer, size);
+		RELEASE_ARRAY(buffer);
 
 		aiReleaseImport(scene);
-		RELEASE_ARRAY(buffer);
 		save_file.Release();
 
-		LOG("%s loaded in %d ms", resource->assetsFile.c_str(), timer.Read());
+		LOG("%s loaded in %d ms", model->assetsFile.c_str(), timer.Read());
 	}
 	else
-		LOG_ERROR("Error loading scene %s", resource->assetsFile.c_str());
+		LOG_ERROR("Error loading scene %s", model->assetsFile.c_str());
 }
 
-void ModelImporter::ImportChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, const char* path, GnJSONArray& meshes_array)
+void ModelImporter::ImportChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, uint parentNodeUID, const char* path, GnJSONArray& meshes_array)
 {
-	GnJSONObj save_object;
+	GnJSONObj node_object;
+
+	//Node Information 
+	meshes_array.AddObject(node_object);
+	node_object.AddString("Name", node->mName.C_Str());
+	uint node_uid = App->resources->GenerateUID();
+	node_object.AddInt("Node UID", node_uid);
+	node_object.AddInt("ParentNode UID", parentNodeUID);
+
+	LoadTransform(node, node_object);
 
 	if (node->mMeshes != nullptr)
 	{
-		//Transform------------------------------------------------------------
-
-		//LoadTransform(node, gameObject->GetTransform());
-		//gameObject->GetTransform()->UpdateGlobalTransform(parentGameObject->GetTransform()->GetGlobalTransform());
-
 		//Mesh --------------------------------------------------------------
 
 		aiMesh* aimesh = scene->mMeshes[*node->mMeshes];
@@ -85,74 +86,52 @@ void ModelImporter::ImportChildren(const aiScene* scene, aiNode* node, aiNode* p
 
 		MeshImporter::Import(aimesh, mesh);
 
-		char* buffer;
-		uint size = MeshImporter::Save(mesh, &buffer);
-		App->resources->SaveResource(buffer, size, mesh);
-		save_object.AddInt("UID", mesh->GetUID());
+		char* meshBuffer;
+		uint size = MeshImporter::Save(mesh, &meshBuffer);
+		App->resources->SaveResource(meshBuffer, size, mesh);
+
+		node_object.AddInt("Mesh UID", mesh->GetUID());
 
 		App->resources->ReleaseResource(mesh->GetUID());
-
-		RELEASE_ARRAY(buffer);
+		RELEASE_ARRAY(meshBuffer);
 
 		//Materials ----------------------------------------------------------
 
-		//Material* material = new Material();
 		//aiMaterial* aimaterial = scene->mMaterials[aimesh->mMaterialIndex];
+		//ResourceMaterial* material = (ResourceMaterial*)App->resources->CreateResource(path, ResourceType::RESOURCE_MATERIAL);
 
 		////Import Material
 		//MaterialImporter::Import(aimaterial, material, path);
-		//size = MaterialImporter::Save(material, &texBuffer);
 
-		////Set own format path
-		//std::string textures_path = "Library/Textures/";
-		//std::string file = FileSystem::GetFile(material->GetDiffuseTexture()->name.c_str());
-		//textures_path += file;
-		//textures_path += ".dds";
+		//char* materialBuffer;
+		//size = MaterialImporter::Save(material, &materialBuffer);
+		//App->resources->SaveResource(materialBuffer, size, material);
 
-		////Save into Library
-		//FileSystem::Save(textures_path.c_str(), texBuffer, size);
-		//save_object.AddString("Diffuse Texture: ", textures_path.c_str());
+		//node_object.AddInt("Material UID", material->GetUID());
 
-		//delete material;
-		//material = nullptr;
-		//material = new Material();
-
-		//MaterialImporter::Load(textures_path.c_str(), material);
-
-		//material->SetMesh(mesh);
-		//gameObject->AddComponent(material);
-
-		//RELEASE_ARRAY(texBuffer);
-
-		meshes_array.AddObject(save_object);
+		//App->resources->ReleaseResource(material->GetUID());
+		//RELEASE_ARRAY(materialBuffer);
 	}
+
+	meshes_array.AddObject(node_object);
 
 	for (size_t i = 0; i < node->mNumChildren; i++)
 	{
-		ImportChildren(scene, node->mChildren[i], node, path, meshes_array);
+		ImportChildren(scene, node->mChildren[i], node, node_uid, path, meshes_array);
 	}
 }
 
-void ModelImporter::LoadTransform(aiNode* node, Transform* transform)
+void ModelImporter::LoadTransform(aiNode* node, GnJSONObj& node_object)
 {
 	aiVector3D position, scaling, eulerRotation;
 	aiQuaternion rotation;
 
 	node->mTransformation.Decompose(scaling, rotation, position);
-	eulerRotation = rotation.GetEuler() * RADTODEG;
+	//eulerRotation = rotation.GetEuler() * RADTODEG;
 
-	transform->SetPosition(position.x, position.y, position.z);
-	transform->SetRotation(eulerRotation.x, eulerRotation.y, eulerRotation.z);
-
-	if (FileSystem::normalize_scales) {
-		if (scaling.x == 100 && scaling.y == 100 && scaling.z == 100)
-		{
-			scaling.x = scaling.y = scaling.z = 1.0f;
-		}
-	}
-
-	transform->SetScale(scaling.x, scaling.y, scaling.z);
-	transform->UpdateLocalTransform();
+	node_object.AddFloat3("Position", float3(position.x, position.y, position.z));
+	node_object.AddQuaternion("Rotation", Quat(rotation.x, rotation.y, rotation.z, rotation.w));
+	node_object.AddFloat3("Scale", float3(scaling.x, scaling.y, scaling.z));
 }
 
 #pragma endregion
@@ -360,7 +339,7 @@ void TextureImporter::Init()
 		LOG("DevIL initted correctly");
 }
 
-void TextureImporter::Import(char* fileBuffer, Resource* resource, uint size)
+void TextureImporter::Import(char* fileBuffer, ResourceTexture* texture, uint size)
 {
 	Timer timer;
 	timer.Start();
@@ -377,15 +356,15 @@ void TextureImporter::Import(char* fileBuffer, Resource* resource, uint size)
 	error = ilGetError();
 	if (error != IL_NO_ERROR)
 	{
-		LOG_ERROR("Could not create a texture buffer to load: %s, %d %s", resource->assetsFile, ilGetError(), iluErrorString(error));
+		LOG_ERROR("%s, %d %s", texture->assetsFile, ilGetError(), iluErrorString(error));
 		return;
 	}
 
-	ILenum file_format = GetFileFormat(resource->assetsFile.c_str());
+	ILenum file_format = GetFileFormat(texture->assetsFile.c_str());
 
 	if (ilLoadL(file_format, fileBuffer, size) == IL_FALSE)
 	{
-		LOG_ERROR("Error importing texture %s - %d: %s", resource->assetsFile, ilGetError(), iluErrorString(ilGetError()));
+		LOG_ERROR("Error importing texture %s - %d: %s", texture->assetsFile, ilGetError(), iluErrorString(ilGetError()));
 
 		ilBindImage(0);
 		ilDeleteImages(1, &imageID);
@@ -403,16 +382,12 @@ void TextureImporter::Import(char* fileBuffer, Resource* resource, uint size)
 	}
 	else
 	{
-		LOG("Texture loaded successfully from: %s in %d ms", resource->assetsFile, timer.Read());
-
-		ResourceTexture* texture = (ResourceTexture*)resource;
+		LOG("Texture loaded successfully from: %s in %d ms", texture->assetsFile, timer.Read());
 
 		texture->data = ilGetData();
 		texture->id = (uint)(imageID);
 		texture->width = ilGetInteger(IL_IMAGE_WIDTH);
 		texture->height = ilGetInteger(IL_IMAGE_HEIGHT);
-
-		resource = texture;
 	}
 
 	ilBindImage(0);
@@ -433,8 +408,6 @@ uint TextureImporter::Save(char** fileBuffer, ResourceTexture* texture)
 		data = new ILubyte[size];
 		if (ilSaveL(IL_DDS, data, size) > 0)
 			*fileBuffer = (char*)data;
-
-		//RELEASE_ARRAY(data);
 	}
 	else
 	{
@@ -510,7 +483,7 @@ ILenum TextureImporter::GetFileFormat(const char* file)
 
 #pragma region MaterialImporter
 
-void MaterialImporter::Import(const aiMaterial* aimaterial, Material* material, const char* folder_path)
+void MaterialImporter::Import(const aiMaterial* aimaterial, ResourceMaterial* material, const char* folder_path)
 {
 	Timer timer;
 	timer.Start();
@@ -521,198 +494,24 @@ void MaterialImporter::Import(const aiMaterial* aimaterial, Material* material, 
 	if (path.length > 0)
 	{
 		std::string file_path = folder_path;
-		file_path += path.C_Str();
-		GnTexture* texture = LoadTexture(file_path.c_str());
+		file_path = TextureImporter::FindTexture(path.C_Str(), folder_path);
 
-		material->SetTexture(texture);
-
-		LOG("%s imported in %.3f s", texture->path.c_str(), timer.ReadSec());
+		if(file_path.size() > 0)
+			App->resources->ImportFile(file_path.c_str());
+		//LOG("%s imported in %.3f s", texture->path.c_str(), timer.ReadSec());
 	}
 }
 
-uint64 MaterialImporter::Save(Material* ourMaterial, char** fileBuffer)
+uint64 MaterialImporter::Save(ResourceMaterial* material, char** fileBuffer)
 {
-	ILuint size;
-	ILubyte* data;
-
-	//ilBindImage(ourMaterial->GetDiffuseTexture()->id);
-
-	ilSetInteger(IL_DXTC_DATA_FORMAT, IL_DXT5);
-	size = ilSaveL(IL_DDS, nullptr, 0);
-
-	if (size > 0)
-	{
-		data = new ILubyte[size];
-		if (ilSaveL(IL_DDS, data, size) > 0)
-			*fileBuffer = (char*)data;
-
-		//RELEASE_ARRAY(data);
-	}
-	else 
-	{
-		ILenum error;
-		error = ilGetError();
-
-		if (error != IL_NO_ERROR)
-		{
-			LOG_ERROR("Error when saving %s - %d: %s", ourMaterial->GetDiffuseTexture()->name, error, iluErrorString(error));
-		}
-	}
-
-	ilBindImage(0);
-
-	return size;
+	return 0;
 }
 
 void MaterialImporter::Load(const char* fileBuffer, Material* material)
 {
 	Timer timer;
 	timer.Start();
-	ILuint imageID = 0;
-
-	ilGenImages(1, &imageID);
-	ilBindImage(imageID);
-
-	ilEnable(IL_ORIGIN_SET);
-	ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
-
-	char* buffer = nullptr;
-	uint size = FileSystem::Load(fileBuffer, &buffer);
-
-	if (ilLoadL(IL_DDS, buffer, size) == IL_FALSE)
-	{
-		LOG_WARNING("Error when trying to load the texture %s into buffer, %d: %s", fileBuffer, ilGetError(), iluErrorString(ilGetError()));
-		buffer = nullptr;
-
-		//Reset Image
-		ilBindImage(0);
-		ilDeleteImages(1, &imageID);
-		ilGenImages(1, &imageID);
-		ilBindImage(imageID);
-	}
-
-	if (buffer != NULL)
-		RELEASE_ARRAY(buffer);
-
-	ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
-
-	ILenum error = IL_NO_ERROR;
-	error = ilGetError();
-
-	if (error != IL_NO_ERROR)
-	{
-		ilBindImage(0);
-		ilDeleteImages(1, &imageID);
-		LOG_ERROR("Error when loading %s - %d: %s", fileBuffer, error, iluErrorString(error));
-	}
-	else
-	{
-		GnTexture* texture = new GnTexture();
-
-		//texture->id = (uint)(imageID);
-		////texture->name = FileSystem::GetFile(f) + format;
-		//texture->data = ilGetData();
-		//texture->width = ilGetInteger(IL_IMAGE_WIDTH);
-		//texture->height = ilGetInteger(IL_IMAGE_HEIGHT);
-		//texture->path = fileBuffer;
-
-		material->SetTexture(texture);
-
-		LOG("Texture loaded successfully from: %s in %.3f s", fileBuffer, timer.ReadSec());
-	}
-
-	ilBindImage(0);
-}
-
-GnTexture* MaterialImporter::LoadTexture(const char* full_path)
-{
-	Timer timer;
-	timer.Start();
-
-	ILuint imageID = 0;
-	ILenum error;
-
-	std::string normalized_path = FileSystem::NormalizePath(full_path);
-	std::string relative_path = FileSystem::GetPathRelativeToAssets(normalized_path.c_str());
-
-	ilGenImages(1, &imageID);
-	ilBindImage(imageID);
-
-	ilEnable(IL_ORIGIN_SET);
-	ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
-
-	GnTexture* texture = new GnTexture();
-
-	error = ilGetError();
-	if (error != IL_NO_ERROR)
-	{
-		error = ilGetError();
-		LOG_ERROR("Could not create a texture buffer to load: %s, %d %s", full_path, ilGetError(), iluErrorString(error));
-	}
-
-	ILenum file_format = IL_TYPE_UNKNOWN;
-	std::string format = FileSystem::GetFileFormat(full_path);
-
-	if (format == ".png")
-		file_format = IL_PNG;
-	else if (format == ".jpg")
-		file_format = IL_JPG;
-	else if (format == ".bmp")
-		file_format = IL_BMP;
-
-	if (FileSystem::Exists(relative_path.c_str()))
-	{
-		char* buffer;
-		uint size = FileSystem::Load(relative_path.c_str(), &buffer);
-
-		if (ilLoadL(file_format, buffer, size) == IL_FALSE)
-		{
-			LOG_WARNING("Warning: Trying to load the texture %s into buffer, %d: %s", full_path, ilGetError(), iluErrorString(ilGetError()));
-			buffer = nullptr;
-
-			//Reset Image
-			ilBindImage(0);
-			ilDeleteImages(1, &imageID);
-			return nullptr;
-		}
-
-		if (buffer != NULL)
-			RELEASE_ARRAY(buffer);
-	}
-	else
-	{
-		if (ilLoadImage(normalized_path.c_str()) == IL_FALSE)
-		{
-			LOG_ERROR("Error trying to load the texture directly from %s", full_path);
-		}
-	}
-
-	ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
-
-
-	error = ilGetError();
-
-	if (error != IL_NO_ERROR)
-	{
-		ilBindImage(0);
-		ilDeleteImages(1, &imageID);
-		LOG_ERROR("%d: %s", error, iluErrorString(error));
-	}
-	else
-	{
-		LOG("Texture loaded successfully from: %s in %.3f s", full_path, timer.ReadSec());
-
-		/*texture->id = (uint)(imageID);
-		texture->name = FileSystem::GetFile(full_path) + format;
-		texture->data = ilGetData();
-		texture->width = ilGetInteger(IL_IMAGE_WIDTH);
-		texture->height = ilGetInteger(IL_IMAGE_HEIGHT);
-		texture->path = normalized_path.c_str();*/
-	}
-
-	ilBindImage(0);
-
-	return texture;
+	
 }
 
 #pragma endregion

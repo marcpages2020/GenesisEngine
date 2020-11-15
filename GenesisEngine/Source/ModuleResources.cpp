@@ -10,6 +10,7 @@
 #include "Resource.h"
 #include "ResourceModel.h"
 #include "ResourceMesh.h"
+#include "ResourceMaterial.h"
 #include "ResourceTexture.h"
 
 #include "MathGeoLib/include/MathGeoLib.h"
@@ -31,11 +32,36 @@ bool ModuleResources::Init()
 	return ret;
 }
 
+bool ModuleResources::MetaUpToDate(const char* asset_path)
+{
+	std::string meta_file = asset_path;
+	meta_file += ".meta";
+
+	if (FileSystem::Exists(meta_file.c_str()))
+	{
+		char* buffer = nullptr;
+		uint size = FileSystem::Load(meta_file.c_str(), &buffer);
+		GnJSONObj meta(buffer);
+
+		int lastModifiedMeta = meta.GetInt("lastModified");
+		uint lastModified = FileSystem::GetLastModTime(asset_path);
+
+		if (lastModifiedMeta != lastModified)
+			return false;
+		else
+			return true;
+	}
+	else {
+		return false;
+	}
+}
+
 uint ModuleResources::ImportFile(const char* assets_file)
 {
-	std::string processed_path = FileSystem::ProcessPath(assets_file);
+	if (MetaUpToDate(assets_file))
+		return 0;
 
-	//uint uid = 
+	std::string processed_path = FileSystem::ProcessPath(assets_file);
 
 	ResourceType type = GetResourceTypeFromPath(assets_file);
 
@@ -48,13 +74,10 @@ uint ModuleResources::ImportFile(const char* assets_file)
 	switch (type)
 	{
 	case RESOURCE_MODEL:
-		ModelImporter::Import(fileBuffer, resource, size);
-		break;
-	case RESOURCE_MESH:
-		//MeshImporter::Import(processed_path.c_str());
+		ModelImporter::Import(fileBuffer, (ResourceModel*)resource, size);
 		break;
 	case RESOURCE_TEXTURE:
-		TextureImporter::Import(fileBuffer, resource, size);
+		TextureImporter::Import(fileBuffer, (ResourceTexture*)resource, size);
 		size = TextureImporter::Save(&fileBuffer, (ResourceTexture*)resource);
 		break;
 	case RESOURCE_SCENE:
@@ -66,7 +89,9 @@ uint ModuleResources::ImportFile(const char* assets_file)
 	}
 
 	SaveResource(fileBuffer, size, resource);
+	//SaveMetaFile(resource);
 	ret = resource->GetUID();
+	ReleaseResource(ret);
 	RELEASE_ARRAY(fileBuffer);
 
 	return ret;
@@ -87,6 +112,9 @@ Resource* ModuleResources::CreateResource(const char* assetsPath, ResourceType t
 		break;
 	case RESOURCE_MESH:
 		resource = new ResourceMesh(UID);
+		break;
+	case RESOURCE_MATERIAL:
+		resource = new ResourceMaterial(UID);
 		break;
 	case RESOURCE_TEXTURE:
 		resource = new ResourceTexture(UID);
@@ -120,21 +148,29 @@ bool ModuleResources::SaveResource(char* fileBuffer, uint size, Resource* resour
 {
 	bool ret = true;
 
+	ret = SaveMetaFile(resource);
+
+	if (resource->GetType() != ResourceType::RESOURCE_MODEL && resource->GetType() != ResourceType::RESOURCE_SCENE)
+		FileSystem::Save(resource->libraryFile.c_str(), fileBuffer, size);
+
+	return ret;
+}
+
+bool ModuleResources::SaveMetaFile(Resource* resource)
+{
 	GnJSONObj base_object;
-	resource->Save(base_object);
-	
+	resource->SaveMeta(base_object, FileSystem::GetLastModTime(resource->assetsFile.c_str()));
+
 	char* meta_buffer = NULL;
 	uint meta_size = base_object.Save(&meta_buffer);
 
 	std::string meta_file_name = resource->assetsFile + ".meta";
-
 	FileSystem::Save(meta_file_name.c_str(), meta_buffer, meta_size);
-	FileSystem::Save(resource->libraryFile.c_str(), fileBuffer, size);
 
-	//base_object.Release();
-	//RELEASE_ARRAY(buffer);
+	base_object.Release();
+	RELEASE_ARRAY(meta_buffer);
 
-	return ret;
+	return true;
 }
 
 ResourceType ModuleResources::GetResourceTypeFromPath(const char* path)
@@ -163,6 +199,9 @@ const char* ModuleResources::GenerateLibraryPath(Resource* resource)
 		break;
 	case RESOURCE_MESH:
 		sprintf_s(library_path, 128, "Library/Meshes/%d.mesh", resource->GetUID());
+		break;
+	case RESOURCE_MATERIAL:
+		sprintf_s(library_path, 128, "Library/Materials/%d.material", resource->GetUID());
 		break;
 	case RESOURCE_TEXTURE:
 		sprintf_s(library_path, 128, "Library/Textures/%d.dds", resource->GetUID());

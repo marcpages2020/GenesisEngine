@@ -62,6 +62,7 @@ void FileSystem::CreateLibraryDirectories()
 	CreateDir("Library/Config/");
 	CreateDir("Library/Models/");
 	CreateDir("Library/Meshes/");
+	CreateDir("Library/Materials/");
 	CreateDir("Library/Textures/");
 	CreateDir("Library/Scenes/");
 	//CreateDir("Materials/");
@@ -397,7 +398,12 @@ uint FileSystem::Save(const char* file, const void* buffer, unsigned int size, b
 	return ret;
 }
 
-std::string FileSystem::GetUniqueName(const char* path, const char* name) 
+uint64 FileSystem::GetLastModTime(const char* filename)
+{
+	return PHYSFS_getLastModTime(filename);
+}
+
+std::string FileSystem::GetUniqueName(const char* path, const char* name)
 {
 	//TODO: modify to distinguix files and dirs?
 	std::vector<std::string> files, dirs;

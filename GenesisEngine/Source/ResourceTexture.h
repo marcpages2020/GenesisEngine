@@ -10,7 +10,7 @@ public:
 	ResourceTexture(uint UID);
 	~ResourceTexture();
 
-	uint Save(GnJSONObj& base_object) override;
+	uint SaveMeta(GnJSONObj& base_object, uint last_modification) override;
 	//void Load(GnJSONObj& base_object) override;
 
 public:

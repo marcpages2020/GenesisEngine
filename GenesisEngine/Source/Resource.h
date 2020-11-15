@@ -7,10 +7,11 @@ class GnJSONObj;
 
 enum ResourceType 
 {
-	RESOURCE_TEXTURE,
-	RESOURCE_MESH,
-	RESOURCE_SCENE,
 	RESOURCE_MODEL,
+	RESOURCE_MESH,
+	RESOURCE_MATERIAL,
+	RESOURCE_TEXTURE,
+	RESOURCE_SCENE,
 	RESOURCE_UNKNOWN
 };
 
@@ -24,6 +25,7 @@ public:
 	uint GetUID();
 
 	virtual uint Save(GnJSONObj& base_object) { return -1; };
+	virtual uint SaveMeta(GnJSONObj& base_object, uint last_modification) { return -1; };
 	virtual void Load(GnJSONObj& base_object) {};
 
 public: 
