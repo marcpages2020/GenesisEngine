@@ -1,8 +1,9 @@
 #pragma once
 #include "Globals.h"
 #include "Resource.h"
-
 #include "GnJSON.h"
+
+#include <vector>
 
 class ResourceModel : public Resource {
 public:
@@ -14,4 +15,7 @@ public:
 
 public:
 	GnJSONObj model_information;
+
+	std::vector<uint> meshes;
+	std::vector<uint> textures;
 };

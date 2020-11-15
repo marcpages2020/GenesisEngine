@@ -234,6 +234,11 @@ void GnJSONArray::AddObject(GnJSONObj& object)
 	json_array_append_value(_array, object.GetValue());
 }
 
+void GnJSONArray::AddInt(int number)
+{
+	json_array_append_number(_array, number);
+}
+
 void GnJSONArray::AddFloat(float number)
 {
 	json_array_append_number(_array, number);

@@ -45,10 +45,45 @@ void ModelImporter::Import(char* fileBuffer, ResourceModel* model, uint size)
 		aiNode* rootNode = scene->mRootNode;
 
 		GnJSONObj save_file;
-		GnJSONArray meshes = save_file.AddArray("Nodes");
+		GnJSONArray nodes = save_file.AddArray("Nodes");
+		GnJSONArray meshes = save_file.AddArray("Meshes");
+		GnJSONArray materials = save_file.AddArray("Materials");
+		GnJSONArray textures = save_file.AddArray("Textures");
 
-		ImportChildren(scene, rootNode, nullptr, 0, model->assetsFile.c_str(), meshes);
-		//root->SetName(file.c_str());
+		//Import Meshes
+		for (size_t i = 0; i < scene->mNumMeshes; i++)
+		{
+			aiMesh* aimesh = scene->mMeshes[i];
+			ResourceMesh* mesh = (ResourceMesh*)App->resources->CreateResource(model->assetsFile.c_str(), ResourceType::RESOURCE_MESH);
+			meshes.AddInt(mesh->GetUID());
+
+			MeshImporter::Import(aimesh, mesh);
+
+			char* buffer;
+			uint size = MeshImporter::Save(mesh, &buffer);
+			App->resources->SaveResource(buffer, size, mesh);
+
+			App->resources->ReleaseResource(mesh->GetUID());
+			RELEASE_ARRAY(buffer);
+		}
+
+		for (size_t i = 0; i < scene->mNumMaterials; i++)
+		{
+			aiMaterial* aimaterial = scene->mMaterials[i];
+			ResourceMaterial* material = (ResourceMaterial*)App->resources->CreateResource(model->assetsFile.c_str(), ResourceType::RESOURCE_MATERIAL);
+			materials.AddInt(material->GetUID());
+
+			MaterialImporter::Import(aimaterial, material, model->assetsFile.c_str());
+
+			//char* buffer;
+			//uint size = MaterialImporter::Save(material, &buffer);
+			//App->resources->SaveResource(buffer, size, material);
+
+			//App->resources->ReleaseResource(material->GetUID());
+			//RELEASE_ARRAY(buffer);
+		}
+
+		ImportChildren(scene, rootNode, nullptr, 0, model->assetsFile.c_str(), nodes);
 
 		char* buffer;
 		uint size = save_file.Save(&buffer);
@@ -81,36 +116,28 @@ void ModelImporter::ImportChildren(const aiScene* scene, aiNode* node, aiNode* p
 	{
 		//Mesh --------------------------------------------------------------
 
-		aiMesh* aimesh = scene->mMeshes[*node->mMeshes];
-		ResourceMesh* mesh = (ResourceMesh*)App->resources->CreateResource(path, ResourceType::RESOURCE_MESH);
-
-		MeshImporter::Import(aimesh, mesh);
-
-		char* meshBuffer;
-		uint size = MeshImporter::Save(mesh, &meshBuffer);
-		App->resources->SaveResource(meshBuffer, size, mesh);
-
-		node_object.AddInt("Mesh UID", mesh->GetUID());
-
-		App->resources->ReleaseResource(mesh->GetUID());
-		RELEASE_ARRAY(meshBuffer);
+		node_object.AddInt("Mesh Index", *node->mMeshes);
 
 		//Materials ----------------------------------------------------------
 
-		//aiMaterial* aimaterial = scene->mMaterials[aimesh->mMaterialIndex];
-		//ResourceMaterial* material = (ResourceMaterial*)App->resources->CreateResource(path, ResourceType::RESOURCE_MATERIAL);
+//		node_object.AddInt("M")
+
+		/*
+		aiMaterial* aimaterial = scene->mMaterials[aimesh->mMaterialIndex];
+		ResourceMaterial* material = (ResourceMaterial*)App->resources->CreateResource(path, ResourceType::RESOURCE_MATERIAL);
 
 		////Import Material
-		//MaterialImporter::Import(aimaterial, material, path);
+		MaterialImporter::Import(aimaterial, material, path);
 
-		//char* materialBuffer;
-		//size = MaterialImporter::Save(material, &materialBuffer);
-		//App->resources->SaveResource(materialBuffer, size, material);
+		char* materialBuffer;
+		size = MaterialImporter::Save(material, &materialBuffer);
+		App->resources->SaveResource(materialBuffer, size, material);
 
-		//node_object.AddInt("Material UID", material->GetUID());
+		node_object.AddInt("Material UID", material->GetUID());
 
 		//App->resources->ReleaseResource(material->GetUID());
 		//RELEASE_ARRAY(materialBuffer);
+		*/
 	}
 
 	meshes_array.AddObject(node_object);
@@ -497,13 +524,15 @@ void MaterialImporter::Import(const aiMaterial* aimaterial, ResourceMaterial* ma
 		file_path = TextureImporter::FindTexture(path.C_Str(), folder_path);
 
 		if(file_path.size() > 0)
-			App->resources->ImportFile(file_path.c_str());
+			material->diffuse_texture_uid = App->resources->ImportFile(file_path.c_str());
+
 		//LOG("%s imported in %.3f s", texture->path.c_str(), timer.ReadSec());
 	}
 }
 
 uint64 MaterialImporter::Save(ResourceMaterial* material, char** fileBuffer)
 {
+	//Save Material as JSON
 	return 0;
 }
 

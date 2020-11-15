@@ -18,6 +18,7 @@ public:
 	bool MetaUpToDate(const char* asset_path);
 	uint ImportFile(const char* assets_file);
 	Resource* CreateResource(const char* assetsPath, ResourceType type);
+	Resource* RequestResource(uint UID);
 	void ReleaseResource(uint UID);
 	bool SaveResource(char* fileBuffer, uint size, Resource* resource);
 	bool SaveMetaFile(Resource* resource);

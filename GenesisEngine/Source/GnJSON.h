@@ -65,6 +65,7 @@ public:
 	GnJSONObj GetObjectAt(int index);
 
 	void AddObject(GnJSONObj& object);
+	void AddInt(int number);
 	void AddFloat(float number);
 	void AddString(const char* string);
 

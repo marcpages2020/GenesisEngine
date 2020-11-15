@@ -58,8 +58,8 @@ bool ModuleResources::MetaUpToDate(const char* asset_path)
 
 uint ModuleResources::ImportFile(const char* assets_file)
 {
-	if (MetaUpToDate(assets_file))
-		return 0;
+	//if (MetaUpToDate(assets_file))
+		//return 0;
 
 	std::string processed_path = FileSystem::ProcessPath(assets_file);
 
@@ -138,6 +138,17 @@ Resource* ModuleResources::CreateResource(const char* assetsPath, ResourceType t
 	return resource;
 }
 
+Resource* ModuleResources::RequestResource(uint UID)
+{
+	Resource* resource = nullptr;
+	std::map<uint, Resource*>::iterator it = resources.find(UID);
+
+	if (it != resources.end()) {
+		it->second->referenceCount++;
+		return it->second;
+	}
+}
+
 void ModuleResources::ReleaseResource(uint UID)
 {
 	delete resources[UID];
@@ -150,8 +161,8 @@ bool ModuleResources::SaveResource(char* fileBuffer, uint size, Resource* resour
 
 	ret = SaveMetaFile(resource);
 
-	if (resource->GetType() != ResourceType::RESOURCE_MODEL && resource->GetType() != ResourceType::RESOURCE_SCENE)
-		FileSystem::Save(resource->libraryFile.c_str(), fileBuffer, size);
+	//if (resource->GetType() != ResourceType::RESOURCE_MODEL && resource->GetType() != ResourceType::RESOURCE_SCENE)
+	FileSystem::Save(resource->libraryFile.c_str(), fileBuffer, size);
 
 	return ret;
 }

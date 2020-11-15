@@ -32,9 +32,10 @@ public:
 	std::string assetsFile;
 	std::string libraryFile;
 
+	uint referenceCount = 0;
+
 protected:
 	uint _uid = 0;
 
 	ResourceType _type = RESOURCE_UNKNOWN;
-	uint _referenceCount = 0;
 };
