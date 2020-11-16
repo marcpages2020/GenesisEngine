@@ -14,7 +14,7 @@
 
 // GnMesh =========================================================================================================================
 
-GnMesh::GnMesh() : Component(), draw_face_normals(false), draw_vertex_normals(false), textureID(-1), texture_buffer(-1), name("No name"), resource(nullptr)
+GnMesh::GnMesh() : Component(), draw_face_normals(false), draw_vertex_normals(false), texcoords_buffer(-1), name("No name"), _resource(nullptr)
 {
 	type = ComponentType::MESH;
 }
@@ -42,7 +42,7 @@ void GnMesh::Load(GnJSONObj& load_object)
 void GnMesh::SetResourceUID(uint UID)
 {
 	_resourceUID = UID;
-	resource = (ResourceMesh*)App->resources->RequestResource(_resourceUID);
+	_resource = (ResourceMesh*)App->resources->RequestResource(_resourceUID);
 	GenerateBuffers();
 }
 
@@ -51,34 +51,22 @@ void GnMesh::GenerateBuffers()
 	//vertices
 	glGenBuffers(1, (GLuint*)&(vertices_buffer));
 	glBindBuffer(GL_ARRAY_BUFFER, vertices_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * resource->vertices_amount * 3, resource->vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * _resource->vertices_amount * 3, _resource->vertices, GL_STATIC_DRAW);
 
 	//normals
 	glGenBuffers(1, (GLuint*)&(normals_buffer));
 	glBindBuffer(GL_NORMAL_ARRAY, normals_buffer);
-	glBufferData(GL_NORMAL_ARRAY, sizeof(float) * resource->vertices_amount * 3, resource->normals, GL_STATIC_DRAW);
+	glBufferData(GL_NORMAL_ARRAY, sizeof(float) * _resource->vertices_amount * 3, _resource->normals, GL_STATIC_DRAW);
 
 	//textures
-	glGenBuffers(1, (GLuint*)&(texture_buffer));
-	glBindBuffer(GL_ARRAY_BUFFER, texture_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * resource->vertices_amount * 2, resource->texcoords, GL_STATIC_DRAW);
+	glGenBuffers(1, (GLuint*)&(texcoords_buffer));
+	glBindBuffer(GL_ARRAY_BUFFER, texcoords_buffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * _resource->vertices_amount * 2, _resource->texcoords, GL_STATIC_DRAW);
 
 	//indices
 	glGenBuffers(1, (GLuint*)&(indices_buffer));
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * resource->indices_amount, resource->indices, GL_STATIC_DRAW);
-
-	//textures
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	glGenTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_2D, textureID);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * _resource->indices_amount, _resource->indices, GL_STATIC_DRAW);
 }
 
 void GnMesh::DeleteBuffers()
@@ -93,51 +81,29 @@ void GnMesh::DeleteBuffers()
 	glDeleteBuffers(1, &normals_buffer);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
-	glDeleteBuffers(1, &texture_buffer);
-	glDeleteTextures(1, &textureID);
+	glDeleteBuffers(1, &texcoords_buffer);
+	//glDeleteTextures(1, &textureID);
 }
 
-bool GnMesh::SetTexture(GnTexture* g_texture)
-{
-	bool ret = false;
+//bool GnMesh::SetTexture(GnTexture* g_texture)
+//{
+//	bool ret = false;
+//
+//	if (g_texture != nullptr && g_texture->data != nullptr)
+//	{
+//		glBindTexture(GL_TEXTURE_2D, textureID);
+//		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture->width, texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture->data);
+//		glBindTexture(GL_TEXTURE_2D, 0);
+//		ret = true;
+//	}
+//	else 
+//	{
+//		AssignCheckersImage();
+//	}
+//
+//	return ret;
+//}
 
-	//if (g_texture != nullptr && g_texture->data != nullptr)
-	//{
-	//	texture = g_texture;
-	//	glBindTexture(GL_TEXTURE_2D, textureID);
-	//	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture->width, texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture->data);
-	//	glBindTexture(GL_TEXTURE_2D, 0);
-	//	ret = true;
-	//}
-	//else 
-	//{
-	//	AssignCheckersImage();
-	//}
-
-	return ret;
-}
-
-void GnMesh::AssignCheckersImage()
-{
-	int CHECKERS_WIDTH = 64;
-	int CHECKERS_HEIGHT = 64;
-
-	GLubyte checkerImage[64][64][4];
-
-	for (int i = 0; i < CHECKERS_HEIGHT; i++) {
-		for (int j = 0; j < CHECKERS_WIDTH; j++) {
-			int c = ((((i & 0x8) == 0) ^ (((j & 0x8)) == 0))) * 255;
-			checkerImage[i][j][0] = (GLubyte)c;
-			checkerImage[i][j][1] = (GLubyte)c;
-			checkerImage[i][j][2] = (GLubyte)c;
-			checkerImage[i][j][3] = (GLubyte)255;
-		}
-	}
-
-	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, CHECKERS_WIDTH, CHECKERS_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, checkerImage);
-	glBindTexture(GL_TEXTURE_2D, 0);
-}
 
 void GnMesh::Update()
 {
@@ -159,11 +125,11 @@ void GnMesh::Render()
 	glNormalPointer(GL_FLOAT, 0, NULL);
 
 	//textures
-	glBindBuffer(GL_ARRAY_BUFFER, texture_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, texcoords_buffer);
 	glTexCoordPointer(2, GL_FLOAT, 0, NULL);
 
-	//if(textureID != -1)
-	glBindTexture(GL_TEXTURE_2D, textureID);
+	//TODO: Apply Texture
+	//glBindTexture(GL_TEXTURE_2D, textureID);
 
 	//indices
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
@@ -171,7 +137,7 @@ void GnMesh::Render()
 	glPushMatrix();
 	glMultMatrixf((float*)&_gameObject->GetTransform()->GetGlobalTransform());
 
-	glDrawElements(GL_TRIANGLES, resource->indices_amount, GL_UNSIGNED_INT, NULL);
+	glDrawElements(GL_TRIANGLES, _resource->indices_amount, GL_UNSIGNED_INT, NULL);
 
 	if(draw_vertex_normals ||App->renderer3D->draw_vertex_normals)
 		DrawVertexNormals();
@@ -198,22 +164,13 @@ void GnMesh::OnEditor()
 	{
 		ImGui::Checkbox(" Enabled", &enabled);
 
-		ImGui::Text("Vertices: %d Indices: %d", resource->vertices_amount, resource->indices_amount);
+		ImGui::Text("Vertices: %d Indices: %d", _resource->vertices_amount, _resource->indices_amount);
 		ImGui::Spacing();
 
 		ImGui::Checkbox("Vertex Normals", &draw_vertex_normals);
 		ImGui::SameLine();
 		ImGui::Checkbox("Face Normals", &draw_face_normals);
 	}
-}
-
-void GnMesh::RemoveTexture()
-{
-	//TextureImporter::UnloadTexture(texture->id);
-	//delete texture;
-	//texture = nullptr;
-
-	AssignCheckersImage();
 }
 
 void GnMesh::DrawVertexNormals()
@@ -225,15 +182,15 @@ void GnMesh::DrawVertexNormals()
 
 	//vertices normals
 	glBegin(GL_LINES);
-	for (size_t i = 0, c = 0; i < resource->vertices_amount * 3; i += 3, c+= 4)
+	for (size_t i = 0, c = 0; i < _resource->vertices_amount * 3; i += 3, c+= 4)
 	{
 		glColor3f(0.0f, 0.85f, 0.85f);
 		//glColor4f(colors[c], colors[c + 1], colors[c + 2], colors[c + 3]);
-		glVertex3f(resource->vertices[i], resource->vertices[i + 1], resource->vertices[i + 2]);
+		glVertex3f(_resource->vertices[i], _resource->vertices[i + 1], _resource->vertices[i + 2]);
 
-		glVertex3f(resource->vertices[i] + (resource->normals[i] * normal_lenght),
-			       resource->vertices[i + 1] + (resource->normals[i + 1] * normal_lenght),
-			       resource->vertices[i + 2] + (resource->normals[i + 2]) * normal_lenght);
+		glVertex3f(_resource->vertices[i] + (_resource->normals[i] * normal_lenght),
+			       _resource->vertices[i + 1] + (_resource->normals[i + 1] * normal_lenght),
+			       _resource->vertices[i + 2] + (_resource->normals[i + 2]) * normal_lenght);
 	}
 
 	glColor3f(1.0f, 1.0f, 1.0f);
@@ -249,22 +206,22 @@ void GnMesh::DrawFaceNormals()
 
 	//vertices normals
 	glBegin(GL_LINES);
-	for (size_t i = 0; i < resource->vertices_amount * 3; i += 3)
+	for (size_t i = 0; i < _resource->vertices_amount * 3; i += 3)
 	{
 		glColor3f(1.0f, 0.85f, 0.0f);
-		float vx = (resource->vertices[i] + resource->vertices[i + 3] + resource->vertices[i+ 6]) / 3;
-		float vy = (resource->vertices[i + 1] + resource->vertices[i + 4] + resource->vertices[i + 7]) / 3;
-		float vz = (resource->vertices[i + 2] + resource->vertices[i + 5] + resource->vertices[i + 8]) / 3;
+		float vx = (_resource->vertices[i] + _resource->vertices[i + 3] + _resource->vertices[i+ 6]) / 3;
+		float vy = (_resource->vertices[i + 1] + _resource->vertices[i + 4] + _resource->vertices[i + 7]) / 3;
+		float vz = (_resource->vertices[i + 2] + _resource->vertices[i + 5] + _resource->vertices[i + 8]) / 3;
 
-		float nx = (resource->normals[i] +     resource->normals[i + 3] + resource->normals[i + 6]) / 3;
-		float ny = (resource->normals[i + 1] + resource->normals[i + 4] + resource->normals[i + 7]) / 3;
-		float nz = (resource->normals[i + 2] + resource->normals[i + 5] + resource->normals[i + 8]) / 3;
+		float nx = (_resource->normals[i] +     _resource->normals[i + 3] + _resource->normals[i + 6]) / 3;
+		float ny = (_resource->normals[i + 1] + _resource->normals[i + 4] + _resource->normals[i + 7]) / 3;
+		float nz = (_resource->normals[i + 2] + _resource->normals[i + 5] + _resource->normals[i + 8]) / 3;
 
 		glVertex3f(vx, vy, vz);
 
-		glVertex3f(vx + (resource->normals[i] * normal_lenght),
-			       vy + (resource->normals[i + 1] * normal_lenght),
-			       vz + (resource->normals[i + 2]) * normal_lenght);
+		glVertex3f(vx + (_resource->normals[i] * normal_lenght),
+			       vy + (_resource->normals[i + 1] * normal_lenght),
+			       vz + (_resource->normals[i + 2]) * normal_lenght);
 	}
 
 	glColor3f(1.0f, 1.0f, 1.0f);

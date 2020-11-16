@@ -54,7 +54,7 @@ namespace TextureImporter
 
 	void Import(char* fileBuffer, ResourceTexture* resource, uint size);
 	uint Save(ResourceTexture* texture, char** fileBuffer);
-	void Load(const char* path);
+	void Load(const char* path, ResourceTexture* texture);
 
 	std::string FindTexture(const char* texture_name, const char* model_directory);
 	void UnloadTexture(uint imageID);
@@ -65,5 +65,5 @@ namespace MaterialImporter
 {
 	void Import(const aiMaterial* aimaterial, ResourceMaterial* material);
 	uint64 Save(ResourceMaterial* material, char** fileBuffer);
-	void Load(const char* fileBuffer, Material* material);
+	void Load(const char* file_path, ResourceMaterial* material);
 }

@@ -44,11 +44,7 @@ void Transform::OnEditor()
 		float position4f[4] = { _position.x, _position.y, _position.z, 1.0f };
 		if (ImGui::DragFloat3("Position", position4f, 0.1f, -10000.0f, 10000.0f))
 		{
-			_position.x = position4f[0];
-			_position.y = position4f[1];
-			_position.z = position4f[2];
-
-			SetPosition(_position);
+			SetPosition(position4f[0], position4f[1], position4f[2]);
 			UpdateGlobalTransform();
 			_gameObject->UpdateChildrenTransforms();
 		}
@@ -56,11 +52,7 @@ void Transform::OnEditor()
 		float rotation4f[4] = { _eulerRotation.x, _eulerRotation.y, _eulerRotation.z, 1.0f };
 		if (ImGui::DragFloat3("Rotation", rotation4f, 0.1f, -360.0f, 360.0f))
 		{
-			_eulerRotation.x = rotation4f[0];
-			_eulerRotation.y = rotation4f[1];
-			_eulerRotation.z = rotation4f[2];
-
-			SetRotation(_eulerRotation.x, _eulerRotation.y, _eulerRotation.z);
+			SetRotation(rotation4f[0], rotation4f[1], rotation4f[2]);
 			UpdateGlobalTransform();
 			_gameObject->UpdateChildrenTransforms();
 		}
@@ -68,11 +60,7 @@ void Transform::OnEditor()
 		float scale4f[4] = { _scale.x, _scale.y, _scale.z, 1.0f };
 		if (ImGui::DragFloat3("Scale", scale4f, 0.01f, -10000.0f, 10000.0f))
 		{
-			_scale.x = scale4f[0];
-			_scale.y = scale4f[1];
-			_scale.z = scale4f[2];
-
-			SetScale(_scale);
+			SetScale(scale4f[0], scale4f[1], scale4f[2]);
 			UpdateGlobalTransform();
 			_gameObject->UpdateChildrenTransforms();
 		};
@@ -157,6 +145,8 @@ void Transform::Reset()
 	_eulerRotation = float3::zero;
 
 	UpdateGlobalTransform();
+	_gameObject->UpdateChildrenTransforms();
+	
 }
 
 void Transform::SetPosition(float x, float y, float z)
@@ -171,7 +161,7 @@ void Transform::SetPosition(float x, float y, float z)
 void Transform::SetPosition(float3 new_position)
 {
 	_position = new_position;
-	UpdateLocalTransform();
+	UpdateGlobalTransform();
 }
 
 float3 Transform::GetPosition()
@@ -184,7 +174,7 @@ void Transform::SetRotation(float x, float y, float z)
 {
 	_eulerRotation = float3(x, y, z);
 	_rotation = Quat::FromEulerXYZ(x * DEGTORAD, y * DEGTORAD, z * DEGTORAD);
-	UpdateLocalTransform();
+	UpdateGlobalTransform();
 }
 
 void Transform::SetRotation(Quat new_rotation)
@@ -192,7 +182,7 @@ void Transform::SetRotation(Quat new_rotation)
 	_rotation = new_rotation;
 	_eulerRotation = _rotation.ToEulerXYZ() * RADTODEG;
 
-	UpdateLocalTransform();
+	UpdateGlobalTransform();
 }
 
 void Transform::SetRotation(float x, float y, float z, float w)
@@ -202,7 +192,7 @@ void Transform::SetRotation(float x, float y, float z, float w)
 	_rotation.z = z;
 	_rotation.w = w;
 
-	UpdateLocalTransform();
+	UpdateGlobalTransform();
 }
 
 Quat Transform::GetRotation()
@@ -222,21 +212,21 @@ void Transform::SetScale(float x, float y, float z)
 	_scale.y = y;
 	_scale.z = z;
 
-	UpdateLocalTransform();
+	UpdateGlobalTransform();
 }
 
 void Transform::SetScale(float3 new_scale)
 {
 	_scale = new_scale;
 
-	UpdateLocalTransform();
+	UpdateGlobalTransform();
 }
 
 void Transform::SetProportionalScale(float multiplier)
 {
 	_scale.x = _scale.y = _scale.z = multiplier;
 
-	UpdateLocalTransform();
+	UpdateGlobalTransform();
 }
 
 float3 Transform::GetScale()

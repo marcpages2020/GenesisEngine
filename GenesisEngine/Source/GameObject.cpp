@@ -140,6 +140,15 @@ uint GameObject::LoadNodeData(GnJSONObj* object)
 	name = object->GetString("Name", "No Name");
 	uint parentUUID = object->GetInt("Parent UUID");
 
+	float3 position = object->GetFloat3("Position");
+	transform->SetPosition(position);
+
+	Quat rotation = object->GetQuaternion("Rotation");
+	transform->SetRotation(rotation);
+
+	float3 scale = object->GetFloat3("Scale");
+	transform->SetScale(scale);
+
 	int meshID = object->GetInt("Mesh", -1);
 	if (meshID != -1) {
 		GnMesh* mesh = (GnMesh*)AddComponent(ComponentType::MESH);
@@ -149,7 +158,7 @@ uint GameObject::LoadNodeData(GnJSONObj* object)
 	int materialID = object->GetInt("Material", -1);
 	if (materialID != -1) {
 		Material* material = (Material*)AddComponent(ComponentType::MATERIAL);
-		material->SetResourceUID(meshID);
+		material->SetResourceUID(materialID);
 	}
 
 	return parentUUID;

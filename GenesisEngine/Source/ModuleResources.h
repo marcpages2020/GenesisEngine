@@ -26,7 +26,7 @@ public:
 
 	uint ImportFile(const char* assets_file);
 	uint ImportInternalResource(const char* path, const void* data, ResourceType type);
-	void CreateResourceData(uint UID, ResourceType type);
+	void CreateResourceData(uint UID, ResourceType type, const char* assets_path = "No path");
 
 	Resource* LoadResource(uint UID);
 

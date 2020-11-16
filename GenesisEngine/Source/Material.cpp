@@ -5,47 +5,51 @@
 #include "GnJSON.h"
 #include "GameObject.h"
 #include "Application.h"
+#include "ResourceTexture.h"
+#include "glew/include/glew.h"
+#include "ResourceMaterial.h"
 
-Material::Material() : Component(), mesh(nullptr), checkers_image(true), diffuse_texture(nullptr) {
+Material::Material() : Component(), checkers_image(true), _resource(nullptr) {
 	type = ComponentType::MATERIAL;
 }
 
-Material::Material(GameObject* gameObject) : Component(gameObject), mesh(nullptr), checkers_image(true), diffuse_texture(nullptr)
+Material::Material(GameObject* gameObject) : Component(gameObject), checkers_image(true), _resource(nullptr)
 {
 	type = ComponentType::MATERIAL;
-
-	mesh = (GnMesh*)gameObject->GetComponent(MESH);
-}
-
-Material::Material(GnMesh* g_mesh, GnTexture* g_diffuse_texture) : Component(), checkers_image(true), diffuse_texture(nullptr)
-{
-	mesh = g_mesh;
-	type = ComponentType::MATERIAL;
-
-	//if (g_diffuse_texture->data != nullptr)
-	//{
-	//	SetTexture(g_diffuse_texture);
-	//	checkers_image = false;
-	//}
-	//else
-	//{
-	//	mesh->AssignCheckersImage();
-	//}
 }
 
 Material::~Material()
 {
-	if (diffuse_texture != nullptr)
+	if (_resource != nullptr)
 	{
 		DeleteTexture();
 	}
-
-	mesh = nullptr;
 }
 
 void Material::Update()
 {
-	resource = (ResourceMaterial*)App->resources->RequestResource(_resourceUID);
+
+}
+
+void Material::SetResourceUID(uint UID)
+{
+	_resource = (ResourceMaterial*)App->resources->RequestResource(UID);
+	_diffuseTexture = (ResourceTexture*)App->resources->RequestResource(_resource->diffuseTextureUID);
+	GenerateTextureBuffers();
+}
+
+void Material::GenerateTextureBuffers()
+{
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glGenTextures(1, &_textureID);
+	glBindTexture(GL_TEXTURE_2D, _textureID);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Material::Save(GnJSONArray& save_array)
@@ -54,8 +58,8 @@ void Material::Save(GnJSONArray& save_array)
 
 	save_object.AddInt("Type", type);
 
-	if (diffuse_texture != nullptr)
-		save_object.AddString("Path", diffuse_texture->path.c_str());
+	//if (diffuseTexture != nullptr)
+		//save_object.AddString("Path", diffuse_texture->path.c_str());
 
 	save_array.AddObject(save_object);
 }
@@ -65,8 +69,8 @@ void Material::Load(GnJSONObj& load_object)
 	//TODO
 	//MaterialImporter::Load(load_object.GetString("Path"), this);
 
-	if (diffuse_texture != nullptr && mesh != nullptr)
-		mesh->SetTexture(diffuse_texture);
+	//if (diffuse_texture != nullptr && mesh != nullptr)
+		//mesh->SetTexture(diffuse_texture);
 }
 
 void Material::OnEditor()
@@ -78,20 +82,20 @@ void Material::OnEditor()
 		ImGui::SameLine();
 		if (ImGui::Checkbox("Checkers Image", &checkers_image))
 		{
-			if (diffuse_texture != nullptr)
-			{
-				if (checkers_image == false)
-					mesh->SetTexture(diffuse_texture);
-				else
-					mesh->AssignCheckersImage();
-			}
-			else
-			{
-				checkers_image = true;
-			}
+			//if (diffuse_texture != nullptr)
+			//{
+			//	if (checkers_image == false)
+			//		mesh->SetTexture(diffuse_texture);
+			//	else
+			//		mesh->AssignCheckersImage();
+			//}
+			//else
+			//{
+			//	checkers_image = true;
+			//}
 		}
 
-		ImGui::Separator();
+		//ImGui::Separator();
 
 		/*
 		if(diffuse_texture != nullptr)
@@ -104,7 +108,7 @@ void Material::OnEditor()
 			ImGui::Spacing();
 			ImGui::Image((ImTextureID)diffuse_texture->id, ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
 
-			if (ImGui::Button("Remove Texture")) 
+			if (ImGui::Button("Remove Texture"))
 			{
 				DeleteTexture();
 
@@ -112,36 +116,60 @@ void Material::OnEditor()
 			}
 		}
 		*/
-		ImGui::Spacing();
 	}
 }
 
-void Material::SetTexture(GnTexture* texture)
+void Material::SetTexture(ResourceTexture* texture)
 {
-	if (diffuse_texture != nullptr)
-		DeleteTexture();
+	/*if (diffuseTexture != nullptr)
+		DeleteTexture();*/
 
-	diffuse_texture = texture;
+	//diffuseTexture = (ResourceMaterial*)App->resources->RequestResource(_resourceUID);
 
-	if (mesh != nullptr)
+	//diffuse_texture = texture;
+
+	/*if (mesh != nullptr)
 	{
 		checkers_image = !mesh->SetTexture(diffuse_texture);
-	}
+	}*/
 }
 
-GnTexture* Material::GetDiffuseTexture()
+void Material::AssignCheckersImage()
 {
-	return diffuse_texture;
+	int CHECKERS_WIDTH = 64;
+	int CHECKERS_HEIGHT = 64;
+
+	GLubyte checkerImage[64][64][4];
+
+	for (int i = 0; i < CHECKERS_HEIGHT; i++) {
+		for (int j = 0; j < CHECKERS_WIDTH; j++) {
+			int c = ((((i & 0x8) == 0) ^ (((j & 0x8)) == 0))) * 255;
+			checkerImage[i][j][0] = (GLubyte)c;
+			checkerImage[i][j][1] = (GLubyte)c;
+			checkerImage[i][j][2] = (GLubyte)c;
+			checkerImage[i][j][3] = (GLubyte)255;
+		}
+	}
+
+	//glBindTexture(GL_TEXTURE_2D, textureID);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, CHECKERS_WIDTH, CHECKERS_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, checkerImage);
+	//glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+ResourceTexture* Material::GetDiffuseTexture()
+{
+	//return diffuse_texture;
+	return nullptr;
 }
 
 void Material::SetMesh(GnMesh* g_mesh)
 {
-	mesh = g_mesh;
+	//mesh = g_mesh;
 
-	if (diffuse_texture != nullptr)
-	{
-		checkers_image = !mesh->SetTexture(diffuse_texture);
-	}
+	//if (diffuse_texture != nullptr)
+	//{
+	//	checkers_image = !mesh->SetTexture(diffuse_texture);
+	//}
 }
 
 bool Material::DeleteTexture()
@@ -150,8 +178,8 @@ bool Material::DeleteTexture()
 
 	//TODO
 	//TextureImporter::UnloadTexture(diffuse_texture->id);
-	delete diffuse_texture;
-	diffuse_texture = nullptr;
+	//delete diffuse_texture;
+	//diffuse_texture = nullptr;
 
 	return ret;
 }

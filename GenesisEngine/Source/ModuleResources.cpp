@@ -140,9 +140,10 @@ uint ModuleResources::ImportInternalResource(const char* path, const void* data,
 	return ret;
 }
 
-void ModuleResources::CreateResourceData(uint UID, ResourceType type)
+void ModuleResources::CreateResourceData(uint UID, ResourceType type, const char* assets_path)
 {
 	resources_data[UID].type = type;
+	resources_data[UID].assetsFile = assets_path;
 	resources_data[UID].libraryFile = GenerateLibraryPath(&Resource(UID, type));
 
 }
@@ -160,8 +161,10 @@ Resource* ModuleResources::LoadResource(uint UID)
 		MeshImporter::Load(resource->libraryFile.c_str(), (ResourceMesh*)resource);
 		break;
 	case RESOURCE_MATERIAL:
+		MaterialImporter::Load(resource->libraryFile.c_str(), (ResourceMaterial*)resource);
 		break;
 	case RESOURCE_TEXTURE:
+		TextureImporter::Load(resource->libraryFile.c_str(), (ResourceTexture*)resource);
 		break;
 	case RESOURCE_SCENE:
 		break;

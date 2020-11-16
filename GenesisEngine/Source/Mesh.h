@@ -17,14 +17,10 @@ public:
 
 	void Save(GnJSONArray& save_array) override;
 	void Load(GnJSONObj& load_object) override;
-	void SetResourceUID(uint UID);
+	void SetResourceUID(uint UID) override;
 
 	void GenerateBuffers();
 	void DeleteBuffers();
-
-	bool SetTexture(GnTexture* texture);
-	void RemoveTexture();
-	void AssignCheckersImage();
 
 	virtual void Update() override;
 	virtual void Render();
@@ -37,18 +33,16 @@ public:
 	const char* name;
 	char* path;
 
-	uint texture_buffer = -1;
-	uint textureID;
-
 private:
 	uint vertices_buffer = -1;
 	uint indices_buffer = -1;
-	uint normals_buffer;
+	uint normals_buffer = -1;
+	uint texcoords_buffer = -1;
 
 	bool draw_vertex_normals;
 	bool draw_face_normals;
 
-	ResourceMesh* resource;
+	ResourceMesh* _resource;
 	
 };
 

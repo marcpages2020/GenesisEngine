@@ -8,5 +8,6 @@ public:
 	~ResourceMaterial();
 
 public:
-	uint diffuse_texture_uid;
+	uint diffuseTextureUID;
+	uint texture_buffer = -1;
 };

@@ -120,6 +120,10 @@ void ModelImporter::LoadTransform(aiNode* node, GnJSONObj& node_object)
 	node->mTransformation.Decompose(scaling, rotation, position);
 	//eulerRotation = rotation.GetEuler() * RADTODEG;
 
+	if (FileSystem::normalize_scales && scaling.x == 100 && scaling.y == 100 && scaling.z == 100) {
+		scaling.x = scaling.y = scaling.z = 1.0f;
+	}
+
 	node_object.AddFloat3("Position", float3(position.x, position.y, position.z));
 	node_object.AddQuaternion("Rotation", Quat(rotation.x, rotation.y, rotation.z, rotation.w));
 	node_object.AddFloat3("Scale", float3(scaling.x, scaling.y, scaling.z));
@@ -145,11 +149,19 @@ GameObject* ModelImporter::Load(const char* path, ResourceModel* model)
 	for (size_t i = 0; i < nodes.Size(); i++)
 	{
 		GnJSONObj node_data = nodes.GetObjectAt(i);
+
 		int meshID = node_data.GetInt("Mesh", -1);
 		if (meshID != -1)
 		{
-			App->resources->CreateResourceData(meshID, ResourceType::RESOURCE_MESH);
+			App->resources->CreateResourceData(meshID, ResourceType::RESOURCE_MESH, model->assetsFile.c_str());
 			App->resources->LoadResource(meshID);
+		}
+
+		int materialID = node_data.GetInt("Material", -1);
+		if (materialID != -1)
+		{
+			App->resources->CreateResourceData(materialID, ResourceType::RESOURCE_MATERIAL, model->assetsFile.c_str());
+			App->resources->LoadResource(materialID);
 		}
 
 		//load game object
@@ -160,7 +172,6 @@ GameObject* ModelImporter::Load(const char* path, ResourceModel* model)
 		//check if it's the root game object
 		if (strcmp(gameObject->GetName(), "RootNode") == 0) {
 			root = gameObject;
-			//selectedGameObject = root;
 		}
 
 		//Get game object's parent
@@ -174,6 +185,8 @@ GameObject* ModelImporter::Load(const char* path, ResourceModel* model)
 		}
 	}
 
+	model_data.Release();
+	RELEASE_ARRAY(buffer);
 	App->scene->GetRoot()->AddChild(root);
 
 	return root;
@@ -470,6 +483,54 @@ uint TextureImporter::Save(ResourceTexture* texture, char** fileBuffer)
 	return size;
 }
 
+void TextureImporter::Load(const char* path, ResourceTexture* texture)
+{
+	Timer timer;
+	timer.Start();
+
+	ILuint imageID = 0;
+	ILenum error = IL_NO_ERROR;
+
+	ilGenImages(1, &imageID);
+	ilBindImage(imageID);
+
+	ilEnable(IL_ORIGIN_SET);
+	ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
+
+	char* buffer;
+	uint size = FileSystem::Load(path, &buffer);
+
+	if (ilLoadL(IL_DDS, buffer, size) == IL_FALSE)
+	{
+		LOG_ERROR("Error importing texture %s - %d: %s", texture->assetsFile, ilGetError(), iluErrorString(ilGetError()));
+
+		ilBindImage(0);
+		ilDeleteImages(1, &imageID);
+		return;
+	}
+
+	ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
+
+	error = ilGetError();
+	if (error != IL_NO_ERROR)
+	{
+		ilBindImage(0);
+		ilDeleteImages(1, &imageID);
+		LOG_ERROR("%d: %s", error, iluErrorString(error));
+	}
+	else
+	{
+		LOG("Texture loaded successfully from: %s in %d ms", texture->assetsFile, timer.Read());
+
+		texture->data = ilGetData();
+		texture->id = (uint)(imageID);
+		texture->width = ilGetInteger(IL_IMAGE_WIDTH);
+		texture->height = ilGetInteger(IL_IMAGE_HEIGHT);
+	}
+
+	ilBindImage(0);
+}
+
 std::string TextureImporter::FindTexture(const char* texture_name, const char* model_directory)
 {
 	std::string path;
@@ -542,7 +603,7 @@ void MaterialImporter::Import(const aiMaterial* aimaterial, ResourceMaterial* ma
 		file_path = TextureImporter::FindTexture(path.C_Str(), material->assetsFile.c_str());
 
 		if(file_path.size() > 0)
-			material->diffuse_texture_uid = App->resources->ImportFile(file_path.c_str());
+			material->diffuseTextureUID = App->resources->ImportFile(file_path.c_str());
 
 		//LOG("%s imported in %.3f s", texture->path.c_str(), timer.ReadSec());
 	}
@@ -551,7 +612,7 @@ void MaterialImporter::Import(const aiMaterial* aimaterial, ResourceMaterial* ma
 uint64 MaterialImporter::Save(ResourceMaterial* material, char** fileBuffer)
 {
 	GnJSONObj base_object;
-	base_object.AddInt("Diffuse Texture", material->diffuse_texture_uid);
+	base_object.AddInt("Diffuse Texture", material->diffuseTextureUID);
 
 	char* buffer;
 	uint size = base_object.Save(&buffer);
@@ -560,11 +621,22 @@ uint64 MaterialImporter::Save(ResourceMaterial* material, char** fileBuffer)
 	return size;
 }
 
-void MaterialImporter::Load(const char* fileBuffer, Material* material)
+void MaterialImporter::Load(const char* path, ResourceMaterial* material)
 {
 	Timer timer;
 	timer.Start();
-	
+
+	char* buffer = nullptr;
+	FileSystem::Load(path, &buffer);
+
+	GnJSONObj material_data(buffer);
+	material->diffuseTextureUID = material_data.GetInt("Diffuse Texture");
+
+	App->resources->CreateResourceData(material->diffuseTextureUID, ResourceType::RESOURCE_TEXTURE);
+	App->resources->LoadResource(material->diffuseTextureUID);
+
+	material_data.Release();
+	RELEASE_ARRAY(buffer);
 }
 
 #pragma endregion

@@ -6,43 +6,34 @@
 
 class GnMesh;
 class ResourceMaterial;
+class ResourceTexture;
 class GnJSONArray;
-
-struct GnTexture 
-{
-	std::string name = "Unnamed Texture";
-	std::string path = "Unknown path";
-
-	~GnTexture()
-	{
-		name.clear();
-		path.clear();
-		//delete data;
-	}
-};
 
 class Material : public Component {
 public: 
 	Material();
 	Material(GameObject* gameObject);
-	Material(GnMesh* mesh, GnTexture* diffuse_texture);
 	~Material();
 
 	void Update() override;
+	void SetResourceUID(uint UID) override;
+
+	void GenerateTextureBuffers();
 
 	void Save(GnJSONArray& save_array) override;
 	void Load(GnJSONObj& load_object) override;
 	void OnEditor() override;
 
-	void SetTexture(GnTexture* texture);
-	GnTexture* GetDiffuseTexture();
+	void SetTexture(ResourceTexture* texture);
+	void AssignCheckersImage();
+	ResourceTexture* GetDiffuseTexture();
 	void SetMesh(GnMesh* mesh);
 	bool DeleteTexture();
 
 private:
-	GnTexture* diffuse_texture;
-	GnMesh* mesh;
 	bool checkers_image;
 
-	ResourceMaterial* resource;
+	ResourceMaterial* _resource;
+	ResourceTexture* _diffuseTexture;
+	uint _textureID;
 };
