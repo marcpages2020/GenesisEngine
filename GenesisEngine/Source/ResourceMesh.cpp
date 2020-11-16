@@ -7,3 +7,8 @@ ResourceMesh::ResourceMesh(uint UID) : Resource(UID, ResourceType::RESOURCE_MESH
  texcoords(nullptr), colors(nullptr) {}
 
 ResourceMesh::~ResourceMesh(){}
+
+void ResourceMesh::Load(GnJSONObj& base_object)
+{
+
+}

@@ -7,9 +7,10 @@ ResourceTexture::~ResourceTexture() {}
 
 uint ResourceTexture::SaveMeta(GnJSONObj& base_object, uint last_modification)
 {
-	base_object.AddInt("width", width);
-	base_object.AddInt("height", height);
 	base_object.AddInt("UID", _uid);
+	base_object.AddInt("lastModified", last_modification);
+	//base_object.AddInt("width", width);
+	//base_object.AddInt("height", height);
 
 	return 1;
 }

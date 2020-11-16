@@ -1,11 +1,15 @@
 #pragma once
 #include "Resource.h"
 
+class GnJSONObj;
+
 class ResourceMesh : public Resource
 {
 public:
 	ResourceMesh(uint UID);
 	~ResourceMesh();
+
+	void Load(GnJSONObj& base_object);
 
 public:
 	uint vertices_amount = -1;

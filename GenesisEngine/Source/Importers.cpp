@@ -42,7 +42,6 @@ void ModelImporter::Import(char* fileBuffer, ResourceModel* model, uint size)
 
 	if (scene != nullptr && scene->HasMeshes())
 	{
-
 		for (size_t i = 0; i < scene->mNumMeshes; i++)
 		{
 			aiMesh* aimesh = scene->mMeshes[i];
@@ -89,8 +88,8 @@ void ModelImporter::ImportChildren(const aiScene* scene, aiNode* node, aiNode* p
 	meshes_array.AddObject(node_object);
 	node_object.AddString("Name", node->mName.C_Str());
 	uint node_uid = App->resources->GenerateUID();
-	node_object.AddInt("Node UID", node_uid);
-	node_object.AddInt("ParentNode UID", parentNodeUID);
+	node_object.AddInt("UUID", node_uid);
+	node_object.AddInt("Parent UUID", parentNodeUID);
 
 	LoadTransform(node, node_object);
 
@@ -124,6 +123,60 @@ void ModelImporter::LoadTransform(aiNode* node, GnJSONObj& node_object)
 	node_object.AddFloat3("Position", float3(position.x, position.y, position.z));
 	node_object.AddQuaternion("Rotation", Quat(rotation.x, rotation.y, rotation.z, rotation.w));
 	node_object.AddFloat3("Scale", float3(scaling.x, scaling.y, scaling.z));
+}
+
+GameObject* ModelImporter::Load(const char* path, ResourceModel* model)
+{
+	//Load JSON and transform into Game Objects
+	char* buffer = nullptr;
+	uint size = FileSystem::Load(model->libraryFile.c_str(), &buffer);
+	GnJSONObj model_data(buffer);
+	GnJSONArray nodes = model_data.GetArray("Nodes");
+
+	for (size_t i = 0; i < nodes.Size(); i++)
+	{
+		GnJSONObj node = nodes.GetObjectAt(i);
+		model->meshes.push_back(node.GetInt("Mesh"));
+	}
+
+	GameObject* root = nullptr;
+	std::vector<GameObject*> createdObjects;
+
+	for (size_t i = 0; i < nodes.Size(); i++)
+	{
+		GnJSONObj node_data = nodes.GetObjectAt(i);
+		int meshID = node_data.GetInt("Mesh", -1);
+		if (meshID != -1)
+		{
+			App->resources->CreateResourceData(meshID, ResourceType::RESOURCE_MESH);
+			App->resources->LoadResource(meshID);
+		}
+
+		//load game object
+		GameObject* gameObject = new GameObject();
+		uint parentUUID = gameObject->LoadNodeData(&node_data);
+		createdObjects.push_back(gameObject);
+
+		//check if it's the root game object
+		if (strcmp(gameObject->GetName(), "RootNode") == 0) {
+			root = gameObject;
+			//selectedGameObject = root;
+		}
+
+		//Get game object's parent
+		for (size_t i = 0; i < createdObjects.size(); i++)
+		{
+			if (createdObjects[i]->UUID == parentUUID)
+			{
+				createdObjects[i]->AddChild(gameObject);
+				gameObject->SetParent(createdObjects[i]);
+			}
+		}
+	}
+
+	App->scene->GetRoot()->AddChild(root);
+
+	return root;
 }
 
 #pragma endregion
@@ -385,7 +438,7 @@ void TextureImporter::Import(char* fileBuffer, ResourceTexture* texture, uint si
 	ilBindImage(0);
 }
 
-uint TextureImporter::Save(char** fileBuffer, ResourceTexture* texture)
+uint TextureImporter::Save(ResourceTexture* texture, char** fileBuffer)
 {
 	ILuint size;
 	ILubyte* data;

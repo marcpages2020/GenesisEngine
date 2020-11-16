@@ -4,6 +4,7 @@
 #include "FileSystem.h"
 #include "GnJSON.h"
 #include "GameObject.h"
+#include "Application.h"
 
 Material::Material() : Component(), mesh(nullptr), checkers_image(true), diffuse_texture(nullptr) {
 	type = ComponentType::MATERIAL;
@@ -40,6 +41,11 @@ Material::~Material()
 	}
 
 	mesh = nullptr;
+}
+
+void Material::Update()
+{
+	resource = (ResourceMaterial*)App->resources->RequestResource(_resourceUID);
 }
 
 void Material::Save(GnJSONArray& save_array)

@@ -1,7 +1,7 @@
 #pragma once
+#include "Globals.h"
 
 class GameObject;
-
 class GnJSONObj;
 class GnJSONArray;
 
@@ -29,9 +29,12 @@ public:
 
 	void SetGameObject(GameObject* gameObject);
 	GameObject* GetGameObject();
+	virtual void SetResourceUID(uint UID);
 
 protected:
 	ComponentType type;
 	GameObject* _gameObject;
 	bool enabled;
+
+	uint _resourceUID;
 };

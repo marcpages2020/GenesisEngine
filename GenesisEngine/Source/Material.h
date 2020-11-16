@@ -5,6 +5,7 @@
 #include <string>
 
 class GnMesh;
+class ResourceMaterial;
 class GnJSONArray;
 
 struct GnTexture 
@@ -27,6 +28,8 @@ public:
 	Material(GnMesh* mesh, GnTexture* diffuse_texture);
 	~Material();
 
+	void Update() override;
+
 	void Save(GnJSONArray& save_array) override;
 	void Load(GnJSONObj& load_object) override;
 	void OnEditor() override;
@@ -40,4 +43,6 @@ private:
 	GnTexture* diffuse_texture;
 	GnMesh* mesh;
 	bool checkers_image;
+
+	ResourceMaterial* resource;
 };

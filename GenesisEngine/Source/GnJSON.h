@@ -30,12 +30,12 @@ public:
 
 	JSON_Array* GetArray(const char* name);
 
-	int GetInt(const char* name);
-	float GetFloat(const char* name);
-	bool GetBool(const char* name);
-	const char* GetString(const char* name);
-	math::float3 GetFloat3(const char* name);
-	Quat GetQuaternion(const char* name);
+	int GetInt(const char* name, int default = -1);
+	float GetFloat(const char* name, float default = -1.0f);
+	bool GetBool(const char* name, bool default = false);
+	const char* GetString(const char* name, const char* default);
+	math::float3 GetFloat3(const char* name, float3 default = float3(-1,-1,-1));
+	Quat GetQuaternion(const char* name, Quat default = Quat(-1,-1,-1,-1));
 
 	void AddInt(const char* name, int number);
 	void AddFloat(const char* name, float number);

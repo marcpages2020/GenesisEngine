@@ -24,6 +24,7 @@ public:
 
 	void Save(GnJSONArray& save_array);
 	uint Load(GnJSONObj* object);
+	uint LoadNodeData(GnJSONObj* object);
 
 	Component* GetComponent(ComponentType component);
 	std::vector<Component*> GetComponents();

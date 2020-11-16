@@ -17,8 +17,10 @@ public:
 
 	void Save(GnJSONArray& save_array) override;
 	void Load(GnJSONObj& load_object) override;
+	void SetResourceUID(uint UID);
 
 	void GenerateBuffers();
+	void DeleteBuffers();
 
 	bool SetTexture(GnTexture* texture);
 	void RemoveTexture();
@@ -45,6 +47,7 @@ private:
 
 	bool draw_vertex_normals;
 	bool draw_face_normals;
+
 	ResourceMesh* resource;
 	
 };

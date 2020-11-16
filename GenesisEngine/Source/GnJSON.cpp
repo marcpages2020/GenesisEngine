@@ -66,56 +66,81 @@ uint GnJSONObj::Save(char** buffer)
 
 JSON_Array* GnJSONObj::GetArray(const char* name)
 {
-	return json_object_get_array(_object, name);
+	if (json_object_has_value(_object, name) == 1)
+		return json_object_get_array(_object, name);
+	else
+		return nullptr;
 }
 
-int GnJSONObj::GetInt(const char* name)
+int GnJSONObj::GetInt(const char* name, int default)
 {
-	return json_object_get_number(_object, name);
+	if (json_object_has_value(_object, name) == 1)
+		return json_object_get_number(_object, name);
+	else
+		return default;
 }
 
-float GnJSONObj::GetFloat(const char* name)
+float GnJSONObj::GetFloat(const char* name, float default)
 {
-	return json_object_get_number(_object, name);
+	if (json_object_has_value(_object, name) == 1)
+		return json_object_get_number(_object, name);
+	else
+		return default;
 }
 
-bool GnJSONObj::GetBool(const char* name)
+bool GnJSONObj::GetBool(const char* name, bool default)
 {
-	return json_object_get_boolean(_object, name);
+	if (json_object_has_value(_object, name) == 1)
+		return json_object_get_boolean(_object, name);
+	else
+		return default;
 }
 
-const char* GnJSONObj::GetString(const char* name)
+const char* GnJSONObj::GetString(const char* name, const char* default)
 {
-	return json_object_get_string(_object, name);
+	if (json_object_has_value(_object, name) == 1)
+		return json_object_get_string(_object, name);
+	else
+		return default;
 }
 
-math::float3 GnJSONObj::GetFloat3(const char* name)
+math::float3 GnJSONObj::GetFloat3(const char* name, float3 default)
 {
-	math::float3 number;
+	if (json_object_has_value(_object, name) == 1)
+	{
+		math::float3 number;
 
-	JSON_Array* array;
-	array = json_object_get_array(_object, name);
+		JSON_Array* array;
+		array = json_object_get_array(_object, name);
 
-	number.x = json_array_get_number(array, 0);
-	number.y = json_array_get_number(array, 1);
-	number.z = json_array_get_number(array, 2);
+		number.x = json_array_get_number(array, 0);
+		number.y = json_array_get_number(array, 1);
+		number.z = json_array_get_number(array, 2);
 
-	return number;
+		return number;
+	}
+	else
+		return default;
 }
 
-Quat GnJSONObj::GetQuaternion(const char* name)
+Quat GnJSONObj::GetQuaternion(const char* name, Quat default)
 {
-	math::Quat quaternion;
+	if (json_object_has_value(_object, name) == 1)
+	{
+		math::Quat quaternion;
 
-	JSON_Array* array;
-	array = json_object_get_array(_object, name);
+		JSON_Array* array;
+		array = json_object_get_array(_object, name);
 
-	quaternion.x = json_array_get_number(array, 0);
-	quaternion.y = json_array_get_number(array, 1);
-	quaternion.z = json_array_get_number(array, 2);
-	quaternion.w = json_array_get_number(array, 3);
+		quaternion.x = json_array_get_number(array, 0);
+		quaternion.y = json_array_get_number(array, 1);
+		quaternion.z = json_array_get_number(array, 2);
+		quaternion.w = json_array_get_number(array, 3);
 
-	return quaternion;
+		return quaternion;
+	}
+	else
+		return default;
 }
 
 void GnJSONObj::AddInt(const char* name, int number)

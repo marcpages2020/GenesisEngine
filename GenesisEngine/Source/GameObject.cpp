@@ -60,10 +60,10 @@ void GameObject::OnEditor()
 {
 	ImGui::Checkbox("Enabled", &enabled);
 	ImGui::SameLine();
-	ImGui::Text(name.c_str());
-	//static char buf[64] = "Name";
-	//strcpy(buf, name.c_str());
-	//if (ImGui::InputText("", &buf[0], IM_ARRAYSIZE(buf))){}
+
+	static char buf[64] = "Name";
+	strcpy(buf, name.c_str());
+	if (ImGui::InputText("", &buf[0], IM_ARRAYSIZE(buf))){}
 
 	for (size_t i = 0; i < components.size(); i++)
 	{
@@ -119,7 +119,7 @@ void GameObject::Save(GnJSONArray& save_array)
 uint GameObject::Load(GnJSONObj* object)
 {
 	UUID = object->GetInt("UUID");
-	name = object->GetString("Name");
+	name = object->GetString("Name", "No Name");
 	uint parentUUID = object->GetInt("Parent UUID");
 
 	GnJSONArray componentsArray = object->GetArray("Components");
@@ -129,6 +129,27 @@ uint GameObject::Load(GnJSONObj* object)
 		GnJSONObj componentObject = componentsArray.GetObjectAt(i);
 		Component* component = AddComponent((ComponentType)componentObject.GetInt("Type"));
 		component->Load(componentObject);
+	}
+
+	return parentUUID;
+}
+
+uint GameObject::LoadNodeData(GnJSONObj* object)
+{
+	UUID = object->GetInt("UUID");
+	name = object->GetString("Name", "No Name");
+	uint parentUUID = object->GetInt("Parent UUID");
+
+	int meshID = object->GetInt("Mesh", -1);
+	if (meshID != -1) {
+		GnMesh* mesh = (GnMesh*)AddComponent(ComponentType::MESH);
+		mesh->SetResourceUID(meshID);
+	}
+
+	int materialID = object->GetInt("Material", -1);
+	if (materialID != -1) {
+		Material* material = (Material*)AddComponent(ComponentType::MATERIAL);
+		material->SetResourceUID(meshID);
 	}
 
 	return parentUUID;

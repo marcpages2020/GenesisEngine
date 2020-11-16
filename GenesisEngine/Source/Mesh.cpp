@@ -14,24 +14,13 @@
 
 // GnMesh =========================================================================================================================
 
-GnMesh::GnMesh() : Component(), draw_face_normals(false), draw_vertex_normals(false), textureID(-1), texture_buffer(-1), name("No name")
+GnMesh::GnMesh() : Component(), draw_face_normals(false), draw_vertex_normals(false), textureID(-1), texture_buffer(-1), name("No name"), resource(nullptr)
 {
 	type = ComponentType::MESH;
 }
 
-GnMesh::~GnMesh(){
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glDeleteBuffers(1, &vertices_buffer);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	glDeleteBuffers(1, &indices_buffer);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glDeleteBuffers(1, &normals_buffer);
-
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glDeleteBuffers(1, &texture_buffer);
-	glDeleteTextures(1, &textureID);
+GnMesh::~GnMesh() {
+	DeleteBuffers();
 }
 
 void GnMesh::Save(GnJSONArray& save_array)
@@ -48,6 +37,13 @@ void GnMesh::Load(GnJSONObj& load_object)
 {
 	//TODO
 	//MeshImporter::Load(load_object.GetString("Path"), this);
+}
+
+void GnMesh::SetResourceUID(uint UID)
+{
+	_resourceUID = UID;
+	resource = (ResourceMesh*)App->resources->RequestResource(_resourceUID);
+	GenerateBuffers();
 }
 
 void GnMesh::GenerateBuffers()
@@ -83,6 +79,22 @@ void GnMesh::GenerateBuffers()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void GnMesh::DeleteBuffers()
+{
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glDeleteBuffers(1, &vertices_buffer);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glDeleteBuffers(1, &indices_buffer);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glDeleteBuffers(1, &normals_buffer);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glDeleteBuffers(1, &texture_buffer);
+	glDeleteTextures(1, &textureID);
 }
 
 bool GnMesh::SetTexture(GnTexture* g_texture)

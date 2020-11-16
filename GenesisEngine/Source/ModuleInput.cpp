@@ -3,6 +3,9 @@
 #include "ModuleInput.h"
 #include "ModuleResources.h"
 
+#include "ImGui/imgui_internal.h"
+#include "ImGui/imgui_impl_sdl.h"
+
 #define MAX_KEYS 300
 
 ModuleInput::ModuleInput(bool start_enabled) : Module(start_enabled)
@@ -93,6 +96,8 @@ update_status ModuleInput::PreUpdate(float dt)
 
 	while(SDL_PollEvent(&e))
 	{
+		ImGui_ImplSDL2_ProcessEvent(&e);
+
 		switch(e.type)
 		{
 			case SDL_MOUSEWHEEL:

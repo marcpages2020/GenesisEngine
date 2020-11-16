@@ -35,6 +35,7 @@ namespace ModelImporter
 	uint64 Save(ResourceModel* model, char** fileBuffer);
 	void ImportChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, uint parentNodeUID, ResourceModel* model, GnJSONArray& meshes_array);
 	void LoadTransform(aiNode* node, GnJSONObj& node_object);
+	GameObject* Load(const char* path, ResourceModel* model);
 }
 
 namespace MeshImporter
@@ -52,7 +53,7 @@ namespace TextureImporter
 	void Init();
 
 	void Import(char* fileBuffer, ResourceTexture* resource, uint size);
-	uint Save(char** fileBuffer, ResourceTexture* texture);
+	uint Save(ResourceTexture* texture, char** fileBuffer);
 	void Load(const char* path);
 
 	std::string FindTexture(const char* texture_name, const char* model_directory);
