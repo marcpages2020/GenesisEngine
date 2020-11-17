@@ -19,6 +19,7 @@ public:
 	void SetResourceUID(uint UID) override;
 
 	void GenerateTextureBuffers();
+	void BindTexture();
 
 	void Save(GnJSONArray& save_array) override;
 	void Load(GnJSONObj& load_object) override;
@@ -27,7 +28,6 @@ public:
 	void SetTexture(ResourceTexture* texture);
 	void AssignCheckersImage();
 	ResourceTexture* GetDiffuseTexture();
-	void SetMesh(GnMesh* mesh);
 	bool DeleteTexture();
 
 private:

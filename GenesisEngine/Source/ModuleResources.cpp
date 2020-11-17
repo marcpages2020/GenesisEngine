@@ -75,7 +75,7 @@ int ModuleResources::UpdateMetaFile(const char* assets_file)
 	//uint lastModified = FileSystem::GetLastModTime(asset_path);
 
 	//Find(UID);
-
+	return 0;
 }
 
 uint ModuleResources::Find(const char* assets_file)

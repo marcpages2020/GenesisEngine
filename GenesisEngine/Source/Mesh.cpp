@@ -82,7 +82,6 @@ void GnMesh::DeleteBuffers()
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glDeleteBuffers(1, &texcoords_buffer);
-	//glDeleteTextures(1, &textureID);
 }
 
 //bool GnMesh::SetTexture(GnTexture* g_texture)
@@ -128,14 +127,15 @@ void GnMesh::Render()
 	glBindBuffer(GL_ARRAY_BUFFER, texcoords_buffer);
 	glTexCoordPointer(2, GL_FLOAT, 0, NULL);
 
-	//TODO: Apply Texture
-	//glBindTexture(GL_TEXTURE_2D, textureID);
+	Material* material = (Material*)_gameObject->GetComponent(ComponentType::MATERIAL);
+	if (material != nullptr)
+		material->BindTexture();
 
 	//indices
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
 
 	glPushMatrix();
-	glMultMatrixf((float*)&_gameObject->GetTransform()->GetGlobalTransform());
+	glMultMatrixf((float*)&_gameObject->GetTransform()->GetGlobalTransform().Transposed());
 
 	glDrawElements(GL_TRIANGLES, _resource->indices_amount, GL_UNSIGNED_INT, NULL);
 

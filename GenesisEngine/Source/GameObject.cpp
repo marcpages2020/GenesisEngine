@@ -255,7 +255,8 @@ Transform* GameObject::GetTransform()
 
 void GameObject::AddChild(GameObject* child)
 {
-	children.push_back(child);
+	if(child != nullptr)
+		children.push_back(child);
 }
 
 int GameObject::GetChildAmount()
@@ -305,8 +306,6 @@ void GameObject::DeleteChildren()
 
 void GameObject::UpdateChildrenTransforms()
 {
-	transform->UpdateGlobalTransform();
-
 	for (size_t i = 0; i < children.size(); i++)
 	{
 		children[i]->GetTransform()->UpdateGlobalTransform(transform->GetGlobalTransform());

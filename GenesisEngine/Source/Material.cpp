@@ -9,11 +9,12 @@
 #include "glew/include/glew.h"
 #include "ResourceMaterial.h"
 
-Material::Material() : Component(), checkers_image(true), _resource(nullptr) {
+Material::Material() : Component(), checkers_image(false), _resource(nullptr) 
+{
 	type = ComponentType::MATERIAL;
 }
 
-Material::Material(GameObject* gameObject) : Component(gameObject), checkers_image(true), _resource(nullptr)
+Material::Material(GameObject* gameObject) : Component(gameObject), checkers_image(false), _resource(nullptr)
 {
 	type = ComponentType::MATERIAL;
 }
@@ -26,16 +27,19 @@ Material::~Material()
 	}
 }
 
-void Material::Update()
-{
-
-}
+void Material::Update() {}
 
 void Material::SetResourceUID(uint UID)
 {
 	_resource = (ResourceMaterial*)App->resources->RequestResource(UID);
 	_diffuseTexture = (ResourceTexture*)App->resources->RequestResource(_resource->diffuseTextureUID);
+
 	GenerateTextureBuffers();
+
+	if (_diffuseTexture == nullptr)
+		AssignCheckersImage();
+	else
+		SetTexture(_diffuseTexture);
 }
 
 void Material::GenerateTextureBuffers()
@@ -50,6 +54,11 @@ void Material::GenerateTextureBuffers()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void Material::BindTexture()
+{
+	glBindTexture(GL_TEXTURE_2D, _textureID);
 }
 
 void Material::Save(GnJSONArray& save_array)
@@ -82,56 +91,52 @@ void Material::OnEditor()
 		ImGui::SameLine();
 		if (ImGui::Checkbox("Checkers Image", &checkers_image))
 		{
-			//if (diffuse_texture != nullptr)
-			//{
-			//	if (checkers_image == false)
-			//		mesh->SetTexture(diffuse_texture);
-			//	else
-			//		mesh->AssignCheckersImage();
-			//}
-			//else
-			//{
-			//	checkers_image = true;
-			//}
+			if (checkers_image)
+			{
+				AssignCheckersImage();
+			}
+			else
+			{
+				if (_diffuseTexture != nullptr)
+					SetTexture(_diffuseTexture);
+				else
+					checkers_image = true;
+			}
+
+
 		}
 
-		//ImGui::Separator();
+		ImGui::Separator();
 
-		/*
-		if(diffuse_texture != nullptr)
+		if(_diffuseTexture != nullptr)
 		{
-			ImGui::Text("Diffuse Texture: %s", diffuse_texture->name.c_str());
-			ImGui::Text("Path: %s", diffuse_texture->path.c_str());
+			//ImGui::Text("Diffuse Texture: %s", _diffuseTexture->name.c_str());
+			//ImGui::Text("Path: %s", diffuse_texture->path.c_str());
 
-			ImGui::Text("Width: %d Height: %d", diffuse_texture->width, diffuse_texture->height);
+			ImGui::Text("Width: %d Height: %d", _diffuseTexture->width, _diffuseTexture->height);
 
 			ImGui::Spacing();
-			ImGui::Image((ImTextureID)diffuse_texture->id, ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
+			ImGui::Image((ImTextureID)_diffuseTexture->id, ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
 
 			if (ImGui::Button("Remove Texture"))
 			{
 				DeleteTexture();
-
-				mesh->RemoveTexture();
+				//mesh->RemoveTexture();
 			}
 		}
-		*/
 	}
 }
 
 void Material::SetTexture(ResourceTexture* texture)
 {
-	/*if (diffuseTexture != nullptr)
-		DeleteTexture();*/
+	//if (_diffuseTexture != nullptr)
+		//DeleteTexture();
 
-	//diffuseTexture = (ResourceMaterial*)App->resources->RequestResource(_resourceUID);
+	_diffuseTexture = texture;
 
-	//diffuse_texture = texture;
-
-	/*if (mesh != nullptr)
-	{
-		checkers_image = !mesh->SetTexture(diffuse_texture);
-	}*/
+	glBindTexture(GL_TEXTURE_2D, _textureID);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _diffuseTexture->width, _diffuseTexture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, _diffuseTexture->data);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Material::AssignCheckersImage()
@@ -151,33 +156,25 @@ void Material::AssignCheckersImage()
 		}
 	}
 
-	//glBindTexture(GL_TEXTURE_2D, textureID);
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, CHECKERS_WIDTH, CHECKERS_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, checkerImage);
-	//glBindTexture(GL_TEXTURE_2D, 0);
+	glBindTexture(GL_TEXTURE_2D, _textureID);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, CHECKERS_WIDTH, CHECKERS_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, checkerImage);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 ResourceTexture* Material::GetDiffuseTexture()
 {
-	//return diffuse_texture;
+	return _diffuseTexture;
 	return nullptr;
-}
-
-void Material::SetMesh(GnMesh* g_mesh)
-{
-	//mesh = g_mesh;
-
-	//if (diffuse_texture != nullptr)
-	//{
-	//	checkers_image = !mesh->SetTexture(diffuse_texture);
-	//}
 }
 
 bool Material::DeleteTexture()
 {
 	bool ret = true;
 
+	glDeleteTextures(1, &_textureID);
+
 	//TODO
-	//TextureImporter::UnloadTexture(diffuse_texture->id);
+	//TextureImporter::UnloadTexture(_diffuseTextureID);
 	//delete diffuse_texture;
 	//diffuse_texture = nullptr;
 
