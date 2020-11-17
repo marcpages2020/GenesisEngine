@@ -187,7 +187,7 @@ GameObject* ModelImporter::Load(const char* path, ResourceModel* model)
 
 	model_data.Release();
 	RELEASE_ARRAY(buffer);
-	App->scene->GetRoot()->AddChild(root);
+	//App->scene->GetRoot()->AddChild(root);
 
 	return root;
 }
