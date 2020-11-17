@@ -36,6 +36,11 @@ bool ModuleScene::Start()
 	GameObject* baker_house_GO = App->resources->RequestGameObject("Assets/Models/baker_house/BakerHouse.FBX");
 	root->AddChild(baker_house_GO);
 	baker_house_GO->SetParent(root);
+
+	GameObject* camera = new GameObject();
+	camera->AddComponent(ComponentType::CAMERA);
+	camera->SetName("Camera");
+	root->AddChild(camera);
 	//uint baker_house_texture = App->resources->ImportFile("Assets/Textures/Baker_house.png");
 	//AddGameObject(house);
 

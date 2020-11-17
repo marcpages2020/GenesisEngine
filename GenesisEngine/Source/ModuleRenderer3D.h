@@ -1,7 +1,7 @@
 #pragma once
 #include "Module.h"
 #include "Globals.h"
-#include "glmath.h"
+#include "MathGeoLib/include/MathGeoLib.h"
 #include "Light.h"
 
 #define MAX_LIGHTS 8
@@ -34,6 +34,7 @@ public:
 	
 	void OnResize(int width, int height);
 
+	void DrawAABB(float3* aabb);
 	DisplayMode GetDisplayMode();
 	void SetDisplayMode(DisplayMode display);
 

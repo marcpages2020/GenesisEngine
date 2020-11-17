@@ -9,8 +9,8 @@
 
 #include "ResourceMesh.h"
 
-#include "glew/include/glew.h"
 #include "ImGui/imgui.h"
+#include "glew/include/glew.h"
 
 // GnMesh =========================================================================================================================
 
@@ -44,6 +44,7 @@ void GnMesh::SetResourceUID(uint UID)
 	_resourceUID = UID;
 	_resource = (ResourceMesh*)App->resources->RequestResource(_resourceUID);
 	GenerateBuffers();
+	GenerateAABB();
 }
 
 void GnMesh::GenerateBuffers()
@@ -82,6 +83,17 @@ void GnMesh::DeleteBuffers()
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glDeleteBuffers(1, &texcoords_buffer);
+}
+
+void GnMesh::GenerateAABB()
+{
+	_AABB.SetNegativeInfinity();
+	_AABB.Enclose((float3*)_resource->vertices, _resource->vertices_amount);
+}
+
+AABB GnMesh::GetAABB()
+{
+	return _AABB;
 }
 
 //bool GnMesh::SetTexture(GnTexture* g_texture)
@@ -126,16 +138,15 @@ void GnMesh::Render()
 	//textures
 	glBindBuffer(GL_ARRAY_BUFFER, texcoords_buffer);
 	glTexCoordPointer(2, GL_FLOAT, 0, NULL);
-
-	Material* material = (Material*)_gameObject->GetComponent(ComponentType::MATERIAL);
-	if (material != nullptr)
-		material->BindTexture();
-
 	//indices
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
 
 	glPushMatrix();
 	glMultMatrixf((float*)&_gameObject->GetTransform()->GetGlobalTransform().Transposed());
+
+	Material* material = (Material*)_gameObject->GetComponent(ComponentType::MATERIAL);
+	if (material != nullptr)
+		material->BindTexture();
 
 	glDrawElements(GL_TRIANGLES, _resource->indices_amount, GL_UNSIGNED_INT, NULL);
 
@@ -144,6 +155,8 @@ void GnMesh::Render()
 
 	if (draw_face_normals || App->renderer3D->draw_face_normals)
 		DrawFaceNormals();
+
+	//App->renderer3D->DrawAABB(_AABB);
 
 	glPopMatrix();
 
@@ -228,6 +241,7 @@ void GnMesh::DrawFaceNormals()
 
 	glEnd();
 }
+
 
 // --------------------------------------------------------------------------------------------------------------------------------
 

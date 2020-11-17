@@ -3,8 +3,10 @@
 #include "Transform.h"
 #include "Mesh.h"
 #include "Material.h"
+#include "Camera.h"
 #include "ImGui/imgui.h"
 #include "GnJSON.h"
+#include "Application.h"
 
 #include "MathGeoLib/include/MathGeoLib.h"
 
@@ -47,6 +49,19 @@ void GameObject::Update()
 		{
 			if (components[i]->IsEnabled())
 				components[i]->Update();
+
+			if (components[i]->GetType() == ComponentType::MESH) {
+				GnMesh* mesh = (GnMesh*)components[i];
+				_OBB = mesh->GetAABB();
+				_OBB.Transform(transform->GetGlobalTransform());
+
+				_AABB.SetNegativeInfinity();
+				_AABB.Enclose(_OBB);
+
+				float3 cornerPoints[8];
+				_AABB.GetCornerPoints(cornerPoints);
+				App->renderer3D->DrawAABB(cornerPoints);
+			}
 		}
 
 		for (size_t i = 0; i < children.size(); i++)
@@ -186,8 +201,9 @@ Component* GameObject::AddComponent(ComponentType type)
 {
 	Component* component = nullptr;
 
-	if (type == ComponentType::TRANSFORM) 
+	switch (type)
 	{
+	case TRANSFORM:
 		if (transform != nullptr)
 		{
 			RemoveComponent(transform);
@@ -195,14 +211,18 @@ Component* GameObject::AddComponent(ComponentType type)
 
 		transform = new Transform();
 		component = transform;
-	}
-	else if (type == ComponentType::MESH)
-	{
+		break;
+	case MESH:
 		component = new GnMesh();
-	}
-	else if (type == ComponentType::MATERIAL)
-	{
+		break;
+	case MATERIAL:
 		component = new Material(this);
+		break;
+	case CAMERA:
+		component = new Camera(this);
+		break;
+	default:
+		break;
 	}
 
 	component->SetGameObject(this);

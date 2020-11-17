@@ -4,6 +4,8 @@
 #include <vector>;
 #include "Material.h"
 
+#include "MathGeoLib/include/MathGeoLib.h"
+
 class ResourceMesh;
 
 typedef float GLfloat;
@@ -22,6 +24,9 @@ public:
 	void GenerateBuffers();
 	void DeleteBuffers();
 
+	void GenerateAABB();
+	AABB GetAABB();
+
 	virtual void Update() override;
 	virtual void Render();
 	virtual void OnEditor() override;
@@ -38,6 +43,7 @@ private:
 	uint indices_buffer = -1;
 	uint normals_buffer = -1;
 	uint texcoords_buffer = -1;
+	AABB _AABB;
 
 	bool draw_vertex_normals;
 	bool draw_face_normals;

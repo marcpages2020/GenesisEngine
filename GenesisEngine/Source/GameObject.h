@@ -5,6 +5,8 @@
 #include <vector>
 #include <string>
 
+#include "MathGeoLib/include/MathGeoLib.h"
+
 class Component;
 class Transform;
 class GnMesh;
@@ -58,4 +60,7 @@ private:
 	Transform* transform;
 	std::vector<Component*> components;
 	std::vector<GameObject*> children;
+
+	OBB _OBB;
+	AABB _AABB;
 };
