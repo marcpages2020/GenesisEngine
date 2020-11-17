@@ -81,6 +81,26 @@ uint ModuleResources::Find(const char* assets_file)
 	return UID;
 }
 
+const char* ModuleResources::Find(uint UID)
+{
+	std::vector<std::string> directories = { "Library/Config/","Library/Models/","Library/Meshes/","Library/Materials/","Library/Textures/", "Library/Scenes/" };
+	std::vector<std::string> extensions = { ".json",".model",".mesh",".material",".dds", ".scene" };
+
+	for (size_t i = 0; i < directories.size(); i++)
+	{
+		std::string file = directories[i];
+		file += std::to_string(UID);
+		file += extensions[i];
+		if (FileSystem::Exists(file.c_str()))
+		{
+			char* final_file = new char[128];
+			strcpy(final_file, file.c_str());
+			return final_file;
+		}
+	}
+	return nullptr;
+}
+
 
 
 uint ModuleResources::ImportFile(const char* assets_file)
@@ -225,6 +245,7 @@ Resource* ModuleResources::CreateResource(uint UID)
 {
 	Resource* resource = nullptr;
 
+	//TODO: find file if data does not exist
 	ResourceType type = resources_data[UID].type;
 
 	switch (type)

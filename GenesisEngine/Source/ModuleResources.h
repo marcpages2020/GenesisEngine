@@ -23,6 +23,7 @@ public:
 
 	int MetaUpToDate(const char* asset_path);
 	uint Find(const char* assets_file);
+	const char* Find(uint UID);
 
 	uint ImportFile(const char* assets_file);
 	uint ImportInternalResource(const char* path, const void* data, ResourceType type);
