@@ -48,14 +48,34 @@ int ModuleResources::MetaUpToDate(const char* asset_path)
 		uint lastModified = FileSystem::GetLastModTime(asset_path);
 
 		if (lastModifiedMeta != lastModified)
-			return 0;
+			return UpdateMetaFile(asset_path);
 		else
 			return UID;
+
+		meta.Release();
+		RELEASE_ARRAY(buffer);
 	}
 	else 
 	{
 		return -1;
 	}
+}
+
+int ModuleResources::UpdateMetaFile(const char* assets_file)
+{
+	char* buffer = nullptr;
+	std::string meta_file = assets_file;
+	meta_file.append(".meta");
+
+	uint size = FileSystem::Load(meta_file.c_str(), &buffer);
+	GnJSONObj meta(buffer);
+
+	uint UID = meta.GetInt("UID");
+	int lastModifiedMeta = meta.GetInt("lastModified");
+	//uint lastModified = FileSystem::GetLastModTime(asset_path);
+
+	//Find(UID);
+
 }
 
 uint ModuleResources::Find(const char* assets_file)
@@ -291,6 +311,12 @@ Resource* ModuleResources::RequestResource(uint UID)
 	}
 
 	return LoadResource(UID);
+}
+
+GameObject* ModuleResources::RequestGameObject(const char* assets_file)
+{
+	ResourceModel* model = (ResourceModel*)RequestResource(Find(assets_file));
+	return ModelImporter::Load(resources[model->GetUID()]->libraryFile.c_str(), model);
 }
 
 void ModuleResources::ReleaseResource(uint UID)

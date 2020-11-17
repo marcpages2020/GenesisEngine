@@ -6,6 +6,8 @@
 #include <map>
 #include <string>
 
+class GameObject;
+
 struct ResourceData
 {
 	ResourceType type = ResourceType::RESOURCE_UNKNOWN;
@@ -22,6 +24,7 @@ public:
 	bool Init() override;
 
 	int MetaUpToDate(const char* asset_path);
+	int UpdateMetaFile(const char* assets_file);
 	uint Find(const char* assets_file);
 	const char* Find(uint UID);
 
@@ -34,6 +37,7 @@ public:
 	Resource* CreateResource(const char* assetsPath, ResourceType type);
 	Resource* CreateResource(uint UID);
 	Resource* RequestResource(uint UID);
+	GameObject* RequestGameObject(const char* assets_file);
 	void ReleaseResource(uint UID);
 	bool SaveResource(Resource* resource);
 	bool SaveMetaFile(Resource* resource);
