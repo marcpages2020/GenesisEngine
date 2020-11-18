@@ -11,12 +11,6 @@
 
 typedef int GLint;
 
-enum class AspectRatio {
-	FREE_ASPECT,
-	ASPECT_16_9,
-	ASPECT_4_3
-};
-
 struct log_message {
 	std::string log_text;
 	int warning_level;
@@ -84,8 +78,6 @@ private:
 	std::vector<float> ms_log;
 
 	std::vector<log_message> console_log;
-
-	AspectRatio aspect_ratio;
 
 	enum
 	{

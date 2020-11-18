@@ -54,6 +54,9 @@ public:
 	uint UUID = -1;
 
 private:
+	void GenerateAABB(GnMesh* mesh);
+
+private:
 	bool enabled;
 	std::string name;
 	GameObject* parent;

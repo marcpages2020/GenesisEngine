@@ -23,7 +23,7 @@
 #define IM_NEWLINE  "\n"
 #endif
 
-Editor::Editor(bool start_enabled) : Module(start_enabled), aspect_ratio(AspectRatio::FREE_ASPECT)
+Editor::Editor(bool start_enabled) : Module(start_enabled)
 {
 	name = "editor";
 
@@ -464,7 +464,6 @@ void Editor::ShowSceneWindow()
 	if (ImGui::Begin("Scene", &show_scene_window, ImGuiWindowFlags_MenuBar))
 	{
 		scene_window_focused = ImGui::IsWindowFocused();
-		static AspectRatio desired_aspect_ratio = aspect_ratio;
 
 		if (ImGui::BeginMenuBar())
 		{
@@ -486,19 +485,6 @@ void Editor::ShowSceneWindow()
 				static bool face_normals = App->renderer3D->draw_face_normals;
 				if (ImGui::Checkbox("Face Normals", &face_normals))
 					App->renderer3D->draw_face_normals = face_normals;
-
-				/*
-				if (ImGui::BeginMenu("Aspect"))
-				{
-					if (ImGui::MenuItem("Free Aspect"))
-						desired_aspect_ratio = AspectRatio::FREE_ASPECT;
-					else if (ImGui::MenuItem("16:9"))
-						desired_aspect_ratio = AspectRatio::ASPECT_16_9;
-					else if (ImGui::MenuItem("4:3"))
-						desired_aspect_ratio = AspectRatio::ASPECT_4_3;
-					ImGui::EndMenu();
-				}
-				*/
 
 				ImGui::EndMenu();
 			}

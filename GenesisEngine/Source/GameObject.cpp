@@ -47,23 +47,24 @@ void GameObject::Update()
 	{
 		for (size_t i = 0; i < components.size(); i++)
 		{
-			if (components[i]->IsEnabled())
-				components[i]->Update();
+			//Update Components
+			if (components[i]->IsEnabled()) 
+			{
+				if (components[i]->GetType() == ComponentType::MESH) 
+				{
+					GnMesh* mesh = (GnMesh*)components[i];
+					GenerateAABB(mesh);
 
-			if (components[i]->GetType() == ComponentType::MESH) {
-				GnMesh* mesh = (GnMesh*)components[i];
-				_OBB = mesh->GetAABB();
-				_OBB.Transform(transform->GetGlobalTransform());
-
-				_AABB.SetNegativeInfinity();
-				_AABB.Enclose(_OBB);
-
-				float3 cornerPoints[8];
-				_AABB.GetCornerPoints(cornerPoints);
-				App->renderer3D->DrawAABB(cornerPoints);
+					mesh->Update();
+				}
+				else
+				{
+					components[i]->Update();
+				}
 			}
 		}
 
+		//Update Children
 		for (size_t i = 0; i < children.size(); i++)
 		{
 			children[i]->Update();
@@ -330,4 +331,17 @@ void GameObject::UpdateChildrenTransforms()
 	{
 		children[i]->GetTransform()->UpdateGlobalTransform(transform->GetGlobalTransform());
 	}
+}
+
+void GameObject::GenerateAABB(GnMesh* mesh)
+{
+	_OBB = mesh->GetAABB();
+	_OBB.Transform(transform->GetGlobalTransform());
+
+	_AABB.SetNegativeInfinity();
+	_AABB.Enclose(_OBB);
+
+	float3 cornerPoints[8];
+	_AABB.GetCornerPoints(cornerPoints);
+	App->renderer3D->DrawAABB(cornerPoints);
 }
