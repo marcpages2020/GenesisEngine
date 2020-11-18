@@ -13,21 +13,21 @@ public:
 
 	bool Init();
 	bool Start();
-	bool LoadConfig(GnJSONObj& config) override;
 	update_status Update(float dt);
 	bool CleanUp();
 
-	void Look(const float3& Position, const float3& Reference, bool RotateAroundReference = false);
+	bool LoadConfig(GnJSONObj& config) override;
+
+	void Look(float3& position);
 	void LookAt(const float3& Spot);
-	void Move(const float3& Movement);
 	float* GetViewMatrix();
 
 	void Reset();
 	void SetBackgroundColor(float r, float g, float b, float w);
 
 private:
-
-	void CalculateViewMatrix();
+	void Move(const float3& Movement);
+	void Orbit(float dt);
 
 public:
 
@@ -36,6 +36,7 @@ public:
 
 	float move_speed;
 	float drag_speed;
+	float orbit_speed;
 	float zoom_speed;
 	float sensitivity;
 

@@ -24,6 +24,9 @@ public:
 	void SetPosition(float3 position);
 	void SetReference(float3 reference);
 
+	void Look(float3 spot);
+	Frustum GetFrustum();
+
 	float* GetViewMatrix();
 	//virtual void Enable() override;
 	//virtual void Disable() override;

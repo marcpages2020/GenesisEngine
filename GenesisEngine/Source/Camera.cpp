@@ -47,7 +47,10 @@ void Camera::Update()
 {
 	_frustum.pos = _gameObject->GetTransform()->GetPosition();
 	//_frustum.Transform(_gameObject->GetTransform()->GetLocalTransform());
-		
+	
+	_frustum.up = _gameObject->GetTransform()->GetGlobalTransform().WorldY();
+	_frustum.front = _gameObject->GetTransform()->GetGlobalTransform().WorldZ();
+
 	float3 corner_points[8];
 	_frustum.GetCornerPoints(corner_points);
 	App->renderer3D->DrawAABB(corner_points);
@@ -102,6 +105,21 @@ void Camera::SetPosition(float3 position)
 void Camera::SetReference(float3 reference)
 {
 	_reference = reference;
+}
+
+void Camera::Look(float3 spot)
+{
+	float3 difference = spot - _frustum.pos;
+
+	float3x3 matrix = float3x3::LookAt(_frustum.front, difference.Normalized(), _frustum.up, float3::unitY);
+
+	_frustum.front = matrix.MulDir(_frustum.front).Normalized();
+	_frustum.up = matrix.MulDir(_frustum.up).Normalized();
+}
+
+Frustum Camera::GetFrustum()
+{
+	return _frustum;
 }
 
 float* Camera::GetViewMatrix()

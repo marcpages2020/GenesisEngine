@@ -19,9 +19,6 @@ bool ModuleScene::Start()
 	LOG("Loading Intro assets");
 	bool ret = true;
 
-	App->camera->Move(float3(1.0f, 1.0f, 0.0f));
-	App->camera->LookAt(float3::zero);
-
 	root = new GameObject();
 	selectedGameObject = root;
 	root->SetName("Root");

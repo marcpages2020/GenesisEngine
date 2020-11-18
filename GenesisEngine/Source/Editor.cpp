@@ -676,7 +676,7 @@ void Editor::ShowConfigurationWindow()
 			}
 
 			ImGui::SliderFloat("Movement Speed", &App->camera->move_speed, 0.0f, 50.0f);
-			ImGui::SliderFloat("Drag Speed", &App->camera->drag_speed, 0.0f, 10.0f);
+			ImGui::SliderFloat("Drag Speed", &App->camera->orbit_speed, 0.0f, 10.0f);
 			ImGui::SliderFloat("Zoom Speed", &App->camera->zoom_speed, 0.0f, 50.0f);
 			ImGui::SliderFloat("Sensitivity", &App->camera->sensitivity, 0.0f, 50.0f);
 		}
