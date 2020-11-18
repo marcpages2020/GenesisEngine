@@ -2,8 +2,8 @@
 #include "Application.h"
 
 #include "GameObject.h"
-#include "Mesh.h"
 #include "Material.h"
+#include "Camera.h"
 
 #include <vector>
 #include "FileSystem.h"
@@ -332,6 +332,16 @@ void ModuleRenderer3D::SetDisplayMode(DisplayMode display)
 	{
 		glPolygonMode(face, GL_LINE);
 	}
+}
+
+void ModuleRenderer3D::SetMainCamera(Camera* camera)
+{
+	_mainCamera = camera;
+}
+
+bool ModuleRenderer3D::IsInsideCameraView(AABB aabb)
+{
+	return _mainCamera->ContainsAABB(aabb);
 }
 
 void ModuleRenderer3D::SetCapActive(GLenum cap, bool active)

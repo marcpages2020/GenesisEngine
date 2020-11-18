@@ -10,8 +10,7 @@ typedef unsigned int GLuint;
 typedef unsigned int GLenum;
 typedef unsigned char GLubyte;
 typedef void* SDL_GLContext;
-class GnMesh;
-class GnMeshCollection;
+class Camera;
 
 enum DisplayMode
 {
@@ -37,6 +36,8 @@ public:
 	void DrawAABB(float3* aabb);
 	DisplayMode GetDisplayMode();
 	void SetDisplayMode(DisplayMode display);
+	void SetMainCamera(Camera* camera);
+	bool IsInsideCameraView(AABB aabb);
 
 	void SetCapActive(GLenum cap, bool active);
 	void SetVSYNC(bool enabled);
@@ -67,4 +68,5 @@ public:
 
 private:
 	bool debug;
+	Camera* _mainCamera;
 };

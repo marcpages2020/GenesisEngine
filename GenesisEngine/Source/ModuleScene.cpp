@@ -23,13 +23,7 @@ bool ModuleScene::Start()
 	selectedGameObject = root;
 	root->SetName("Root");
 
-	//GameObject* house = 
 	//uint baker_house = App->resources->ImportFile("Assets/Models/baker_house/BakerHouse.FBX");
-	//uint baker_house_uid = App->resources->Find("Assets/Models/baker_house/BakerHouse.FBX");
-	//App->resources->Find(baker_house_uid);
-	//Resource* baker_house_resource = App->resources->RequestResource(baker_house_uid);
-	//uint baker_house_uid = App->resources->Find("Assets/Models/baker_house/BakerHouse.FBX");
-	//Resource* baker_house_resource = App->resources->RequestResource(baker_house_uid);
 	GameObject* baker_house_GO = App->resources->RequestGameObject("Assets/Models/baker_house/BakerHouse.FBX");
 	root->AddChild(baker_house_GO);
 	baker_house_GO->SetParent(root);
@@ -38,15 +32,9 @@ bool ModuleScene::Start()
 	camera->AddComponent(ComponentType::CAMERA);
 	camera->SetName("Camera");
 	root->AddChild(camera);
+	App->renderer3D->SetMainCamera((Camera*)camera->GetComponent(ComponentType::CAMERA));
 
-	//App->camera->SetMainCamera((Camera*)camera->GetComponent(ComponentType::CAMERA));
 	//uint baker_house_texture = App->resources->ImportFile("Assets/Textures/Baker_house.png");
-	//AddGameObject(house);
-
-	//GameObject* rayman = MeshImporter::ImportFBX("Assets/Models/rayman/rayman.fbx");
-	//AddGameObject(rayman);
-
-	//MeshImporter::ImportFBX("Assets/Models/monkey.fbx");
 
 	return ret;
 }

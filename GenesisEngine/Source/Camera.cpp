@@ -131,3 +131,41 @@ float* Camera::GetViewMatrix()
 
 	return (float*)viewMatrix.v;
 }
+
+bool Camera::ContainsAABB(AABB& aabb)
+{
+	float3 cornerPoints[8];
+	int totalInside = 0;
+
+	//get frustum planes
+	Plane* m_plane = new Plane[6](); 
+	_frustum.GetPlanes(m_plane);
+
+	//get AABB points
+	aabb.GetCornerPoints(cornerPoints); 
+
+	for (int p = 0; p < 6; ++p) {
+		int iInCount = 8;
+		int iPtIn = 1;
+
+		//test all planes
+		for (int i = 0; i < 8; ++i) {
+			if (m_plane[p].IsOnPositiveSide(cornerPoints[i]) == true) { 
+				iPtIn = 0;
+				--iInCount;
+			}
+		}
+		
+		if(iInCount == 0)
+			return false;
+
+		totalInside += iPtIn;
+	}
+
+	//Totally inside camera view
+	if (totalInside == 6)
+		return true;
+
+	//Partly inside camera view
+	return true;
+}

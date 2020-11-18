@@ -28,6 +28,7 @@ public:
 	Frustum GetFrustum();
 
 	float* GetViewMatrix();
+	bool ContainsAABB(AABB& aabb);
 	//virtual void Enable() override;
 	//virtual void Disable() override;
 
