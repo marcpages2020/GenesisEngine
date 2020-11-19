@@ -21,6 +21,7 @@ public:
 	void Look(float3& position);
 	void LookAt(const float3& Spot);
 	float* GetViewMatrix();
+	float3 GetPosition();
 
 	void Reset();
 	void SetBackgroundColor(float r, float g, float b, float w);

@@ -51,7 +51,7 @@ private:
 	void GetMemoryStatistics(const char* gpu_brand, GLint& vram_budget, GLint& vram_usage, GLint& vram_available, GLint& vram_reserved);
 
 	void OnResize(ImVec2 window_size);
-	void PreorderHierarchy(GameObject* gameObject);
+	void PreorderHierarchy(GameObject* gameObject, int& id);
 
 public:
 	ImVec2 image_size;

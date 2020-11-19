@@ -12,7 +12,7 @@
 
 #include <vector>
 
-GameObject::GameObject() : enabled(true), name("Empty Game Object"), parent(nullptr), to_delete(false), transform(nullptr)
+GameObject::GameObject() : enabled(true), name("Empty Game Object"), parent(nullptr), to_delete(false), transform(nullptr), _visible(false)
 {
 	transform = (Transform*)AddComponent(TRANSFORM);
 	UUID = LCG().Int();
@@ -273,6 +273,11 @@ void GameObject::SetTransform(Transform g_transform)
 Transform* GameObject::GetTransform()
 {
 	return transform;
+}
+
+bool GameObject::IsVisible()
+{
+	return _visible;
 }
 
 void GameObject::AddChild(GameObject* child)

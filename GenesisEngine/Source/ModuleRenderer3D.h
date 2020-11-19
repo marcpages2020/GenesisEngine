@@ -45,6 +45,7 @@ public:
 	GLubyte GetCheckersImage();
 
 private:
+	void GenerateBuffers();
 	void DrawDirectModeCube();
 	void BeginDebugDraw();
 	void EndDebugDraw();
@@ -52,8 +53,11 @@ private:
 	GLuint frameBuffer;
 
 public:
-	GLuint texColorBuffer;
+	GLuint colorTexture;
 	GLuint renderBuffer;
+
+	GLuint depthRenderBuffer;
+	GLuint depthTexture;
 
 	Light lights[MAX_LIGHTS];
 	SDL_GLContext context;

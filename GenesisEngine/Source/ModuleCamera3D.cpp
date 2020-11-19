@@ -158,15 +158,15 @@ void ModuleCamera3D::Orbit(float dt)
 	int dx = -App->input->GetMouseXMotion();
 	int dy = -App->input->GetMouseYMotion();
 
-	float3 distance = _position - _reference;
-
 	Quat y_rotation(_camera->GetFrustum().up, dx * dt * orbit_speed * 0.1f);
 	Quat x_rotation(_camera->GetFrustum().WorldRight(), dy * dt * orbit_speed * 0.1f);
 
+	float3 distance = _position - _reference;
 	distance = x_rotation.Transform(distance);
 	distance = y_rotation.Transform(distance);
 
 	_position = distance + _reference;
+	_camera->SetPosition(_position);
 	_camera->Look(_reference);
 }
 
@@ -175,6 +175,11 @@ float* ModuleCamera3D::GetViewMatrix()
 {
 	//return &ViewMatrix;
 	return _camera->GetViewMatrix();;
+}
+
+float3 ModuleCamera3D::GetPosition()
+{
+	return _position;
 }
 
 void ModuleCamera3D::Reset()

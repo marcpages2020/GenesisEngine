@@ -505,7 +505,8 @@ void Editor::ShowSceneWindow()
 		if (image_size.x != window_size.x || image_size.y != window_size.y)
 			OnResize(window_size);
 
-		ImGui::Image((ImTextureID)App->renderer3D->texColorBuffer, image_size, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
+		ImGui::Image((ImTextureID)App->renderer3D->colorTexture, image_size, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
+		//ImGui::Image((ImTextureID)App->renderer3D->depthTexture, image_size, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
 	}
 	ImGui::End();
 }
@@ -523,50 +524,55 @@ void Editor::ShowHierarchyWindow()
 	if (ImGui::Begin("Hierarchy", &show_hierarchy_window)) 
 	{
 		GameObject* root = App->scene->GetRoot();
-		PreorderHierarchy(root);
+		int id = 0;
+		PreorderHierarchy(root,id);
 	}
 	ImGui::End();
 }
 
-void Editor::PreorderHierarchy(GameObject* gameObject)
+void Editor::PreorderHierarchy(GameObject* gameObject, int& id)
 {
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
+	id++;
 
-	if (gameObject->GetChildAmount() > 0) 
+	ImGui::PushID(gameObject->UUID);
+	if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
 	{
-		if (gameObject == App->scene->GetRoot())
-			flags |= ImGuiTreeNodeFlags_DefaultOpen;
-
-		if (App->scene->selectedGameObject == gameObject)
-			flags |= ImGuiTreeNodeFlags_Selected;
-
-		if (ImGui::TreeNodeEx(gameObject->GetName(), flags)) 
-		{
-			if (ImGui::IsItemClicked())
-				App->scene->selectedGameObject = gameObject;
-
-			for (size_t i = 0; i < gameObject->GetChildAmount(); i++)
-			{
-				PreorderHierarchy(gameObject->GetChildAt(i));
-			}
-
-			ImGui::TreePop();
-		}
+		ImGui::SetDragDropPayload("HIERARCHY", &id, sizeof(int));
+		ImGui::Text("Change Hierarchy");
+		ImGui::EndDragDropSource();
 	}
-	else
+	if (ImGui::BeginDragDropTarget())
 	{
+		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("HIERARCHY"))
+		{
+			IM_ASSERT(payload->DataSize == sizeof(int));
+			int payload_n = *(const int*)payload->Data;
+		}
+		ImGui::EndDragDropTarget();
+	}
+	ImGui::PopID();
+
+	if (gameObject == App->scene->GetRoot())
+		flags |= ImGuiTreeNodeFlags_DefaultOpen;
+
+	if (App->scene->selectedGameObject == gameObject)
+		flags |= ImGuiTreeNodeFlags_Selected;
+
+	if (gameObject->GetChildAmount() == 0)
 		flags |= ImGuiTreeNodeFlags_Leaf;
 
-		if (App->scene->selectedGameObject == gameObject)
-			flags |= ImGuiTreeNodeFlags_Selected;
+	//if (ImGui::TreeNodeEx(std::to_string(id).c_str(), flags)) 
+	if (ImGui::TreeNodeEx(gameObject->GetName(), flags)) 
+	{
+		if (ImGui::IsItemClicked())
+			App->scene->selectedGameObject = gameObject;
 
-		if (ImGui::TreeNodeEx(gameObject->GetName(), flags))
+		for (size_t i = 0; i < gameObject->GetChildAmount(); i++)
 		{
-			if (ImGui::IsItemClicked())
-				App->scene->selectedGameObject = gameObject;
-
-			ImGui::TreePop();
+			PreorderHierarchy(gameObject->GetChildAt(i), id);
 		}
+		ImGui::TreePop();
 	}
 }
 

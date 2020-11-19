@@ -38,6 +38,7 @@ public:
 	void SetName(const char* name);
 	void SetTransform(Transform transform);
 	Transform* GetTransform();
+	bool IsVisible();
 
 	GameObject* GetParent();
 	void SetParent(GameObject* parent);
@@ -58,6 +59,7 @@ private:
 
 private:
 	bool enabled;
+	bool _visible;
 	std::string name;
 	GameObject* parent;
 	Transform* transform;
