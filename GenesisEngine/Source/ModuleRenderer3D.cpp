@@ -29,6 +29,8 @@ ModuleRenderer3D::ModuleRenderer3D(bool start_enabled) : Module(start_enabled)
 	name = "renderer";
 	context = nullptr;
 
+	_ray = LineSegment();
+
 	display_mode = SOLID;
 }
 
@@ -187,6 +189,7 @@ update_status ModuleRenderer3D::Update(float dt)
 	update_status ret = UPDATE_CONTINUE;
 
 	//DrawDirectModeCube();
+	DrawRay();
 
 	return ret;
 }
@@ -355,24 +358,12 @@ void ModuleRenderer3D::SetVSYNC(bool enabled)
 
 }
 
-GLubyte ModuleRenderer3D::GetCheckersImage()
+void ModuleRenderer3D::DrawRay()
 {
-	int CHECKERS_WIDTH = 64;
-	int CHECKERS_HEIGHT = 64;
-
-	GLubyte checkerImage[64][64][4];
-
-	for (int i = 0; i < CHECKERS_HEIGHT; i++) {
-		for (int j = 0; j < CHECKERS_WIDTH; j++) {
-			int c = ((((i & 0x8) == 0) ^ (((j & 0x8)) == 0))) * 255;
-			checkerImage[i][j][0] = (GLubyte)c;
-			checkerImage[i][j][1] = (GLubyte)c;
-			checkerImage[i][j][2] = (GLubyte)c;
-			checkerImage[i][j][3] = (GLubyte)255;
-		}
-	}
-
-	return checkerImage[64][64][4];
+	glBegin(GL_LINES);
+	glVertex3f(_ray.a.x, _ray.a.y, _ray.a.z);
+	glVertex3f(_ray.b.x, _ray.b.y, _ray.b.z);
+	glEnd();
 }
 
 void ModuleRenderer3D::GenerateBuffers()

@@ -5,6 +5,7 @@
 #include "Mesh.h"
 #include "FileSystem.h"
 #include "GameObject.h"
+#include "Transform.h"
 
 ModuleScene::ModuleScene(bool start_enabled) : Module(start_enabled), show_grid(true), selectedGameObject(nullptr), root(nullptr) 
 {
@@ -31,6 +32,7 @@ bool ModuleScene::Start()
 	GameObject* camera = new GameObject();
 	camera->AddComponent(ComponentType::CAMERA);
 	camera->SetName("Camera");
+	camera->GetTransform()->SetPosition(float3(0.0f, 0.0f, -5.0f));
 	root->AddChild(camera);
 	App->renderer3D->SetMainCamera((Camera*)camera->GetComponent(ComponentType::CAMERA));
 
@@ -79,6 +81,25 @@ void ModuleScene::DeleteGameObject(GameObject* gameObject)
 
 	delete gameObject;
 	gameObject = nullptr;
+}
+
+std::vector<GameObject*> ModuleScene::GetAllGameObjects()
+{
+	std::vector<GameObject*> gameObjects;
+
+	PreorderGameObjects(root, gameObjects);
+
+	return gameObjects;
+}
+
+void ModuleScene::PreorderGameObjects(GameObject* gameObject, std::vector<GameObject*>& gameObjects)
+{
+	gameObjects.push_back(gameObject);
+
+	for (size_t i = 0; i < gameObject->GetChildrenAmount(); i++)
+	{
+		PreorderGameObjects(gameObject->GetChildAt(i), gameObjects);
+	}
 }
 
 void ModuleScene::SetDroppedTexture(GnTexture* texture)

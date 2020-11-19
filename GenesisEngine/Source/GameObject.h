@@ -38,13 +38,14 @@ public:
 	void SetName(const char* name);
 	void SetTransform(Transform transform);
 	Transform* GetTransform();
+	AABB GetAABB();
 	bool IsVisible();
 
 	GameObject* GetParent();
 	void SetParent(GameObject* parent);
 
 	void AddChild(GameObject* child);
-	int GetChildAmount();
+	int GetChildrenAmount();
 	GameObject* GetChildAt(int index);
 	bool RemoveChild(GameObject* gameObject);
 	void DeleteChildren();

@@ -2,6 +2,8 @@
 #include "Module.h"
 #include "Globals.h"
 
+#include <vector>
+
 class GameObject;
 class GnTexture;
 
@@ -20,6 +22,8 @@ public:
 	void AddGameObject(GameObject* gameObject);
 	void DeleteGameObject(GameObject* gameObject);
 	GameObject* GetRoot() { return root; }
+	std::vector<GameObject*> GetAllGameObjects();
+	void PreorderGameObjects(GameObject* gameObject, std::vector<GameObject*>& gameObjects);
 	void SetDroppedTexture(GnTexture* texture);
 
 	bool ClearScene();

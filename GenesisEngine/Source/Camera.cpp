@@ -9,17 +9,16 @@ Camera::Camera() : Component(nullptr), _aspectRatio(AspectRatio::AR_16_9) {
 	type = ComponentType::CAMERA;
 
 	_frustum.type = FrustumType::PerspectiveFrustum;
-
-	_frustum.pos = float3(0.0f, 0.0f, 0.0f);
+	
+	_frustum.pos = float3(0.0f, 0.0f, -5.0f);
 	_frustum.up = float3(0.0f, 1.0f, 0.0f);
 	_frustum.front = float3(0.0f, 0.0f, 1.0f);
 
-	//_frustum.horizontalFov = 60.0f * DEGTORAD;
 	_frustum.verticalFov = 30.0f * DEGTORAD;
-	AdjustAspecRatio();
+	AdjustFieldOfView();
 
 	_frustum.nearPlaneDistance = 0.3f;
-	_frustum.farPlaneDistance = 20.0f;
+	_frustum.farPlaneDistance = 100.0f;
 }
 
 Camera::Camera(GameObject* gameObject) : Component(gameObject), _aspectRatio(AspectRatio::AR_16_9)
@@ -35,10 +34,10 @@ Camera::Camera(GameObject* gameObject) : Component(gameObject), _aspectRatio(Asp
 
 	//_frustum.horizontalFov = 60.0f * DEGTORAD;
 	_frustum.verticalFov = 30.0f * DEGTORAD;
-	AdjustAspecRatio();
+	AdjustFieldOfView();
 
 	_frustum.nearPlaneDistance = 0.3f;
-	_frustum.farPlaneDistance = 20.0f;
+	_frustum.farPlaneDistance = 100.0f;
 }
 
 Camera::~Camera(){}
@@ -46,7 +45,6 @@ Camera::~Camera(){}
 void Camera::Update()
 {
 	_frustum.pos = _gameObject->GetTransform()->GetPosition();
-	//_frustum.Transform(_gameObject->GetTransform()->GetLocalTransform());
 	
 	_frustum.up = _gameObject->GetTransform()->GetGlobalTransform().WorldY();
 	_frustum.front = _gameObject->GetTransform()->GetGlobalTransform().WorldZ();
@@ -63,20 +61,20 @@ void Camera::OnEditor()
 		float horizontalFOV = _frustum.horizontalFov * RADTODEG;
 		if (ImGui::DragFloat("Horizontal FOV", &horizontalFOV, 0.02f, 0.0f, 130.0f)) {
 			_frustum.horizontalFov = horizontalFOV * DEGTORAD;
-			AdjustAspecRatio();
+			AdjustFieldOfView();
 		}
 
 		float verticalFOV = _frustum.verticalFov * RADTODEG;
 		if (ImGui::DragFloat("Vertical FOV", &verticalFOV, 0.02f, 0.0f, 60.0f)) {
 			_frustum.verticalFov = verticalFOV * DEGTORAD;
-			AdjustAspecRatio();
+			AdjustFieldOfView();
 		}
 
 		ImGui::Spacing();
 	}
 }
 
-void Camera::AdjustAspecRatio()
+void Camera::AdjustFieldOfView()
 {
 	switch (_aspectRatio)
 	{
@@ -95,6 +93,17 @@ void Camera::AdjustAspecRatio()
 	default:
 		break;
 	}
+}
+
+void Camera::AdjustFieldOfView(float width, float height)
+{
+	_frustum.horizontalFov = 2.0f * std::atan(std::tan(_frustum.verticalFov * 0.5f) * (width / height));
+}
+
+void Camera::SetFieldOfView(float verticalFOV, float screen_width, float screen_height)
+{
+	_frustum.verticalFov = verticalFOV;
+	_frustum.horizontalFov = 2.0f * std::atan(std::tan(_frustum.verticalFov * 0.5f) * (screen_width / screen_height));
 }
 
 void Camera::SetPosition(float3 position)

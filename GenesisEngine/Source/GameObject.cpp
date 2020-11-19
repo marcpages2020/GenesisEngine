@@ -275,6 +275,11 @@ Transform* GameObject::GetTransform()
 	return transform;
 }
 
+AABB GameObject::GetAABB()
+{
+	return _AABB;
+}
+
 bool GameObject::IsVisible()
 {
 	return _visible;
@@ -286,7 +291,7 @@ void GameObject::AddChild(GameObject* child)
 		children.push_back(child);
 }
 
-int GameObject::GetChildAmount()
+int GameObject::GetChildrenAmount()
 {
 	return children.size();
 }

@@ -42,7 +42,7 @@ public:
 	void SetCapActive(GLenum cap, bool active);
 	void SetVSYNC(bool enabled);
 
-	GLubyte GetCheckersImage();
+	void DrawRay();
 
 private:
 	void GenerateBuffers();
@@ -64,6 +64,8 @@ public:
 	mat3x3 NormalMatrix;
 	mat4x4 ModelMatrix, ViewMatrix, ProjectionMatrix;
 	DisplayMode display_mode;
+
+	LineSegment _ray;
 
 	bool draw_vertex_normals;
 	bool draw_face_normals;

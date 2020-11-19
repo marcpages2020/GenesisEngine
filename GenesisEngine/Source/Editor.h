@@ -55,6 +55,8 @@ private:
 
 public:
 	ImVec2 image_size;
+	ImVec2 sceneWindowOrigin;
+	ImVec2 mouseScenePosition;
 
 private:
 	bool show_inspector_window;
@@ -85,6 +87,7 @@ private:
 		opened,
 		ready_to_close
 	} file_dialog = closed;
+
 	bool in_modal = false;
 	char selected_file[256];
 };

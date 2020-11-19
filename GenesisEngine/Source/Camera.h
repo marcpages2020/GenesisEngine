@@ -20,7 +20,9 @@ public:
 	void Update() override;
 	void OnEditor() override;
 
-	void AdjustAspecRatio();
+	void AdjustFieldOfView();
+	void AdjustFieldOfView(float width, float height);
+	void SetFieldOfView(float verticalFOV, float screen_width, float screen_height);
 	void SetPosition(float3 position);
 	void SetReference(float3 reference);
 

@@ -461,6 +461,7 @@ bool Editor::CreateMainMenuBar() {
 //Windows
 void Editor::ShowSceneWindow()
 {
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 	if (ImGui::Begin("Scene", &show_scene_window, ImGuiWindowFlags_MenuBar))
 	{
 		scene_window_focused = ImGui::IsWindowFocused();
@@ -500,15 +501,24 @@ void Editor::ShowSceneWindow()
 			ImGui::EndMenuBar();
 		}
 
-		ImVec2 window_size = ImGui::GetWindowSize();
+		ImVec2 window_size = ImGui::GetContentRegionAvail();
+		sceneWindowOrigin = ImGui::GetWindowPos();
+		sceneWindowOrigin.x += ImGui::GetWindowContentRegionMin().x;
+		sceneWindowOrigin.y += ImGui::GetWindowContentRegionMin().y;
 
-		if (image_size.x != window_size.x || image_size.y != window_size.y)
+		mouseScenePosition.x = App->input->GetMouseX() - sceneWindowOrigin.x;
+		mouseScenePosition.y = App->input->GetMouseY() - sceneWindowOrigin.y;
+
+		if (image_size.x != window_size.x || image_size.y != window_size.y) 
+		{
 			OnResize(window_size);
+		}
 
 		ImGui::Image((ImTextureID)App->renderer3D->colorTexture, image_size, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
 		//ImGui::Image((ImTextureID)App->renderer3D->depthTexture, image_size, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
 	}
 	ImGui::End();
+	ImGui::PopStyleVar();
 }
 
 void Editor::ShowInspectorWindow()
@@ -559,7 +569,7 @@ void Editor::PreorderHierarchy(GameObject* gameObject, int& id)
 	if (App->scene->selectedGameObject == gameObject)
 		flags |= ImGuiTreeNodeFlags_Selected;
 
-	if (gameObject->GetChildAmount() == 0)
+	if (gameObject->GetChildrenAmount() == 0)
 		flags |= ImGuiTreeNodeFlags_Leaf;
 
 	//if (ImGui::TreeNodeEx(std::to_string(id).c_str(), flags)) 
@@ -568,7 +578,7 @@ void Editor::PreorderHierarchy(GameObject* gameObject, int& id)
 		if (ImGui::IsItemClicked())
 			App->scene->selectedGameObject = gameObject;
 
-		for (size_t i = 0; i < gameObject->GetChildAmount(); i++)
+		for (size_t i = 0; i < gameObject->GetChildrenAmount(); i++)
 		{
 			PreorderHierarchy(gameObject->GetChildAt(i), id);
 		}
@@ -668,9 +678,6 @@ void Editor::ShowConfigurationWindow()
 
 			if (ImGui::Checkbox("VSYNC", &vsync)) 
 				App->renderer3D->SetVSYNC(vsync);
-
-
-			//TODO:	Add two more enables
 		}
 
 		if (ImGui::CollapsingHeader("Camera")) {
@@ -685,6 +692,15 @@ void Editor::ShowConfigurationWindow()
 			ImGui::SliderFloat("Drag Speed", &App->camera->orbit_speed, 0.0f, 10.0f);
 			ImGui::SliderFloat("Zoom Speed", &App->camera->zoom_speed, 0.0f, 50.0f);
 			ImGui::SliderFloat("Sensitivity", &App->camera->sensitivity, 0.0f, 50.0f);
+
+			ImGui::Spacing();
+
+			float verticalFOV = App->camera->GetVerticalFieldOfView() * RADTODEG;
+			if (ImGui::SliderFloat("Vertical FOV", &verticalFOV, 20.0f, 60.0f)) {
+				App->camera->SetFieldOfView(verticalFOV * DEGTORAD, image_size.x, image_size.y);
+			}
+
+			ImGui::Text("Horizontal FOV: %.2f", App->camera->GetHorizontalFieldOfView() * RADTODEG);
 		}
 
 		if (ImGui::CollapsingHeader("Hardware"))
@@ -743,6 +759,33 @@ void Editor::ShowConfigurationWindow()
 			ImGui::SameLine();
 			ImGui::TextColored(values_color, "%.1f Mb", vram_available * 0.001f);
 
+		}
+
+		if (ImGui::CollapsingHeader("Input"))
+		{
+			ImGui::Text("Mouse X: %d", App->input->GetMouseX());
+			ImGui::Text("Mouse Y: %d", App->input->GetMouseY());
+
+			ImGui::Spacing();
+
+			ImGui::Text("Current Window Mouse X: %.2f", mouseScenePosition.x);
+			ImGui::Text("Current Window Mouse Y: %.2f", mouseScenePosition.y);
+
+			ImGui::Spacing();
+
+			ImGui::Text("Normalized Mouse X: %.2f", mouseScenePosition.x / image_size.x);
+			ImGui::Text("Normalized Mouse Y: %.2f", mouseScenePosition.y / image_size.y);
+
+			ImGui::Spacing();
+
+			float normalized_x = App->editor->mouseScenePosition.x / App->editor->image_size.x;
+			float normalized_y = App->editor->mouseScenePosition.y / App->editor->image_size.y;
+
+			normalized_x =  (normalized_x - 0.5f) * 2.0f;
+			normalized_y = -(normalized_y - 0.5f) * 2.0f;
+
+			ImGui::Text("Near Plane Mouse X: %.2f", normalized_x);
+			ImGui::Text("Near Plane Mouse Y: %.2f", normalized_y);
 		}
 
 		if (ImGui::CollapsingHeader("File System")) 
@@ -942,8 +985,8 @@ void Editor::DrawDirectoryRecursive(const char* directory, const char* filter_ex
 void Editor::OnResize(ImVec2 window_size)
 {
 	image_size = window_size;
-	image_size.y -= 50.0f;
 
 	App->renderer3D->OnResize(image_size.x, image_size.y);
+	App->camera->OnResize(image_size.x, image_size.y);
 }
 

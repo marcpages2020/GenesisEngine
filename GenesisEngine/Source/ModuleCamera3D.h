@@ -4,6 +4,7 @@
 #include "MathGeoLib/include/MathGeoLib.h"
 
 class Camera;
+class GameObject;
 
 class ModuleCamera3D : public Module
 {
@@ -16,12 +17,18 @@ public:
 	update_status Update(float dt);
 	bool CleanUp();
 
+	void OnResize(int width, int height);
+
 	bool LoadConfig(GnJSONObj& config) override;
 
 	void Look(float3& position);
 	void LookAt(const float3& Spot);
 	float* GetViewMatrix();
 	float3 GetPosition();
+	GameObject* PickGameObject();
+	float GetVerticalFieldOfView();
+	float GetHorizontalFieldOfView();
+	void SetFieldOfView(float verticalFOV, int screen_width, int screen_height);
 
 	void Reset();
 	void SetBackgroundColor(float r, float g, float b, float w);
