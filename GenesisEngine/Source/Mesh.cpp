@@ -47,6 +47,11 @@ void GnMesh::SetResourceUID(uint UID)
 	GenerateAABB();
 }
 
+Resource* GnMesh::GetResource(ResourceType type)
+{
+	return _resource;
+}
+
 void GnMesh::GenerateBuffers()
 {
 	//vertices

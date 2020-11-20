@@ -527,6 +527,10 @@ void Editor::ShowInspectorWindow()
 	{
 		App->scene->selectedGameObject->OnEditor();
 	}
+
+	if (ImGui::CollapsingHeader("Resources")) {
+		App->resources->OnEditor();
+	}
 }
 
 void Editor::ShowHierarchyWindow()
@@ -695,12 +699,20 @@ void Editor::ShowConfigurationWindow()
 
 			ImGui::Spacing();
 
+			/*
 			float verticalFOV = App->camera->GetVerticalFieldOfView() * RADTODEG;
 			if (ImGui::SliderFloat("Vertical FOV", &verticalFOV, 20.0f, 60.0f)) {
 				App->camera->SetFieldOfView(verticalFOV * DEGTORAD, image_size.x, image_size.y);
 			}
 
 			ImGui::Text("Horizontal FOV: %.2f", App->camera->GetHorizontalFieldOfView() * RADTODEG);
+			*/
+			float horizontalFOV = App->camera->GetHorizontalFieldOfView() * RADTODEG;
+			if (ImGui::SliderFloat("Horizontal FOV", &horizontalFOV, 55.0f, 110.0f)) {
+				App->camera->SetHorizontalFieldOfView(horizontalFOV * DEGTORAD, image_size.x, image_size.y);
+			}
+
+			ImGui::Text("Vertical FOV: %.2f", App->camera->GetVerticalFieldOfView() * RADTODEG);
 		}
 
 		if (ImGui::CollapsingHeader("Hardware"))

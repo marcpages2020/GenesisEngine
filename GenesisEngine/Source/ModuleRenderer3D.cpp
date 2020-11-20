@@ -73,6 +73,7 @@ bool ModuleRenderer3D::Init()
 		//Initialize Projection Matrix
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
+		glLoadMatrixf(App->camera->GetProjectionMatrix());
 
 		//Check for error
 		GLenum error = glGetError();
@@ -85,6 +86,7 @@ bool ModuleRenderer3D::Init()
 		//Initialize Modelview Matrix
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
+		glLoadMatrixf(App->camera->GetViewMatrix());		
 
 		//Check for error
 		error = glGetError();
@@ -169,9 +171,8 @@ update_status ModuleRenderer3D::PreUpdate(float dt)
 	glClearColor(c.r, c.g, c.b, c.a);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-	glLoadIdentity();
-
 	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 	glLoadMatrixf(App->camera->GetViewMatrix());
 
 	//light 0 on cam pos
@@ -231,11 +232,6 @@ void ModuleRenderer3D::OnResize(int width, int height)
 {
 	glViewport(0, 0, width, height);
 
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	ProjectionMatrix = perspective(60.0f, (float)width / (float)height, 0.125f, 512.0f);
-	glLoadMatrixf(&ProjectionMatrix);
-
 	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 	glBindTexture(GL_TEXTURE_2D, colorTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
@@ -246,8 +242,21 @@ void ModuleRenderer3D::OnResize(int width, int height)
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glLoadMatrixf(App->camera->GetProjectionMatrix());
+}
+
+void ModuleRenderer3D::UpdateProjectionMatrix(float* projectionMatrix)
+{
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+	glLoadMatrixf(App->camera->GetViewMatrix());
+
+	//TODO: Load from outside matrix
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glLoadMatrixf(App->camera->GetProjectionMatrix());
 }
 
 void ModuleRenderer3D::DrawAABB(float3* cornerPoints)

@@ -5,6 +5,11 @@
 
 class GameObject;
 
+enum FixedFOV {
+	FIXED_VERTICAL_FOV,
+	FIXED_HORIZONTAL_FOV
+};
+
 enum AspectRatio {
 	AR_16_9,
 	AR_16_10,
@@ -22,7 +27,8 @@ public:
 
 	void AdjustFieldOfView();
 	void AdjustFieldOfView(float width, float height);
-	void SetFieldOfView(float verticalFOV, float screen_width, float screen_height);
+	void SetVerticalFieldOfView(float verticalFOV, float screen_width, float screen_height);
+	void SetHorizontalFieldOfView(float horizontalFOV, float screen_width, float screen_height);
 	void SetPosition(float3 position);
 	void SetReference(float3 reference);
 
@@ -30,6 +36,7 @@ public:
 	Frustum GetFrustum();
 
 	float* GetViewMatrix();
+	float* GetProjectionMatrix();
 	bool ContainsAABB(AABB& aabb);
 	//virtual void Enable() override;
 	//virtual void Disable() override;
@@ -38,4 +45,5 @@ private:
 	Frustum _frustum;
 	AspectRatio _aspectRatio;
 	float3 _reference;
+	FixedFOV fixedFOV;
 };

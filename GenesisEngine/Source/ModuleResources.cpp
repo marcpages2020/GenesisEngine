@@ -32,6 +32,75 @@ bool ModuleResources::Init()
 	return ret;
 }
 
+void ModuleResources::OnEditor()
+{
+	std::vector<Resource*> meshes;
+	std::vector<Resource*> materials;
+	std::vector<Resource*> textures;
+
+	std::map<uint, Resource*>::iterator it = resources.begin();
+	for (it; it != resources.end(); it++)
+	{
+		switch (it->second->GetType())
+		{
+		case ResourceType::RESOURCE_MESH:
+			meshes.push_back(it->second);
+			break;
+		case ResourceType::RESOURCE_MATERIAL:
+			materials.push_back(it->second);
+			break;
+		case ResourceType::RESOURCE_TEXTURE:
+			textures.push_back(it->second);
+			break;
+		default:
+			break;
+		}
+	}
+
+	if(ImGui::TreeNode("Meshes")) {
+		ImGui::Separator();
+		for (size_t i = 0; i < meshes.size(); i++)
+		{
+			ImGui::Text("UID: %d", meshes[i]->GetUID());
+			ImGui::Text("Assets path: %s", meshes[i]->assetsFile.c_str());
+			ImGui::Text("Library path: %s", meshes[i]->libraryFile.c_str());
+			ImGui::Text("Reference count: %d", meshes[i]->referenceCount);
+			ImGui::Spacing();
+			ImGui::Separator();
+			ImGui::Spacing();
+		}
+		ImGui::TreePop();
+	}
+
+	if (ImGui::TreeNode("Materials")) {
+		for (size_t i = 0; i < materials.size(); i++)
+		{
+			ImGui::Text("UID: %d", materials[i]->GetUID());
+			ImGui::Text("Assets path: %s", materials[i]->assetsFile.c_str());
+			ImGui::Text("Library path: %s", materials[i]->libraryFile.c_str());
+			ImGui::Text("Reference count: %d", materials[i]->referenceCount);
+			ImGui::Spacing();
+			ImGui::Separator();
+			ImGui::Spacing();
+		}
+		ImGui::TreePop();
+	}
+
+	if (ImGui::TreeNode("Textures")) {
+		for (size_t i = 0; i < textures.size(); i++)
+		{
+			ImGui::Text("UID: %d", textures[i]->GetUID());
+			ImGui::Text("Assets path: %s", textures[i]->assetsFile.c_str());
+			ImGui::Text("Library path: %s", textures[i]->libraryFile.c_str());
+			ImGui::Text("Reference count: %d", textures[i]->referenceCount);
+			ImGui::Spacing();
+			ImGui::Separator();
+			ImGui::Spacing();
+		}
+		ImGui::TreePop();
+	}
+}
+
 int ModuleResources::MetaUpToDate(const char* asset_path)
 {
 	std::string meta_file = asset_path;

@@ -1,10 +1,14 @@
 #include "Globals.h"
 #include "Application.h"
 #include "ModuleCamera3D.h"
-#include "GameObject.h"
-#include "Transform.h"
 #include "GnJSON.h"
 #include "Camera.h"
+
+#include "Mesh.h"
+#include "ResourceMesh.h"
+#include "GameObject.h"
+#include "Transform.h"
+
 
 ModuleCamera3D::ModuleCamera3D(bool start_enabled) : Module(start_enabled)
 {
@@ -63,7 +67,8 @@ bool ModuleCamera3D::CleanUp()
 
 void ModuleCamera3D::OnResize(int width, int height)
 {
-	_camera->AdjustFieldOfView(width, height);
+	//_camera->AdjustFieldOfView(width, height);
+	_camera->SetVerticalFieldOfView(App->camera->GetVerticalFieldOfView(), width, height);
 }
 
 // -----------------------------------------------------------------
@@ -139,10 +144,6 @@ update_status ModuleCamera3D::Update(float dt)
 	_reference += newPos;
 	_camera->SetReference(_reference);
 
-	float3 corner_points[8];
-	_camera->GetFrustum().GetCornerPoints(corner_points);
-	App->renderer3D->DrawAABB(corner_points);
-
 	return UPDATE_CONTINUE;
 }
 
@@ -190,6 +191,11 @@ float* ModuleCamera3D::GetViewMatrix()
 	return _camera->GetViewMatrix();
 }
 
+float* ModuleCamera3D::GetProjectionMatrix()
+{
+	return _camera->GetProjectionMatrix();
+}
+
 float3 ModuleCamera3D::GetPosition()
 {
 	return _position;
@@ -204,26 +210,56 @@ GameObject* ModuleCamera3D::PickGameObject()
 	normalized_y =  -(normalized_y - 0.5f) * 2.0f;
 
 	LineSegment my_ray = _camera->GetFrustum().UnProjectLineSegment(normalized_x, normalized_y);
-	LOG("Picking x: %.2f y: %.2f", normalized_x, normalized_y);
 
 	App->renderer3D->_ray = my_ray;
 
 	std::vector<GameObject*> sceneGameObjects = App->scene->GetAllGameObjects();
-	float closest_distance;
-	float closest_hit_point;
+	std::map<float, GameObject*> hitGameObjects;
 
-	for (size_t i = 0; i < sceneGameObjects.size(); i++)
+	//find all hit GameObjects
+	for (size_t i = 0; i < sceneGameObjects.size(); i++) 
 	{
 		bool hit = my_ray.Intersects(sceneGameObjects[i]->GetAABB());
 
 		if (hit)
 		{
-			float distance;
-			float hit_point;			
+			float dNear;
+			float dFar;
+			hit = my_ray.Intersects(sceneGameObjects[i]->GetAABB(), dNear, dFar);
+			hitGameObjects[dNear] = sceneGameObjects[i];
+		}
+	}
 
-			hit = my_ray.Intersects(sceneGameObjects[i]->GetAABB(), distance, hit_point);
-			LOG("Intersection");
-			return sceneGameObjects[i];
+	std::map<float, GameObject*>::iterator it = hitGameObjects.begin();
+	for (it; it != hitGameObjects.end() ; it++)
+	{
+		GameObject* gameObject = it->second;
+
+		LineSegment ray_local_space = my_ray;
+		ray_local_space.Transform(gameObject->GetTransform()->GetGlobalTransform().Inverted());
+
+		GnMesh* mesh = (GnMesh*)gameObject->GetComponent(ComponentType::MESH);
+		ResourceMesh* resourceMesh = dynamic_cast<ResourceMesh*>(mesh->GetResource(ResourceType::RESOURCE_MESH));
+
+		for (size_t i = 0; i < resourceMesh->indices_amount; i+=3)
+		{
+			//create every triangle
+			float3 v1(resourceMesh->vertices[resourceMesh->indices[i] * 3], resourceMesh->vertices[resourceMesh->indices[i] * 3 + 1],
+				      resourceMesh->vertices[resourceMesh->indices[i] * 3 + 2]);
+
+			float3 v2(resourceMesh->vertices[resourceMesh->indices[i+1] * 3], resourceMesh->vertices[resourceMesh->indices[i+1] * 3 + 1],
+				      resourceMesh->vertices[resourceMesh->indices[i+1] * 3 + 2]);
+
+			float3 v3(resourceMesh->vertices[resourceMesh->indices[i+2] * 3], resourceMesh->vertices[resourceMesh->indices[i+2] * 3 + 1],
+				      resourceMesh->vertices[resourceMesh->indices[i+2] * 3 + 2]);
+
+			const Triangle triangle(v1, v2, v3);
+
+			float distance;
+			float3 intersectionPoint;
+			if (ray_local_space.Intersects(triangle, &distance, &intersectionPoint)) {
+				return gameObject;
+			}
 		}
 	}
 
@@ -241,10 +277,16 @@ float ModuleCamera3D::GetHorizontalFieldOfView()
 }
 
 
-void ModuleCamera3D::SetFieldOfView(float verticalFOV, int screen_width, int screen_height)
+void ModuleCamera3D::SetVerticalFieldOfView(float verticalFOV, int screen_width, int screen_height)
 {
-	_camera->SetFieldOfView(verticalFOV, screen_width, screen_height);
-	
+	_camera->SetVerticalFieldOfView(verticalFOV, screen_width, screen_height);
+	App->renderer3D->UpdateProjectionMatrix(_camera->GetProjectionMatrix());
+}
+
+void ModuleCamera3D::SetHorizontalFieldOfView(float horizontalFOV, int screen_width, int screen_height)
+{
+	_camera->SetHorizontalFieldOfView(horizontalFOV, screen_width, screen_height);
+	App->renderer3D->UpdateProjectionMatrix(_camera->GetProjectionMatrix());
 }
 
 void ModuleCamera3D::Reset()

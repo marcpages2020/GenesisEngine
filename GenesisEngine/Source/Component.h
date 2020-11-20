@@ -4,6 +4,8 @@
 class GameObject;
 class GnJSONObj;
 class GnJSONArray;
+class Resource;
+enum ResourceType;
 
 enum ComponentType {
 	TRANSFORM,
@@ -31,6 +33,7 @@ public:
 	void SetGameObject(GameObject* gameObject);
 	GameObject* GetGameObject();
 	virtual void SetResourceUID(uint UID);
+	virtual Resource* GetResource(ResourceType type) { return nullptr; };
 
 protected:
 	ComponentType type;

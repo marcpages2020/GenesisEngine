@@ -22,6 +22,7 @@ public:
 	~ModuleResources();
 
 	bool Init() override;
+	void OnEditor();
 
 	int MetaUpToDate(const char* asset_path);
 	int UpdateMetaFile(const char* assets_file);

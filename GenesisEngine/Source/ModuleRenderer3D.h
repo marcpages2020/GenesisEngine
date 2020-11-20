@@ -32,6 +32,7 @@ public:
 	bool CleanUp();
 	
 	void OnResize(int width, int height);
+	void UpdateProjectionMatrix(float* projectionMatrix);
 
 	void DrawAABB(float3* aabb);
 	DisplayMode GetDisplayMode();

@@ -24,11 +24,13 @@ public:
 	void Look(float3& position);
 	void LookAt(const float3& Spot);
 	float* GetViewMatrix();
+	float* GetProjectionMatrix();
 	float3 GetPosition();
 	GameObject* PickGameObject();
 	float GetVerticalFieldOfView();
 	float GetHorizontalFieldOfView();
-	void SetFieldOfView(float verticalFOV, int screen_width, int screen_height);
+	void SetVerticalFieldOfView(float verticalFOV, int screen_width, int screen_height);
+	void SetHorizontalFieldOfView(float horizontalFOV, int screen_width, int screen_height);
 
 	void Reset();
 	void SetBackgroundColor(float r, float g, float b, float w);
