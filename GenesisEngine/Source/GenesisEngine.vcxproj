@@ -99,6 +99,7 @@
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GnJSON.h" />
     <ClInclude Include="Importers.h" />
+    <ClInclude Include="Libs\ImGuizmo\ImGuizmo.h" />
     <ClInclude Include="Libs\MathGeoLib\include\Algorithm\Random\LCG.h" />
     <ClInclude Include="Libs\MathGeoLib\include\Geometry\AABB.h" />
     <ClInclude Include="Libs\MathGeoLib\include\Geometry\AABB2D.h" />
@@ -207,6 +208,7 @@
     <ClCompile Include="glmath.cpp" />
     <ClCompile Include="GnJSON.cpp" />
     <ClCompile Include="Importers.cpp" />
+    <ClCompile Include="Libs\ImGuizmo\ImGuizmo.cpp" />
     <ClCompile Include="Libs\ImGui\imgui.cpp" />
     <ClCompile Include="Libs\ImGui\imgui_demo.cpp" />
     <ClCompile Include="Libs\ImGui\imgui_draw.cpp" />

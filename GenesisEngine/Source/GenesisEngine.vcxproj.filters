@@ -196,6 +196,9 @@
     <ClCompile Include="Camera.cpp">
       <Filter>GameObjects &amp; Components</Filter>
     </ClCompile>
+    <ClCompile Include="Libs\ImGuizmo\ImGuizmo.cpp">
+      <Filter>Libs\ImGuizmo</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
@@ -498,6 +501,9 @@
     <ClInclude Include="Camera.h">
       <Filter>GameObjects &amp; Components</Filter>
     </ClInclude>
+    <ClInclude Include="Libs\ImGuizmo\ImGuizmo.h">
+      <Filter>Libs\ImGuizmo</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Modules">
@@ -544,6 +550,9 @@
     </Filter>
     <Filter Include="FileManagement\parson">
       <UniqueIdentifier>{03cd38a1-3ea2-4234-89ff-3f9057e2f643}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libs\ImGuizmo">
+      <UniqueIdentifier>{b53402f4-cb07-479e-aece-ca6b6fcee811}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

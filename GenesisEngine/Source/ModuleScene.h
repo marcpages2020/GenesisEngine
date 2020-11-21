@@ -1,6 +1,8 @@
 #pragma once
 #include "Module.h"
 #include "Globals.h"
+#include "ImGui/imgui.h"
+#include "ImGuizmo/ImGuizmo.h"
 
 #include <vector>
 
@@ -17,6 +19,7 @@ public:
 	bool Init();
 	bool LoadConfig(GnJSONObj& config) override;
 	update_status Update(float dt);
+	void HandleInput();
 	bool CleanUp();
 
 	void AddGameObject(GameObject* gameObject);
@@ -24,6 +27,7 @@ public:
 	GameObject* GetRoot() { return root; }
 	std::vector<GameObject*> GetAllGameObjects();
 	void PreorderGameObjects(GameObject* gameObject, std::vector<GameObject*>& gameObjects);
+	void EditTransform();
 	void SetDroppedTexture(GnTexture* texture);
 
 	bool ClearScene();
@@ -37,4 +41,6 @@ public:
 
 private:
 	GameObject* root;
+	ImGuizmo::OPERATION mCurrentGizmoOperation;
+	ImGuizmo::MODE mCurrentGizmoMode;
 };

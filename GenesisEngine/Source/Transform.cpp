@@ -119,6 +119,11 @@ float4x4 Transform::GetGlobalTransform()
 	return _globalTransform;
 }
 
+void Transform::SetGlobalTransform(float4x4 newTransform)
+{
+	_globalTransform = newTransform;
+}
+
 void Transform::UpdateLocalTransform()
 {
 	_localTransform = float4x4::FromTRS(_position, _rotation, _scale);

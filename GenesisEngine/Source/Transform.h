@@ -23,6 +23,7 @@ public:
 
 	float4x4 GetLocalTransform();
 	float4x4 GetGlobalTransform();
+	void SetGlobalTransform(float4x4 newTransform);
 
 	void UpdateLocalTransform();
 	void UpdateGlobalTransform();

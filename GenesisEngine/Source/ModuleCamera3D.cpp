@@ -133,7 +133,7 @@ update_status ModuleCamera3D::Update(float dt)
 		((App->input->GetKey(SDL_SCANCODE_LALT) == KEY_REPEAT) && (App->input->GetMouseButton(SDL_BUTTON_LEFT) == KEY_REPEAT)))
 		Orbit(dt);
 
-	if (App->input->GetMouseButton(SDL_BUTTON_LEFT) == KEY_DOWN) 
+	if (App->input->GetMouseButton(SDL_BUTTON_LEFT) == KEY_DOWN && !ImGuizmo::IsOver())
 	{
 		GameObject* pickedGameObject = PickGameObject();
 		App->scene->selectedGameObject = pickedGameObject;
@@ -191,9 +191,19 @@ float* ModuleCamera3D::GetViewMatrix()
 	return _camera->GetViewMatrix();
 }
 
+float4x4 ModuleCamera3D::GetViewMatrixM()
+{
+	return _camera->GetFrustum().ViewMatrix();
+}
+
 float* ModuleCamera3D::GetProjectionMatrix()
 {
 	return _camera->GetProjectionMatrix();
+}
+
+float4x4 ModuleCamera3D::GetProjectionMatrixM()
+{
+	return _camera->GetFrustum().ProjectionMatrix();
 }
 
 float3 ModuleCamera3D::GetPosition()

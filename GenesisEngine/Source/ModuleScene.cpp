@@ -10,6 +10,9 @@
 ModuleScene::ModuleScene(bool start_enabled) : Module(start_enabled), show_grid(true), selectedGameObject(nullptr), root(nullptr) 
 {
 	name = "scene";
+
+	mCurrentGizmoOperation = ImGuizmo::OPERATION::TRANSLATE;
+	mCurrentGizmoMode = ImGuizmo::MODE::WORLD;
 }
 
 ModuleScene::~ModuleScene() {}
@@ -44,6 +47,37 @@ bool ModuleScene::Start()
 bool ModuleScene::Init()
 {
 	return true;
+}
+
+// Update: draw background
+update_status ModuleScene::Update(float dt)
+{
+	if (show_grid)
+	{
+		GnGrid grid(24);
+		grid.Render();
+	}
+
+	HandleInput();
+
+	root->Update();
+
+	return UPDATE_CONTINUE;
+}
+
+void ModuleScene::HandleInput()
+{
+	if ((App->input->GetKey(SDL_SCANCODE_DELETE) == KEY_DOWN) && (selectedGameObject != nullptr) && (selectedGameObject != root))
+		selectedGameObject->to_delete = true;
+
+	if ((App->input->GetKey(SDL_SCANCODE_W) == KEY_DOWN))
+		mCurrentGizmoOperation = ImGuizmo::OPERATION::TRANSLATE;
+
+	else if((App->input->GetKey(SDL_SCANCODE_E) == KEY_DOWN))
+		mCurrentGizmoOperation = ImGuizmo::OPERATION::ROTATE;
+
+	else if ((App->input->GetKey(SDL_SCANCODE_R) == KEY_DOWN))
+		mCurrentGizmoOperation = ImGuizmo::OPERATION::SCALE;
 }
 
 // Load assets
@@ -100,6 +134,31 @@ void ModuleScene::PreorderGameObjects(GameObject* gameObject, std::vector<GameOb
 	{
 		PreorderGameObjects(gameObject->GetChildAt(i), gameObjects);
 	}
+}
+
+void ModuleScene::EditTransform()
+{
+	if (selectedGameObject == nullptr)
+		return;
+
+	float4x4 viewMatrix = App->camera->GetViewMatrixM().Transposed();
+	float4x4 projectionMatrix = App->camera->GetProjectionMatrixM().Transposed();
+	float4x4 objectTransform = selectedGameObject->GetTransform()->GetGlobalTransform().Transposed();
+
+	ImGuizmo::SetDrawlist();
+	ImGuizmo::SetRect(App->editor->sceneWindowOrigin.x, App->editor->sceneWindowOrigin.y, App->editor->image_size.x, App->editor->image_size.y);
+
+	float tempTransform[16];
+	memcpy(tempTransform, objectTransform.ptr(), 16 * sizeof(float));
+
+	ImGuizmo::Manipulate(viewMatrix.ptr(), projectionMatrix.ptr(), mCurrentGizmoOperation, mCurrentGizmoMode, tempTransform);
+
+
+	float4x4 newTransform;
+	newTransform.Set(tempTransform);
+	newTransform.Transpose();
+	selectedGameObject->GetTransform()->SetGlobalTransform(newTransform);
+
 }
 
 void ModuleScene::SetDroppedTexture(GnTexture* texture)
@@ -206,23 +265,6 @@ bool ModuleScene::LoadConfig(GnJSONObj& config)
 	return true;
 }
 
-// Update: draw background
-update_status ModuleScene::Update(float dt)
-{
-	if (show_grid) 
-	{
-		GnGrid grid(24);
-		grid.Render();
-	}
 
-	root->Update();
-
-	if ((App->input->GetKey(SDL_SCANCODE_DELETE) == KEY_DOWN) && (selectedGameObject != nullptr) && (selectedGameObject != root)) 
-	{
-		selectedGameObject->to_delete = true;
-	}
-
-	return UPDATE_CONTINUE;
-}
 
 

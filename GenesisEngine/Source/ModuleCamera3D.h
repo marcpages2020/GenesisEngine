@@ -24,7 +24,9 @@ public:
 	void Look(float3& position);
 	void LookAt(const float3& Spot);
 	float* GetViewMatrix();
+	float4x4 GetViewMatrixM();
 	float* GetProjectionMatrix();
+	float4x4 GetProjectionMatrixM();
 	float3 GetPosition();
 	GameObject* PickGameObject();
 	float GetVerticalFieldOfView();

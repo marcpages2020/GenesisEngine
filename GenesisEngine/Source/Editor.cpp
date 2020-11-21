@@ -515,6 +515,7 @@ void Editor::ShowSceneWindow()
 		}
 
 		ImGui::Image((ImTextureID)App->renderer3D->colorTexture, image_size, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
+		App->scene->EditTransform();
 		//ImGui::Image((ImTextureID)App->renderer3D->depthTexture, image_size, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
 	}
 	ImGui::End();
