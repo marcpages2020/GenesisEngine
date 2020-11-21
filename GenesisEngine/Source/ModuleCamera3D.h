@@ -5,6 +5,7 @@
 
 class Camera;
 class GameObject;
+enum FixedFOV;
 
 class ModuleCamera3D : public Module
 {
@@ -29,6 +30,9 @@ public:
 	float4x4 GetProjectionMatrixM();
 	float3 GetPosition();
 	GameObject* PickGameObject();
+
+	FixedFOV GetFixedFOV();
+	void SetFixedFOV(FixedFOV fixedFOV);
 	float GetVerticalFieldOfView();
 	float GetHorizontalFieldOfView();
 	void SetVerticalFieldOfView(float verticalFOV, int screen_width, int screen_height);
@@ -42,8 +46,6 @@ private:
 	void Orbit(float dt);
 
 public:
-
-	float3 X, Y, Z;
 	Color background;
 
 	float move_speed;
@@ -54,7 +56,7 @@ public:
 
 private:
 	mat4x4 ViewMatrix, ViewMatrixInverse;
-
+	float3 X, Y, Z;
 	Camera* _camera;
 	float3 _position;
 	float3 _reference;

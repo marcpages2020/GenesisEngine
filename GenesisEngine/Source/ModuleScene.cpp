@@ -153,12 +153,13 @@ void ModuleScene::EditTransform()
 
 	ImGuizmo::Manipulate(viewMatrix.ptr(), projectionMatrix.ptr(), mCurrentGizmoOperation, mCurrentGizmoMode, tempTransform);
 
-
-	float4x4 newTransform;
-	newTransform.Set(tempTransform);
-	newTransform.Transpose();
-	selectedGameObject->GetTransform()->SetGlobalTransform(newTransform);
-
+	if (ImGuizmo::IsUsing())
+	{
+		float4x4 newTransform;
+		newTransform.Set(tempTransform);
+		newTransform.Transpose();
+		selectedGameObject->GetTransform()->SetGlobalTransform(newTransform);
+	}
 }
 
 void ModuleScene::SetDroppedTexture(GnTexture* texture)

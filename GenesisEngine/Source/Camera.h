@@ -25,6 +25,7 @@ public:
 	void Update() override;
 	void OnEditor() override;
 
+	void SetFixedFOV(FixedFOV fixedFOV);
 	void AdjustFieldOfView();
 	void AdjustFieldOfView(float width, float height);
 	void SetVerticalFieldOfView(float verticalFOV, float screen_width, float screen_height);
@@ -41,9 +42,11 @@ public:
 	//virtual void Enable() override;
 	//virtual void Disable() override;
 
+public:
+	FixedFOV fixedFOV;
+
 private:
 	Frustum _frustum;
 	AspectRatio _aspectRatio;
 	float3 _reference;
-	FixedFOV fixedFOV;
 };

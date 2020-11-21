@@ -72,6 +72,11 @@ void Camera::OnEditor()
 	}
 }
 
+void Camera::SetFixedFOV(FixedFOV g_fixedFOV)
+{
+	fixedFOV = g_fixedFOV;
+}
+
 void Camera::AdjustFieldOfView()
 {
 	switch (_aspectRatio)

@@ -5,6 +5,7 @@
 #include "ModuleScene.h"
 #include "GameObject.h"
 #include "FileSystem.h"
+#include "Camera.h"
 
 #include <vector>
 #include <string>
@@ -219,6 +220,12 @@ bool Editor::LoadConfig(GnJSONObj& config)
 bool Editor::IsSceneFocused()
 {
 	return scene_window_focused;
+}
+
+bool Editor::MouseOnScene()
+{
+	return mouseScenePosition.x > 0 && mouseScenePosition.x < image_size.x 
+		   && mouseScenePosition.y > 0 && mouseScenePosition.y < image_size.y;
 }
 
 void Editor::AddConsoleLog(const char* log, int warning_level)
@@ -554,7 +561,7 @@ void Editor::PreorderHierarchy(GameObject* gameObject, int& id)
 	if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
 	{
 		ImGui::SetDragDropPayload("HIERARCHY", &id, sizeof(int));
-		ImGui::Text("Change Hierarchy");
+		ImGui::Text("Reparent");
 		ImGui::EndDragDropSource();
 	}
 	if (ImGui::BeginDragDropTarget())
@@ -577,7 +584,7 @@ void Editor::PreorderHierarchy(GameObject* gameObject, int& id)
 	if (gameObject->GetChildrenAmount() == 0)
 		flags |= ImGuiTreeNodeFlags_Leaf;
 
-	//if (ImGui::TreeNodeEx(std::to_string(id).c_str(), flags)) 
+
 	if (ImGui::TreeNodeEx(gameObject->GetName(), flags)) 
 	{
 		if (ImGui::IsItemClicked())
@@ -699,21 +706,37 @@ void Editor::ShowConfigurationWindow()
 			ImGui::SliderFloat("Sensitivity", &App->camera->sensitivity, 0.0f, 50.0f);
 
 			ImGui::Spacing();
+			ImGui::Separator();
+			ImGui::Spacing();
 
-			/*
-			float verticalFOV = App->camera->GetVerticalFieldOfView() * RADTODEG;
-			if (ImGui::SliderFloat("Vertical FOV", &verticalFOV, 20.0f, 60.0f)) {
-				App->camera->SetFieldOfView(verticalFOV * DEGTORAD, image_size.x, image_size.y);
+			bool fixedVerticalFOV = App->camera->GetFixedFOV() == FixedFOV::FIXED_VERTICAL_FOV;
+			bool fixedHorizontalFOV = App->camera->GetFixedFOV() == FixedFOV::FIXED_HORIZONTAL_FOV;
+
+			if (ImGui::RadioButton("Fixed VerticalFOV", fixedVerticalFOV)) 
+				App->camera->SetFixedFOV(FixedFOV::FIXED_VERTICAL_FOV);
+			ImGui::SameLine();
+			if(ImGui::RadioButton("Fixed HorizontalFOV", fixedHorizontalFOV))
+				App->camera->SetFixedFOV(FixedFOV::FIXED_HORIZONTAL_FOV);
+
+			//Fixed Vertical FOV Settings
+			if(fixedVerticalFOV)
+			{
+				float verticalFOV = App->camera->GetVerticalFieldOfView() * RADTODEG;
+				if (ImGui::SliderFloat("Vertical FOV", &verticalFOV, 20.0f, 60.0f)) 
+					App->camera->SetVerticalFieldOfView(verticalFOV * DEGTORAD, image_size.x, image_size.y);
+				
+				ImGui::Text("Horizontal FOV: %.2f", App->camera->GetHorizontalFieldOfView() * RADTODEG);
+			}
+			//Fixed Horizontal FOV Settings
+			else
+			{
+				float horizontalFOV = App->camera->GetHorizontalFieldOfView() * RADTODEG;
+				if (ImGui::SliderFloat("Horizontal FOV", &horizontalFOV, 55.0f, 110.0f)) 
+					App->camera->SetHorizontalFieldOfView(horizontalFOV * DEGTORAD, image_size.x, image_size.y);
+
+				ImGui::Text("Vertical FOV: %.2f", App->camera->GetVerticalFieldOfView() * RADTODEG);
 			}
 
-			ImGui::Text("Horizontal FOV: %.2f", App->camera->GetHorizontalFieldOfView() * RADTODEG);
-			*/
-			float horizontalFOV = App->camera->GetHorizontalFieldOfView() * RADTODEG;
-			if (ImGui::SliderFloat("Horizontal FOV", &horizontalFOV, 55.0f, 110.0f)) {
-				App->camera->SetHorizontalFieldOfView(horizontalFOV * DEGTORAD, image_size.x, image_size.y);
-			}
-
-			ImGui::Text("Vertical FOV: %.2f", App->camera->GetVerticalFieldOfView() * RADTODEG);
 		}
 
 		if (ImGui::CollapsingHeader("Hardware"))

@@ -67,8 +67,7 @@ bool ModuleCamera3D::CleanUp()
 
 void ModuleCamera3D::OnResize(int width, int height)
 {
-	//_camera->AdjustFieldOfView(width, height);
-	_camera->SetVerticalFieldOfView(App->camera->GetVerticalFieldOfView(), width, height);
+	_camera->AdjustFieldOfView(width, height);
 }
 
 // -----------------------------------------------------------------
@@ -133,7 +132,7 @@ update_status ModuleCamera3D::Update(float dt)
 		((App->input->GetKey(SDL_SCANCODE_LALT) == KEY_REPEAT) && (App->input->GetMouseButton(SDL_BUTTON_LEFT) == KEY_REPEAT)))
 		Orbit(dt);
 
-	if (App->input->GetMouseButton(SDL_BUTTON_LEFT) == KEY_DOWN && !ImGuizmo::IsOver())
+	if (App->input->GetMouseButton(SDL_BUTTON_LEFT) == KEY_DOWN && !ImGuizmo::IsOver() && App->editor->MouseOnScene())
 	{
 		GameObject* pickedGameObject = PickGameObject();
 		App->scene->selectedGameObject = pickedGameObject;
@@ -274,6 +273,16 @@ GameObject* ModuleCamera3D::PickGameObject()
 	}
 
 	return nullptr;
+}
+
+FixedFOV ModuleCamera3D::GetFixedFOV()
+{
+	return _camera->fixedFOV;
+}
+
+void ModuleCamera3D::SetFixedFOV(FixedFOV fixedFOV)
+{
+	_camera->SetFixedFOV(fixedFOV);
 }
 
 float ModuleCamera3D::GetVerticalFieldOfView()

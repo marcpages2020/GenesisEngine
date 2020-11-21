@@ -29,6 +29,7 @@ public:
 	bool CleanUp();
 
 	bool IsSceneFocused();
+	bool MouseOnScene();
 	void AddConsoleLog(const char* log, int warning_level);
 	
 private:

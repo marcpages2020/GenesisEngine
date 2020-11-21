@@ -122,11 +122,22 @@ float4x4 Transform::GetGlobalTransform()
 void Transform::SetGlobalTransform(float4x4 newTransform)
 {
 	_globalTransform = newTransform;
+	float4x4 inverseParentGlobal = _parentGlobalTransform;
+	inverseParentGlobal.Inverse();
+	_localTransform = inverseParentGlobal * _globalTransform;
+	UpdateTRS();
+	_gameObject->UpdateChildrenTransforms();
 }
 
 void Transform::UpdateLocalTransform()
 {
 	_localTransform = float4x4::FromTRS(_position, _rotation, _scale);
+	UpdateEulerRotation();
+}
+
+void Transform::UpdateTRS()
+{
+	_localTransform.Decompose(_position, _rotation, _scale);
 }
 
 void Transform::UpdateGlobalTransform()
@@ -173,6 +184,7 @@ float3 Transform::GetPosition()
 {
 	return _position;
 }
+
 
 //Set rotation from Euler angles
 void Transform::SetRotation(float x, float y, float z)
