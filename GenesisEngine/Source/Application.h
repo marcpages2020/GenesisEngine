@@ -15,7 +15,6 @@
 
 #include <string>
 
-
 struct HardwareSpecs
 {
 	int cpu_count;
@@ -55,6 +54,7 @@ public:
 
 	const char* engine_name;
 	const char* engine_version;
+	bool in_game;
 
 public:
 
@@ -65,7 +65,9 @@ public:
 	update_status Update();
 	bool CleanUp();
 
-public:
+	void StartGame();
+	void StopGame();
+
 	float GetFPS();
 	float GetLastDt();
 	int GetFPSCap();

@@ -199,6 +199,7 @@
     <ClCompile Include="Libs\ImGuizmo\ImGuizmo.cpp">
       <Filter>Libs\ImGuizmo</Filter>
     </ClCompile>
+    <ClCompile Include="Time.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
@@ -504,6 +505,7 @@
     <ClInclude Include="Libs\ImGuizmo\ImGuizmo.h">
       <Filter>Libs\ImGuizmo</Filter>
     </ClInclude>
+    <ClInclude Include="Time.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Modules">

@@ -37,6 +37,8 @@ private:
 	update_status ShowDockSpace(bool* p_open);
 	bool CreateMainMenuBar();
 
+	void ShowGameButtons();
+
 	//Windows
 	void ShowSceneWindow();
 	void ShowInspectorWindow();
@@ -70,6 +72,7 @@ private:
 	//edit subwindows
 	bool show_preferences_window;
 	bool show_about_window;
+	bool show_game_buttons;
 
 	//menus
 	bool* open_dockspace;

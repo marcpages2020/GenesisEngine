@@ -6,6 +6,7 @@
 #include "GameObject.h"
 #include "FileSystem.h"
 #include "Camera.h"
+#include "Time.h"
 
 #include <vector>
 #include <string>
@@ -29,16 +30,8 @@ Editor::Editor(bool start_enabled) : Module(start_enabled)
 	name = "editor";
 
 	show_scene_window = true;
-	show_inspector_window = true;
-	show_hierarchy_window = true;
-	show_project_window = true;
-	show_console_window = true;
-	show_configuration_window = false;
-
-	show_preferences_window = false;
-	show_about_window = false;
-
 	scene_window_focused = false;
+	show_game_buttons = true;
 
 	current_theme = 1;
 
@@ -85,6 +78,8 @@ update_status Editor::Update(float dt)
 
 update_status Editor::Draw()
 {
+	ShowGameButtons();
+
 	//Inspector
 	if (show_inspector_window)
 	{
@@ -104,9 +99,7 @@ update_status Editor::Draw()
 
 	//Hierarchy
 	if (show_hierarchy_window)
-	{
 		ShowHierarchyWindow();
-	}
 
 	//scene window
 	if (show_scene_window)
@@ -147,21 +140,15 @@ update_status Editor::Draw()
 
 	//Preferences
 	if (show_preferences_window)
-	{
 		ShowPreferencesWindow();
-	}
 
 	//Configuration
 	if (show_configuration_window)
-	{
 		ShowConfigurationWindow();
-	}
 
 	//About
 	if (show_about_window)
-	{
 		ShowAboutWindow();
-	}
 
 	if (file_dialog == opened)
 		LoadFile(nullptr, "Library/");
@@ -424,6 +411,10 @@ bool Editor::CreateMainMenuBar() {
 			{
 				show_inspector_window = !show_inspector_window;
 			}
+			else if (ImGui::MenuItem("Hierarchy", NULL, show_hierarchy_window))
+			{
+				show_hierarchy_window = !show_hierarchy_window;
+			}
 			else if (ImGui::MenuItem("Scene", NULL, show_scene_window))
 			{
 				show_scene_window = !show_scene_window;
@@ -435,6 +426,10 @@ bool Editor::CreateMainMenuBar() {
 			else if (ImGui::MenuItem("Console", NULL, show_console_window))
 			{
 				show_console_window = !show_console_window;
+			}
+			else if (ImGui::MenuItem("Configuration", NULL, show_configuration_window))
+			{
+				show_configuration_window = !show_configuration_window;
 			}
 			ImGui::EndMenu();
 		}
@@ -463,6 +458,40 @@ bool Editor::CreateMainMenuBar() {
 	}
 
 	return ret;
+}
+
+void Editor::ShowGameButtons()
+{
+	//ImGuiWindowFlags_NoTitleBar;
+	//ImGuiWindowFlags_NoDecoration
+	ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove;
+
+	float x_position = App->window->width * 0.5f;
+	float y_position = App->window->height * 0.1f;
+
+	//ImGui::SetNextWindowPos(ImVec2(x_position - 20, y_position));
+	if (ImGui::Begin("Game Buttons", &show_game_buttons, flags))
+	{
+		ImGui::Columns(3);
+
+		if (App->in_game == false)
+		{
+			if (ImGui::Button("Play", ImVec2(40, 20)))
+				App->StartGame();
+		}
+		else {
+			if (ImGui::Button("Stop", ImVec2(40, 20)))
+				App->StopGame();
+		}
+
+		ImGui::NextColumn();
+		//ImGui::SameLine();
+		if (ImGui::Button("Pause", ImVec2(45, 20))) {
+			Time::GameClock::Pause();
+		}
+		//
+	}
+	ImGui::End();
 }
 
 //Windows
@@ -822,6 +851,27 @@ void Editor::ShowConfigurationWindow()
 
 			ImGui::Text("Near Plane Mouse X: %.2f", normalized_x);
 			ImGui::Text("Near Plane Mouse Y: %.2f", normalized_y);
+		}
+
+		if (ImGui::CollapsingHeader("Time"))
+		{
+			ImGui::Text("Frame Count: %d", Time::frameCount);
+
+			ImGui::Spacing();	
+			ImGui::Separator();
+
+			ImGui::Text("Real Time");
+			ImGui::Spacing();
+			ImGui::Text("Delta time: %.3f", Time::RealClock::deltaTime);
+			ImGui::Text("Time Since Startup %.3f", Time::RealClock::timeSinceStartup());
+
+			ImGui::Separator();
+
+			ImGui::Text("Game Time");
+			ImGui::Spacing();
+			ImGui::Text("Delta time %.3f", Time::GameClock::deltaTime());
+
+			ImGui::Text("Time Scale %.2f", Time::GameClock::timeScale);
 		}
 
 		if (ImGui::CollapsingHeader("File System")) 

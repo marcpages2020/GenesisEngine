@@ -2,12 +2,12 @@
 #include "glew/include/glew.h"
 #include "Globals.h"
 #include "FileSystem.h"
-
+#include "Time.h"
 #include "GnJSON.h"
 
 #include "parson/parson.h"
 
-Application::Application(int argc, char* args[]) : argc(argc), args(args), want_to_save(false), want_to_load(false)
+Application::Application(int argc, char* args[]) : argc(argc), args(args), want_to_save(false), want_to_load(false), in_game(false)
 {
 	window = new ModuleWindow(true);
 	input = new ModuleInput(true);
@@ -48,6 +48,7 @@ bool Application::Init()
 	bool ret = true;
 
 	FileSystem::Init();
+	Time::Init();
 
 	char* buffer = nullptr;
 
@@ -87,6 +88,7 @@ bool Application::Init()
 void Application::PrepareUpdate()
 {
 	dt = (float)ms_timer.Read() / 1000;
+	Time::RealClock::deltaTime = dt;
 	fps = 1.0f / dt;
 	ms_timer.Start();
 }
@@ -95,11 +97,12 @@ void Application::PrepareUpdate()
 void Application::FinishUpdate()
 {
 	Uint32 last_frame_ms = ms_timer.Read();
-
 	if (last_frame_ms < capped_ms)
 	{
 		SDL_Delay(capped_ms - last_frame_ms);
 	}
+
+	Time::frameCount++;
 }
 
 // Call PreUpdate, Update and PostUpdate on all modules
@@ -149,6 +152,17 @@ bool Application::CleanUp()
 	FileSystem::CleanUp();
 
 	return ret;
+}
+
+void Application::StartGame()
+{
+	in_game = true;
+	Time::GameClock::Resume();
+}
+
+void Application::StopGame()
+{
+	in_game = false;
 }
 
 void Application::AddModule(Module* mod)
