@@ -30,13 +30,14 @@ bool ModuleScene::Start()
 	//uint baker_house = App->resources->ImportFile("Assets/Models/baker_house/BakerHouse.FBX");
 	GameObject* baker_house_GO = App->resources->RequestGameObject("Assets/Models/baker_house/BakerHouse.FBX");
 	root->AddChild(baker_house_GO);
+	baker_house_GO->GetTransform()->UpdateGlobalTransform(root->GetTransform()->GetGlobalTransform());
 	baker_house_GO->SetParent(root);
 
 	GameObject* camera = new GameObject();
 	camera->AddComponent(ComponentType::CAMERA);
 	camera->SetName("Camera");
 	camera->GetTransform()->SetPosition(float3(0.0f, 0.0f, -5.0f));
-	root->AddChild(camera);
+	AddGameObject(camera);
 	App->renderer3D->SetMainCamera((Camera*)camera->GetComponent(ComponentType::CAMERA));
 
 	//uint baker_house_texture = App->resources->ImportFile("Assets/Textures/Baker_house.png");

@@ -2,32 +2,31 @@
 
 #include "Timer.h"
 
+struct GnClock
+{
+	GnClock();
+	void Start();
+	void Pause();
+	void Resume();
+	void Reset();
+	//time since startup
+	float timeSinceStartup();
+	void SetDT();
+
+	float deltaTime(); //last frame expressed in seconds time
+	float timeScale; //scale at which time is passing
+	bool paused;
+	float dt;
+	Timer timer;
+	Timer deltaTimer;
+};
+
 namespace Time 
 {
 	void Init();
 
-	static int frameCount = 0; //frames since game start
-
-	namespace GameClock
-	{
-		void Start();
-		void Pause();
-		void Resume();
-		void Reset();
-		static float time(); //seconds since game start
-		float deltaTime(); //last frame time expressed in seconds
-
-		static float timeScale; //scale at which time is passing
-		static bool paused;
-		static Timer timer;
-	}
-
-	namespace RealClock
-	{
-		//real time since start
-		float timeSinceStartup(); 
-
-		static float deltaTime; //last frame expressed in real time
-		static Timer timer;
-	}
+	static int frameCount; //frames since game start
+	
+	static GnClock realClock;
+	static GnClock gameClock;
 }

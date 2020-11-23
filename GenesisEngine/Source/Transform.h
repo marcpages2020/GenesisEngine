@@ -29,6 +29,7 @@ public:
 	void UpdateTRS();
 	void UpdateGlobalTransform();
 	void UpdateGlobalTransform(float4x4 parentGlobalTransform);
+	void ChangeParentTransform(float4x4 newParentGlobalTransform);
 
 	void Reset();
 

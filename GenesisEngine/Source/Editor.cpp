@@ -485,11 +485,9 @@ void Editor::ShowGameButtons()
 		}
 
 		ImGui::NextColumn();
-		//ImGui::SameLine();
 		if (ImGui::Button("Pause", ImVec2(45, 20))) {
-			Time::GameClock::Pause();
+			Time::gameClock.Pause();
 		}
-		//
 	}
 	ImGui::End();
 }
@@ -576,7 +574,7 @@ void Editor::ShowHierarchyWindow()
 	{
 		GameObject* root = App->scene->GetRoot();
 		int id = 0;
-		PreorderHierarchy(root,id);
+		PreorderHierarchy(root, id);
 	}
 	ImGui::End();
 }
@@ -584,25 +582,6 @@ void Editor::ShowHierarchyWindow()
 void Editor::PreorderHierarchy(GameObject* gameObject, int& id)
 {
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
-	id++;
-
-	ImGui::PushID(gameObject->UUID);
-	if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
-	{
-		ImGui::SetDragDropPayload("HIERARCHY", &id, sizeof(int));
-		ImGui::Text("Reparent");
-		ImGui::EndDragDropSource();
-	}
-	if (ImGui::BeginDragDropTarget())
-	{
-		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("HIERARCHY"))
-		{
-			IM_ASSERT(payload->DataSize == sizeof(int));
-			int payload_n = *(const int*)payload->Data;
-		}
-		ImGui::EndDragDropTarget();
-	}
-	ImGui::PopID();
 
 	if (gameObject == App->scene->GetRoot())
 		flags |= ImGuiTreeNodeFlags_DefaultOpen;
@@ -618,6 +597,29 @@ void Editor::PreorderHierarchy(GameObject* gameObject, int& id)
 	{
 		if (ImGui::IsItemClicked())
 			App->scene->selectedGameObject = gameObject;
+
+		ImGui::PushID(id);
+		if (ImGui::BeginDragDropSource())
+		{
+			ImGui::SetDragDropPayload("HIERARCHY", &id, sizeof(int));
+			ImGui::Text("Reparent");
+			ImGui::EndDragDropSource();
+		}
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("HIERARCHY"))
+			{
+				IM_ASSERT(payload->DataSize == sizeof(int));
+				int payload_n = *(const int*)payload->Data;
+
+				std::vector<GameObject*> gameObjects = App->scene->GetAllGameObjects();
+				GameObject* target = gameObjects[payload_n];
+				target->Reparent(gameObject);
+			}
+			ImGui::EndDragDropTarget();
+		}
+		ImGui::PopID();
+		id++;
 
 		for (size_t i = 0; i < gameObject->GetChildrenAmount(); i++)
 		{
@@ -862,16 +864,17 @@ void Editor::ShowConfigurationWindow()
 
 			ImGui::Text("Real Time");
 			ImGui::Spacing();
-			ImGui::Text("Delta time: %.3f", Time::RealClock::deltaTime);
-			ImGui::Text("Time Since Startup %.3f", Time::RealClock::timeSinceStartup());
+			ImGui::Text("Delta Time: %.3f", Time::realClock.deltaTime());
+			ImGui::Text("Time Since Startup %.3f", Time::realClock.timeSinceStartup());
 
+			ImGui::Spacing();
 			ImGui::Separator();
 
 			ImGui::Text("Game Time");
 			ImGui::Spacing();
-			ImGui::Text("Delta time %.3f", Time::GameClock::deltaTime());
+			//ImGui::Text("Delta time %.3f", Time::GameClock::deltaTime());
 
-			ImGui::Text("Time Scale %.2f", Time::GameClock::timeScale);
+			ImGui::Text("Time Scale: %.2f", Time::gameClock.timeScale);
 		}
 
 		if (ImGui::CollapsingHeader("File System")) 

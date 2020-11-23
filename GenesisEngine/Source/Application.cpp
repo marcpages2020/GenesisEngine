@@ -88,7 +88,8 @@ bool Application::Init()
 void Application::PrepareUpdate()
 {
 	dt = (float)ms_timer.Read() / 1000;
-	Time::RealClock::deltaTime = dt;
+	Time::realClock.SetDT();
+	Time::realClock.deltaTimer.Start();
 	fps = 1.0f / dt;
 	ms_timer.Start();
 }
@@ -157,7 +158,7 @@ bool Application::CleanUp()
 void Application::StartGame()
 {
 	in_game = true;
-	Time::GameClock::Resume();
+	//Time::GameClock::Resume();
 }
 
 void Application::StopGame()

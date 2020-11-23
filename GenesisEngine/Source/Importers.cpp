@@ -520,7 +520,7 @@ void TextureImporter::Load(const char* path, ResourceTexture* texture)
 	}
 	else
 	{
-		LOG("Texture loaded successfully from: %s in %d ms", texture->assetsFile, timer.Read());
+		LOG("Texture loaded successfully from: %s in %d ms", texture->libraryFile.c_str(), timer.Read());
 
 		texture->data = ilGetData();
 		texture->id = (uint)(imageID);

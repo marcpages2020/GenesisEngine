@@ -12,7 +12,7 @@
 
 #include <vector>
 
-GameObject::GameObject() : enabled(true), name("Empty Game Object"), parent(nullptr), to_delete(false), transform(nullptr), _visible(false)
+GameObject::GameObject() : enabled(true), name("Empty Game Object"), _parent(nullptr), to_delete(false), transform(nullptr), _visible(false)
 {
 	transform = (Transform*)AddComponent(TRANSFORM);
 	UUID = LCG().Int();
@@ -26,7 +26,7 @@ GameObject::GameObject(GnMesh* mesh) : GameObject()
 
 GameObject::~GameObject()
 {
-	parent = nullptr;
+	_parent = nullptr;
 
 	for (size_t i = 0; i < components.size(); i++)
 	{
@@ -89,8 +89,8 @@ void GameObject::OnEditor()
 
 	if(ImGui::CollapsingHeader("Debugging Information")) 
 	{
-		if(parent != nullptr)
-			ImGui::Text("Parent: %s", parent->GetName());
+		if(_parent != nullptr)
+			ImGui::Text("Parent: %s", _parent->GetName());
 		else 
 			ImGui::Text("No parent");
 
@@ -104,8 +104,8 @@ void GameObject::Save(GnJSONArray& save_array)
 
 	save_object.AddInt("UUID", UUID);
 
-	if(parent != nullptr)
-		save_object.AddInt("Parent UUID",parent->UUID);
+	if(_parent != nullptr)
+		save_object.AddInt("Parent UUID",_parent->UUID);
 
 	save_object.AddString("Name", name.c_str());
 
@@ -303,12 +303,23 @@ GameObject* GameObject::GetChildAt(int index)
 
 GameObject* GameObject::GetParent()
 {
-	return parent;
+	return _parent;
 }
 
 void GameObject::SetParent(GameObject* g_parent)
 {
-	parent = g_parent;
+	_parent = g_parent;
+}
+
+void GameObject::Reparent(GameObject* newParent)
+{
+	if (newParent != nullptr) 
+	{
+		_parent->RemoveChild(this);
+		_parent = newParent;
+		newParent->AddChild(this);
+		transform->ChangeParentTransform(newParent->GetTransform()->GetGlobalTransform());
+	}
 }
 
 bool GameObject::RemoveChild(GameObject* gameObject)

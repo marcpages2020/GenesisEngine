@@ -43,6 +43,7 @@ public:
 
 	GameObject* GetParent();
 	void SetParent(GameObject* parent);
+	void Reparent(GameObject* newParent);
 
 	void AddChild(GameObject* child);
 	int GetChildrenAmount();
@@ -62,7 +63,7 @@ private:
 	bool enabled;
 	bool _visible;
 	std::string name;
-	GameObject* parent;
+	GameObject* _parent;
 	Transform* transform;
 	std::vector<Component*> components;
 	std::vector<GameObject*> children;

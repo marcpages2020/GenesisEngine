@@ -138,6 +138,7 @@ void Transform::UpdateLocalTransform()
 void Transform::UpdateTRS()
 {
 	_localTransform.Decompose(_position, _rotation, _scale);
+	UpdateEulerRotation();
 }
 
 void Transform::UpdateGlobalTransform()
@@ -150,6 +151,15 @@ void Transform::UpdateGlobalTransform(float4x4 parentGlobalTransform)
 {
 	UpdateLocalTransform();
 	_parentGlobalTransform = parentGlobalTransform;
+	_globalTransform = _parentGlobalTransform * _localTransform;
+}
+
+void Transform::ChangeParentTransform(float4x4 newParentGlobalTransform)
+{
+	_parentGlobalTransform = newParentGlobalTransform;
+	newParentGlobalTransform.Inverse();
+	_localTransform =  newParentGlobalTransform * _globalTransform;
+	UpdateTRS();
 	_globalTransform = _parentGlobalTransform * _localTransform;
 }
 
