@@ -87,7 +87,6 @@ private:
 	int	   argc;
 	char** args;
 
-	Timer	ms_timer;
 	float	dt;
 	float	fps;
 	float	capped_ms;

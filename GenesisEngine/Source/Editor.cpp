@@ -350,7 +350,11 @@ bool Editor::CreateMainMenuBar() {
 	
 		if (ImGui::BeginMenu("Game Object"))
 		{
-			if (ImGui::MenuItem("Cube"))
+			if (ImGui::MenuItem("Empty Object"))
+			{
+				App->scene->AddGameObject(new GameObject());
+			}
+			else if (ImGui::MenuItem("Cube"))
 			{
 				App->scene->AddGameObject(new GameObject(new GnCube()));
 			}
@@ -485,9 +489,17 @@ void Editor::ShowGameButtons()
 		}
 
 		ImGui::NextColumn();
-		if (ImGui::Button("Pause", ImVec2(45, 20))) {
-			Time::gameClock.Pause();
+		if (Time::gameClock.paused) 
+		{
+			if (ImGui::Button("Resume", ImVec2(45, 20)))
+				Time::gameClock.Resume();
 		}
+		else 
+		{
+			if (ImGui::Button("Pause", ImVec2(45, 20))) 
+				Time::gameClock.Pause();
+		}
+
 	}
 	ImGui::End();
 }
@@ -620,6 +632,21 @@ void Editor::PreorderHierarchy(GameObject* gameObject, int& id)
 		}
 		ImGui::PopID();
 		id++;
+
+		if (ImGui::BeginPopupContextItem())
+		{
+			if (ImGui::Button("Add Empty Child")) 
+			{
+				gameObject->AddChild(new GameObject());
+				ImGui::CloseCurrentPopup();
+			}
+			else if (ImGui::Button("Delete"))
+			{
+				gameObject->to_delete = true;
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
 
 		for (size_t i = 0; i < gameObject->GetChildrenAmount(); i++)
 		{
@@ -864,7 +891,7 @@ void Editor::ShowConfigurationWindow()
 
 			ImGui::Text("Real Time");
 			ImGui::Spacing();
-			ImGui::Text("Delta Time: %.3f", Time::realClock.deltaTime());
+			ImGui::Text("Delta Time: %.3f", Time::realClock.dt);
 			ImGui::Text("Time Since Startup %.3f", Time::realClock.timeSinceStartup());
 
 			ImGui::Spacing();
@@ -872,9 +899,9 @@ void Editor::ShowConfigurationWindow()
 
 			ImGui::Text("Game Time");
 			ImGui::Spacing();
-			//ImGui::Text("Delta time %.3f", Time::GameClock::deltaTime());
-
+			ImGui::Text("Delta time %.3f", Time::gameClock.dt);
 			ImGui::Text("Time Scale: %.2f", Time::gameClock.timeScale);
+			ImGui::Text("Time since game start: %.2f", Time::gameClock.timeSinceStartup());
 		}
 
 		if (ImGui::CollapsingHeader("File System")) 

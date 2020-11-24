@@ -1,18 +1,22 @@
 #include "Time.h"
 
+GnClock Time::realClock;
+GnClock Time::gameClock;
+
+int Time::frameCount = 0;
+
 void Time::Init()
 {
-	frameCount = 0;
-	gameClock.timeScale = 1.0f;
-	gameClock.paused = true;
+	gameClock.timeScale = 0.0f;
+	gameClock.started = false;
 	
 	realClock.timer.Start();
+	realClock.started = true;
 }
 
 
 GnClock::GnClock()
 {
-	dt = 0.33f;
 	timeScale = 1.0f;
 	paused = false;
 }
@@ -20,59 +24,52 @@ GnClock::GnClock()
 void GnClock::Start()
 {
 	paused = false;
-	timer.Start();
+	started = true;
 	timeScale = 1.0f;
+	timer.Start();
+}
+
+void GnClock::Stop()
+{
+	paused = false;
+	started = false;
 }
 
 void GnClock::Pause()
 {
 	paused = true;
 	timeScale = 0.0f;
+	timer.Stop();
 }
 
 void GnClock::Resume()
 {
 	paused = false;
 	timeScale = 1.0f;
+	timer.Resume();
 }
 
 void GnClock::Reset()
 {
-	//GameClock::deltaTime = 0.0f;
-	//GameClock::time = 0.0f;
 	timeScale = 1.0f;
 	paused = false;
 }
 
-float GnClock::timeSinceStartup()
+void GnClock::Step()
 {
-	return timer.ReadSec();
+	dt = (float)deltaTimer.Read() / 1000 * timeScale;
+	deltaTimer.Start();
 }
 
-void GnClock::SetDT()
+float GnClock::timeSinceStartup()
 {
-	dt = deltaTimer.ReadSec();
+	if (started)
+		return timer.ReadSec();
+	else
+		return 0.0f;
 }
 
 float GnClock::deltaTime()
 {
 	return dt * timeScale;
 }
-
-/*
-float Time::GameClock::time()
-{
-	return Time::GameClock::timer.ReadSec();
-}
-
-float Time::GameClock::deltaTime()
-{
-	return RealClock::deltaTime * GameClock::timeScale;
-}
-
-
-float Time::RealClock::timeSinceStartup()
-{
-	return RealClock::timer.ReadSec();
-}
-*/

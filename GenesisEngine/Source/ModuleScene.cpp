@@ -28,11 +28,18 @@ bool ModuleScene::Start()
 	root->SetName("Root");
 
 	//uint baker_house = App->resources->ImportFile("Assets/Models/baker_house/BakerHouse.FBX");
+	
 	GameObject* baker_house_GO = App->resources->RequestGameObject("Assets/Models/baker_house/BakerHouse.FBX");
 	root->AddChild(baker_house_GO);
 	baker_house_GO->GetTransform()->UpdateGlobalTransform(root->GetTransform()->GetGlobalTransform());
 	baker_house_GO->SetParent(root);
+	
 
+	/*
+	uint street_environment_uid = App->resources->ImportFile("Assets/Models/street/Street environment_V01.FBX");
+	GameObject* street_environment = App->resources->RequestGameObject("Assets/Models/street/Street environment_V01.FBX");
+	AddGameObject(street_environment);
+	*/
 	GameObject* camera = new GameObject();
 	camera->AddComponent(ComponentType::CAMERA);
 	camera->SetName("Camera");

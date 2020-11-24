@@ -428,7 +428,9 @@ bool ModuleResources::SaveResource(Resource* resource)
 		FileSystem::Save(resource->libraryFile.c_str(), buffer, size);
 		RELEASE_ARRAY(buffer);
 	}
-	ret = SaveMetaFile(resource);
+
+	if(resource->GetType() != ResourceType::RESOURCE_MESH && resource->GetType() != ResourceType::RESOURCE_MATERIAL)
+		ret = SaveMetaFile(resource);
 
 	return ret;
 }

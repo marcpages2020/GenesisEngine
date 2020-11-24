@@ -63,10 +63,10 @@ void ModelImporter::Import(char* fileBuffer, ResourceModel* model, uint size)
 
 		aiReleaseImport(scene);
 
-		LOG("%s loaded in %d ms", model->assetsFile.c_str(), timer.Read());
+		LOG("%s: imported in %d ms", model->assetsFile.c_str(), timer.Read());
 	}
 	else
-		LOG_ERROR("Error loading scene %s", model->assetsFile.c_str());
+		LOG_ERROR("Error importing: %s", model->assetsFile.c_str());
 }
 
 uint64 ModelImporter::Save(ResourceModel* model, char** fileBuffer)
@@ -86,7 +86,12 @@ void ModelImporter::ImportChildren(const aiScene* scene, aiNode* node, aiNode* p
 
 	//Node Information 
 	meshes_array.AddObject(node_object);
-	node_object.AddString("Name", node->mName.C_Str());
+
+	if (node == scene->mRootNode)
+		node_object.AddString("Name", FileSystem::GetFile(model->assetsFile.c_str()).c_str());
+	else 
+		node_object.AddString("Name", node->mName.C_Str());
+
 	uint node_uid = App->resources->GenerateUID();
 	node_object.AddInt("UUID", node_uid);
 	node_object.AddInt("Parent UUID", parentNodeUID);

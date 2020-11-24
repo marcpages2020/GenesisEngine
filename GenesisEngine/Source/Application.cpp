@@ -80,24 +80,24 @@ bool Application::Init()
 	config.Release();
 	RELEASE_ARRAY(buffer);
 
-	ms_timer.Start();
+	Time::realClock.deltaTimer.Start();
 	return ret;
 }
 
 // ---------------------------------------------
 void Application::PrepareUpdate()
 {
-	dt = (float)ms_timer.Read() / 1000;
-	Time::realClock.SetDT();
-	Time::realClock.deltaTimer.Start();
+	dt = (float)Time::realClock.deltaTimer.Read() / 1000;
 	fps = 1.0f / dt;
-	ms_timer.Start();
+
+	Time::realClock.Step();
+	Time::gameClock.Step();
 }
 
 // ---------------------------------------------
 void Application::FinishUpdate()
 {
-	Uint32 last_frame_ms = ms_timer.Read();
+	Uint32 last_frame_ms = Time::realClock.dt;
 	if (last_frame_ms < capped_ms)
 	{
 		SDL_Delay(capped_ms - last_frame_ms);
@@ -158,12 +158,13 @@ bool Application::CleanUp()
 void Application::StartGame()
 {
 	in_game = true;
-	//Time::GameClock::Resume();
+	Time::gameClock.Start();
 }
 
 void Application::StopGame()
 {
 	in_game = false;
+	Time::gameClock.Stop();
 }
 
 void Application::AddModule(Module* mod)
