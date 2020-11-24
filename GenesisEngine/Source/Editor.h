@@ -5,6 +5,7 @@
 #include "Globals.h"
 
 #include "ImGui/imgui.h"
+#include "EditorWindow.h"
 
 #include <vector>
 #include <string>
@@ -31,6 +32,8 @@ public:
 	bool IsSceneFocused();
 	bool MouseOnScene();
 	void AddConsoleLog(const char* log, int warning_level);
+
+	void OnResize(ImVec2 window_size);
 	
 private:
 	//Dock Space
@@ -40,48 +43,34 @@ private:
 	void ShowGameButtons();
 
 	//Windows
-	void ShowSceneWindow();
-	void ShowInspectorWindow();
-	void ShowHierarchyWindow();
-	void ShowConfigurationWindow();
-	void ShowAboutWindow();
 	void ShowPreferencesWindow();
 
 	void LoadFile(const char* filter_extension, const char* from_dir);
 	void DrawDirectoryRecursive(const char* directory, const char* filter_extension);
 
 	void ChangeTheme(std::string theme);
-	void GetMemoryStatistics(const char* gpu_brand, GLint& vram_budget, GLint& vram_usage, GLint& vram_available, GLint& vram_reserved);
-
-	void OnResize(ImVec2 window_size);
-	void PreorderHierarchy(GameObject* gameObject, int& id);
 
 public:
 	ImVec2 image_size;
 	ImVec2 sceneWindowOrigin;
 	ImVec2 mouseScenePosition;
+	bool scene_window_focused;
 
 private:
-	bool show_inspector_window;
+	EditorWindow* windows[MAX_WINDOWS];
+
 	bool show_project_window;
-	bool show_hierarchy_window;
 	bool show_console_window;
-	bool show_scene_window;
-	bool show_configuration_window;
 
 	//edit subwindows
 	bool show_preferences_window;
-	bool show_about_window;
 	bool show_game_buttons;
 
 	//menus
 	bool* open_dockspace;
-	bool scene_window_focused;
 
 	int current_theme;
 
-	std::vector<float> fps_log;
-	std::vector<float> ms_log;
 	std::vector<log_message> console_log;
 
 	enum

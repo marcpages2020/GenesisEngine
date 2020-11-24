@@ -200,6 +200,24 @@
       <Filter>Libs\ImGuizmo</Filter>
     </ClCompile>
     <ClCompile Include="Time.cpp" />
+    <ClCompile Include="WindowHierarchy.cpp">
+      <Filter>EditorWindows</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowInspector.cpp">
+      <Filter>EditorWindows</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowAbout.cpp">
+      <Filter>EditorWindows</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowConfiguration.cpp">
+      <Filter>EditorWindows</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowScene.cpp">
+      <Filter>EditorWindows</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowAssets.cpp">
+      <Filter>EditorWindows</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
@@ -506,6 +524,27 @@
       <Filter>Libs\ImGuizmo</Filter>
     </ClInclude>
     <ClInclude Include="Time.h" />
+    <ClInclude Include="EditorWindow.h">
+      <Filter>EditorWindows</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowHierarchy.h">
+      <Filter>EditorWindows</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowInspector.h">
+      <Filter>EditorWindows</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowAbout.h">
+      <Filter>EditorWindows</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowConfiguration.h">
+      <Filter>EditorWindows</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowScene.h">
+      <Filter>EditorWindows</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowAssets.h">
+      <Filter>EditorWindows</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Modules">
@@ -555,6 +594,9 @@
     </Filter>
     <Filter Include="Libs\ImGuizmo">
       <UniqueIdentifier>{b53402f4-cb07-479e-aece-ca6b6fcee811}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="EditorWindows">
+      <UniqueIdentifier>{627bcd62-5937-4fdf-9955-217f87331806}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

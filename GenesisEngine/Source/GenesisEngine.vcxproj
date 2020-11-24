@@ -95,6 +95,7 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Component.h" />
+    <ClInclude Include="EditorWindow.h" />
     <ClInclude Include="FileSystem.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GnJSON.h" />
@@ -197,6 +198,12 @@
     <ClInclude Include="Time.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Transform.h" />
+    <ClInclude Include="WindowAbout.h" />
+    <ClInclude Include="WindowAssets.h" />
+    <ClInclude Include="WindowConfiguration.h" />
+    <ClInclude Include="WindowHierarchy.h" />
+    <ClInclude Include="WindowInspector.h" />
+    <ClInclude Include="WindowScene.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
@@ -268,6 +275,12 @@
     <ClCompile Include="Time.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="Transform.cpp" />
+    <ClCompile Include="WindowAbout.cpp" />
+    <ClCompile Include="WindowAssets.cpp" />
+    <ClCompile Include="WindowConfiguration.cpp" />
+    <ClCompile Include="WindowHierarchy.cpp" />
+    <ClCompile Include="WindowInspector.cpp" />
+    <ClCompile Include="WindowScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Engine\Library\Config\config.json" />
