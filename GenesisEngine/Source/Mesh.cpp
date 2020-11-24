@@ -28,7 +28,7 @@ void GnMesh::Save(GnJSONArray& save_array)
 	GnJSONObj save_object;
 
 	save_object.AddInt("Type", type);
-	save_object.AddString("Resource UID", _resource->libraryFile.c_str());
+	save_object.AddInt("Mesh UID", _resource->GetUID());
 
 	save_array.AddObject(save_object);
 }
@@ -37,6 +37,8 @@ void GnMesh::Load(GnJSONObj& load_object)
 {
 	//TODO
 	//MeshImporter::Load(load_object.GetString("Path"), this);
+	uint meshUID = load_object.GetInt("Mesh UID");
+	SetResourceUID(meshUID);
 }
 
 void GnMesh::SetResourceUID(uint UID)

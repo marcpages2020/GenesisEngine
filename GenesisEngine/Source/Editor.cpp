@@ -1089,7 +1089,7 @@ void Editor::DrawDirectoryRecursive(const char* directory, const char* filter_ex
 				if (ImGui::IsMouseDoubleClicked(0))
 				{
 					file_dialog = ready_to_close;
-					//FileSystem::LoadFile(selected_file);
+					App->Load(selected_file);
 				}
 			}
 

@@ -327,6 +327,11 @@ void ModuleRenderer3D::SetMainCamera(Camera* camera)
 	_mainCamera = camera;
 }
 
+Camera* ModuleRenderer3D::GetMainCamera()
+{
+	return _mainCamera;
+}
+
 bool ModuleRenderer3D::IsInsideCameraView(AABB aabb)
 {
 	return _mainCamera->ContainsAABB(aabb);

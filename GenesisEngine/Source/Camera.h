@@ -25,6 +25,9 @@ public:
 	void Update() override;
 	void OnEditor() override;
 
+	void Save(GnJSONArray& save_array);
+	void Load(GnJSONObj& load_object);
+
 	void SetFixedFOV(FixedFOV fixedFOV);
 	void AdjustFieldOfView();
 	void AdjustFieldOfView(float width, float height);

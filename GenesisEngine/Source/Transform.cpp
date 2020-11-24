@@ -65,12 +65,6 @@ void Transform::OnEditor()
 			_gameObject->UpdateChildrenTransforms();
 		};
 
-		float scale_multiplier = _scale.x;
-		if (ImGui::DragFloat("Scale Multiplier", &scale_multiplier, 0.01f, 0.0f, 10.0f)) 
-		{
-			SetProportionalScale(scale_multiplier);
-		}
-
 		ImGui::Spacing();
 
 		if (ImGui::Button("Reset"))

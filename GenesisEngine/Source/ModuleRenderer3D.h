@@ -38,6 +38,7 @@ public:
 	DisplayMode GetDisplayMode();
 	void SetDisplayMode(DisplayMode display);
 	void SetMainCamera(Camera* camera);
+	Camera* GetMainCamera();
 	bool IsInsideCameraView(AABB aabb);
 
 	void SetCapActive(GLenum cap, bool active);

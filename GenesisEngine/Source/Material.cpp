@@ -14,7 +14,7 @@ Material::Material() : Component(), checkers_image(false), _resource(nullptr)
 	type = ComponentType::MATERIAL;
 }
 
-Material::Material(GameObject* gameObject) : Component(gameObject), checkers_image(false), _resource(nullptr)
+Material::Material(GameObject* gameObject) : Component(gameObject), checkers_image(false), _resource(nullptr), _diffuseTexture(nullptr)
 {
 	type = ComponentType::MATERIAL;
 }
@@ -66,7 +66,10 @@ void Material::Save(GnJSONArray& save_array)
 	GnJSONObj save_object;
 
 	save_object.AddInt("Type", type);
-	save_object.AddString("Resource UID", _resource->libraryFile.c_str());
+	save_object.AddInt("Material UID", _resource->GetUID());
+
+	if (_diffuseTexture != nullptr)
+		save_object.AddInt("Texture UID", _diffuseTexture->GetUID());
 
 	//if (diffuseTexture != nullptr)
 		//save_object.AddString("Path", diffuse_texture->path.c_str());
@@ -76,11 +79,21 @@ void Material::Save(GnJSONArray& save_array)
 
 void Material::Load(GnJSONObj& load_object)
 {
-	//TODO
-	//MaterialImporter::Load(load_object.GetString("Path"), this);
+	uint materialUID = load_object.GetInt("Material UID");
+	_resource = (ResourceMaterial*)App->resources->RequestResource(materialUID);
 
-	//if (diffuse_texture != nullptr && mesh != nullptr)
-		//mesh->SetTexture(diffuse_texture);
+	uint textureUID = load_object.GetInt("Texture UID", -1);
+	_resource->diffuseTextureUID = textureUID;
+
+	if (textureUID != -1) {
+		_diffuseTexture = (ResourceTexture*)App->resources->RequestResource(textureUID);
+		GenerateTextureBuffers();
+	}
+
+	if (_diffuseTexture == nullptr)
+		AssignCheckersImage();
+	else
+		SetTexture(_diffuseTexture);
 }
 
 void Material::OnEditor()

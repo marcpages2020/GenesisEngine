@@ -4,6 +4,7 @@
 #include "Application.h"
 #include "ModuleRenderer3D.h"
 #include "ImGui/imgui.h"
+#include "GnJSON.h"
 
 Camera::Camera() : Component(nullptr), _aspectRatio(AspectRatio::AR_16_9), fixedFOV(FIXED_HORIZONTAL_FOV) {
 	type = ComponentType::CAMERA;
@@ -70,6 +71,23 @@ void Camera::OnEditor()
 
 		ImGui::Spacing();
 	}
+}
+
+void Camera::Save(GnJSONArray& save_array)
+{
+	GnJSONObj save_object;
+
+	save_object.AddInt("Type", type);
+	bool mainCamera = App->renderer3D->GetMainCamera() == this;
+	save_object.AddBool("Main Camera", mainCamera);
+
+	save_array.AddObject(save_object);
+}
+
+void Camera::Load(GnJSONObj& load_object)
+{
+	if (load_object.GetBool("Main Camera", false))
+		App->renderer3D->SetMainCamera(this);
 }
 
 void Camera::SetFixedFOV(FixedFOV g_fixedFOV)
