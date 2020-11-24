@@ -28,7 +28,7 @@ void GnMesh::Save(GnJSONArray& save_array)
 	GnJSONObj save_object;
 
 	save_object.AddInt("Type", type);
-	save_object.AddString("Path", path);
+	save_object.AddString("Resource UID", _resource->libraryFile.c_str());
 
 	save_array.AddObject(save_object);
 }

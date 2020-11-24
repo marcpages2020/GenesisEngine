@@ -505,6 +505,28 @@ std::string ModuleResources::GetLibraryFolder(const char* file_in_assets)
 	}
 }
 
+const char* ModuleResources::GenerateAssetsPath(const char* path)
+{
+	ResourceType type = GetResourceTypeFromPath(path);
+	std::string file = FileSystem::GetFile(path) + FileSystem::GetFileFormat(path);
+
+	char* library_path = new char[128];
+
+	switch (type)
+	{
+	case RESOURCE_MODEL:
+		sprintf_s(library_path, 128, "Assets/Models/%s", file.c_str()); break;
+	case RESOURCE_TEXTURE:
+		sprintf_s(library_path, 128, "Assets/Textures/%s", file.c_str()); break;
+	case RESOURCE_SCENE:
+		sprintf_s(library_path, 128, "Assets/Scenes/%s", file.c_str()); break;
+	default:
+		break;
+	}
+
+	return library_path;
+}
+
 void ModuleResources::AddFileExtension(std::string& file, ResourceType type)
 {
 	switch (type)

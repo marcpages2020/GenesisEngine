@@ -22,7 +22,6 @@ namespace FileSystem
 
 	void DiscoverFiles(const char* directory, std::vector<std::string>& file_list, std::vector<std::string>& dir_list);
 	void GetAllFilesWithExtension(const char* directory, const char* extension, std::vector<std::string>& file_list);
-	//PathNode GetAllFiles(const char* directory, std::vector<std::string>* filter_ext = nullptr, std::vector<std::string>* ignore_ext = nullptr);
 	void GetRealDir(const char* path, std::string& output);
 	std::string GetPathRelativeToAssets(const char* originalPath);
 
@@ -49,6 +48,8 @@ namespace FileSystem
 
 	std::string GetFileFormat(const char* path);
 	std::string GetFile(const char* path);
+
+	void DragDropFile(const char* path);
 }
 
 

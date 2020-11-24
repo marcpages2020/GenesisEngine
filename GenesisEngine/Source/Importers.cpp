@@ -177,6 +177,7 @@ GameObject* ModelImporter::Load(const char* path, ResourceModel* model)
 		//check if it's the root game object
 		if (strcmp(gameObject->GetName(), "RootNode") == 0) {
 			root = gameObject;
+			root->SetName(FileSystem::GetFile(model->assetsFile.c_str()).c_str());
 		}
 
 		//Get game object's parent

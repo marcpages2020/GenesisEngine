@@ -47,6 +47,7 @@ public:
 	uint GenerateUID();
 	const char* GenerateLibraryPath(Resource* resource);
 	std::string GetLibraryFolder(const char* file_in_assets);
+	const char* GenerateAssetsPath(const char* path);
 	void AddFileExtension(std::string& file, ResourceType type);
 
 private:

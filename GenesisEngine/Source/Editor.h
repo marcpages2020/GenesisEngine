@@ -82,7 +82,6 @@ private:
 
 	std::vector<float> fps_log;
 	std::vector<float> ms_log;
-
 	std::vector<log_message> console_log;
 
 	enum

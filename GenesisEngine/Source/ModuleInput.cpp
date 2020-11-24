@@ -1,7 +1,7 @@
 #include "Globals.h"
 #include "Application.h"
 #include "ModuleInput.h"
-#include "ModuleResources.h"
+#include "FileSystem.h"
 
 #include "ImGui/imgui_internal.h"
 #include "ImGui/imgui_impl_sdl.h"
@@ -118,7 +118,7 @@ update_status ModuleInput::PreUpdate(float dt)
 
 			case SDL_DROPFILE:
 				dropped_filedir = e.drop.file;
-				App->resources->ImportFile(dropped_filedir);
+				FileSystem::DragDropFile(dropped_filedir);
 				SDL_free(dropped_filedir);
 				break;
 
