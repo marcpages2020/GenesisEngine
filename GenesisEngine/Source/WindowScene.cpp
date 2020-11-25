@@ -2,6 +2,7 @@
 #include "ImGui/imgui.h"
 #include "Application.h"
 #include "glew/include/glew.h"
+#include "WindowAssets.h"
 
 WindowScene::WindowScene() : EditorWindow()
 {
@@ -68,6 +69,21 @@ void WindowScene::Draw()
 		}
 
 		ImGui::Image((ImTextureID)App->renderer3D->colorTexture, App->editor->image_size, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
+		ImGui::PushID(42);
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSETS"))
+			{
+				IM_ASSERT(payload->DataSize == sizeof(int));
+				int payload_n = *(const int*)payload->Data;
+				WindowAssets* assets_window = (WindowAssets*)App->editor->windows[ASSETS_WINDOW];
+				const char* file = assets_window->GetFileAt(payload_n);
+				App->scene->AddGameObject(App->resources->RequestGameObject(file));
+			}
+			ImGui::EndDragDropTarget();
+		}
+		ImGui::PopID();
+
 		App->scene->EditTransform();
 		//ImGui::Image((ImTextureID)App->renderer3D->depthTexture, image_size, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
 	}

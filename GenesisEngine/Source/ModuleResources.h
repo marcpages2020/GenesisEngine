@@ -51,6 +51,9 @@ public:
 	void AddFileExtension(std::string& file, ResourceType type);
 
 private:
+	void CheckAssetsRecursive(const char* directory);
+
+private:
 	std::map<uint, Resource*> resources;
 	std::map<uint, ResourceData> resources_data;
 };

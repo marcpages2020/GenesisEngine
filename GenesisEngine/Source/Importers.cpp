@@ -420,7 +420,7 @@ void TextureImporter::Import(char* fileBuffer, ResourceTexture* texture, uint si
 	error = ilGetError();
 	if (error != IL_NO_ERROR)
 	{
-		LOG_ERROR("%s, %d %s", texture->assetsFile, ilGetError(), iluErrorString(error));
+		LOG_ERROR("%s, %d %s", texture->assetsFile.c_str(), ilGetError(), iluErrorString(error));
 		return;
 	}
 

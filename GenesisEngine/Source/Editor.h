@@ -34,7 +34,9 @@ public:
 	void AddConsoleLog(const char* log, int warning_level);
 
 	void OnResize(ImVec2 window_size);
-	
+	void LoadFile(const char* filter_extension, const char* from_dir);
+	void DrawDirectoryRecursive(const char* directory, const char* filter_extension);
+
 private:
 	//Dock Space
 	update_status ShowDockSpace(bool* p_open);
@@ -45,9 +47,6 @@ private:
 	//Windows
 	void ShowPreferencesWindow();
 
-	void LoadFile(const char* filter_extension, const char* from_dir);
-	void DrawDirectoryRecursive(const char* directory, const char* filter_extension);
-
 	void ChangeTheme(std::string theme);
 
 public:
@@ -55,9 +54,9 @@ public:
 	ImVec2 sceneWindowOrigin;
 	ImVec2 mouseScenePosition;
 	bool scene_window_focused;
+	EditorWindow* windows[MAX_WINDOWS];
 
 private:
-	EditorWindow* windows[MAX_WINDOWS];
 
 	bool show_project_window;
 	bool show_console_window;

@@ -13,6 +13,8 @@
 #include "ResourceMaterial.h"
 #include "ResourceTexture.h"
 
+#include <algorithm>
+
 #include "MathGeoLib/include/MathGeoLib.h"
 
 ModuleResources::ModuleResources(bool start_enabled) : Module(start_enabled)
@@ -29,6 +31,7 @@ bool ModuleResources::Init()
 	MeshImporter::Init();
 	TextureImporter::Init();
 
+	CheckAssetsRecursive("Assets");
 	return ret;
 }
 
@@ -213,9 +216,13 @@ uint ModuleResources::ImportFile(const char* assets_file)
 		ModelImporter::Import(fileBuffer, (ResourceModel*)resource, size); break;
 	case RESOURCE_TEXTURE:
 		TextureImporter::Import(fileBuffer, (ResourceTexture*)resource, size); break;
-	case RESOURCE_SCENE: break;
+	case RESOURCE_SCENE: 
+		break;
 	default: break;
 	}
+
+	if (resource == nullptr)
+		return -1;
 
 	SaveResource(resource);
 	ret = resource->GetUID();
@@ -537,6 +544,41 @@ void ModuleResources::AddFileExtension(std::string& file, ResourceType type)
 	case RESOURCE_TEXTURE: file += ".dds"; break;
 	case RESOURCE_SCENE:  file += ".scene";	break;
 	default: break;
+	}
+}
+
+void ModuleResources::CheckAssetsRecursive(const char* directory)
+{
+	std::vector<std::string> files;
+	std::vector<std::string> dirs;
+
+	std::string dir((directory) ? directory : "");
+	dir += "/";
+
+	FileSystem::DiscoverFiles(dir.c_str(), files, dirs);
+
+	for (std::vector<std::string>::const_iterator it = dirs.begin(); it != dirs.end(); ++it)
+	{
+		CheckAssetsRecursive((dir + (*it)).c_str());
+	}
+
+	std::sort(files.begin(), files.end());
+
+	for (size_t i = 0; i < files.size(); i++)
+	{
+		const std::string& str = files[i];
+		std::size_t found = str.find(".meta");
+
+		if (found == -1) {
+			std::string meta = files[i];
+			meta.append(".meta");
+			if (!FileSystem::Exists(meta.c_str())) {
+				std::string file_to_import = directory;
+				file_to_import.append("/");
+				file_to_import.append(files[i].c_str());
+				ImportFile(file_to_import.c_str());
+			}
+		}
 	}
 }
 
