@@ -38,21 +38,32 @@ void WindowAssets::DrawDirectoryRecursive(const char* directory, const char* fil
 	std::string dir((directory) ? directory : "");
 	dir += "/";
 
-	//ImGuiTreeNodeFlags tree_flags = ImGuiTreeNodeFlags_None;
 	ImGuiTreeNodeFlags tree_flags = ImGuiTreeNodeFlags_OpenOnDoubleClick;
-
 	FileSystem::DiscoverFiles(dir.c_str(), files, dirs);
 
 	for (std::vector<std::string>::const_iterator it = dirs.begin(); it != dirs.end(); ++it)
 	{
 		if (ImGui::TreeNodeEx((dir + (*it)).c_str(), 0, "%s/", (*it).c_str(), tree_flags))
 		{
+			/*
+			if (ImGui::BeginPopupContextItem()) {
+				if (ImGui::Button("Delete"))
+				{
+					//gameObject->to_delete = true;
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::EndPopup();
+			}
+			*/
+
 			if (ImGui::IsItemClicked()) {
 				current_folder = directory;
 				current_folder.append("/");
 				current_folder.append(*it).c_str();
 			}
+
 			DrawDirectoryRecursive((dir + (*it)).c_str(), filter_extension);
+
 			ImGui::TreePop();
 		}
 	}
@@ -68,8 +79,20 @@ void WindowAssets::DrawDirectoryRecursive(const char* directory, const char* fil
 		if (filter_extension && str.substr(str.find_last_of(".") + 1) != filter_extension)
 			ok = false;
 
+		if (it->find(".meta") != -1)
+			ok = false;
+
 		if (ok && ImGui::TreeNodeEx(str.c_str(), ImGuiTreeNodeFlags_Leaf))
 		{
+			if (ImGui::BeginPopupContextItem()) {
+				if (ImGui::Button("Delete"))
+				{
+					//gameObject->to_delete = true;
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::EndPopup();
+			}
+
 			ImGui::TreePop();
 		}
 	}
@@ -84,41 +107,12 @@ void WindowAssets::DrawCurrentFolder()
 
 	for (size_t i = 0; i < dirs.size(); i++)
 	{
-			ImGui::PushID(i);
-			if (ImGui::Button(dirs[i].c_str(), ImVec2(100, 100))) {
-				current_folder.append("/");
-				current_folder.append(dirs[i].c_str());
-			}
-
-			if (ImGui::BeginDragDropSource())
-			{
-				ImGui::SetDragDropPayload("ASSETS", &i, sizeof(int));
-				//ImGui::Text("Reparent");
-				ImGui::EndDragDropSource();
-			}
-			if (ImGui::BeginDragDropTarget())
-			{
-				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSETS"))
-				{
-					IM_ASSERT(payload->DataSize == sizeof(int));
-					int payload_n = *(const int*)payload->Data;
-				}
-				ImGui::EndDragDropTarget();
-			}
-
-			if (ImGui::IsMouseDoubleClicked(0))
-			{
-				current_folder = current_folder + dirs[i];
-			}
-
-			ImGui::PopID();
-			ImGui::SameLine();
-	}
-
-	for (size_t i = 0; i < files.size(); i++)
-	{
 		ImGui::PushID(i);
-		ImGui::Button(files[i].c_str(), ImVec2(60, 60));
+		if (ImGui::Button(dirs[i].c_str(), ImVec2(100, 100))) {
+			current_folder.append("/");
+			current_folder.append(dirs[i].c_str());
+		}
+
 		if (ImGui::BeginDragDropSource())
 		{
 			ImGui::SetDragDropPayload("ASSETS", &i, sizeof(int));
@@ -133,6 +127,59 @@ void WindowAssets::DrawCurrentFolder()
 				int payload_n = *(const int*)payload->Data;
 			}
 			ImGui::EndDragDropTarget();
+		}
+
+		/*
+		if (ImGui::BeginPopupContextItem()) {
+			if (ImGui::Button("Delete"))
+			{
+				//gameObject->to_delete = true;
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+		*/
+		if (ImGui::IsMouseDoubleClicked(0))
+		{
+			current_folder = current_folder + dirs[i];
+		}
+
+		ImGui::PopID();
+		ImGui::SameLine();
+	}
+
+	for (size_t i = 0; i < files.size(); i++)
+	{
+		if (files[i].find(".meta") != -1)
+			continue;
+
+		ImGui::PushID(i);
+		ImGui::Button(files[i].c_str(), ImVec2(120, 120));
+		if (ImGui::BeginDragDropSource())
+		{
+			ImGui::SetDragDropPayload("ASSETS", &i, sizeof(int));
+			//ImGui::Text("Reparent");
+			ImGui::EndDragDropSource();
+		}
+
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSETS"))
+			{
+				IM_ASSERT(payload->DataSize == sizeof(int));
+				int payload_n = *(const int*)payload->Data;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		if (ImGui::BeginPopupContextItem()) {
+			if (ImGui::Button("Delete"))
+			{
+				std::string file_to_delete = current_folder + "/" + files[i];
+				App->resources->DeleteAssetsResource(file_to_delete.c_str());
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
 		}
 
 		ImGui::PopID();

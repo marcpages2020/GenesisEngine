@@ -104,10 +104,13 @@ bool ModuleScene::CleanUp()
 
 void ModuleScene::AddGameObject(GameObject* gameObject)
 {
-	gameObject->SetParent(root);
-	root->AddChild(gameObject);
+	if (gameObject != nullptr) 
+	{
+		gameObject->SetParent(root);
+		root->AddChild(gameObject);
 
-	selectedGameObject = gameObject;
+		selectedGameObject = gameObject;
+	}
 }
 
 void ModuleScene::DeleteGameObject(GameObject* gameObject)

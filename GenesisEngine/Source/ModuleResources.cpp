@@ -150,7 +150,7 @@ int ModuleResources::UpdateMetaFile(const char* assets_file)
 	return 0;
 }
 
-uint ModuleResources::Find(const char* assets_file)
+int ModuleResources::Find(const char* assets_file)
 {
 	int UID = MetaUpToDate(assets_file);
 
@@ -175,6 +175,9 @@ uint ModuleResources::Find(const char* assets_file)
 
 const char* ModuleResources::Find(uint UID)
 {
+	if (resources_data.find(UID) != resources_data.end()) 
+		return resources_data[UID].libraryFile.c_str();
+
 	std::vector<std::string> directories = { "Library/Config/","Library/Models/","Library/Meshes/","Library/Materials/","Library/Textures/", "Library/Scenes/" };
 	std::vector<std::string> extensions = { ".json",".model",".mesh",".material",".dds", ".scene" };
 
@@ -190,6 +193,7 @@ const char* ModuleResources::Find(uint UID)
 			return final_file;
 		}
 	}
+
 	return nullptr;
 }
 
@@ -262,6 +266,71 @@ void ModuleResources::CreateResourceData(uint UID, ResourceType type, const char
 	resources_data[UID].assetsFile = assets_path;
 	resources_data[UID].libraryFile = GenerateLibraryPath(&Resource(UID, type));
 
+}
+
+bool ModuleResources::DeleteAssetsResource(const char* assets_path)
+{
+	bool ret = true;
+
+	int UID = Find(assets_path);
+
+	if (UID != -1)
+	{
+		DeleteResource(UID);
+	}
+
+//	FileSystem::Delete(assets_path);
+
+	return ret;
+}
+
+bool ModuleResources::DeleteResource(uint UUID)
+{
+	bool ret = true;
+
+	char* buffer;
+	FileSystem::Load(resources_data[UUID].libraryFile.c_str(), &buffer);
+
+	GnJSONObj resource_data(buffer);
+	GnJSONArray nodes = resource_data.GetArray("Nodes");
+
+	for (size_t i = 0; i < nodes.Size(); i++)
+	{
+		GnJSONObj node = nodes.GetObjectAt(i);
+		int meshID = node.GetInt("Mesh");
+		int materialID = node.GetInt("Material");
+
+		if(meshID != -1)
+			DeleteInternalResource(meshID);
+
+		if (materialID != -1)
+			DeleteInternalResource(materialID);
+	}
+
+	FileSystem::Delete(resources_data[UUID].libraryFile.c_str());
+
+	resource_data.Release();
+	RELEASE_ARRAY(buffer);
+	return ret;
+}
+
+bool ModuleResources::DeleteInternalResource(uint UID)
+{
+	bool ret = true;
+
+	const char* library_path = Find(UID);
+
+	ResourceType type = GetResourceTypeFromPath(library_path);
+
+	if (library_path != nullptr) {
+
+		if(type == ResourceType::RESOURCE_MATERIAL)
+			ret = MaterialImporter::DeleteTexture(library_path);
+
+		ret = FileSystem::Delete(library_path);
+	}
+
+	return ret;
 }
 
 Resource* ModuleResources::LoadResource(uint UID)
@@ -461,12 +530,13 @@ bool ModuleResources::SaveMetaFile(Resource* resource)
 
 ResourceType ModuleResources::GetResourceTypeFromPath(const char* path)
 {
-
 	std::string extension = FileSystem::GetFileFormat(path);
 	
 	if (extension == ".fbx") { return ResourceType::RESOURCE_MODEL; }
 	else if (extension == ".mesh") { return ResourceType::RESOURCE_MESH; }
-	else if (extension == ".png") { return ResourceType::RESOURCE_TEXTURE; }
+	else if (extension == ".material") { return ResourceType::RESOURCE_MATERIAL; }
+	else if (extension == ".png" || extension == ".dds") { return ResourceType::RESOURCE_TEXTURE; }
+	else return ResourceType::RESOURCE_UNKNOWN;
 }
 
 uint ModuleResources::GenerateUID()

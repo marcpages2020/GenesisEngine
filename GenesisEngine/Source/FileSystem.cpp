@@ -399,6 +399,16 @@ uint FileSystem::Save(const char* file, const void* buffer, unsigned int size, b
 	return ret;
 }
 
+bool FileSystem::Delete(const char* file)
+{
+	if (PHYSFS_delete(file) != 0)
+		return true;
+	else {
+		LOG_ERROR("File System error while deleting file %s: %s", file, PHYSFS_getLastError());
+		return false;
+	}
+}
+
 uint64 FileSystem::GetLastModTime(const char* filename)
 {
 	return PHYSFS_getLastModTime(filename);

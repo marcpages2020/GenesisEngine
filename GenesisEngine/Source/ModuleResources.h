@@ -26,12 +26,16 @@ public:
 
 	int MetaUpToDate(const char* asset_path);
 	int UpdateMetaFile(const char* assets_file);
-	uint Find(const char* assets_file);
+	int Find(const char* assets_file);
 	const char* Find(uint UID);
 
 	uint ImportFile(const char* assets_file);
 	uint ImportInternalResource(const char* path, const void* data, ResourceType type);
 	void CreateResourceData(uint UID, ResourceType type, const char* assets_path = "No path");
+
+	bool DeleteAssetsResource(const char* assets_path);
+	bool DeleteResource(uint UUID);
+	bool DeleteInternalResource(uint UID);
 
 	Resource* LoadResource(uint UID);
 

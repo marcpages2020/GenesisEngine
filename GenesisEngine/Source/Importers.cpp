@@ -175,7 +175,7 @@ GameObject* ModelImporter::Load(const char* path, ResourceModel* model)
 		createdObjects.push_back(gameObject);
 
 		//check if it's the root game object
-		if (strcmp(gameObject->GetName(), "RootNode") == 0) {
+		if (parentUUID == 0) {
 			root = gameObject;
 			root->SetName(FileSystem::GetFile(model->assetsFile.c_str()).c_str());
 		}
@@ -643,6 +643,29 @@ void MaterialImporter::Load(const char* path, ResourceMaterial* material)
 
 	material_data.Release();
 	RELEASE_ARRAY(buffer);
+}
+
+bool MaterialImporter::DeleteTexture(const char* material_library_path)
+{
+	bool ret = true;
+
+	char* buffer = nullptr;
+	FileSystem::Load(material_library_path, &buffer);
+
+	GnJSONObj material_data(buffer);
+	int diffuseTextureUID = material_data.GetInt("Diffuse Texture");
+
+	const char* texture_library_path = App->resources->Find(diffuseTextureUID);
+
+	if (texture_library_path != nullptr)
+		FileSystem::Delete(texture_library_path);
+	else
+		LOG_WARNING("Texture: %s could not be deleted. Not found", material_library_path);
+
+	material_data.Release();
+	RELEASE_ARRAY(buffer);
+
+	return ret;
 }
 
 #pragma endregion

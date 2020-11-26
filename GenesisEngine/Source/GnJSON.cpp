@@ -17,7 +17,7 @@ GnJSONObj::GnJSONObj(const char* buffer) : _object(nullptr)
 	if (_root != NULL)
 	{
 		_object = json_value_get_object(_root);
-		LOG("File parsed successfully");
+		//LOG("File parsed successfully");
 	}
 	else
 	{

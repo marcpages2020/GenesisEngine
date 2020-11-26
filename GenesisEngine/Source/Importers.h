@@ -66,4 +66,6 @@ namespace MaterialImporter
 	void Import(const aiMaterial* aimaterial, ResourceMaterial* material);
 	uint64 Save(ResourceMaterial* material, char** fileBuffer);
 	void Load(const char* file_path, ResourceMaterial* material);
+
+	bool DeleteTexture(const char* material_library_path);
 }

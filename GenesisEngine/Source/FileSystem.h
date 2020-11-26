@@ -42,6 +42,7 @@ namespace FileSystem
 
 	unsigned int Save(const char* file, const void* buffer, unsigned int size, bool append = false);
 	bool Remove(const char* file);
+	bool Delete(const char* file);
 
 	uint64 GetLastModTime(const char* filename);
 	std::string GetUniqueName(const char* path, const char* name);

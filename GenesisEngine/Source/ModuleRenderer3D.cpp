@@ -375,8 +375,10 @@ void ModuleRenderer3D::SetVSYNC(bool enabled)
 void ModuleRenderer3D::DrawRay()
 {
 	glBegin(GL_LINES);
+	glColor3f(0.0f, 0.85f, 0.85f);
 	glVertex3f(_ray.a.x, _ray.a.y, _ray.a.z);
 	glVertex3f(_ray.b.x, _ray.b.y, _ray.b.z);
+	glColor3f(1.0f, 1.0f, 1.0f);
 	glEnd();
 }
 
