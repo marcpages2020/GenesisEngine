@@ -32,7 +32,7 @@ public:
 
 	bool ClearScene();
 
-	bool Save();
+	bool Save(const char* file_path);
 	bool Load(const char* scene_file);
 
 public:

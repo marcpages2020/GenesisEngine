@@ -129,12 +129,12 @@ update_status Application::Update()
 
 	if (want_to_save)
 	{
-		scene->Save();
+		scene->Save(_file_to_save);
 		want_to_save = false;
 	}
 	else if (want_to_load)
 	{
-		scene->Load(file_to_load);
+		scene->Load(_file_to_load);
 		want_to_load = false;
 	}
 
@@ -186,15 +186,16 @@ void Application::SetFPSCap(int fps_cap)
 	capped_ms = 1000 / fps_cap;
 }
 
-void Application::Save()
+void Application::Save(const char* filePath)
 {
 	want_to_save = true;
+	_file_to_save = filePath;
 }
 
 void Application::Load(const char* filePath)
 {
 	want_to_load = true;
-	file_to_load = filePath;
+	_file_to_load = filePath;
 }
 
 HardwareSpecs Application::GetHardware()

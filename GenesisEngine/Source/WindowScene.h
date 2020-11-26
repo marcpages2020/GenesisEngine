@@ -8,4 +8,6 @@ public:
 	~WindowScene();
 
 	void Draw() override;
+	void DrawGameTimeDataOverlay();
+
 };

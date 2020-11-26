@@ -3,6 +3,8 @@
 #include "Application.h"
 #include "glew/include/glew.h"
 #include "WindowAssets.h"
+#include "Time.h"
+
 
 WindowScene::WindowScene() : EditorWindow()
 {
@@ -63,10 +65,11 @@ void WindowScene::Draw()
 		App->editor->mouseScenePosition.x = App->input->GetMouseX() - App->editor->sceneWindowOrigin.x;
 		App->editor->mouseScenePosition.y = App->input->GetMouseY() - App->editor->sceneWindowOrigin.y;
 
+		if (App->in_game)
+			DrawGameTimeDataOverlay();
+
 		if (App->editor->image_size.x != window_size.x || App->editor->image_size.y != window_size.y)
-		{
 			App->editor->OnResize(window_size);
-		}
 
 		ImGui::Image((ImTextureID)App->renderer3D->colorTexture, App->editor->image_size, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
 		ImGui::PushID(42);
@@ -89,4 +92,37 @@ void WindowScene::Draw()
 	}
 	ImGui::End();
 	ImGui::PopStyleVar();
+}
+
+void WindowScene::DrawGameTimeDataOverlay()
+{
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
+
+	window_flags |= ImGuiWindowFlags_NoMove;
+	ImGuiViewport* viewport = ImGui::GetMainViewport();
+
+	ImVec2 window_pos = App->editor->sceneWindowOrigin;
+	window_pos.x += 10.0f;
+	window_pos.y += 10.0f;
+
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(15.0f, 15.0f));
+	ImGui::SetNextWindowPos(window_pos);
+	ImGui::SetNextWindowViewport(viewport->ID);
+
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.25f, 0.25f, 0.25f, 0.75f));
+	bool dummy_bool = true;
+	if (ImGui::Begin("Example: Simple overlay", &dummy_bool, window_flags))
+	{
+		ImGui::Text("Game Time");
+		ImGui::Separator();
+		ImGui::Spacing();
+		ImGui::Text("Delta time %.3f", Time::gameClock.dt);
+		ImGui::Text("Time Scale: %.2f", Time::gameClock.timeScale);
+		ImGui::Text("Time since game start: %.2f", Time::gameClock.timeSinceStartup());
+	}
+	ImGui::PopStyleColor();
+	ImGui::PopStyleVar();
+	ImGui::PopStyleVar();
+	ImGui::End();
 }

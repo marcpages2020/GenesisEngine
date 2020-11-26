@@ -205,7 +205,7 @@ bool ModuleScene::ClearScene()
 	return ret;
 }
 
-bool ModuleScene::Save()
+bool ModuleScene::Save(const char* file_path)
 {
 	bool ret = true;
 
@@ -218,7 +218,7 @@ bool ModuleScene::Save()
 	char* buffer = NULL;
 	uint size = save_file.Save(&buffer);
 
-	FileSystem::Save("Library/Scenes/new_scene.scene", buffer, size);
+	FileSystem::Save(file_path, buffer, size);
 
 	save_file.Release();
 	RELEASE_ARRAY(buffer);

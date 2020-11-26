@@ -72,7 +72,7 @@ public:
 	float GetLastDt();
 	int GetFPSCap();
 	void SetFPSCap(int fps_cap);
-	void Save();
+	void Save(const char* filePath);
 	void Load(const char* filePath);
 
 	HardwareSpecs GetHardware();
@@ -93,9 +93,12 @@ private:
 	std::vector<Module*> modules_vector;
 
 	const char* config_path;
+
 	bool want_to_save;
 	bool want_to_load;
-	const char* file_to_load;
+
+	const char* _file_to_load;
+	const char* _file_to_save;
 };
 
 extern Application* App;

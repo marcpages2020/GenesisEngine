@@ -280,7 +280,7 @@ bool Editor::CreateMainMenuBar() {
 		{
 			if (ImGui::MenuItem("Save Scene"))
 			{
-				App->Save();
+				App->Save("Library/Scenes/new_scene.scene");
 			}
 			else if (ImGui::MenuItem("Load Scene"))
 			{
