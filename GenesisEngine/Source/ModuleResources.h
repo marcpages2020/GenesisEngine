@@ -44,6 +44,7 @@ public:
 	Resource* RequestResource(uint UID);
 	GameObject* RequestGameObject(const char* assets_file);
 	void ReleaseResource(uint UID);
+	void ReleaseResourceData(uint UID);
 	bool SaveResource(Resource* resource);
 	bool SaveMetaFile(Resource* resource);
 

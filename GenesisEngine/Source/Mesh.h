@@ -22,9 +22,6 @@ public:
 	void SetResourceUID(uint UID) override;
 	Resource* GetResource(ResourceType type) override;
 
-	void GenerateBuffers();
-	void DeleteBuffers();
-
 	void GenerateAABB();
 	AABB GetAABB();
 
@@ -40,10 +37,6 @@ public:
 	char* path;
 
 private:
-	uint vertices_buffer = -1;
-	uint indices_buffer = -1;
-	uint normals_buffer = -1;
-	uint texcoords_buffer = -1;
 	AABB _AABB;
 
 	bool draw_vertex_normals;

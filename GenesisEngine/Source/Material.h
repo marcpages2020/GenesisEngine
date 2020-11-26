@@ -28,12 +28,11 @@ public:
 	void SetTexture(ResourceTexture* texture);
 	void AssignCheckersImage();
 	ResourceTexture* GetDiffuseTexture();
-	bool DeleteTexture();
 
 private:
 	bool checkers_image;
 
 	ResourceMaterial* _resource;
 	ResourceTexture* _diffuseTexture;
-	uint _textureID;
+	uint checkersID;
 };

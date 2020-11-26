@@ -9,19 +9,17 @@
 
 #include "ResourceMesh.h"
 
-#include "ImGui/imgui.h"
 #include "glew/include/glew.h"
+#include "ImGui/imgui.h"
 
 // GnMesh =========================================================================================================================
 
-GnMesh::GnMesh() : Component(), draw_face_normals(false), draw_vertex_normals(false), texcoords_buffer(-1), name("No name"), _resource(nullptr)
+GnMesh::GnMesh() : Component(), draw_face_normals(false), draw_vertex_normals(false), name("No name"), _resource(nullptr)
 {
 	type = ComponentType::MESH;
 }
 
-GnMesh::~GnMesh() {
-	DeleteBuffers();
-}
+GnMesh::~GnMesh() {}
 
 void GnMesh::Save(GnJSONArray& save_array)
 {
@@ -45,51 +43,12 @@ void GnMesh::SetResourceUID(uint UID)
 {
 	_resourceUID = UID;
 	_resource = (ResourceMesh*)App->resources->RequestResource(_resourceUID);
-	GenerateBuffers();
 	GenerateAABB();
 }
 
 Resource* GnMesh::GetResource(ResourceType type)
 {
 	return _resource;
-}
-
-void GnMesh::GenerateBuffers()
-{
-	//vertices
-	glGenBuffers(1, (GLuint*)&(vertices_buffer));
-	glBindBuffer(GL_ARRAY_BUFFER, vertices_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * _resource->vertices_amount * 3, _resource->vertices, GL_STATIC_DRAW);
-
-	//normals
-	glGenBuffers(1, (GLuint*)&(normals_buffer));
-	glBindBuffer(GL_NORMAL_ARRAY, normals_buffer);
-	glBufferData(GL_NORMAL_ARRAY, sizeof(float) * _resource->vertices_amount * 3, _resource->normals, GL_STATIC_DRAW);
-
-	//textures
-	glGenBuffers(1, (GLuint*)&(texcoords_buffer));
-	glBindBuffer(GL_ARRAY_BUFFER, texcoords_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * _resource->vertices_amount * 2, _resource->texcoords, GL_STATIC_DRAW);
-
-	//indices
-	glGenBuffers(1, (GLuint*)&(indices_buffer));
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * _resource->indices_amount, _resource->indices, GL_STATIC_DRAW);
-}
-
-void GnMesh::DeleteBuffers()
-{
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glDeleteBuffers(1, &vertices_buffer);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	glDeleteBuffers(1, &indices_buffer);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glDeleteBuffers(1, &normals_buffer);
-
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glDeleteBuffers(1, &texcoords_buffer);
 }
 
 void GnMesh::GenerateAABB()
@@ -135,23 +94,24 @@ void GnMesh::Render()
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
 	//vertices
-	glBindBuffer(GL_ARRAY_BUFFER, vertices_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, _resource->vertices_buffer);
 	glVertexPointer(3, GL_FLOAT, 0, NULL);
 
 	//normals
-	glBindBuffer(GL_NORMAL_ARRAY, normals_buffer);
+	glBindBuffer(GL_NORMAL_ARRAY, _resource->normals_buffer);
 	glNormalPointer(GL_FLOAT, 0, NULL);
 
 	//textures
-	glBindBuffer(GL_ARRAY_BUFFER, texcoords_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, _resource->texcoords_buffer);
 	glTexCoordPointer(2, GL_FLOAT, 0, NULL);
 	//indices
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _resource->indices_buffer);
 
 	glPushMatrix();
 	glMultMatrixf((float*)&_gameObject->GetTransform()->GetGlobalTransform().Transposed());
 
 	Material* material = (Material*)_gameObject->GetComponent(ComponentType::MATERIAL);
+
 	if (material != nullptr)
 		material->BindTexture();
 
@@ -195,7 +155,7 @@ void GnMesh::OnEditor()
 
 void GnMesh::DrawVertexNormals()
 {
-	if (normals_buffer == -1)
+	if (_resource->normals_buffer == -1)
 		return;
 
 	float normal_lenght = 0.5f;
@@ -219,7 +179,7 @@ void GnMesh::DrawVertexNormals()
 
 void GnMesh::DrawFaceNormals()
 {
-	if (normals_buffer == -1)
+	if (_resource->normals_buffer == -1)
 		return;
 
 	float normal_lenght = 0.5f;
@@ -305,7 +265,7 @@ GnCube::GnCube() : GnMesh()
 	//vertices_amount = 8;
 	//indices_amount = 36;
 
-	GenerateBuffers();
+	//GenerateBuffers();
 }
 
 GnCube::~GnCube(){}
@@ -333,7 +293,7 @@ GnPlane::GnPlane() : GnMesh()
 	vertices_amount = 4;
 	indices_amount = 6;*/
 
-	GenerateBuffers();
+	//GenerateBuffers();
 }
 
 GnPlane::~GnPlane() {}
@@ -369,7 +329,7 @@ GnPyramid::GnPyramid() : GnMesh()
 	//vertices_amount = 5;
 	//indices_amount = 18;
 
-	GenerateBuffers();
+	//GenerateBuffers();
 }
 
 GnPyramid::~GnPyramid() {}

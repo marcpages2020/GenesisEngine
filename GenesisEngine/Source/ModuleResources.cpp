@@ -300,7 +300,7 @@ bool ModuleResources::DeleteResource(uint UUID)
 		int meshID = node.GetInt("Mesh");
 		int materialID = node.GetInt("Material");
 
-		if(meshID != -1)
+		if (meshID != -1)
 			DeleteInternalResource(meshID);
 
 		if (materialID != -1)
@@ -308,6 +308,9 @@ bool ModuleResources::DeleteResource(uint UUID)
 	}
 
 	FileSystem::Delete(resources_data[UUID].libraryFile.c_str());
+	ReleaseResource(UUID);
+
+	resources_data.erase(resources_data.find(UUID));
 
 	resource_data.Release();
 	RELEASE_ARRAY(buffer);
@@ -320,14 +323,17 @@ bool ModuleResources::DeleteInternalResource(uint UID)
 
 	const char* library_path = Find(UID);
 
-	ResourceType type = GetResourceTypeFromPath(library_path);
-
 	if (library_path != nullptr) {
+
+		ResourceType type = GetResourceTypeFromPath(library_path);
 
 		if(type == ResourceType::RESOURCE_MATERIAL)
 			ret = MaterialImporter::DeleteTexture(library_path);
 
 		ret = FileSystem::Delete(library_path);
+
+		ReleaseResource(UID);
+		ReleaseResourceData(UID);
 	}
 
 	return ret;
@@ -469,7 +475,12 @@ void ModuleResources::ReleaseResource(uint UID)
 	delete resources[UID];
 	resources[UID] = nullptr;
 
-	//resources.erase(UID);
+	resources.erase(resources.find(UID));
+}
+
+void ModuleResources::ReleaseResourceData(uint UID)
+{
+	resources_data.erase(resources_data.find(UID));
 }
 
 bool ModuleResources::SaveResource(Resource* resource)

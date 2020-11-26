@@ -9,5 +9,4 @@ public:
 
 public:
 	uint diffuseTextureUID;
-	uint texture_buffer = -1;
 };

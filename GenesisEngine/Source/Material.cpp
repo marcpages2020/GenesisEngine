@@ -23,7 +23,7 @@ Material::~Material()
 {
 	if (_resource != nullptr)
 	{
-		DeleteTexture();
+		//DeleteTexture();
 	}
 }
 
@@ -44,21 +44,15 @@ void Material::SetResourceUID(uint UID)
 
 void Material::GenerateTextureBuffers()
 {
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	glGenTextures(1, &_textureID);
-	glBindTexture(GL_TEXTURE_2D, _textureID);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Material::BindTexture()
 {
-	glBindTexture(GL_TEXTURE_2D, _textureID);
+	if(!checkers_image)
+		_diffuseTexture->BindTexture();
+	else 
+		glBindTexture(GL_TEXTURE_2D, checkersID);
 }
 
 void Material::Save(GnJSONArray& save_array)
@@ -127,15 +121,15 @@ void Material::OnEditor()
 			//ImGui::Text("Diffuse Texture: %s", _diffuseTexture->name.c_str());
 			//ImGui::Text("Path: %s", diffuse_texture->path.c_str());
 
-			ImGui::Text("Width: %d Height: %d", _diffuseTexture->width, _diffuseTexture->height);
+			ImGui::Text("Width: %d Height: %d", _diffuseTexture->GeWidth(), _diffuseTexture->GetHeight());
 
 			ImGui::Spacing();
-			ImGui::Image((ImTextureID)_diffuseTexture->id, ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
+			ImGui::Image((ImTextureID)_diffuseTexture->GetID(), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
 
 			if (ImGui::Button("Remove Texture"))
 			{
-				DeleteTexture();
-				//mesh->RemoveTexture();
+				_diffuseTexture = nullptr;
+				AssignCheckersImage();
 			}
 		}
 	}
@@ -147,10 +141,6 @@ void Material::SetTexture(ResourceTexture* texture)
 		//DeleteTexture();
 
 	_diffuseTexture = texture;
-
-	glBindTexture(GL_TEXTURE_2D, _textureID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _diffuseTexture->width, _diffuseTexture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, _diffuseTexture->data);
-	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Material::AssignCheckersImage()
@@ -170,27 +160,15 @@ void Material::AssignCheckersImage()
 		}
 	}
 
-	glBindTexture(GL_TEXTURE_2D, _textureID);
+	glBindTexture(GL_TEXTURE_2D, checkersID);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, CHECKERS_WIDTH, CHECKERS_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, checkerImage);
 	glBindTexture(GL_TEXTURE_2D, 0);
+
+	checkers_image = true;
 }
 
 ResourceTexture* Material::GetDiffuseTexture()
 {
 	return _diffuseTexture;
 	return nullptr;
-}
-
-bool Material::DeleteTexture()
-{
-	bool ret = true;
-
-	glDeleteTextures(1, &_textureID);
-
-	//TODO
-	//TextureImporter::UnloadTexture(_diffuseTextureID);
-	//delete diffuse_texture;
-	//diffuse_texture = nullptr;
-
-	return ret;
 }

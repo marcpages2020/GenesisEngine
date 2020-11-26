@@ -387,7 +387,7 @@ void MeshImporter::Load(const char* fileBuffer, ResourceMesh* mesh)
 	//mesh->assetsFile = new char[strlen(fileBuffer)];
 	//strcpy(mesh->assetsFile.c_str(), fileBuffer);
 
-	//mesh->GenerateBuffers();
+	mesh->GenerateBuffers();
 }
 
 #pragma endregion 
@@ -448,10 +448,7 @@ void TextureImporter::Import(char* fileBuffer, ResourceTexture* texture, uint si
 	{
 		LOG("Texture loaded successfully from: %s in %d ms", texture->assetsFile, timer.Read());
 
-		texture->data = ilGetData();
-		texture->id = (uint)(imageID);
-		texture->width = ilGetInteger(IL_IMAGE_WIDTH);
-		texture->height = ilGetInteger(IL_IMAGE_HEIGHT);
+		texture->FillData(ilGetData(), (uint)imageID, ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT));
 	}
 
 	ilBindImage(0);
@@ -462,7 +459,7 @@ uint TextureImporter::Save(ResourceTexture* texture, char** fileBuffer)
 	ILuint size;
 	ILubyte* data;
 
-	ilBindImage(texture->id);
+	ilBindImage(texture->GetID());
 
 	ilSetInteger(IL_DXTC_DATA_FORMAT, IL_DXT5);
 	size = ilSaveL(IL_DDS, nullptr, 0);
@@ -528,10 +525,8 @@ void TextureImporter::Load(const char* path, ResourceTexture* texture)
 	{
 		LOG("Texture loaded successfully from: %s in %d ms", texture->libraryFile.c_str(), timer.Read());
 
-		texture->data = ilGetData();
-		texture->id = (uint)(imageID);
-		texture->width = ilGetInteger(IL_IMAGE_WIDTH);
-		texture->height = ilGetInteger(IL_IMAGE_HEIGHT);
+		texture->FillData(ilGetData(), (uint)imageID, ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT));
+		texture->GenerateBuffers();
 	}
 
 	ilBindImage(0);
@@ -653,12 +648,16 @@ bool MaterialImporter::DeleteTexture(const char* material_library_path)
 	FileSystem::Load(material_library_path, &buffer);
 
 	GnJSONObj material_data(buffer);
-	int diffuseTextureUID = material_data.GetInt("Diffuse Texture");
 
+	int diffuseTextureUID = material_data.GetInt("Diffuse Texture");
 	const char* texture_library_path = App->resources->Find(diffuseTextureUID);
 
 	if (texture_library_path != nullptr)
+	{
 		FileSystem::Delete(texture_library_path);
+		App->resources->ReleaseResource(diffuseTextureUID);
+		App->resources->ReleaseResourceData(diffuseTextureUID);
+	}
 	else
 		LOG_WARNING("Texture: %s could not be deleted. Not found", material_library_path);
 

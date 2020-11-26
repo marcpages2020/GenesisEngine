@@ -10,12 +10,22 @@ public:
 	ResourceTexture(uint UID);
 	~ResourceTexture();
 
+	void GenerateBuffers();
+	void BindTexture();
+
+	void FillData(GLubyte* data, uint id, int width, int height);
 	uint SaveMeta(GnJSONObj& base_object, uint last_modification) override;
 	//void Load(GnJSONObj& base_object) override;
 
-public:
-	uint id;
-	int width;
-	int height;
-	GLubyte* data;
+	uint GetID();
+	int GeWidth();
+	int GetHeight();
+	GLubyte* GetData();
+
+private:
+	uint _id;
+	int _width;
+	int _height;
+	GLubyte* _data;
+	uint gpu_id;
 };
