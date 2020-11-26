@@ -122,7 +122,6 @@ void WindowScene::DrawGameTimeDataOverlay()
 		ImGui::Text("Time since game start: %.2f", Time::gameClock.timeSinceStartup());
 	}
 	ImGui::PopStyleColor();
-	ImGui::PopStyleVar();
-	ImGui::PopStyleVar();
+	ImGui::PopStyleVar(2);
 	ImGui::End();
 }

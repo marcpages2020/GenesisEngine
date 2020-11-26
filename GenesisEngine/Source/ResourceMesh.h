@@ -32,4 +32,7 @@ public:
 	uint texcoords_amount = -1;
 
 	float* colors;
+
+private:
+	bool _buffers_created;
 };

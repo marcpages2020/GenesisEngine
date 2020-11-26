@@ -32,6 +32,7 @@ bool ModuleResources::Init()
 	TextureImporter::Init();
 
 	CheckAssetsRecursive("Assets");
+
 	return ret;
 }
 
@@ -106,8 +107,9 @@ void ModuleResources::OnEditor()
 
 int ModuleResources::MetaUpToDate(const char* asset_path)
 {
+	int ret = -1;
 	std::string meta_file = asset_path;
-	meta_file += ".meta";
+	meta_file.append(".meta");
 
 	if (FileSystem::Exists(meta_file.c_str()))
 	{
@@ -119,31 +121,37 @@ int ModuleResources::MetaUpToDate(const char* asset_path)
 		int lastModifiedMeta = meta.GetInt("lastModified");
 		uint lastModified = FileSystem::GetLastModTime(asset_path);
 
+		//TODO: Update file meta
+
 		if (lastModifiedMeta != lastModified)
-			return UpdateMetaFile(asset_path);
+			ret = UpdateMetaFile(meta);
 		else
-			return UID;
+			ret = UID;
+
+		resources_data[ret].assetsFile = asset_path;
+		resources_data[ret].type = GetResourceTypeFromPath(asset_path);
+		resources_data[ret].libraryFile = Find(ret);
 
 		meta.Release();
 		RELEASE_ARRAY(buffer);
 	}
-	else 
-	{
-		return -1;
-	}
+
+
+
+	return ret;
 }
 
-int ModuleResources::UpdateMetaFile(const char* assets_file)
+int ModuleResources::UpdateMetaFile(GnJSONObj& meta_file)
 {
-	char* buffer = nullptr;
-	std::string meta_file = assets_file;
-	meta_file.append(".meta");
+	//char* buffer = nullptr;
+	//std::string meta_file = assets_file;
+	//meta_file.append(".meta");
 
-	uint size = FileSystem::Load(meta_file.c_str(), &buffer);
-	GnJSONObj meta(buffer);
+	//uint size = FileSystem::Load(meta_file.c_str(), &buffer);
+	//GnJSONObj meta(buffer);
 
-	uint UID = meta.GetInt("UID");
-	int lastModifiedMeta = meta.GetInt("lastModified");
+	//uint UID = meta.GetInt("UID");
+	//int lastModifiedMeta = meta.GetInt("lastModified");
 	//uint lastModified = FileSystem::GetLastModTime(asset_path);
 
 	//Find(UID);
@@ -175,7 +183,7 @@ int ModuleResources::Find(const char* assets_file)
 
 const char* ModuleResources::Find(uint UID)
 {
-	if (resources_data.find(UID) != resources_data.end()) 
+	if (resources_data.find(UID) != resources_data.end() && resources_data[UID].libraryFile.size() > 0) 
 		return resources_data[UID].libraryFile.c_str();
 
 	std::vector<std::string> directories = { "Library/Config/","Library/Models/","Library/Meshes/","Library/Materials/","Library/Textures/", "Library/Scenes/" };
@@ -188,8 +196,8 @@ const char* ModuleResources::Find(uint UID)
 		file += extensions[i];
 		if (FileSystem::Exists(file.c_str()))
 		{
-			char* final_file = new char[128];
-			strcpy(final_file, file.c_str());
+			char* final_file = new char[256];
+			sprintf_s(final_file, 256, file.c_str());
 			return final_file;
 		}
 	}
@@ -341,6 +349,9 @@ bool ModuleResources::DeleteInternalResource(uint UID)
 
 Resource* ModuleResources::LoadResource(uint UID)
 {
+	if (resources_data.find(UID) == resources_data.end())
+		Find(UID);
+
 	Resource* resource = CreateResource(UID);
 
 	switch (resource->GetType())
@@ -416,7 +427,6 @@ Resource* ModuleResources::CreateResource(uint UID)
 {
 	Resource* resource = nullptr;
 
-	//TODO: find file if data does not exist
 	ResourceType type = resources_data[UID].type;
 
 	switch (type)
@@ -651,13 +661,19 @@ void ModuleResources::CheckAssetsRecursive(const char* directory)
 		std::size_t found = str.find(".meta");
 
 		if (found == -1) {
-			std::string meta = files[i];
-			meta.append(".meta");
+			std::string meta = directory;
+			meta.append("/" + files[i] + ".meta");
 			if (!FileSystem::Exists(meta.c_str())) {
 				std::string file_to_import = directory;
 				file_to_import.append("/");
 				file_to_import.append(files[i].c_str());
 				ImportFile(file_to_import.c_str());
+			}
+			else
+			{
+				std::string file = directory;
+				file.append("/" + files[i]);
+				MetaUpToDate(file.c_str());
 			}
 		}
 	}

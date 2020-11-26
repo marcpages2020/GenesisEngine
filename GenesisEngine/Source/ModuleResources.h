@@ -25,7 +25,7 @@ public:
 	void OnEditor();
 
 	int MetaUpToDate(const char* asset_path);
-	int UpdateMetaFile(const char* assets_file);
+	int UpdateMetaFile(GnJSONObj& meta_file);
 	int Find(const char* assets_file);
 	const char* Find(uint UID);
 

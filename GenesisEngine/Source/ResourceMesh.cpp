@@ -5,11 +5,25 @@ ResourceMesh::ResourceMesh(uint UID) : Resource(UID, ResourceType::RESOURCE_MESH
  vertices_amount(-1), vertices(nullptr), 
  indices_amount(-1), indices(nullptr),
  normals_amount(-1), normals(nullptr), 
- texcoords(nullptr), colors(nullptr) {}
+ texcoords(nullptr), colors(nullptr),
+ _buffers_created(false) {}
 
 ResourceMesh::~ResourceMesh()
 {
-	DeleteBuffers();
+	if(_buffers_created)
+		DeleteBuffers();
+
+	delete vertices;
+	vertices = nullptr;
+
+	delete indices;
+	indices = nullptr;
+
+	delete normals;
+	normals = nullptr;
+
+	delete texcoords;
+	texcoords = nullptr;
 }
 
 void ResourceMesh::Load(GnJSONObj& base_object) {}
@@ -35,6 +49,8 @@ void ResourceMesh::GenerateBuffers()
 	glGenBuffers(1, (GLuint*)&(indices_buffer));
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * indices_amount, indices, GL_STATIC_DRAW);
+
+	_buffers_created = true;
 }
 
 void ResourceMesh::DeleteBuffers()
