@@ -1,6 +1,6 @@
 #include "Resource.h"
 
-Resource::Resource(uint uid, ResourceType type)
+Resource::Resource(uint uid, ResourceType type) : referenceCount(0), _uid(uid), _type(type)
 {
 	_uid = uid;
 	_type = type;

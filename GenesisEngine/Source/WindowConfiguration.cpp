@@ -140,6 +140,8 @@ void WindowConfiguration::Draw()
 			if (ImGui::RadioButton("Fixed HorizontalFOV", fixedHorizontalFOV))
 				App->camera->SetFixedFOV(FixedFOV::FIXED_HORIZONTAL_FOV);
 
+			ImGui::Spacing();
+
 			//Fixed Vertical FOV Settings
 			if (fixedVerticalFOV)
 			{
@@ -147,6 +149,7 @@ void WindowConfiguration::Draw()
 				if (ImGui::SliderFloat("Vertical FOV", &verticalFOV, 20.0f, 60.0f))
 					App->camera->SetVerticalFieldOfView(verticalFOV * DEGTORAD, App->editor->image_size.x, App->editor->image_size.y);
 
+				ImGui::Spacing();
 				ImGui::Text("Horizontal FOV: %.2f", App->camera->GetHorizontalFieldOfView() * RADTODEG);
 			}
 			//Fixed Horizontal FOV Settings
@@ -156,9 +159,10 @@ void WindowConfiguration::Draw()
 				if (ImGui::SliderFloat("Horizontal FOV", &horizontalFOV, 55.0f, 110.0f))
 					App->camera->SetHorizontalFieldOfView(horizontalFOV * DEGTORAD, App->editor->image_size.x, App->editor->image_size.y);
 
+				ImGui::Spacing();
 				ImGui::Text("Vertical FOV: %.2f", App->camera->GetVerticalFieldOfView() * RADTODEG);
 			}
-
+			ImGui::Spacing();
 		}
 
 		if (ImGui::CollapsingHeader("Hardware"))

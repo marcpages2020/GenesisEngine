@@ -5,6 +5,20 @@
 
 #include <vector>
 
+struct ModelNode
+{
+	char* name;
+	float3 position;
+	Quat rotation;
+	float3 scale;
+
+	int meshID = -1;
+	int materialID = -1;
+
+	uint UID;
+	uint parentUID;
+};
+
 class ResourceModel : public Resource {
 public:
 	ResourceModel(uint UID);
@@ -14,9 +28,8 @@ public:
 	uint SaveMeta(GnJSONObj& base_object, uint last_modification) override;
 
 public:
-	GnJSONObj model_information;
-
 	std::vector<uint> meshes;
 	std::vector<uint> materials;
 	std::vector<uint> textures;
+	std::vector<ModelNode> nodes;
 };

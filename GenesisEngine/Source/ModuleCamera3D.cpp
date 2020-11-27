@@ -100,9 +100,6 @@ update_status ModuleCamera3D::Update(float dt)
 		}
 	}
 
-	if (App->input->GetKey(SDL_SCANCODE_R) == KEY_DOWN)
-		Reset();
-
 	//Forwards/Backwards
 	if ((App->input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT) || (App->input->GetKey(SDL_SCANCODE_UP) == KEY_REPEAT)) 
 		newPos += _camera->GetFrustum().front * move_speed * speed_multiplier * dt;

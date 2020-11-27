@@ -28,19 +28,21 @@ public:
 	int UpdateMetaFile(GnJSONObj& meta_file);
 	int Find(const char* assets_file);
 	const char* Find(uint UID);
+	const char* GetLibraryPath(uint UID);
 
 	uint ImportFile(const char* assets_file);
 	uint ImportInternalResource(const char* path, const void* data, ResourceType type);
-	void CreateResourceData(uint UID, ResourceType type, const char* assets_path = "No path");
+	void CreateResourceData(uint UID, const char* assets_path = "No path", const char* library_path = "No path");
 
 	bool DeleteAssetsResource(const char* assets_path);
 	bool DeleteResource(uint UUID);
 	bool DeleteInternalResource(uint UID);
 
-	Resource* LoadResource(uint UID);
+	Resource* LoadResource(uint UID, ResourceType type);
+	void UnloadResource(uint UID);
 
 	Resource* CreateResource(const char* assetsPath, ResourceType type);
-	Resource* CreateResource(uint UID);
+	Resource* CreateResource(uint UID, ResourceType type);
 	Resource* RequestResource(uint UID);
 	GameObject* RequestGameObject(const char* assets_file);
 	void ReleaseResource(uint UID);
@@ -48,7 +50,7 @@ public:
 	bool SaveResource(Resource* resource);
 	bool SaveMetaFile(Resource* resource);
 
-	ResourceType GetResourceTypeFromPath(const char* path);
+	ResourceType GetResourceTypeFromPath(const char* library_path);
 	uint GenerateUID();
 	const char* GenerateLibraryPath(Resource* resource);
 	std::string GetLibraryFolder(const char* file_in_assets);

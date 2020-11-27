@@ -12,7 +12,7 @@ class ResourceMesh;
 class ResourceMaterial;
 class ResourceTexture;
 
-class GnJSONObj;
+struct ModelNode;
 class GnJSONArray;
 class GameObject;
 struct GnTexture;
@@ -32,10 +32,12 @@ typedef unsigned int ILenum;
 namespace ModelImporter
 {
 	void Import(char* fileBuffer, ResourceModel* resource, uint size);
+	void ImportChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, uint parentNodeUID, ResourceModel* model);
 	uint64 Save(ResourceModel* model, char** fileBuffer);
-	void ImportChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, uint parentNodeUID, ResourceModel* model, GnJSONArray& meshes_array);
-	void LoadTransform(aiNode* node, GnJSONObj& node_object);
-	GameObject* Load(const char* path, ResourceModel* model);
+	void LoadTransform(aiNode* node, ModelNode& modelNode);
+	void Load(const char* path, ResourceModel* model);
+
+	GameObject* ConvertToGameObject(ResourceModel* model);
 }
 
 namespace MeshImporter

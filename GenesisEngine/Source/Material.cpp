@@ -8,6 +8,7 @@
 #include "ResourceTexture.h"
 #include "glew/include/glew.h"
 #include "ResourceMaterial.h"
+#include "WindowAssets.h"
 
 Material::Material() : Component(), checkers_image(false), _resource(nullptr) 
 {
@@ -110,8 +111,6 @@ void Material::OnEditor()
 				else
 					checkers_image = true;
 			}
-
-
 		}
 
 		ImGui::Separator();
@@ -124,7 +123,23 @@ void Material::OnEditor()
 			ImGui::Text("Width: %d Height: %d", _diffuseTexture->GeWidth(), _diffuseTexture->GetHeight());
 
 			ImGui::Spacing();
+
 			ImGui::Image((ImTextureID)_diffuseTexture->GetID(), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSETS"))
+				{
+					IM_ASSERT(payload->DataSize == sizeof(int));
+					int payload_n = *(const int*)payload->Data;
+					WindowAssets* assets_window = (WindowAssets*)App->editor->windows[ASSETS_WINDOW];
+					const char* file = assets_window->GetFileAt(payload_n);
+					Resource* possible_texture = App->resources->RequestResource(App->resources->Find(file));
+
+					if (possible_texture->GetType() == ResourceType::RESOURCE_TEXTURE)
+						_diffuseTexture = (ResourceTexture*)possible_texture;
+				}
+				ImGui::EndDragDropTarget();
+			}
 
 			if (ImGui::Button("Remove Texture"))
 			{

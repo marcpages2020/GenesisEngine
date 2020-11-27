@@ -54,12 +54,8 @@ void ModelImporter::Import(char* fileBuffer, ResourceModel* model, uint size)
 			model->materials.push_back(App->resources->ImportInternalResource(model->assetsFile.c_str(), aimaterial, ResourceType::RESOURCE_MATERIAL));
 		}
 
-		GnJSONObj save_file;
-		GnJSONArray nodes = save_file.AddArray("Nodes");
 		aiNode* rootNode = scene->mRootNode;
-		ImportChildren(scene, rootNode, nullptr, 0, model, nodes);
-
-		model->model_information = save_file;
+		ImportChildren(scene, rootNode, nullptr, 0, model);
 
 		aiReleaseImport(scene);
 
@@ -71,55 +67,80 @@ void ModelImporter::Import(char* fileBuffer, ResourceModel* model, uint size)
 
 uint64 ModelImporter::Save(ResourceModel* model, char** fileBuffer)
 {
-	GnJSONObj base_object; 
-
 	char* buffer;
-	uint size = model->model_information.Save(&buffer);
+
+	GnJSONObj base_object;
+	GnJSONArray nodes_array = base_object.AddArray("Nodes");
+
+	for (size_t i = 0; i < model->nodes.size(); i++)
+	{
+		GnJSONObj node_object;
+
+		node_object.AddString("Name", model->nodes[i].name);
+		node_object.AddInt("UID", model->nodes[i].UID);
+		node_object.AddInt("Parent UID", model->nodes[i].parentUID);
+
+		node_object.AddFloat3("Position", model->nodes[i].position);
+		node_object.AddQuaternion("Rotation", model->nodes[i].rotation);
+		node_object.AddFloat3("Scale", model->nodes[i].scale);
+
+		if (model->nodes[i].meshID != -1)
+		{
+			node_object.AddInt("Mesh UID", model->nodes[i].meshID);
+			node_object.AddString("Mesh library path", App->resources->GetLibraryPath(model->nodes[i].meshID));
+		}
+
+		if (model->nodes[i].materialID != -1)
+		{
+			node_object.AddInt("Material UID", model->nodes[i].materialID);
+			node_object.AddString("Material library path", App->resources->GetLibraryPath(model->nodes[i].materialID));
+		}
+
+		nodes_array.AddObject(node_object);
+	}
+
+	uint size = base_object.Save(&buffer);
 	*fileBuffer = buffer;
 
 	return size;
 }
 
-void ModelImporter::ImportChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, uint parentNodeUID, ResourceModel* model, GnJSONArray& meshes_array)
+void ModelImporter::ImportChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, uint parentNodeUID, ResourceModel* model)
 {
-	GnJSONObj node_object;
-
-	//Node Information 
-	meshes_array.AddObject(node_object);
+	ModelNode modelNode;
+	modelNode.name = new char[128];
 
 	if (node == scene->mRootNode)
-		node_object.AddString("Name", FileSystem::GetFile(model->assetsFile.c_str()).c_str());
+		strcpy(modelNode.name,FileSystem::GetFile(model->assetsFile.c_str()).c_str());
 	else 
-		node_object.AddString("Name", node->mName.C_Str());
+		strcpy(modelNode.name, node->mName.C_Str());
 
-	uint node_uid = App->resources->GenerateUID();
-	node_object.AddInt("UUID", node_uid);
-	node_object.AddInt("Parent UUID", parentNodeUID);
+	modelNode.UID = App->resources->GenerateUID();
+	modelNode.parentUID = parentNodeUID;
 
-	LoadTransform(node, node_object);
+	LoadTransform(node, modelNode);
 
 	if (node->mMeshes != nullptr)
 	{
 		//Mesh --------------------------------------------------------------
-		node_object.AddInt("Mesh", model->meshes[*node->mMeshes]);
+		modelNode.meshID = model->meshes[*node->mMeshes];
 
 		//Materials ----------------------------------------------------------
 		aiMesh* aimesh = scene->mMeshes[*node->mMeshes];
-		node_object.AddInt("Material", model->materials[aimesh->mMaterialIndex]);
-
+		modelNode.materialID = model->materials[aimesh->mMaterialIndex];
 	}
 
-	meshes_array.AddObject(node_object);
+	model->nodes.push_back(modelNode);
 
 	for (size_t i = 0; i < node->mNumChildren; i++)
 	{
-		ImportChildren(scene, node->mChildren[i], node, node_uid, model, meshes_array);
+		ImportChildren(scene, node->mChildren[i], node, modelNode.UID, model);
 	}
 }
 
-void ModelImporter::LoadTransform(aiNode* node, GnJSONObj& node_object)
+void ModelImporter::LoadTransform(aiNode* node, ModelNode& modelNode)
 {
-	aiVector3D position, scaling, eulerRotation;
+	aiVector3D position, scaling;
 	aiQuaternion rotation;
 
 	node->mTransformation.Decompose(scaling, rotation, position);
@@ -129,71 +150,91 @@ void ModelImporter::LoadTransform(aiNode* node, GnJSONObj& node_object)
 		scaling.x = scaling.y = scaling.z = 1.0f;
 	}
 
-	node_object.AddFloat3("Position", float3(position.x, position.y, position.z));
-	node_object.AddQuaternion("Rotation", Quat(rotation.x, rotation.y, rotation.z, rotation.w));
-	node_object.AddFloat3("Scale", float3(scaling.x, scaling.y, scaling.z));
+	modelNode.position = float3(position.x, position.y, position.z);
+	modelNode.rotation = Quat(rotation.x, rotation.y, rotation.z, rotation.w);
+	modelNode.scale = float3(scaling.x, scaling.y, scaling.z);
 }
 
-GameObject* ModelImporter::Load(const char* path, ResourceModel* model)
+void ModelImporter::Load(const char* path, ResourceModel* model)
 {
 	//Load JSON and transform into Game Objects
 	char* buffer = nullptr;
 	uint size = FileSystem::Load(model->libraryFile.c_str(), &buffer);
 	GnJSONObj model_data(buffer);
-	GnJSONArray nodes = model_data.GetArray("Nodes");
+	GnJSONArray nodes_array = model_data.GetArray("Nodes");
 
-	for (size_t i = 0; i < nodes.Size(); i++)
+	for (size_t i = 0; i < nodes_array.Size(); i++)
 	{
-		GnJSONObj node = nodes.GetObjectAt(i);
-		model->meshes.push_back(node.GetInt("Mesh"));
-	}
+		GnJSONObj nodeObject = nodes_array.GetObjectAt(i);
+		ModelNode modelNode;
+		modelNode.name = (char*)nodeObject.GetString("Name", "No Name");
+		modelNode.UID = nodeObject.GetInt("UID");
+		modelNode.parentUID = nodeObject.GetInt("Parent UID");
 
-	GameObject* root = nullptr;
-	std::vector<GameObject*> createdObjects;
+		modelNode.position = nodeObject.GetFloat3("Position", float3::zero);
+		modelNode.rotation = nodeObject.GetQuaternion("Rotation", Quat::identity);
+		modelNode.scale = nodeObject.GetFloat3("Scale", float3::zero);
 
-	for (size_t i = 0; i < nodes.Size(); i++)
-	{
-		GnJSONObj node_data = nodes.GetObjectAt(i);
-
-		int meshID = node_data.GetInt("Mesh", -1);
-		if (meshID != -1)
-		{
-			App->resources->CreateResourceData(meshID, ResourceType::RESOURCE_MESH, model->assetsFile.c_str());
-			App->resources->LoadResource(meshID);
+		modelNode.meshID = nodeObject.GetInt("Mesh UID");
+		if (modelNode.meshID != -1) {
+			App->resources->CreateResourceData(modelNode.meshID, model->assetsFile.c_str(), nodeObject.GetString("Mesh library path", "No Path"));
+			App->resources->LoadResource(modelNode.meshID, ResourceType::RESOURCE_MESH);
 		}
 
-		int materialID = node_data.GetInt("Material", -1);
-		if (materialID != -1)
-		{
-			App->resources->CreateResourceData(materialID, ResourceType::RESOURCE_MATERIAL, model->assetsFile.c_str());
-			App->resources->LoadResource(materialID);
+		modelNode.materialID = nodeObject.GetInt("Material UID");
+		if (modelNode.materialID != -1) {
+			App->resources->CreateResourceData(modelNode.materialID, model->assetsFile.c_str(), nodeObject.GetString("Material library path", "No Path"));
+			App->resources->LoadResource(modelNode.materialID, ResourceType::RESOURCE_MATERIAL);
 		}
 
-		//load game object
-		GameObject* gameObject = new GameObject();
-		uint parentUUID = gameObject->LoadNodeData(&node_data);
-		createdObjects.push_back(gameObject);
-
-		//check if it's the root game object
-		if (parentUUID == 0) {
-			root = gameObject;
-			root->SetName(FileSystem::GetFile(model->assetsFile.c_str()).c_str());
-		}
-
-		//Get game object's parent
-		for (size_t i = 0; i < createdObjects.size(); i++)
-		{
-			if (createdObjects[i]->UUID == parentUUID)
-			{
-				createdObjects[i]->AddChild(gameObject);
-				gameObject->SetParent(createdObjects[i]);
-			}
-		}
+		model->nodes.push_back(modelNode);
 	}
 
 	model_data.Release();
 	RELEASE_ARRAY(buffer);
-	//App->scene->GetRoot()->AddChild(root);
+}
+
+GameObject* ModelImporter::ConvertToGameObject(ResourceModel* model)
+{	
+	std::vector<GameObject*> createdGameObjects;
+
+	GameObject* root = nullptr;
+
+	for (size_t i = 0; i < model->nodes.size(); i++)
+	{
+		GameObject* gameObject = new GameObject();
+		gameObject->SetName(model->nodes[i].name);
+		gameObject->UUID = model->nodes[i].UID;
+		gameObject->GetTransform()->SetPosition(model->nodes[i].position);
+		gameObject->GetTransform()->SetRotation(model->nodes[i].rotation);
+		gameObject->GetTransform()->SetScale(model->nodes[i].scale);
+
+		if (model->nodes[i].meshID != -1)
+		{
+			GnMesh* mesh = (GnMesh*)gameObject->AddComponent(ComponentType::MESH);
+			mesh->SetResourceUID(model->nodes[i].meshID);
+		}
+
+		if (model->nodes[i].materialID != -1)
+		{
+			Material* material = (Material*)gameObject->AddComponent(ComponentType::MATERIAL);
+			material->SetResourceUID(model->nodes[i].materialID);
+		}
+		
+		if (model->nodes[i].parentUID == 0)
+			root = gameObject;
+
+		for (size_t j = 0; j < createdGameObjects.size(); j++)
+		{
+			if (createdGameObjects[j]->UUID == model->nodes[i].parentUID) 
+			{
+				createdGameObjects[j]->AddChild(gameObject);
+				gameObject->SetParent(createdGameObjects[j]);
+			}
+		}
+
+		createdGameObjects.push_back(gameObject);
+	}
 
 	return root;
 }
@@ -633,8 +674,7 @@ void MaterialImporter::Load(const char* path, ResourceMaterial* material)
 	GnJSONObj material_data(buffer);
 	material->diffuseTextureUID = material_data.GetInt("Diffuse Texture");
 
-	App->resources->CreateResourceData(material->diffuseTextureUID, ResourceType::RESOURCE_TEXTURE);
-	App->resources->LoadResource(material->diffuseTextureUID);
+	App->resources->LoadResource(material->diffuseTextureUID, ResourceType::RESOURCE_TEXTURE);
 
 	material_data.Release();
 	RELEASE_ARRAY(buffer);

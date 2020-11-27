@@ -205,6 +205,11 @@ const char* ModuleResources::Find(uint UID)
 	return nullptr;
 }
 
+const char* ModuleResources::GetLibraryPath(uint UID)
+{
+	return resources[UID]->libraryFile.c_str();
+}
+
 
 
 uint ModuleResources::ImportFile(const char* assets_file)
@@ -268,11 +273,10 @@ uint ModuleResources::ImportInternalResource(const char* path, const void* data,
 	return ret;
 }
 
-void ModuleResources::CreateResourceData(uint UID, ResourceType type, const char* assets_path)
+void ModuleResources::CreateResourceData(uint UID, const char* assets_path, const char* library_path)
 {
-	resources_data[UID].type = type;
 	resources_data[UID].assetsFile = assets_path;
-	resources_data[UID].libraryFile = GenerateLibraryPath(&Resource(UID, type));
+	resources_data[UID].libraryFile = library_path;
 
 }
 
@@ -347,12 +351,9 @@ bool ModuleResources::DeleteInternalResource(uint UID)
 	return ret;
 }
 
-Resource* ModuleResources::LoadResource(uint UID)
+Resource* ModuleResources::LoadResource(uint UID, ResourceType type)
 {
-	if (resources_data.find(UID) == resources_data.end())
-		Find(UID);
-
-	Resource* resource = CreateResource(UID);
+	Resource* resource = CreateResource(UID, type);
 
 	switch (resource->GetType())
 	{
@@ -377,6 +378,14 @@ Resource* ModuleResources::LoadResource(uint UID)
 	}
 
 	return resources[UID];
+}
+
+void ModuleResources::UnloadResource(uint UID)
+{
+	delete resources[UID];
+	resources[UID] = nullptr;
+
+	resources.erase(resources.find(UID));
 }
 
 Resource* ModuleResources::CreateResource(const char* assetsPath, ResourceType type)
@@ -417,17 +426,18 @@ Resource* ModuleResources::CreateResource(const char* assetsPath, ResourceType t
 
 		resources_data[UID].assetsFile = resource->assetsFile;
 		resources_data[UID].libraryFile = resource->libraryFile;
+		resources_data[UID].type = type;
 	}
 
 	RELEASE_ARRAY(buffer);
 	return resource;
 }
 
-Resource* ModuleResources::CreateResource(uint UID)
+Resource* ModuleResources::CreateResource(uint UID, ResourceType type)
 {
 	Resource* resource = nullptr;
 
-	ResourceType type = resources_data[UID].type;
+	//ResourceType type = resources_data[UID].type;
 
 	switch (type)
 	{
@@ -463,7 +473,6 @@ Resource* ModuleResources::CreateResource(uint UID)
 
 Resource* ModuleResources::RequestResource(uint UID)
 {
-	Resource* resource = nullptr;
 	std::map<uint, Resource*>::iterator it = resources.find(UID);
 
 	if (it != resources.end() && it->second != nullptr) {
@@ -471,21 +480,28 @@ Resource* ModuleResources::RequestResource(uint UID)
 		return it->second;
 	}
 
-	return LoadResource(UID);
+	const char* library_file = Find(UID);
+	ResourceType type = GetResourceTypeFromPath(library_file);
+
+	return LoadResource(UID, type);
 }
 
 GameObject* ModuleResources::RequestGameObject(const char* assets_file)
 {
 	ResourceModel* model = (ResourceModel*)RequestResource(Find(assets_file));
-	return ModelImporter::Load(resources[model->GetUID()]->libraryFile.c_str(), model);
+	return ModelImporter::ConvertToGameObject(model);
 }
 
 void ModuleResources::ReleaseResource(uint UID)
 {
-	delete resources[UID];
-	resources[UID] = nullptr;
-
-	resources.erase(resources.find(UID));
+	std::map<uint, Resource*>::iterator it = resources.find(UID);
+	if (it != resources.end())
+	{
+		it->second->referenceCount--;
+		
+		if (it->second->referenceCount <= 0)
+			UnloadResource(UID);
+	}
 }
 
 void ModuleResources::ReleaseResourceData(uint UID)
@@ -549,11 +565,11 @@ bool ModuleResources::SaveMetaFile(Resource* resource)
 	return true;
 }
 
-ResourceType ModuleResources::GetResourceTypeFromPath(const char* path)
+ResourceType ModuleResources::GetResourceTypeFromPath(const char* library_path)
 {
-	std::string extension = FileSystem::GetFileFormat(path);
+	std::string extension = FileSystem::GetFileFormat(library_path);
 	
-	if (extension == ".fbx") { return ResourceType::RESOURCE_MODEL; }
+	if (extension == ".fbx" || extension == ".model") { return ResourceType::RESOURCE_MODEL; }
 	else if (extension == ".mesh") { return ResourceType::RESOURCE_MESH; }
 	else if (extension == ".material") { return ResourceType::RESOURCE_MATERIAL; }
 	else if (extension == ".png" || extension == ".dds") { return ResourceType::RESOURCE_TEXTURE; }

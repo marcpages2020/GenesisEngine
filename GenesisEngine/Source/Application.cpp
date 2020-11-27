@@ -159,12 +159,14 @@ void Application::StartGame()
 {
 	in_game = true;
 	Time::gameClock.Start();
+	Save("Library/Scenes/tmp.scene");
 }
 
 void Application::StopGame()
 {
 	in_game = false;
 	Time::gameClock.Stop();
+	Load("Library/Scenes/tmp.scene");
 }
 
 void Application::AddModule(Module* mod)
