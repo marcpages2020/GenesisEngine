@@ -38,6 +38,7 @@ namespace ModelImporter
 	void Load(const char* path, ResourceModel* model);
 
 	GameObject* ConvertToGameObject(ResourceModel* model);
+	void ExtractInternalResources(const char* library_path, std::vector<uint>& meshes, std::vector<uint>& materials);
 }
 
 namespace MeshImporter
@@ -70,4 +71,5 @@ namespace MaterialImporter
 	void Load(const char* file_path, ResourceMaterial* material);
 
 	bool DeleteTexture(const char* material_library_path);
+	const char* ExtractTexture(const char* material_library_path);
 }

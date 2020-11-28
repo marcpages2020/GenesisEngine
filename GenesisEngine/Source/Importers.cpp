@@ -239,6 +239,41 @@ GameObject* ModelImporter::ConvertToGameObject(ResourceModel* model)
 	return root;
 }
 
+void ModelImporter::ExtractInternalResources(const char* library_path, std::vector<uint>& meshes, std::vector<uint>& materials)
+{
+	char* buffer = nullptr;
+	uint size = FileSystem::Load(library_path, &buffer);
+	GnJSONObj model_data(buffer);
+	GnJSONArray nodes_array = model_data.GetArray("Nodes");
+
+	for (size_t i = 0; i < nodes_array.Size(); i++)
+	{
+		GnJSONObj nodeObject = nodes_array.GetObjectAt(i);
+		ModelNode modelNode;
+
+		int meshID = nodeObject.GetInt("Mesh UID");
+		if (meshID != -1)
+		{
+			//avoid duplicating meshes
+			if (std::find(meshes.begin(), meshes.end(), meshID) == meshes.end()) {
+				meshes.push_back(meshID);
+			}
+		}
+
+		int materialID = nodeObject.GetInt("Material UID");
+		if (materialID != -1) 
+		{
+			//avoid duplicating materials
+			if (std::find(materials.begin(), materials.end(), materialID) == materials.end()) {
+				materials.push_back(materialID);
+			}
+		}
+	}
+
+	model_data.Release();
+	RELEASE_ARRAY(buffer);
+}
+
 #pragma endregion
 
 #pragma region MeshImporter
@@ -705,6 +740,22 @@ bool MaterialImporter::DeleteTexture(const char* material_library_path)
 	RELEASE_ARRAY(buffer);
 
 	return ret;
+}
+
+const char* MaterialImporter::ExtractTexture(const char* material_library_path)
+{
+	char* buffer = nullptr;
+	FileSystem::Load(material_library_path, &buffer);
+
+	GnJSONObj material_data(buffer);
+
+	int diffuseTextureUID = material_data.GetInt("Diffuse Texture");
+	const char* texture_library_path = App->resources->Find(diffuseTextureUID);
+
+	material_data.Release();
+	RELEASE_ARRAY(buffer);
+
+	return texture_library_path;
 }
 
 #pragma endregion

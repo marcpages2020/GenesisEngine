@@ -14,6 +14,7 @@
 #include "ModuleResources.h"
 
 #include <string>
+#include <stack>
 
 struct HardwareSpecs
 {
@@ -75,6 +76,7 @@ public:
 	void Save(const char* filePath);
 	void Load(const char* filePath);
 
+	void AddModuleToTaskStack(Module* callback);
 	HardwareSpecs GetHardware();
 
 private:
@@ -99,6 +101,8 @@ private:
 
 	const char* _file_to_load;
 	const char* _file_to_save;
+
+	std::stack<Module*> endFrameTasks;
 };
 
 extern Application* App;

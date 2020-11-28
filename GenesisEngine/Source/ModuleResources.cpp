@@ -17,7 +17,7 @@
 
 #include "MathGeoLib/include/MathGeoLib.h"
 
-ModuleResources::ModuleResources(bool start_enabled) : Module(start_enabled)
+ModuleResources::ModuleResources(bool start_enabled) : Module(start_enabled), _toDeleteResource(-1)
 {
 	name = "resources";
 }
@@ -32,6 +32,7 @@ bool ModuleResources::Init()
 	TextureImporter::Init();
 
 	CheckAssetsRecursive("Assets");
+	//LoadEngineAssets();
 
 	return ret;
 }
@@ -105,6 +106,19 @@ void ModuleResources::OnEditor()
 	}
 }
 
+void ModuleResources::LoadEngineAssets()
+{
+	ResourceTexture* folder_tex = dynamic_cast<ResourceTexture*>(RequestResource(Find("Assets/EngineAssets/folder.png")));
+}
+
+void ModuleResources::OnFrameEnd()
+{
+	if(_toDeleteResource != -1)
+	{
+		DeleteResource(_toDeleteResource);
+	}
+}
+
 bool ModuleResources::MetaUpToDate(const char* assets_file, const char* meta_file)
 {
 	bool ret = false;
@@ -119,17 +133,17 @@ bool ModuleResources::MetaUpToDate(const char* assets_file, const char* meta_fil
 
 	if (lastModifiedMeta == lastModified)
 	{
-		char library_path[128];
-		strcpy(library_path, meta.GetString("Library path", "No path"));
+		std::string library_path = meta.GetString("Library path", "NoPath");
 
 		resources_data[UID].assetsFile = assets_file;
+		resources_data[UID].type = GetTypeFromPath(assets_file);
 
-		if (strcmp(library_path, "No path") == 0)
+		if (library_path == "NoPath")
 			resources_data[UID].libraryFile = Find(UID);
 		else
 			resources_data[UID].libraryFile = library_path;
 
-		resources_data[UID].type = GetResourceTypeFromPath(library_path);
+		resources_data[UID].type = GetTypeFromPath(library_path.c_str());
 
 		ret = true;
 	}
@@ -236,12 +250,13 @@ bool ModuleResources::Exists(uint UID)
 
 uint ModuleResources::ImportFile(const char* assets_file)
 {
-	//int meta_data = MetaUpToDate(assets_file);
+	std::string meta_file = assets_file;
+	meta_file.append(".meta");
 
-	//if (meta_data != -1 && meta_data != 0)
-		//return meta_data;
+	if(FileSystem::Exists(meta_file.c_str()))
+		return GetUIDFromMeta(meta_file.c_str());
 
-	ResourceType type = GetResourceTypeFromPath(assets_file);
+	ResourceType type = GetTypeFromPath(assets_file);
 
 	Resource* resource = CreateResource(assets_file, type);
 	uint ret = 0;
@@ -302,6 +317,12 @@ void ModuleResources::CreateResourceData(uint UID, const char* assets_path, cons
 
 }
 
+void ModuleResources::AddResourceToDelete(uint UID)
+{
+	_toDeleteResource = UID;
+	App->AddModuleToTaskStack(this);
+}
+
 bool ModuleResources::DeleteAssetsResource(const char* assets_path)
 {
 	bool ret = true;
@@ -310,7 +331,7 @@ bool ModuleResources::DeleteAssetsResource(const char* assets_path)
 
 	if (UID != -1)
 	{
-		DeleteResource(UID);
+		AddResourceToDelete(UID);
 	}
 
 //	FileSystem::Delete(assets_path);
@@ -318,36 +339,55 @@ bool ModuleResources::DeleteAssetsResource(const char* assets_path)
 	return ret;
 }
 
-bool ModuleResources::DeleteResource(uint UUID)
+bool ModuleResources::DeleteResource(uint UID)
 {
 	bool ret = true;
+	std::string assets_file = resources_data[UID].assetsFile;
+	std::string meta_file = assets_file + ".meta";
 
-	char* buffer;
-	FileSystem::Load(resources_data[UUID].libraryFile.c_str(), &buffer);
-
-	GnJSONObj resource_data(buffer);
-	GnJSONArray nodes = resource_data.GetArray("Nodes");
-
-	for (size_t i = 0; i < nodes.Size(); i++)
+	switch (resources_data[UID].type)
 	{
-		GnJSONObj node = nodes.GetObjectAt(i);
-		int meshID = node.GetInt("Mesh");
-		int materialID = node.GetInt("Material");
-
-		if (meshID != -1)
-			DeleteInternalResource(meshID);
-
-		if (materialID != -1)
-			DeleteInternalResource(materialID);
+	case ResourceType::RESOURCE_MODEL:
+		DeleteInternalResources(UID);
+		break;
+	case ResourceType::RESOURCE_TEXTURE:
+		break;
+	default:
+		break;
 	}
 
-	FileSystem::Delete(resources_data[UUID].libraryFile.c_str());
-	ReleaseResource(UUID);
+	FileSystem::Delete(resources_data[UID].assetsFile.c_str());
+	FileSystem::Delete(resources_data[UID].libraryFile.c_str());
+	FileSystem::Delete(meta_file.c_str());
 
-	resources_data.erase(resources_data.find(UUID));
+	ReleaseResource(UID);
+	//ReleaseResourceData(resource->GetUID());
 
-	resource_data.Release();
-	RELEASE_ARRAY(buffer);
+	return ret;
+}
+
+bool ModuleResources::DeleteInternalResources(uint UID)
+{
+	bool ret = true;
+	std::string meta_file = resources_data[UID].assetsFile + ".meta";
+
+	if (resources_data[UID].type == ResourceType::RESOURCE_MODEL)
+	{
+		std::vector<uint> meshes;
+		std::vector<uint> materials;
+		ModelImporter::ExtractInternalResources(resources_data[UID].libraryFile.c_str(), meshes, materials);
+
+		for (size_t i = 0; i < meshes.size(); i++) 
+		{
+			DeleteInternalResource(meshes[i]);
+		}
+
+		for (size_t i = 0; i < materials.size(); i++) 
+		{
+			DeleteInternalResource(materials[i]);
+		}
+	}
+
 	return ret;
 }
 
@@ -355,21 +395,21 @@ bool ModuleResources::DeleteInternalResource(uint UID)
 {
 	bool ret = true;
 
-	const char* library_path = Find(UID);
+	std::string library_path = Find(UID);
+	ResourceType type = GetTypeFromPath(library_path.c_str());
 
-	if (library_path != nullptr) {
-
-		ResourceType type = GetResourceTypeFromPath(library_path);
-
-		if(type == ResourceType::RESOURCE_MATERIAL)
-			ret = MaterialImporter::DeleteTexture(library_path);
-
-		ret = FileSystem::Delete(library_path);
-
-		ReleaseResource(UID);
-		ReleaseResourceData(UID);
+	if (type == ResourceType::RESOURCE_MESH) 
+	{
+		ret = FileSystem::Delete(library_path.c_str());
+	}
+	else if (type == ResourceType::RESOURCE_MATERIAL) 
+	{
+		const char* texture_library_path = MaterialImporter::ExtractTexture(library_path.c_str());
+		DeleteResource(Find(texture_library_path));
+		ret = FileSystem::Delete(library_path.c_str());
 	}
 
+	ReleaseResource(UID);
 	return ret;
 }
 
@@ -503,7 +543,7 @@ Resource* ModuleResources::RequestResource(uint UID)
 	}
 
 	const char* library_file = Find(UID);
-	ResourceType type = GetResourceTypeFromPath(library_file);
+	ResourceType type = GetTypeFromPath(library_file);
 
 	Resource* resource = LoadResource(UID, type);
 	
@@ -515,7 +555,10 @@ Resource* ModuleResources::RequestResource(uint UID)
 
 GameObject* ModuleResources::RequestGameObject(const char* assets_file)
 {
-	ResourceModel* model = (ResourceModel*)RequestResource(Find(assets_file));
+	std::string meta_file = assets_file;
+	meta_file.append(".meta");
+	ResourceModel* model = (ResourceModel*)RequestResource(GetUIDFromMeta(meta_file.c_str()));
+
 	return ModelImporter::ConvertToGameObject(model);
 }
 
@@ -569,7 +612,7 @@ bool ModuleResources::SaveResource(Resource* resource)
 		RELEASE_ARRAY(buffer);
 	}
 
-	if(resource->GetType() != ResourceType::RESOURCE_MESH && resource->GetType() != ResourceType::RESOURCE_MATERIAL)
+	if(resource->GetType() == ResourceType::RESOURCE_MODEL || resource->GetType() == ResourceType::RESOURCE_TEXTURE)
 		ret = SaveMetaFile(resource);
 
 	return ret;
@@ -592,9 +635,9 @@ bool ModuleResources::SaveMetaFile(Resource* resource)
 	return true;
 }
 
-ResourceType ModuleResources::GetResourceTypeFromPath(const char* library_path)
+ResourceType ModuleResources::GetTypeFromPath(const char* path)
 {
-	std::string extension = FileSystem::GetFileFormat(library_path);
+	std::string extension = FileSystem::GetFileFormat(path);
 	
 	if (extension == ".fbx" || extension == ".model") { return ResourceType::RESOURCE_MODEL; }
 	else if (extension == ".mesh") { return ResourceType::RESOURCE_MESH; }
@@ -633,7 +676,7 @@ const char* ModuleResources::GenerateLibraryPath(Resource* resource)
 
 std::string ModuleResources::GetLibraryFolder(const char* file_in_assets)
 {
-	ResourceType type = GetResourceTypeFromPath(file_in_assets);
+	ResourceType type = GetTypeFromPath(file_in_assets);
 
 	switch (type)
 	{
@@ -648,7 +691,7 @@ std::string ModuleResources::GetLibraryFolder(const char* file_in_assets)
 
 const char* ModuleResources::GenerateAssetsPath(const char* path)
 {
-	ResourceType type = GetResourceTypeFromPath(path);
+	ResourceType type = GetTypeFromPath(path);
 	std::string file = FileSystem::GetFile(path) + FileSystem::GetFileFormat(path);
 
 	char* library_path = new char[128];
@@ -702,6 +745,10 @@ void ModuleResources::CheckAssetsRecursive(const char* directory)
 	{
 		std::string file = directory;
 		file.append("/" + files[i]);
+
+		if (file.find(".meta") != std::string::npos)
+			continue;
+
 		std::string meta = file;
 		meta.append(".meta");
 

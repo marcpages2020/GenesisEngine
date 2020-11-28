@@ -52,6 +52,8 @@ public:
 		return UPDATE_CONTINUE;
 	}
 
+	virtual void OnFrameEnd() {}
+
 	virtual bool CleanUp() 
 	{ 
 		return true; 

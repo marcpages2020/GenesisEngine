@@ -23,6 +23,8 @@ public:
 
 	bool Init() override;
 	void OnEditor();
+	void LoadEngineAssets();
+	void OnFrameEnd() override;
 
 	bool MetaUpToDate(const char* assets_file, const char* meta_file);
 	bool UpdateAssetsResource(const char* assets_path);
@@ -36,8 +38,10 @@ public:
 	uint ImportInternalResource(const char* path, const void* data, ResourceType type);
 	void CreateResourceData(uint UID, const char* assets_path = "No path", const char* library_path = "No path");
 
+	void AddResourceToDelete(uint UID);
 	bool DeleteAssetsResource(const char* assets_path);
-	bool DeleteResource(uint UUID);
+	bool DeleteResource(uint UID);
+	bool DeleteInternalResources(uint UID);
 	bool DeleteInternalResource(uint UID);
 
 	Resource* LoadResource(uint UID, ResourceType type);
@@ -52,7 +56,7 @@ public:
 	bool SaveResource(Resource* resource);
 	bool SaveMetaFile(Resource* resource);
 
-	ResourceType GetResourceTypeFromPath(const char* library_path);
+	ResourceType GetTypeFromPath(const char* path);
 	uint GenerateUID();
 	const char* GenerateLibraryPath(Resource* resource);
 	std::string GetLibraryFolder(const char* file_in_assets);
@@ -65,4 +69,5 @@ private:
 private:
 	std::map<uint, Resource*> resources;
 	std::map<uint, ResourceData> resources_data;
+	int _toDeleteResource;
 };

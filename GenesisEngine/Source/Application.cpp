@@ -138,6 +138,14 @@ update_status Application::Update()
 		want_to_load = false;
 	}
 
+	if (!endFrameTasks.empty()) {
+		for (size_t i = 0; i < endFrameTasks.size(); i++) 
+		{
+			endFrameTasks.top()->OnFrameEnd();
+			endFrameTasks.pop();
+		}
+	}
+
 	FinishUpdate();
 	return ret;
 }
@@ -198,6 +206,11 @@ void Application::Load(const char* filePath)
 {
 	want_to_load = true;
 	_file_to_load = filePath;
+}
+
+void Application::AddModuleToTaskStack(Module* callback)
+{
+	endFrameTasks.push(callback);
 }
 
 HardwareSpecs Application::GetHardware()
