@@ -19,7 +19,11 @@ GnMesh::GnMesh() : Component(), draw_face_normals(false), draw_vertex_normals(fa
 	type = ComponentType::MESH;
 }
 
-GnMesh::~GnMesh() {}
+GnMesh::~GnMesh() 
+{
+	App->resources->ReleaseResource(_resourceUID);
+	_resource = nullptr;
+}
 
 void GnMesh::Save(GnJSONArray& save_array)
 {
@@ -33,8 +37,6 @@ void GnMesh::Save(GnJSONArray& save_array)
 
 void GnMesh::Load(GnJSONObj& load_object)
 {
-	//TODO
-	//MeshImporter::Load(load_object.GetString("Path"), this);
 	uint meshUID = load_object.GetInt("Mesh UID");
 	SetResourceUID(meshUID);
 }
@@ -44,6 +46,7 @@ void GnMesh::SetResourceUID(uint UID)
 	_resourceUID = UID;
 	_resource = (ResourceMesh*)App->resources->RequestResource(_resourceUID);
 	GenerateAABB();
+	//App->resources->ReleaseResource(_resourceUID);
 }
 
 Resource* GnMesh::GetResource(ResourceType type)
@@ -81,7 +84,6 @@ AABB GnMesh::GetAABB()
 //	return ret;
 //}
 
-
 void GnMesh::Update()
 {
  	Render();
@@ -89,6 +91,9 @@ void GnMesh::Update()
 
 void GnMesh::Render()
 {
+	if (!App->resources->Exists(_resourceUID)) 
+		return;
+
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);

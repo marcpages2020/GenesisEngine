@@ -76,7 +76,7 @@ uint64 ModelImporter::Save(ResourceModel* model, char** fileBuffer)
 	{
 		GnJSONObj node_object;
 
-		node_object.AddString("Name", model->nodes[i].name);
+		node_object.AddString("Name", model->nodes[i].name.c_str());
 		node_object.AddInt("UID", model->nodes[i].UID);
 		node_object.AddInt("Parent UID", model->nodes[i].parentUID);
 
@@ -111,9 +111,9 @@ void ModelImporter::ImportChildren(const aiScene* scene, aiNode* node, aiNode* p
 	modelNode.name = new char[128];
 
 	if (node == scene->mRootNode)
-		strcpy(modelNode.name,FileSystem::GetFile(model->assetsFile.c_str()).c_str());
+		modelNode.name = FileSystem::GetFile(model->assetsFile.c_str()).c_str();
 	else 
-		strcpy(modelNode.name, node->mName.C_Str());
+		modelNode.name = node->mName.C_Str();
 
 	modelNode.UID = App->resources->GenerateUID();
 	modelNode.parentUID = parentNodeUID;
@@ -167,7 +167,7 @@ void ModelImporter::Load(const char* path, ResourceModel* model)
 	{
 		GnJSONObj nodeObject = nodes_array.GetObjectAt(i);
 		ModelNode modelNode;
-		modelNode.name = (char*)nodeObject.GetString("Name", "No Name");
+		modelNode.name = nodeObject.GetString("Name", "No Name");
 		modelNode.UID = nodeObject.GetInt("UID");
 		modelNode.parentUID = nodeObject.GetInt("Parent UID");
 
@@ -203,7 +203,7 @@ GameObject* ModelImporter::ConvertToGameObject(ResourceModel* model)
 	for (size_t i = 0; i < model->nodes.size(); i++)
 	{
 		GameObject* gameObject = new GameObject();
-		gameObject->SetName(model->nodes[i].name);
+		gameObject->SetName(model->nodes[i].name.c_str());
 		gameObject->UUID = model->nodes[i].UID;
 		gameObject->GetTransform()->SetPosition(model->nodes[i].position);
 		gameObject->GetTransform()->SetRotation(model->nodes[i].rotation);

@@ -24,7 +24,14 @@ Material::~Material()
 {
 	if (_resource != nullptr)
 	{
-		//DeleteTexture();
+		App->resources->ReleaseResource(_resourceUID);
+		_resource = nullptr;
+
+		if (_diffuseTexture != nullptr)
+		{
+			App->resources->ReleaseResource(_diffuseTexture->GetUID());
+			_diffuseTexture = nullptr;
+		}
 	}
 }
 
@@ -32,20 +39,14 @@ void Material::Update() {}
 
 void Material::SetResourceUID(uint UID)
 {
+	_resourceUID = UID;
 	_resource = (ResourceMaterial*)App->resources->RequestResource(UID);
 	_diffuseTexture = (ResourceTexture*)App->resources->RequestResource(_resource->diffuseTextureUID);
-
-	GenerateTextureBuffers();
 
 	if (_diffuseTexture == nullptr)
 		AssignCheckersImage();
 	else
 		SetTexture(_diffuseTexture);
-}
-
-void Material::GenerateTextureBuffers()
-{
-
 }
 
 void Material::BindTexture()
@@ -66,9 +67,6 @@ void Material::Save(GnJSONArray& save_array)
 	if (_diffuseTexture != nullptr)
 		save_object.AddInt("Texture UID", _diffuseTexture->GetUID());
 
-	//if (diffuseTexture != nullptr)
-		//save_object.AddString("Path", diffuse_texture->path.c_str());
-
 	save_array.AddObject(save_object);
 }
 
@@ -82,7 +80,7 @@ void Material::Load(GnJSONObj& load_object)
 
 	if (textureUID != -1) {
 		_diffuseTexture = (ResourceTexture*)App->resources->RequestResource(textureUID);
-		GenerateTextureBuffers();
+		//GenerateTextureBuffers();
 	}
 
 	if (_diffuseTexture == nullptr)
@@ -117,9 +115,6 @@ void Material::OnEditor()
 
 		if(_diffuseTexture != nullptr)
 		{
-			//ImGui::Text("Diffuse Texture: %s", _diffuseTexture->name.c_str());
-			//ImGui::Text("Path: %s", diffuse_texture->path.c_str());
-
 			ImGui::Text("Width: %d Height: %d", _diffuseTexture->GeWidth(), _diffuseTexture->GetHeight());
 
 			ImGui::Spacing();
@@ -152,9 +147,6 @@ void Material::OnEditor()
 
 void Material::SetTexture(ResourceTexture* texture)
 {
-	//if (_diffuseTexture != nullptr)
-		//DeleteTexture();
-
 	_diffuseTexture = texture;
 }
 

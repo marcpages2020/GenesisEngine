@@ -105,43 +105,42 @@ void ModuleResources::OnEditor()
 	}
 }
 
-int ModuleResources::MetaUpToDate(const char* asset_path)
+bool ModuleResources::MetaUpToDate(const char* assets_file, const char* meta_file)
 {
-	int ret = -1;
-	std::string meta_file = asset_path;
-	meta_file.append(".meta");
+	bool ret = false;
 
-	if (FileSystem::Exists(meta_file.c_str()))
+	char* buffer = nullptr;
+	uint size = FileSystem::Load(meta_file, &buffer);
+	GnJSONObj meta(buffer);
+
+	uint UID = meta.GetInt("UID");
+	int lastModifiedMeta = meta.GetInt("lastModified");
+	uint lastModified = FileSystem::GetLastModTime(assets_file);
+
+	if (lastModifiedMeta == lastModified)
 	{
-		char* buffer = nullptr;
-		uint size = FileSystem::Load(meta_file.c_str(), &buffer);
-		GnJSONObj meta(buffer);
+		char library_path[128];
+		strcpy(library_path, meta.GetString("Library path", "No path"));
 
-		uint UID = meta.GetInt("UID");
-		int lastModifiedMeta = meta.GetInt("lastModified");
-		uint lastModified = FileSystem::GetLastModTime(asset_path);
+		resources_data[UID].assetsFile = assets_file;
 
-		//TODO: Update file meta
-
-		if (lastModifiedMeta != lastModified)
-			ret = UpdateMetaFile(meta);
+		if (strcmp(library_path, "No path") == 0)
+			resources_data[UID].libraryFile = Find(UID);
 		else
-			ret = UID;
+			resources_data[UID].libraryFile = library_path;
 
-		resources_data[ret].assetsFile = asset_path;
-		resources_data[ret].type = GetResourceTypeFromPath(asset_path);
-		resources_data[ret].libraryFile = Find(ret);
+		resources_data[UID].type = GetResourceTypeFromPath(library_path);
 
-		meta.Release();
-		RELEASE_ARRAY(buffer);
+		ret = true;
 	}
 
-
+	meta.Release();
+	RELEASE_ARRAY(buffer);
 
 	return ret;
 }
 
-int ModuleResources::UpdateMetaFile(GnJSONObj& meta_file)
+bool ModuleResources::UpdateAssetsResource(const char* assets_path)
 {
 	//char* buffer = nullptr;
 	//std::string meta_file = assets_file;
@@ -158,24 +157,37 @@ int ModuleResources::UpdateMetaFile(GnJSONObj& meta_file)
 	return 0;
 }
 
+uint ModuleResources::GetUIDFromMeta(const char* meta_file)
+{
+	char* buffer = nullptr;
+	uint size = FileSystem::Load(meta_file, &buffer);
+	GnJSONObj meta(buffer);
+
+	int UID = meta.GetInt("UID");
+
+	meta.Release();
+	RELEASE_ARRAY(buffer);
+
+	return UID;
+}
+
 int ModuleResources::Find(const char* assets_file)
 {
-	int UID = MetaUpToDate(assets_file);
+	int UID = -1;
 
-	if (UID != -1) 
-	{
-		std::map<uint, Resource*>::iterator it = resources.find(UID);
+	std::map<uint, Resource*>::iterator resource_it = resources.begin();
+	std::map<uint, ResourceData>::iterator resources_data_it = resources_data.begin();
 
-		if (it == resources.end() || it->second == nullptr)
-		{
-			std::string library_path = GetLibraryFolder(assets_file);
-			library_path +=  std::to_string(UID);
-			AddFileExtension(library_path, GetResourceTypeFromPath(assets_file));
-			
-			resources_data[UID].assetsFile = assets_file;
-			resources_data[UID].libraryFile = library_path;
-			resources_data[UID].type = GetResourceTypeFromPath(assets_file);
-		}
+	//First we loop through all loaded resources
+	for (resource_it; resource_it != resources.end(); resource_it++) {
+		if (resource_it->second->assetsFile == assets_file)
+			return resource_it->first;
+	}
+
+	//If not found we loop through all not loaded but known resources
+	for (resources_data_it; resources_data_it != resources_data.end(); resources_data_it++) {
+		if (resources_data_it->second.assetsFile == assets_file)
+			return resources_data_it->first;
 	}
 
 	return UID;
@@ -210,14 +222,24 @@ const char* ModuleResources::GetLibraryPath(uint UID)
 	return resources[UID]->libraryFile.c_str();
 }
 
+bool ModuleResources::Exists(uint UID)
+{
+	std::map<uint, Resource*>::iterator it = resources.find(UID);
+
+	if (it != resources.end())
+		return true;
+	else
+		return false;
+}
+
 
 
 uint ModuleResources::ImportFile(const char* assets_file)
 {
-	int meta_data = MetaUpToDate(assets_file);
+	//int meta_data = MetaUpToDate(assets_file);
 
-	if (meta_data != -1 && meta_data != 0)
-		return meta_data;
+	//if (meta_data != -1 && meta_data != 0)
+		//return meta_data;
 
 	ResourceType type = GetResourceTypeFromPath(assets_file);
 
@@ -483,7 +505,12 @@ Resource* ModuleResources::RequestResource(uint UID)
 	const char* library_file = Find(UID);
 	ResourceType type = GetResourceTypeFromPath(library_file);
 
-	return LoadResource(UID, type);
+	Resource* resource = LoadResource(UID, type);
+	
+	if (resource != nullptr)
+		resource->referenceCount++;
+
+	return resource;
 }
 
 GameObject* ModuleResources::RequestGameObject(const char* assets_file)
@@ -498,7 +525,7 @@ void ModuleResources::ReleaseResource(uint UID)
 	if (it != resources.end())
 	{
 		it->second->referenceCount--;
-		
+
 		if (it->second->referenceCount <= 0)
 			UnloadResource(UID);
 	}
@@ -673,25 +700,44 @@ void ModuleResources::CheckAssetsRecursive(const char* directory)
 
 	for (size_t i = 0; i < files.size(); i++)
 	{
-		const std::string& str = files[i];
-		std::size_t found = str.find(".meta");
+		std::string file = directory;
+		file.append("/" + files[i]);
+		std::string meta = file;
+		meta.append(".meta");
 
-		if (found == -1) {
-			std::string meta = directory;
-			meta.append("/" + files[i] + ".meta");
-			if (!FileSystem::Exists(meta.c_str())) {
-				std::string file_to_import = directory;
-				file_to_import.append("/");
-				file_to_import.append(files[i].c_str());
-				ImportFile(file_to_import.c_str());
-			}
-			else
+		if(FileSystem::Exists(meta.c_str()))
+		{
+			if (!MetaUpToDate(file.c_str(), meta.c_str()))
 			{
-				std::string file = directory;
-				file.append("/" + files[i]);
-				MetaUpToDate(file.c_str());
+				UpdateAssetsResource(file.c_str());
 			}
+		}
+		else 
+		{
+			ImportFile(file.c_str());
 		}
 	}
 }
 
+/*
+std::string str = files[i];
+std::size_t found = str.find(".meta");
+
+
+if (found == -1) {
+	std::string meta = directory;
+	meta.append("/" + files[i] + ".meta");
+	if (!FileSystem::Exists(meta.c_str())) {
+		std::string file_to_import = directory;
+		file_to_import.append("/");
+		file_to_import.append(files[i].c_str());
+		ImportFile(file_to_import.c_str());
+	}
+	else
+	{
+		std::string file = directory;
+		file.append("/" + files[i]);
+		MetaUpToDate(file.c_str());
+	}
+}
+*/

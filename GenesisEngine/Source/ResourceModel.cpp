@@ -23,7 +23,7 @@ uint ResourceModel::SaveMeta(GnJSONObj& base_object, uint last_modification)
 	{
 		GnJSONObj node_object;
 
-		node_object.AddString("Name", nodes[i].name);
+		node_object.AddString("Name", nodes[i].name.c_str());
 		node_object.AddInt("UID", nodes[i].UID);
 		node_object.AddInt("Parent UID", nodes[i].parentUID);
 		

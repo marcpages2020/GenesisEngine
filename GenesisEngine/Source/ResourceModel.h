@@ -7,7 +7,7 @@
 
 struct ModelNode
 {
-	char* name;
+	std::string name;
 	float3 position;
 	Quat rotation;
 	float3 scale;

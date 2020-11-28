@@ -8,7 +8,7 @@
 WindowAssets::WindowAssets() : EditorWindow()
 {
 	type = WindowType::ASSETS_WINDOW;
-	current_folder = "Assets/";
+	current_folder = "Assets";
 }
 
 WindowAssets::~WindowAssets() {}
@@ -175,7 +175,7 @@ void WindowAssets::DrawCurrentFolder()
 		if (ImGui::BeginPopupContextItem()) {
 			if (ImGui::Button("Delete"))
 			{
-				std::string file_to_delete = current_folder + "/" + files[i];
+				std::string file_to_delete = current_folder + files[i];
 				App->resources->DeleteAssetsResource(file_to_delete.c_str());
 				ImGui::CloseCurrentPopup();
 			}

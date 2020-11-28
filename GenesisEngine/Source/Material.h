@@ -18,7 +18,6 @@ public:
 	void Update() override;
 	void SetResourceUID(uint UID) override;
 
-	void GenerateTextureBuffers();
 	void BindTexture();
 
 	void Save(GnJSONArray& save_array) override;

@@ -24,11 +24,13 @@ public:
 	bool Init() override;
 	void OnEditor();
 
-	int MetaUpToDate(const char* asset_path);
-	int UpdateMetaFile(GnJSONObj& meta_file);
+	bool MetaUpToDate(const char* assets_file, const char* meta_file);
+	bool UpdateAssetsResource(const char* assets_path);
+	uint GetUIDFromMeta(const char* meta_file);
 	int Find(const char* assets_file);
 	const char* Find(uint UID);
 	const char* GetLibraryPath(uint UID);
+	bool Exists(uint UID);
 
 	uint ImportFile(const char* assets_file);
 	uint ImportInternalResource(const char* path, const void* data, ResourceType type);
