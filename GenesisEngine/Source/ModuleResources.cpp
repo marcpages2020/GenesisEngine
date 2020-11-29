@@ -272,11 +272,15 @@ uint ModuleResources::ImportFile(const char* assets_file)
 		TextureImporter::Import(fileBuffer, (ResourceTexture*)resource, size); break;
 	case RESOURCE_SCENE: 
 		break;
-	default: break;
+	default: 
+		LOG_WARNING("Tryig to import unknown file: %s", assets_file);
+		break;
 	}
 
-	if (resource == nullptr)
-		return -1;
+	if (resource == nullptr) {
+		LOG_ERROR("Fatal error when importing file: %s", assets_file);
+		return 0;
+	}
 
 	SaveResource(resource);
 	ret = resource->GetUID();
@@ -746,7 +750,8 @@ void ModuleResources::CheckAssetsRecursive(const char* directory)
 		std::string file = directory;
 		file.append("/" + files[i]);
 
-		if (file.find(".meta") != std::string::npos)
+		//ignore metas and jsons
+		if ((file.find(".meta") != std::string::npos) || (file.find(".json") != std::string::npos))
 			continue;
 
 		std::string meta = file;

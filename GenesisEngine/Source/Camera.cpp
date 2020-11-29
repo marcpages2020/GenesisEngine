@@ -197,9 +197,10 @@ bool Camera::ContainsAABB(AABB& aabb)
 		int iInCount = 8;
 		int iPtIn = 1;
 
-		//test all planes
-		for (int i = 0; i < 8; ++i) {
-			if (m_plane[p].IsOnPositiveSide(cornerPoints[i]) == true) { 
+		for (int i = 0; i < 8; ++i) 
+		{
+			if (m_plane[p].normal.Dot(cornerPoints[i]) - m_plane[p].d >= 0.0f) 
+			{
 				iPtIn = 0;
 				--iInCount;
 			}
@@ -215,6 +216,6 @@ bool Camera::ContainsAABB(AABB& aabb)
 	if (totalInside == 6)
 		return true;
 
-	//Partly inside camera view
+	//Partially inside camera view
 	return true;
 }

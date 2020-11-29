@@ -3,15 +3,15 @@
 #include "glew/include/glew.h"
 
 ResourceTexture::ResourceTexture(uint UID) : Resource(UID, ResourceType::RESOURCE_TEXTURE),
-_id(0), _width(-1), _height(-1), _data(nullptr) , gpu_id(-1){}
+_id(0), _width(-1), _height(-1), _data(nullptr) , gpu_ID(-1){}
 
 ResourceTexture::~ResourceTexture() {}
 
 void ResourceTexture::GenerateBuffers()
 {
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	glGenTextures(1, &gpu_id);
-	glBindTexture(GL_TEXTURE_2D, gpu_id);
+	glGenTextures(1, &gpu_ID);
+	glBindTexture(GL_TEXTURE_2D, gpu_ID);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -25,7 +25,7 @@ void ResourceTexture::GenerateBuffers()
 
 void ResourceTexture::BindTexture()
 {
-	glBindTexture(GL_TEXTURE_2D, gpu_id);
+	glBindTexture(GL_TEXTURE_2D, gpu_ID);
 }
 
 void ResourceTexture::FillData(GLubyte* data, uint id, int width, int height)

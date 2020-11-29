@@ -13,11 +13,37 @@
 Material::Material() : Component(), checkers_image(false), _resource(nullptr) 
 {
 	type = ComponentType::MATERIAL;
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glGenTextures(1, &checkersID);
+	glBindTexture(GL_TEXTURE_2D, checkersID);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 64, _height, 0, GL_RGBA, GL_UNSIGNED_BYTE, _data);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 Material::Material(GameObject* gameObject) : Component(gameObject), checkers_image(false), _resource(nullptr), _diffuseTexture(nullptr)
 {
 	type = ComponentType::MATERIAL;
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glGenTextures(1, &checkersID);
+	glBindTexture(GL_TEXTURE_2D, checkersID);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 64, _height, 0, GL_RGBA, GL_UNSIGNED_BYTE, _data);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 Material::~Material()
@@ -41,7 +67,9 @@ void Material::SetResourceUID(uint UID)
 {
 	_resourceUID = UID;
 	_resource = (ResourceMaterial*)App->resources->RequestResource(UID);
-	_diffuseTexture = (ResourceTexture*)App->resources->RequestResource(_resource->diffuseTextureUID);
+
+	if(_resource->diffuseTextureUID != 0)
+		_diffuseTexture = (ResourceTexture*)App->resources->RequestResource(_resource->diffuseTextureUID);
 
 	if (_diffuseTexture == nullptr)
 		AssignCheckersImage();
@@ -113,7 +141,7 @@ void Material::OnEditor()
 
 		ImGui::Separator();
 
-		if(_diffuseTexture != nullptr)
+		if(_diffuseTexture != nullptr && checkers_image == false)
 		{
 			ImGui::Text("Width: %d Height: %d", _diffuseTexture->GeWidth(), _diffuseTexture->GetHeight());
 
@@ -142,6 +170,10 @@ void Material::OnEditor()
 				AssignCheckersImage();
 			}
 		}
+		else
+		{
+			ImGui::Image((ImTextureID)checkersID, ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
+		}
 	}
 }
 
@@ -159,7 +191,7 @@ void Material::AssignCheckersImage()
 
 	for (int i = 0; i < CHECKERS_HEIGHT; i++) {
 		for (int j = 0; j < CHECKERS_WIDTH; j++) {
-			int c = ((((i & 0x8) == 0) ^ (((j & 0x8)) == 0))) * 255;
+			int c = ((((i & 0x4) == 0) ^ (((j & 0x4)) == 0))) * 255;
 			checkerImage[i][j][0] = (GLubyte)c;
 			checkerImage[i][j][1] = (GLubyte)c;
 			checkerImage[i][j][2] = (GLubyte)c;

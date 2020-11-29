@@ -108,10 +108,9 @@ uint64 ModelImporter::Save(ResourceModel* model, char** fileBuffer)
 void ModelImporter::ImportChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, uint parentNodeUID, ResourceModel* model)
 {
 	ModelNode modelNode;
-	modelNode.name = new char[128];
 
 	if (node == scene->mRootNode)
-		modelNode.name = FileSystem::GetFile(model->assetsFile.c_str()).c_str();
+		modelNode.name = FileSystem::GetFile(model->assetsFile.c_str());
 	else 
 		modelNode.name = node->mName.C_Str();
 
@@ -176,13 +175,15 @@ void ModelImporter::Load(const char* path, ResourceModel* model)
 		modelNode.scale = nodeObject.GetFloat3("Scale", float3::zero);
 
 		modelNode.meshID = nodeObject.GetInt("Mesh UID");
-		if (modelNode.meshID != -1) {
+		if (modelNode.meshID != -1) 
+		{
 			App->resources->CreateResourceData(modelNode.meshID, model->assetsFile.c_str(), nodeObject.GetString("Mesh library path", "No Path"));
 			App->resources->LoadResource(modelNode.meshID, ResourceType::RESOURCE_MESH);
 		}
 
 		modelNode.materialID = nodeObject.GetInt("Material UID");
-		if (modelNode.materialID != -1) {
+		if (modelNode.materialID != -1)
+		{
 			App->resources->CreateResourceData(modelNode.materialID, model->assetsFile.c_str(), nodeObject.GetString("Material library path", "No Path"));
 			App->resources->LoadResource(modelNode.materialID, ResourceType::RESOURCE_MATERIAL);
 		}
@@ -709,7 +710,8 @@ void MaterialImporter::Load(const char* path, ResourceMaterial* material)
 	GnJSONObj material_data(buffer);
 	material->diffuseTextureUID = material_data.GetInt("Diffuse Texture");
 
-	App->resources->LoadResource(material->diffuseTextureUID, ResourceType::RESOURCE_TEXTURE);
+	if(material->diffuseTextureUID != 0)
+		App->resources->LoadResource(material->diffuseTextureUID, ResourceType::RESOURCE_TEXTURE);
 
 	material_data.Release();
 	RELEASE_ARRAY(buffer);
