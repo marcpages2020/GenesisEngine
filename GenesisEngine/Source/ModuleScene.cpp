@@ -27,12 +27,12 @@ bool ModuleScene::Start()
 	selectedGameObject = root;
 	root->SetName("Root");
 
-	GameObject* baker_house_GO = App->resources->RequestGameObject("Assets/Models/baker_house/BakerHouse.fbx");
-	AddGameObject(baker_house_GO);
+	//GameObject* baker_house_GO = App->resources->RequestGameObject("Assets/Models/baker_house/BakerHouse.fbx");
+	//AddGameObject(baker_house_GO);
 	
 	//uint street_environment_uid = App->resources->ImportFile("Assets/Models/street/Street environment_V01.FBX");
-	//GameObject* street_environment = App->resources->RequestGameObject("Assets/Models/street/Street_environment_V01.FBX");
-	//AddGameObject(street_environment);
+	GameObject* street_environment = App->resources->RequestGameObject("Assets/Models/street/street.fbx");
+	AddGameObject(street_environment);
 	
 	GameObject* camera = new GameObject();
 	camera->AddComponent(ComponentType::CAMERA);

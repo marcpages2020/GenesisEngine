@@ -224,6 +224,8 @@ const char* ModuleResources::Find(uint UID)
 		{
 			char* final_file = new char[256];
 			sprintf_s(final_file, 256, file.c_str());
+			std::string library_path = final_file;
+			resources_data[UID].libraryFile = library_path;
 			return final_file;
 		}
 	}
@@ -233,7 +235,16 @@ const char* ModuleResources::Find(uint UID)
 
 const char* ModuleResources::GetLibraryPath(uint UID)
 {
-	return resources[UID]->libraryFile.c_str();
+	std::map<uint, Resource*>::iterator resources_it = resources.find(UID);
+	std::map<uint, ResourceData>::iterator resources_data_it = resources_data.find(UID);
+
+	if (resources_it != resources.end()) {
+		return resources_it->second->libraryFile.c_str();
+	}
+
+	if (resources_data_it != resources_data.end()) {
+		return resources_data_it->second.libraryFile.c_str();
+	}
 }
 
 bool ModuleResources::Exists(uint UID)
@@ -318,7 +329,6 @@ void ModuleResources::CreateResourceData(uint UID, const char* assets_path, cons
 {
 	resources_data[UID].assetsFile = assets_path;
 	resources_data[UID].libraryFile = library_path;
-
 }
 
 void ModuleResources::AddResourceToDelete(uint UID)
@@ -409,8 +419,11 @@ bool ModuleResources::DeleteInternalResource(uint UID)
 	else if (type == ResourceType::RESOURCE_MATERIAL) 
 	{
 		const char* texture_library_path = MaterialImporter::ExtractTexture(library_path.c_str());
-		DeleteResource(Find(texture_library_path));
-		ret = FileSystem::Delete(library_path.c_str());
+
+		if (texture_library_path != nullptr) {
+			DeleteResource(Find(texture_library_path));
+			ret = FileSystem::Delete(library_path.c_str());
+		}
 	}
 
 	ReleaseResource(UID);

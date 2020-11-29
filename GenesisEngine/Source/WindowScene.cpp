@@ -72,7 +72,7 @@ void WindowScene::Draw()
 			App->editor->OnResize(window_size);
 
 		ImGui::Image((ImTextureID)App->renderer3D->colorTexture, App->editor->image_size, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
-		ImGui::PushID(42);
+		ImGui::PushID(SCENE_WINDOW);
 		if (ImGui::BeginDragDropTarget())
 		{
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSETS"))

@@ -126,11 +126,12 @@ bool ModuleRenderer3D::Init()
 		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, MaterialDiffuse);
 
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_COLOR_MATERIAL);
 		glEnable(GL_TEXTURE_2D);
-		glEnable(GL_POLYGON_SMOOTH);
+		//glEnable(GL_POLYGON_SMOOTH);
 		glEnable(GL_LIGHTING);
 		glEnable(GL_STENCIL_TEST);
 		lights[0].Active(true);

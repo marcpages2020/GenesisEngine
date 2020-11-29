@@ -155,6 +155,18 @@ void GnMesh::OnEditor()
 		ImGui::Checkbox("Vertex Normals", &draw_vertex_normals);
 		ImGui::SameLine();
 		ImGui::Checkbox("Face Normals", &draw_face_normals);
+
+		ImGui::Image((ImTextureID)0, ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("MESHES"))
+			{
+				IM_ASSERT(payload->DataSize == sizeof(int));
+				int payload_n = *(const int*)payload->Data;
+				SetResourceUID(payload_n);
+			}
+			ImGui::EndDragDropTarget();
+		}
 	}
 }
 

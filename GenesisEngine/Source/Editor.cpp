@@ -381,9 +381,9 @@ bool Editor::CreateMainMenuBar() {
 			{
 				windows[SCENE_WINDOW]->visible = !windows[SCENE_WINDOW]->visible;
 			}
-			else if (ImGui::MenuItem("Project", NULL, show_project_window))
+			else if (ImGui::MenuItem("Assets", NULL, windows[ASSETS_WINDOW]->visible))
 			{
-				show_project_window = !show_project_window;
+				windows[ASSETS_WINDOW]->visible = !windows[ASSETS_WINDOW]->visible;
 			}
 			else if (ImGui::MenuItem("Console", NULL, show_console_window))
 			{

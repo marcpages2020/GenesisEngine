@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "ImGui/imgui.h"
 #include "FileSystem.h"
+#include "Importers.h"
 
 #include <algorithm>
 
@@ -45,7 +46,6 @@ void WindowAssets::DrawDirectoryRecursive(const char* directory, const char* fil
 	{
 		if (ImGui::TreeNodeEx((dir + (*it)).c_str(), 0, "%s/", (*it).c_str(), tree_flags))
 		{
-			/*
 			if (ImGui::BeginPopupContextItem()) {
 				if (ImGui::Button("Delete"))
 				{
@@ -54,7 +54,6 @@ void WindowAssets::DrawDirectoryRecursive(const char* directory, const char* fil
 				}
 				ImGui::EndPopup();
 			}
-			*/
 
 			if (ImGui::IsItemClicked()) {
 				current_folder = directory;
@@ -87,7 +86,10 @@ void WindowAssets::DrawDirectoryRecursive(const char* directory, const char* fil
 			if (ImGui::BeginPopupContextItem()) {
 				if (ImGui::Button("Delete"))
 				{
-					//gameObject->to_delete = true;
+					std::string file_to_delete = directory;
+					file_to_delete.append("/" + str);
+					App->resources->DeleteAssetsResource(file_to_delete.c_str());
+					ImGui::CloseCurrentPopup();
 					ImGui::CloseCurrentPopup();
 				}
 				ImGui::EndPopup();
@@ -113,12 +115,6 @@ void WindowAssets::DrawCurrentFolder()
 			current_folder.append(dirs[i].c_str());
 		}
 
-		if (ImGui::BeginDragDropSource())
-		{
-			ImGui::SetDragDropPayload("ASSETS", &i, sizeof(int));
-			//ImGui::Text("Reparent");
-			ImGui::EndDragDropSource();
-		}
 		if (ImGui::BeginDragDropTarget())
 		{
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSETS"))
@@ -129,16 +125,6 @@ void WindowAssets::DrawCurrentFolder()
 			ImGui::EndDragDropTarget();
 		}
 
-		/*
-		if (ImGui::BeginPopupContextItem()) {
-			if (ImGui::Button("Delete"))
-			{
-				//gameObject->to_delete = true;
-				ImGui::CloseCurrentPopup();
-			}
-			ImGui::EndPopup();
-		}
-		*/
 		if (ImGui::IsMouseDoubleClicked(0))
 		{
 			current_folder = current_folder + dirs[i];
@@ -155,21 +141,11 @@ void WindowAssets::DrawCurrentFolder()
 
 		ImGui::PushID(i);
 		ImGui::Button(files[i].c_str(), ImVec2(120, 120));
+
 		if (ImGui::BeginDragDropSource())
 		{
 			ImGui::SetDragDropPayload("ASSETS", &i, sizeof(int));
-			//ImGui::Text("Reparent");
 			ImGui::EndDragDropSource();
-		}
-
-		if (ImGui::BeginDragDropTarget())
-		{
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSETS"))
-			{
-				IM_ASSERT(payload->DataSize == sizeof(int));
-				int payload_n = *(const int*)payload->Data;
-			}
-			ImGui::EndDragDropTarget();
 		}
 
 		if (ImGui::BeginPopupContextItem()) {
@@ -178,6 +154,32 @@ void WindowAssets::DrawCurrentFolder()
 				std::string file_to_delete = current_folder + "/" + files[i];
 				App->resources->DeleteAssetsResource(file_to_delete.c_str());
 				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("->"))
+			ImGui::OpenPopup("Meshes");
+		if (ImGui::BeginPopup("Meshes"))
+		{
+			std::string model = current_folder + "/" + files[i];
+			const char* library_path = App->resources->Find(App->resources->GetUIDFromMeta(model.append(".meta").c_str()));
+
+			std::vector<uint> meshes;
+			std::vector<uint> materials;
+			ModelImporter::ExtractInternalResources(library_path, meshes, materials);
+
+			for (size_t m = 0; m < meshes.size(); m++)
+			{
+				ImGui::PushID(meshes[m]);
+				ImGui::Text("%d", meshes[m]);
+				if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+				{
+					ImGui::SetDragDropPayload("MESHES", &(meshes[m]), sizeof(int));
+					ImGui::EndDragDropSource();
+				}
+				ImGui::PopID();
 			}
 			ImGui::EndPopup();
 		}
