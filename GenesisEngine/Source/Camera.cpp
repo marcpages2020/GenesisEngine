@@ -19,7 +19,7 @@ Camera::Camera() : Component(nullptr), _aspectRatio(AspectRatio::AR_16_9), fixed
 	AdjustFieldOfView();
 
 	_frustum.nearPlaneDistance = 0.3f;
-	_frustum.farPlaneDistance = 100.0f;
+	_frustum.farPlaneDistance = 1000.0f;
 }
 
 Camera::Camera(GameObject* gameObject) : Component(gameObject), _aspectRatio(AspectRatio::AR_16_9)
@@ -36,7 +36,7 @@ Camera::Camera(GameObject* gameObject) : Component(gameObject), _aspectRatio(Asp
 	AdjustFieldOfView();
 
 	_frustum.nearPlaneDistance = 0.3f;
-	_frustum.farPlaneDistance = 100.0f;
+	_frustum.farPlaneDistance = 1000.0f;
 }
 
 Camera::~Camera(){}

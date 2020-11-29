@@ -656,11 +656,20 @@ ResourceType ModuleResources::GetTypeFromPath(const char* path)
 {
 	std::string extension = FileSystem::GetFileFormat(path);
 	
-	if (extension == ".fbx" || extension == ".model") { return ResourceType::RESOURCE_MODEL; }
-	else if (extension == ".mesh") { return ResourceType::RESOURCE_MESH; }
-	else if (extension == ".material") { return ResourceType::RESOURCE_MATERIAL; }
-	else if (extension == ".png" || extension == ".dds") { return ResourceType::RESOURCE_TEXTURE; }
-	else return ResourceType::RESOURCE_UNKNOWN;
+	if (extension == ".fbx" || extension == ".model") 
+		return ResourceType::RESOURCE_MODEL; 
+
+	else if (extension == ".mesh") 
+		return ResourceType::RESOURCE_MESH; 
+
+	else if (extension == ".material") 
+		return ResourceType::RESOURCE_MATERIAL;
+
+	else if (extension == ".png" || extension == ".tga" || extension == ".dds") 
+		return ResourceType::RESOURCE_TEXTURE; 
+
+	else 
+		return ResourceType::RESOURCE_UNKNOWN;
 }
 
 uint ModuleResources::GenerateUID()
@@ -783,26 +792,3 @@ void ModuleResources::CheckAssetsRecursive(const char* directory)
 		}
 	}
 }
-
-/*
-std::string str = files[i];
-std::size_t found = str.find(".meta");
-
-
-if (found == -1) {
-	std::string meta = directory;
-	meta.append("/" + files[i] + ".meta");
-	if (!FileSystem::Exists(meta.c_str())) {
-		std::string file_to_import = directory;
-		file_to_import.append("/");
-		file_to_import.append(files[i].c_str());
-		ImportFile(file_to_import.c_str());
-	}
-	else
-	{
-		std::string file = directory;
-		file.append("/" + files[i]);
-		MetaUpToDate(file.c_str());
-	}
-}
-*/

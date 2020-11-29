@@ -64,10 +64,15 @@ void Material::Update() {}
 void Material::SetResourceUID(uint UID)
 {
 	_resourceUID = UID;
-	_resource = (ResourceMaterial*)App->resources->RequestResource(UID);
+	_resource = dynamic_cast<ResourceMaterial*>(App->resources->RequestResource(UID));
 
-	if(_resource->diffuseTextureUID != 0)
-		_diffuseTexture = (ResourceTexture*)App->resources->RequestResource(_resource->diffuseTextureUID);
+	if (_resource->diffuseTextureUID != 0)
+	{
+		if (_diffuseTexture != nullptr)
+			App->resources->ReleaseResource(_diffuseTexture->GetUID());
+
+		_diffuseTexture = dynamic_cast<ResourceTexture*>(App->resources->RequestResource(_resource->diffuseTextureUID));
+	}
 
 	if (_diffuseTexture == nullptr)
 		AssignCheckersImage();
@@ -77,6 +82,7 @@ void Material::SetResourceUID(uint UID)
 
 void Material::BindTexture()
 {
+	//TODO: Request resource every frame
 	if(!checkers_image)
 		_diffuseTexture->BindTexture();
 	else 
@@ -171,6 +177,22 @@ void Material::OnEditor()
 		else
 		{
 			ImGui::Image((ImTextureID)checkersID, ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
+
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSETS"))
+				{
+					IM_ASSERT(payload->DataSize == sizeof(int));
+					int payload_n = *(const int*)payload->Data;
+					WindowAssets* assets_window = (WindowAssets*)App->editor->windows[ASSETS_WINDOW];
+					const char* file = assets_window->GetFileAt(payload_n);
+					Resource* possible_texture = App->resources->RequestResource(App->resources->Find(file));
+
+					if (possible_texture->GetType() == ResourceType::RESOURCE_TEXTURE)
+						SetTexture(dynamic_cast<ResourceTexture*>(possible_texture));
+				}
+				ImGui::EndDragDropTarget();
+			}
 		}
 	}
 }
@@ -178,6 +200,7 @@ void Material::OnEditor()
 void Material::SetTexture(ResourceTexture* texture)
 {
 	_diffuseTexture = texture;
+	checkers_image = false;
 }
 
 void Material::AssignCheckersImage()
@@ -207,5 +230,4 @@ void Material::AssignCheckersImage()
 ResourceTexture* Material::GetDiffuseTexture()
 {
 	return _diffuseTexture;
-	return nullptr;
 }

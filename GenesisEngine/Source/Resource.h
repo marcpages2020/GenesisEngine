@@ -32,7 +32,7 @@ public:
 	std::string assetsFile;
 	std::string libraryFile;
 
-	uint referenceCount = 0;
+	int referenceCount = 0;
 
 protected:
 	uint _uid = 0;

@@ -158,37 +158,38 @@ void WindowAssets::DrawCurrentFolder()
 			ImGui::EndPopup();
 		}
 
-		ImGui::SameLine();
-		if (ImGui::Button("->"))
-			ImGui::OpenPopup("Meshes");
-		if (ImGui::BeginPopup("Meshes"))
+		if (files[i].find(".fbx") != std::string::npos)
 		{
-			std::string model = current_folder + "/" + files[i];
-			const char* library_path = App->resources->Find(App->resources->GetUIDFromMeta(model.append(".meta").c_str()));
-
-			std::vector<uint> meshes;
-			std::vector<uint> materials;
-			ModelImporter::ExtractInternalResources(library_path, meshes, materials);
-
-			for (size_t m = 0; m < meshes.size(); m++)
+			ImGui::SameLine();
+			if (ImGui::Button("->"))
+				ImGui::OpenPopup("Meshes");
+			if (ImGui::BeginPopup("Meshes", ImGuiWindowFlags_NoMove))
 			{
-				ImGui::PushID(meshes[m]);
-				ImGui::Text("%d", meshes[m]);
-				if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+				std::string model = current_folder + "/" + files[i];
+				const char* library_path = App->resources->Find(App->resources->GetUIDFromMeta(model.append(".meta").c_str()));
+
+				std::vector<uint> meshes;
+				std::vector<uint> materials;
+				ModelImporter::ExtractInternalResources(library_path, meshes, materials);
+
+				for (size_t m = 0; m < meshes.size(); m++)
 				{
-					ImGui::SetDragDropPayload("MESHES", &(meshes[m]), sizeof(int));
-					ImGui::EndDragDropSource();
+					ImGui::PushID(meshes[m]);
+					ImGui::Text("%d", meshes[m]);
+					if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+					{
+						ImGui::SetDragDropPayload("MESHES", &(meshes[m]), sizeof(int));
+						ImGui::EndDragDropSource();
+					}
+					ImGui::PopID();
 				}
-				ImGui::PopID();
+				ImGui::EndPopup();
 			}
-			ImGui::EndPopup();
 		}
 
 		ImGui::PopID();
 		ImGui::SameLine();
 	}
-
-	return;
 }
 
 const char* WindowAssets::GetFileAt(int i)

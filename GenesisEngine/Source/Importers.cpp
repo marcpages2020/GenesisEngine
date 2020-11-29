@@ -498,7 +498,7 @@ void TextureImporter::Import(char* fileBuffer, ResourceTexture* texture, uint si
 	if (error != IL_NO_ERROR)
 	{
 		LOG_ERROR("%s, %d %s", texture->assetsFile.c_str(), ilGetError(), iluErrorString(error));
-		return;
+		//return;
 	}
 
 	ILenum file_format = GetFileFormat(texture->assetsFile.c_str());

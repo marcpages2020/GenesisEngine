@@ -115,7 +115,7 @@ void GnMesh::Render()
 	glPushMatrix();
 	glMultMatrixf((float*)&_gameObject->GetTransform()->GetGlobalTransform().Transposed());
 
-	Material* material = (Material*)_gameObject->GetComponent(ComponentType::MATERIAL);
+	Material* material = dynamic_cast<Material*>(_gameObject->GetComponent(ComponentType::MATERIAL));
 
 	if (material != nullptr)
 		material->BindTexture();
@@ -148,15 +148,20 @@ void GnMesh::OnEditor()
 	if (ImGui::CollapsingHeader("Mesh", ImGuiTreeNodeFlags_DefaultOpen))
 	{
 		ImGui::Checkbox(" Enabled", &enabled);
-
 		ImGui::Text("Vertices: %d Indices: %d", _resource->vertices_amount, _resource->indices_amount);
+
 		ImGui::Spacing();
 
 		ImGui::Checkbox("Vertex Normals", &draw_vertex_normals);
 		ImGui::SameLine();
 		ImGui::Checkbox("Face Normals", &draw_face_normals);
 
-		ImGui::Image((ImTextureID)0, ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::Spacing();
+
+		std::string meshID = "Mesh: ";
+		meshID.append(std::to_string(_resourceUID));
+		ImGui::Button(meshID.c_str());
+		//ImGui::Image((ImTextureID)0, ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
 		if (ImGui::BeginDragDropTarget())
 		{
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("MESHES"))
@@ -167,6 +172,8 @@ void GnMesh::OnEditor()
 			}
 			ImGui::EndDragDropTarget();
 		}
+
+		ImGui::Spacing();
 	}
 }
 
