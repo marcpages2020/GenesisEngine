@@ -32,6 +32,15 @@
 
 #pragma region ModelImporter
 
+void ModelImporter::Init()
+{
+	globalScale = 1.0f;
+	forwardAxis = Axis::Z;
+	upAxis = Axis::Y;
+	ignoreCameras = true;
+	ignoreLights = true;
+}
+
 void ModelImporter::Import(char* fileBuffer, ResourceModel* model, uint size)
 {
 	Timer timer;
@@ -193,6 +202,44 @@ void ModelImporter::Load(const char* path, ResourceModel* model)
 
 	model_data.Release();
 	RELEASE_ARRAY(buffer);
+}
+
+bool ModelImporter::DrawImportingWindow(const char* file_to_import)
+{
+	bool ret = true;
+
+	ImGui::Text("Import Model: %s", file_to_import);
+
+	ImGui::Spacing();
+	ImGui::Separator();
+	ImGui::Spacing();
+
+	ImGui::DragFloat("Global Scale", &globalScale, 0.01f, 0.0f, 100.0f);
+
+	const char* possible_axis[] = { "X", "Y", "Z", "-X", "-Y", "-Z" };
+	int forward_axis = (int)forwardAxis;
+	if (ImGui::Combo("Forward Axis", &forward_axis, possible_axis, 6)) 
+		forwardAxis = (Axis)forward_axis;
+
+	int up_axis = (int)upAxis;
+	if (ImGui::Combo("Up Axis", &up_axis, possible_axis, 6))
+		upAxis = (Axis)up_axis;
+
+	ImGui::Checkbox("Ignore Cameras", &ignoreCameras);
+	
+	ImGui::Spacing();
+
+	ImGui::Checkbox("Ignore Lights", &ignoreLights);
+
+	if (ImGui::Button("OK", ImVec2(40, 20))) {
+		App->resources->ImportFile(file_to_import);
+		ret = false;
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("CANCEL", ImVec2(80, 20))) {
+		ret = false;
+	}
+	return ret;
 }
 
 GameObject* ModelImporter::ConvertToGameObject(ResourceModel* model)
@@ -473,6 +520,12 @@ void MeshImporter::Load(const char* fileBuffer, ResourceMesh* mesh)
 
 void TextureImporter::Init()
 {
+	textureWrap = TextureWrap::REPEAT;
+	textureFiltering = TextureFiltering::NEAREST;
+
+	flip_x = false;
+	flip_y = false;
+
 	ilInit();
 	iluInit();
 
@@ -607,6 +660,45 @@ void TextureImporter::Load(const char* path, ResourceTexture* texture)
 	}
 
 	ilBindImage(0);
+}
+
+bool TextureImporter::DrawImportingWindow(const char* file_to_import)
+{
+	bool ret = true;
+
+	ImGui::Text("Import Texture: %s", file_to_import);
+
+	ImGui::Spacing();
+	ImGui::Separator();
+	ImGui::Spacing();
+
+	const char* texture_wrap_options[] = { "Clamp To Border", "Clamp", "Repeat", "Mirrored Repeat" };
+	int texture_wrap = (int)textureWrap;
+	if (ImGui::Combo("Texture Wrap", &texture_wrap, texture_wrap_options, 4))
+		textureWrap = (TextureWrap)texture_wrap;
+
+	const char* texture_filtering_options[] = { "Nearest", "Linear" };
+	int texture_filtering = (int)textureFiltering;
+	if (ImGui::Combo("Texture Filtering", &texture_filtering, texture_filtering_options, 2))
+		textureFiltering = (TextureFiltering)texture_filtering;
+
+	ImGui::Spacing();
+	ImGui::Separator();
+	ImGui::Spacing();
+
+	ImGui::Checkbox("Flip X", &flip_x);
+
+	ImGui::Checkbox("Flip Y", &flip_y);
+
+	if (ImGui::Button("OK", ImVec2(40, 20))) {
+		App->resources->ImportFile(file_to_import);
+		ret = false;
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("CANCEL", ImVec2(80, 20))) {
+		ret = false;
+	}
+	return ret;
 }
 
 std::string TextureImporter::FindTexture(const char* texture_name, const char* model_directory)

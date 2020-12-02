@@ -22,6 +22,7 @@ public:
 	~ModuleResources();
 
 	bool Init() override;
+	update_status PostUpdate(float dt) override;
 	void OnEditor();
 	void LoadEngineAssets();
 	void OnFrameEnd() override;
@@ -37,6 +38,8 @@ public:
 	uint ImportFile(const char* assets_file);
 	uint ImportInternalResource(const char* path, const void* data, ResourceType type);
 	void CreateResourceData(uint UID, const char* assets_path = "No path", const char* library_path = "No path");
+	void DragDropFile(const char* path);
+	void DrawImportingWindow();
 
 	void AddResourceToDelete(uint UID);
 	bool DeleteAssetsResource(const char* assets_path);
@@ -70,4 +73,8 @@ private:
 	std::map<uint, Resource*> resources;
 	std::map<uint, ResourceData> resources_data;
 	int _toDeleteResource;
+	bool _choosingImportingOptions;
+
+	char* currentImportingFile;
+	ResourceType currentImportingFileType;
 };

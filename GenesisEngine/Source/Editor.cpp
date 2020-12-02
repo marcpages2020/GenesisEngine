@@ -424,17 +424,12 @@ bool Editor::CreateMainMenuBar() {
 
 void Editor::ShowGameButtons()
 {
-	//ImGuiWindowFlags_NoTitleBar;
-	//ImGuiWindowFlags_NoDecoration
 	ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove;
 
-	float x_position = App->window->width * 0.5f;
-	float y_position = App->window->height * 0.1f;
-
-	//ImGui::SetNextWindowPos(ImVec2(x_position - 20, y_position));
+	ImGui::SetNextWindowSize(ImVec2(130, 40));
 	if (ImGui::Begin("Game Buttons", &show_game_buttons, flags))
 	{
-		ImGui::Columns(3);
+		ImGui::Columns(2);
 
 		if (App->in_game == false)
 		{
@@ -546,7 +541,7 @@ void Editor::OnResize(ImVec2 window_size)
 {
 	image_size = window_size;
 
-	App->renderer3D->OnResize(image_size.x, image_size.y);
 	App->camera->OnResize(image_size.x, image_size.y);
+	App->renderer3D->OnResize(image_size.x, image_size.y);
 }
 

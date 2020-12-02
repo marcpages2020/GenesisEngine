@@ -29,13 +29,31 @@ typedef unsigned int ILenum;
 
 #pragma endregion
 
+enum Axis
+{
+	X,
+	Y,
+	Z,
+	MINUS_X,
+	MINUS_Y,
+	MINUS_Z
+};
+
 namespace ModelImporter
 {
+	static float globalScale;
+	static Axis forwardAxis;
+	static Axis upAxis;
+	static bool ignoreCameras;
+	static bool ignoreLights;
+
+	void Init();
 	void Import(char* fileBuffer, ResourceModel* resource, uint size);
 	void ImportChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, uint parentNodeUID, ResourceModel* model);
 	uint64 Save(ResourceModel* model, char** fileBuffer);
 	void LoadTransform(aiNode* node, ModelNode& modelNode);
 	void Load(const char* path, ResourceModel* model);
+	bool DrawImportingWindow(const char* file_to_import);
 
 	GameObject* ConvertToGameObject(ResourceModel* model);
 	void ExtractInternalResources(const char* library_path, std::vector<uint>& meshes, std::vector<uint>& materials);
@@ -51,13 +69,33 @@ namespace MeshImporter
 	void Load(const char* fileBuffer, ResourceMesh* mesh);
 }
 
+enum class TextureWrap
+{
+	CLAMP_TO_BORDER,
+	CLAMP,
+	REPEAT,
+	MIRRORED_REPEAT
+};
+
+enum class TextureFiltering
+{
+	NEAREST,
+	LINEAR
+};
+
 namespace TextureImporter
 {
+	static TextureWrap textureWrap;
+	static TextureFiltering textureFiltering;
+	static bool flip_x;
+	static bool flip_y;
+
 	void Init();
 
 	void Import(char* fileBuffer, ResourceTexture* resource, uint size);
 	uint Save(ResourceTexture* texture, char** fileBuffer);
 	void Load(const char* path, ResourceTexture* texture);
+	bool DrawImportingWindow(const char* file_to_import);
 
 	std::string FindTexture(const char* texture_name, const char* model_directory);
 	void UnloadTexture(uint imageID);

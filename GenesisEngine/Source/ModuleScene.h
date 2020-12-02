@@ -28,7 +28,6 @@ public:
 	std::vector<GameObject*> GetAllGameObjects();
 	void PreorderGameObjects(GameObject* gameObject, std::vector<GameObject*>& gameObjects);
 	void EditTransform();
-	void SetDroppedTexture(GnTexture* texture);
 
 	bool ClearScene();
 

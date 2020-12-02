@@ -162,30 +162,8 @@ void ModuleScene::EditTransform()
 	{
 		float4x4 newTransform;
 		newTransform.Set(tempTransform);
-		newTransform.Transpose();
-		selectedGameObject->GetTransform()->SetGlobalTransform(newTransform);
-	}
-}
-
-void ModuleScene::SetDroppedTexture(GnTexture* texture)
-{
-	if (selectedGameObject != nullptr) 
-	{
-		if (selectedGameObject->GetComponent(ComponentType::MESH) == nullptr && texture != nullptr) 
-		{
-			delete texture;
-			texture = nullptr;
-			return;
-		}
-
-		Material* material = dynamic_cast<Material*>(selectedGameObject->GetComponent(ComponentType::MATERIAL));
-
-		if (material == nullptr)
-		{
-			material = dynamic_cast<Material*>(selectedGameObject->AddComponent(ComponentType::MATERIAL));
-		}
-
-		//material->SetTexture(texture);
+		objectTransform = newTransform.Transposed();
+		selectedGameObject->GetTransform()->SetGlobalTransform(objectTransform);
 	}
 }
 

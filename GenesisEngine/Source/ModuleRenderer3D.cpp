@@ -142,11 +142,6 @@ bool ModuleRenderer3D::Init()
 	LOG("OpenGL version supported %s", glGetString(GL_VERSION));
 	LOG("GLSL: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
-	// Projection matrix for
-	int width, height;
-	App->window->GetSize(width, height);
-	OnResize(width, height);
-
 	GenerateBuffers();
 
 	return ret;

@@ -49,8 +49,6 @@ namespace FileSystem
 
 	std::string GetFileFormat(const char* path);
 	std::string GetFile(const char* path);
-
-	void DragDropFile(const char* path);
 }
 
 

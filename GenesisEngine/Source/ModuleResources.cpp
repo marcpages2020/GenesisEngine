@@ -17,7 +17,7 @@
 
 #include "MathGeoLib/include/MathGeoLib.h"
 
-ModuleResources::ModuleResources(bool start_enabled) : Module(start_enabled), _toDeleteResource(-1)
+ModuleResources::ModuleResources(bool start_enabled) : Module(start_enabled), _toDeleteResource(-1), _choosingImportingOptions(false)
 {
 	name = "resources";
 }
@@ -28,6 +28,7 @@ bool ModuleResources::Init()
 {
 	bool ret = true;
 
+	ModelImporter::Init();
 	MeshImporter::Init();
 	TextureImporter::Init();
 
@@ -35,6 +36,14 @@ bool ModuleResources::Init()
 	//LoadEngineAssets();
 
 	return ret;
+}
+
+update_status ModuleResources::PostUpdate(float dt)
+{
+	if (_choosingImportingOptions)
+		DrawImportingWindow();
+
+	return UPDATE_CONTINUE;
 }
 
 void ModuleResources::OnEditor()
@@ -329,6 +338,43 @@ void ModuleResources::CreateResourceData(uint UID, const char* assets_path, cons
 {
 	resources_data[UID].assetsFile = assets_path;
 	resources_data[UID].libraryFile = library_path;
+}
+
+void ModuleResources::DragDropFile(const char* path)
+{
+	_choosingImportingOptions = true;
+	currentImportingFile = (char*)path;
+	currentImportingFileType = GetTypeFromPath(path);
+	
+	/*
+	if (FileSystem::Exists(path))
+	{
+		//ImportFile(path);
+	}
+	else
+	{
+		//const char* new_path = GenerateAssetsPath(path);
+		//FileSystem::DuplicateFile(path, new_path);
+		//ImportFile(new_path);
+	}
+	*/
+}
+
+void ModuleResources::DrawImportingWindow()
+{
+	ImGuiWindowFlags_ flags = ImGuiWindowFlags_None;
+	if (ImGui::Begin("Import File", NULL, flags)) 
+	{
+		if (currentImportingFileType == ResourceType::RESOURCE_MODEL) 
+		{
+			_choosingImportingOptions = ModelImporter::DrawImportingWindow(currentImportingFile);
+		}
+		else if (currentImportingFileType == ResourceType::RESOURCE_TEXTURE)
+		{
+			_choosingImportingOptions = TextureImporter::DrawImportingWindow(currentImportingFile);
+		}
+	}
+	ImGui::End();
 }
 
 void ModuleResources::AddResourceToDelete(uint UID)

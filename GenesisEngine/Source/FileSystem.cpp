@@ -464,17 +464,5 @@ std::string FileSystem::GetFile(const char* path)
 	return file;
 }
 
-void FileSystem::DragDropFile(const char* path)
-{
-	if (Exists(path))
-		App->resources->ImportFile(path);
-	else
-	{
-		const char* new_path = App->resources->GenerateAssetsPath(path);
-		DuplicateFile(path, new_path);
-		App->resources->ImportFile(new_path);
-	}
-}
-
 #pragma endregion 
 
