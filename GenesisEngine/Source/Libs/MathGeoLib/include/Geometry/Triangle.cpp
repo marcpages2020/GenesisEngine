@@ -1642,7 +1642,7 @@ Triangle operator *(const Quat &transform, const Triangle &triangle)
 std::string Triangle::ToString() const
 {
 	char str[256];
-	sprintf_s(str, 256, "Triangle(a:(%.2f, %.2f, %.2f) b:(%.2f, %.2f, %.2f) c:(%.2f, %.2f, %.2f))",
+	sprintf(str, "Triangle(a:(%.2f, %.2f, %.2f) b:(%.2f, %.2f, %.2f) c:(%.2f, %.2f, %.2f))",
 		a.x, a.y, a.z, b.x, b.y, b.z, c.x, c.y, c.z);
 	return str;
 }

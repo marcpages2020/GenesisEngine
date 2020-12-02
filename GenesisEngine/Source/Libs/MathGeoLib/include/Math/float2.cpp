@@ -237,7 +237,7 @@ bool IsNeutralCLocale()
 std::string float2::ToString() const
 {
 	char str[256];
-	sprintf_s(str, 256, "(%f, %f)", x, y);
+	sprintf(str, "(%f, %f)", x, y);
 	return std::string(str);
 }
 
@@ -245,7 +245,7 @@ std::string float2::SerializeToString() const
 {
 	assert(IsNeutralCLocale());
 	char str[256];
-	sprintf_s(str, 256, "%f %f", x, y);
+	sprintf(str, "%f %f", x, y);
 	return std::string(str);
 }
 #endif

@@ -392,7 +392,7 @@ bool IsNeutralCLocale();
 std::string float4::ToString() const
 {
 	char str[256];
-	sprintf_s(str, 256,"(%.3f, %.3f, %.3f, %.3f)", x, y, z, w);
+	sprintf(str, "(%.3f, %.3f, %.3f, %.3f)", x, y, z, w);
 	return std::string(str);
 }
 
@@ -400,7 +400,7 @@ std::string float4::SerializeToString() const
 {
 	assert(IsNeutralCLocale());
 	char str[256];
-	sprintf_s(str, 256,"%f %f %f %f", x, y, z, w);
+	sprintf(str, "%f %f %f %f", x, y, z, w);
 	return std::string(str);
 }
 #endif

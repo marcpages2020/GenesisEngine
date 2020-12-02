@@ -1254,7 +1254,7 @@ Sphere Sphere::FitThroughPoints(const float3 &a, const float3 &b, const float3 &
 std::string Sphere::ToString() const
 {
 	char str[256];
-	sprintf_s(str, 256, "Sphere(pos:(%.2f, %.2f, %.2f) r:%.2f)",
+	sprintf(str, "Sphere(pos:(%.2f, %.2f, %.2f) r:%.2f)",
 		pos.x, pos.y, pos.z, r);
 	return str;
 }

@@ -416,7 +416,7 @@ bool Capsule::Intersects(const Polyhedron &polyhedron) const
 std::string Capsule::ToString() const
 {
 	char str[256];
-	sprintf_s(str, 256, "Capsule(a:(%.2f, %.2f, %.2f) b:(%.2f, %.2f, %.2f), r:%.2f)", l.a.x, l.a.y, l.a.z, l.b.x, l.b.y, l.b.z, r);
+	sprintf(str, "Capsule(a:(%.2f, %.2f, %.2f) b:(%.2f, %.2f, %.2f), r:%.2f)", l.a.x, l.a.y, l.a.z, l.b.x, l.b.y, l.b.z, r);
 	return str;
 }
 

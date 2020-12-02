@@ -594,10 +594,7 @@ float3x4 OBB::LocalToWorld() const
 	m.SetCol(1, axis[1]);
 	m.SetCol(2, axis[2]);
 	m.SetCol(3, pos - axis[0] * r.x - axis[1] * r.y - axis[2] * r.z);
-	// Ric WTF
-	//assume(m.IsOrthonormal());
-	if(!m.IsOrthonormal())
-		m.Orthonormalize(0,1,2);
+	assume(m.IsOrthonormal());
 	return m;
 }
 
@@ -800,7 +797,7 @@ void OBB::Enclose(const float3 &point)
 		}
 	}
 	// Should now contain the point.
-	//assume(Distance(point) <= 1e-3f);
+	assume(Distance(point) <= 1e-3f);
 }
 
 void OBB::Triangulate(int x, int y, int z, float3 *outPos, float3 *outNormal, float2 *outUV, bool ccwIsFrontFacing) const
@@ -810,8 +807,7 @@ void OBB::Triangulate(int x, int y, int z, float3 *outPos, float3 *outNormal, fl
 	float3x4 localToWorld = LocalToWorld();
 	assume(localToWorld.HasUnitaryScale()); // Transforming of normals will fail otherwise.
 	localToWorld.BatchTransformPos(outPos, NumVerticesInTriangulation(x,y,z), sizeof(float3));
-	if(outNormal != nullptr)
-		localToWorld.BatchTransformDir(outNormal, NumVerticesInTriangulation(x,y,z), sizeof(float3));
+	localToWorld.BatchTransformDir(outNormal, NumVerticesInTriangulation(x,y,z), sizeof(float3));
 }
 
 void OBB::ToEdgeList(float3 *outPos) const
@@ -1025,7 +1021,7 @@ bool OBB::Intersects(const Polyhedron &polyhedron) const
 std::string OBB::ToString() const
 {
 	char str[256];
-	sprintf_s(str, 256, "OBB(Pos:(%.2f, %.2f, %.2f) Size:(%.2f, %.2f, %.2f) X:(%.2f, %.2f, %.2f) Y:(%.2f, %.2f, %.2f) Z:(%.2f, %.2f, %.2f))",
+	sprintf(str, "OBB(Pos:(%.2f, %.2f, %.2f) Size:(%.2f, %.2f, %.2f) X:(%.2f, %.2f, %.2f) Y:(%.2f, %.2f, %.2f) Z:(%.2f, %.2f, %.2f))",
 		pos.x, pos.y, pos.z, r.x*2.f, r.y*2.f, r.z*2.f, axis[0].x, axis[0].y, axis[0].z, axis[1].x, axis[1].y, axis[1].z, axis[2].x, axis[2].y, axis[2].z);
 	return str;
 }

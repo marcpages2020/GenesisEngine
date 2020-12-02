@@ -217,7 +217,7 @@ bool IsNeutralCLocale();
 std::string float3::ToString() const
 {
 	char str[256];
-	sprintf_s(str, 256,"(%.3f, %.3f, %.3f)", x, y, z);
+	sprintf(str, "(%.3f, %.3f, %.3f)", x, y, z);
 	return std::string(str);
 }
 
@@ -225,7 +225,7 @@ std::string float3::SerializeToString() const
 {
 	assert(IsNeutralCLocale());
 	char str[256];
-	sprintf_s(str, 256,"%f %f %f", x, y, z);
+	sprintf(str, "%f %f %f", x, y, z);
 	return std::string(str);
 }
 #endif
@@ -616,13 +616,6 @@ void float3::Set(float x_, float y_, float z_)
 	x = x_;
 	y = y_;
 	z = z_;
-}
-
-void float3::Set(float * v)
-{
-	x = *(v + 0);
-	y = *(v + 1);
-	z = *(v + 2);
 }
 
 void float3::SetFromSphericalCoordinates(float azimuth, float inclination, float radius)

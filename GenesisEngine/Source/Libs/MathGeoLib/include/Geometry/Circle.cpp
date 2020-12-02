@@ -25,7 +25,6 @@
 #include "OBB.h"
 #include "LineSegment.h"
 #include "Line.h"
-#include "../Algorithm/Random/LCG.h"
 
 #ifdef MATH_ENABLE_STL_SUPPORT
 #include <iostream>
@@ -72,12 +71,6 @@ float3 Circle::ExtremePoint(const float3 &direction) const
 Plane Circle::ContainingPlane() const
 {
 	return Plane(pos, normal);
-}
-
-float3 Circle::RandomPointInside(LCG & rng) const
-{
-	assume(r > 1e-3f);
-	return GetPoint(rng.Float(-pi, pi));
 }
 
 void Circle::Translate(const float3 &offset)
@@ -254,7 +247,7 @@ std::vector<float3> Circle::IntersectsFaces(const OBB &obb) const
 std::string Circle::ToString() const
 {
 	char str[256];
-	sprintf_s(str, 256, "Circle(pos:(%.2f, %.2f, %.2f) normal:(%.2f, %.2f, %.2f), r:%.2f)",
+	sprintf(str, "Circle(pos:(%.2f, %.2f, %.2f) normal:(%.2f, %.2f, %.2f), r:%.2f)",
 		pos.x, pos.y, pos.z, normal.x, normal.y, normal.z, r);
 	return str;
 }

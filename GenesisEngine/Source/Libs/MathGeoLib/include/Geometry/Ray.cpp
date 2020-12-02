@@ -438,7 +438,7 @@ void Ray::ProjectToAxis(const float3 &direction, float &outMin, float &outMax) c
 std::string Ray::ToString() const
 {
 	char str[256];
-	sprintf_s(str, 256, "Ray(Pos:(%.2f, %.2f, %.2f) Dir:(%.2f, %.2f, %.2f))", pos.x, pos.y, pos.z, dir.x, dir.y, dir.z);
+	sprintf(str, "Ray(Pos:(%.2f, %.2f, %.2f) Dir:(%.2f, %.2f, %.2f))", pos.x, pos.y, pos.z, dir.x, dir.y, dir.z);
 	return str;
 }
 

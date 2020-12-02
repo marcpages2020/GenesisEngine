@@ -32,13 +32,13 @@
 #endif
 
 #ifdef MATH_BULLET_INTEROP
-#include "../../../Bullet/include/LinearMath/btMatrix3x3.h"
+#include "LinearMath/btMatrix3x3.h"
 #endif
 
 MATH_BEGIN_NAMESPACE
 
 /// A 3-by-3 matrix for linear transformations of 3D geometry.
-/* This matrix can represent any kind of linear transformations of 3D geometry, which include rotation,
+/** This matrix can represent any kind of linear transformations of 3D geometry, which include rotation,
 	scale, shear, mirroring and orthographic projection. A 3x3 matrix cannot represent translation (which requires
 	a 3x4 matrix), or perspective projection (which requires a 4x4 matrix).
 
@@ -673,7 +673,7 @@ public:
 
 #ifdef MATH_BULLET_INTEROP
 	float3x3(const btMatrix3x3 &m) { Set(m[0][0], m[0][1], m[0][2], m[1][0], m[1][1], m[1][2], m[2][0], m[2][1], m[2][2]); }
-	operator btMatrix3x3() const { return btMatrix3x3(v[0][0], v[0][1], v[0][2], v[1][0], v[1][1], v[1][2], v[2][0], v[2][1], v[2][2]); }
+	operator btMatrix3x3() { return btMatrix3x3(v[0][0], v[0][1], v[0][2], v[1][0], v[1][1], v[1][2], v[2][0], v[2][1], v[2][2]); }
 #endif
 
 #ifdef MATH_QT_INTEROP

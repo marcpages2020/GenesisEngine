@@ -17,7 +17,7 @@
 	@brief A 3D (x,y,z) ordered tuple. */
 #pragma once
 
-#include "MathGeoLib/include/MathBuildConfig.h"
+#include "../MathBuildConfig.h"
 
 #ifdef MATH_ENABLE_STL_SUPPORT
 #include <string>
@@ -38,7 +38,7 @@
 #endif
 
 #ifdef MATH_BULLET_INTEROP
-#include "../../../Bullet/include/LinearMath/btVector3.h"
+#include "LinearMath/btVector3.h"
 #endif
 
 MATH_BEGIN_NAMESPACE
@@ -282,7 +282,6 @@ public:
 	/// Sets all elements of this vector.
 	/** @see x, y, z, At(). */
 	void Set(float x, float y, float z);
-	void Set(float* v);
 
 	/// Converts the given vector represented in spherical coordinates to an euclidean float3 (x,y,z) triplet.
 	/** @param azimuth The direction, or yaw, of the vector. This function uses the convention that the X-Z plane is

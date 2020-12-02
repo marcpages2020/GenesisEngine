@@ -112,7 +112,7 @@ void Clock::Sleep(int milliseconds)
 	//if (ret == -1)
 	//	LOGI("nanosleep returned -1! Reason: %s(%d).", strerror(errno), (int)errno);
 #else
-#warning Clock::Sleep has not been implemented!
+	#warning Clock::Sleep has not been implemented!
 #endif
 }
 

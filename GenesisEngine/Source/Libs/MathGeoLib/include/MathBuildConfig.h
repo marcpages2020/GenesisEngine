@@ -17,25 +17,6 @@
 	@brief Specifies all build flags for the library. */
 #pragma once
 
-#if !defined(WIN32)
-#define WIN32
-#endif
-
-// Ric
-// Warning disabled ---
-#pragma warning( disable : 4577 ) // Warning that exceptions are disabled
-#pragma warning( disable : 4530 ) // Warning that exceptions are disabled
-#define MATH_SILENT_ASSUME
-//#define MATH_BULLET_INTEROP
-// ---
-
-// Disable STL exceptions
-#if !defined(_HAS_EXCEPTIONS) 
-#define _HAS_EXCEPTIONS 0
-#endif
-
-#define _STATIC_CPPLIB
-
 // If MATH_ENABLE_NAMESPACE is defined, all math symbols are put inside a namespace.
 #define MATH_ENABLE_NAMESPACE
 
@@ -82,7 +63,7 @@
 #ifdef _DEBUG
 // If MATH_ASSERT_CORRECTNESS is defined, special (and possibly rather costly) mathassert()
 // tests are enabled, which test the internal correctness of the library.
-//#define MATH_ASSERT_CORRECTNESS
+#define MATH_ASSERT_CORRECTNESS
 #endif
 
 // If FAIL_USING_EXCEPTIONS is defined, all mathassert(), assert() and assume() macros turn into
@@ -95,7 +76,7 @@
 // If MATH_ENABLE_STL_SUPPORT is defined, MathGeoLib utilizes STL data structures. Otherwise,
 // features requiring STL are disabled (but the library can still be built).
 #ifndef MATH_ENABLE_STL_SUPPORT
-	#define MATH_ENABLE_STL_SUPPORT
+#define MATH_ENABLE_STL_SUPPORT
 #endif
 
 // If MATH_TINYXML_INTEROP is defined, MathGeoLib integrates with TinyXML to provide
