@@ -1,6 +1,7 @@
 #include "ResourceModel.h"
 #include "Application.h"
 #include "GnJSON.h"
+#include "Importers.h"
 
 ResourceModel::ResourceModel(uint UID) : Resource(UID, ResourceType::RESOURCE_MODEL) {}
 
@@ -16,6 +17,12 @@ uint ResourceModel::SaveMeta(GnJSONObj& base_object, uint last_modification)
 	base_object.AddInt("UID", _uid);
 	base_object.AddString("Library path", App->resources->GetLibraryPath(_uid));
 	base_object.AddInt("lastModified", last_modification);
+
+	base_object.AddFloat("global scale", (float)ModelImporter::globalScale);
+	base_object.AddInt("forward axis", (int)ModelImporter::forwardAxis);
+	base_object.AddInt("up axis", (int)ModelImporter::upAxis);
+	base_object.AddBool("ignore cameras", ModelImporter::ignoreCameras);
+	base_object.AddBool("ignore lights", ModelImporter::ignoreLights);
 
 	GnJSONArray nodes_array = base_object.AddArray("Nodes");
 

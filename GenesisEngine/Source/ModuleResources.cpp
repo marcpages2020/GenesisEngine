@@ -287,9 +287,11 @@ uint ModuleResources::ImportFile(const char* assets_file)
 	switch (type)
 	{
 	case RESOURCE_MODEL: 
-		ModelImporter::Import(fileBuffer, (ResourceModel*)resource, size); break;
+		ModelImporter::Import(fileBuffer, (ResourceModel*)resource, size); 
+		break;
 	case RESOURCE_TEXTURE:
-		TextureImporter::Import(fileBuffer, (ResourceTexture*)resource, size); break;
+		TextureImporter::Import(fileBuffer, (ResourceTexture*)resource, size);
+		break;
 	case RESOURCE_SCENE: 
 		break;
 	default: 
@@ -343,21 +345,19 @@ void ModuleResources::CreateResourceData(uint UID, const char* assets_path, cons
 void ModuleResources::DragDropFile(const char* path)
 {
 	_choosingImportingOptions = true;
-	currentImportingFile = (char*)path;
-	currentImportingFileType = GetTypeFromPath(path);
 	
-	/*
 	if (FileSystem::Exists(path))
 	{
-		//ImportFile(path);
+		currentImportingFile = (char*)path;
+		currentImportingFileType = GetTypeFromPath(path);
 	}
 	else
 	{
-		//const char* new_path = GenerateAssetsPath(path);
-		//FileSystem::DuplicateFile(path, new_path);
-		//ImportFile(new_path);
+		const char* new_path = GenerateAssetsPath(path);
+		FileSystem::DuplicateFile(path, new_path);
+		currentImportingFile = (char*)new_path;
+		currentImportingFileType = GetTypeFromPath(new_path);
 	}
-	*/
 }
 
 void ModuleResources::DrawImportingWindow()
@@ -546,7 +546,7 @@ Resource* ModuleResources::CreateResource(const char* assetsPath, ResourceType t
 	if (resource != nullptr)
 	{
 		resources[UID] = resource;
-		resource->assetsFile = assetsPath;
+		resource->assetsFile = FileSystem::ToLower(assetsPath);
 		resource->libraryFile = GenerateLibraryPath(resource);
 
 		resources_data[UID].assetsFile = resource->assetsFile;

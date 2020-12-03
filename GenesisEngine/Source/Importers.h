@@ -39,16 +39,57 @@ enum Axis
 	MINUS_Z
 };
 
+struct ModelImportingOptions
+{
+	float globalScale;
+	Axis forwardAxis;
+	Axis upAxis;
+	bool normalizeScales;
+	bool ignoreCameras;
+	bool ignoreLights;
+};
+
+enum class TextureWrap
+{
+	CLAMP_TO_BORDER,
+	CLAMP,
+	REPEAT,
+	MIRRORED_REPEAT
+};
+
+enum class TextureFiltering
+{
+	NEAREST,
+	LINEAR
+};
+
+struct TextureImportingOptions
+{
+	TextureWrap textureWrap;
+	TextureFiltering textureFiltering;
+	bool flip_x;
+	bool flip_y;
+};
+
+union ImportingOptions
+{
+	ModelImportingOptions model_options;
+	TextureImportingOptions texture_options;
+};
+
+
+
 namespace ModelImporter
 {
 	static float globalScale;
 	static Axis forwardAxis;
 	static Axis upAxis;
+	static bool normalizeScales;
 	static bool ignoreCameras;
 	static bool ignoreLights;
 
 	void Init();
-	void Import(char* fileBuffer, ResourceModel* resource, uint size);
+	ImportingOptions Import(char* fileBuffer, ResourceModel* resource, uint size);
 	void ImportChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, uint parentNodeUID, ResourceModel* model);
 	uint64 Save(ResourceModel* model, char** fileBuffer);
 	void LoadTransform(aiNode* node, ModelNode& modelNode);
@@ -68,20 +109,6 @@ namespace MeshImporter
 	uint64 Save(ResourceMesh* mesh, char** fileBuffer);
 	void Load(const char* fileBuffer, ResourceMesh* mesh);
 }
-
-enum class TextureWrap
-{
-	CLAMP_TO_BORDER,
-	CLAMP,
-	REPEAT,
-	MIRRORED_REPEAT
-};
-
-enum class TextureFiltering
-{
-	NEAREST,
-	LINEAR
-};
 
 namespace TextureImporter
 {

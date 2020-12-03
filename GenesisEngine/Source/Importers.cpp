@@ -29,7 +29,6 @@
 #pragma comment (lib, "Devil/libx86/ILU.lib")	
 #pragma comment (lib, "Devil/libx86/ILUT.lib")	
 
-
 #pragma region ModelImporter
 
 void ModelImporter::Init()
@@ -37,11 +36,12 @@ void ModelImporter::Init()
 	globalScale = 1.0f;
 	forwardAxis = Axis::Z;
 	upAxis = Axis::Y;
+	normalizeScales = true;
 	ignoreCameras = true;
 	ignoreLights = true;
 }
 
-void ModelImporter::Import(char* fileBuffer, ResourceModel* model, uint size)
+ImportingOptions ModelImporter::Import(char* fileBuffer, ResourceModel* model, uint size)
 {
 	Timer timer;
 	timer.Start();
@@ -72,6 +72,16 @@ void ModelImporter::Import(char* fileBuffer, ResourceModel* model, uint size)
 	}
 	else
 		LOG_ERROR("Error importing: %s", model->assetsFile.c_str());
+
+	ImportingOptions importingOptions;
+	importingOptions.model_options.forwardAxis = forwardAxis;
+	importingOptions.model_options.upAxis = upAxis;
+	importingOptions.model_options.globalScale = globalScale;
+	importingOptions.model_options.ignoreCameras = ignoreCameras;
+	importingOptions.model_options.ignoreLights = ignoreLights;
+	importingOptions.model_options.normalizeScales = normalizeScales;
+	
+	return importingOptions;
 }
 
 uint64 ModelImporter::Save(ResourceModel* model, char** fileBuffer)
@@ -154,9 +164,11 @@ void ModelImporter::LoadTransform(aiNode* node, ModelNode& modelNode)
 	node->mTransformation.Decompose(scaling, rotation, position);
 	//eulerRotation = rotation.GetEuler() * RADTODEG;
 
-	if (FileSystem::normalize_scales && scaling.x == 100 && scaling.y == 100 && scaling.z == 100) {
+	if (normalizeScales && scaling.x == 100 && scaling.y == 100 && scaling.z == 100) {
 		scaling.x = scaling.y = scaling.z = 1.0f;
 	}
+
+	scaling *= globalScale;
 
 	modelNode.position = float3(position.x, position.y, position.z);
 	modelNode.rotation = Quat(rotation.x, rotation.y, rotation.z, rotation.w);

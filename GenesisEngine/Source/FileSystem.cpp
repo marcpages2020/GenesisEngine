@@ -464,5 +464,14 @@ std::string FileSystem::GetFile(const char* path)
 	return file;
 }
 
+std::string FileSystem::ToLower(const char* path)
+{
+	std::string string = path;
+	std::transform(string.begin(), string.end(), string.begin(), [](unsigned char c) { return std::tolower(c); });
+	return string;
+}
+
+
+
 #pragma endregion 
 

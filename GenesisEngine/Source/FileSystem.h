@@ -49,6 +49,7 @@ namespace FileSystem
 
 	std::string GetFileFormat(const char* path);
 	std::string GetFile(const char* path);
+	std::string ToLower(const char* path);
 }
 
 
