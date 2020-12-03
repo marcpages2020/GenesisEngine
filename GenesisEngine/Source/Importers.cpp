@@ -33,15 +33,10 @@
 
 void ModelImporter::Init()
 {
-	globalScale = 1.0f;
-	forwardAxis = Axis::Z;
-	upAxis = Axis::Y;
-	normalizeScales = true;
-	ignoreCameras = true;
-	ignoreLights = true;
+
 }
 
-ImportingOptions ModelImporter::Import(char* fileBuffer, ResourceModel* model, uint size)
+void ModelImporter::Import(char* fileBuffer, ResourceModel* model, uint size)
 {
 	Timer timer;
 	timer.Start();
@@ -72,16 +67,6 @@ ImportingOptions ModelImporter::Import(char* fileBuffer, ResourceModel* model, u
 	}
 	else
 		LOG_ERROR("Error importing: %s", model->assetsFile.c_str());
-
-	ImportingOptions importingOptions;
-	importingOptions.model_options.forwardAxis = forwardAxis;
-	importingOptions.model_options.upAxis = upAxis;
-	importingOptions.model_options.globalScale = globalScale;
-	importingOptions.model_options.ignoreCameras = ignoreCameras;
-	importingOptions.model_options.ignoreLights = ignoreLights;
-	importingOptions.model_options.normalizeScales = normalizeScales;
-	
-	return importingOptions;
 }
 
 uint64 ModelImporter::Save(ResourceModel* model, char** fileBuffer)
@@ -164,11 +149,11 @@ void ModelImporter::LoadTransform(aiNode* node, ModelNode& modelNode)
 	node->mTransformation.Decompose(scaling, rotation, position);
 	//eulerRotation = rotation.GetEuler() * RADTODEG;
 
-	if (normalizeScales && scaling.x == 100 && scaling.y == 100 && scaling.z == 100) {
+	if (App->resources->modelImportingOptions.normalizeScales && scaling.x == 100 && scaling.y == 100 && scaling.z == 100) {
 		scaling.x = scaling.y = scaling.z = 1.0f;
 	}
 
-	scaling *= globalScale;
+	scaling *= App->resources->modelImportingOptions.globalScale;
 
 	modelNode.position = float3(position.x, position.y, position.z);
 	modelNode.rotation = Quat(rotation.x, rotation.y, rotation.z, rotation.w);
@@ -216,7 +201,7 @@ void ModelImporter::Load(const char* path, ResourceModel* model)
 	RELEASE_ARRAY(buffer);
 }
 
-bool ModelImporter::DrawImportingWindow(const char* file_to_import)
+bool ModelImporter::DrawImportingWindow(const char* file_to_import, ModelImportingOptions& importingOptions)
 {
 	bool ret = true;
 
@@ -226,22 +211,22 @@ bool ModelImporter::DrawImportingWindow(const char* file_to_import)
 	ImGui::Separator();
 	ImGui::Spacing();
 
-	ImGui::DragFloat("Global Scale", &globalScale, 0.01f, 0.0f, 100.0f);
+	ImGui::DragFloat("Global Scale", &importingOptions.globalScale, 0.01f, 0.0f, 100.0f);
 
 	const char* possible_axis[] = { "X", "Y", "Z", "-X", "-Y", "-Z" };
-	int forward_axis = (int)forwardAxis;
+	int forward_axis = (int)importingOptions.forwardAxis;
 	if (ImGui::Combo("Forward Axis", &forward_axis, possible_axis, 6)) 
-		forwardAxis = (Axis)forward_axis;
+		importingOptions.forwardAxis = (Axis)forward_axis;
 
-	int up_axis = (int)upAxis;
+	int up_axis = (int)importingOptions.upAxis;
 	if (ImGui::Combo("Up Axis", &up_axis, possible_axis, 6))
-		upAxis = (Axis)up_axis;
+		importingOptions.upAxis = (Axis)up_axis;
 
-	ImGui::Checkbox("Ignore Cameras", &ignoreCameras);
+	ImGui::Checkbox("Ignore Cameras", &importingOptions.ignoreCameras);
 	
 	ImGui::Spacing();
 
-	ImGui::Checkbox("Ignore Lights", &ignoreLights);
+	ImGui::Checkbox("Ignore Lights", &importingOptions.ignoreLights);
 
 	if (ImGui::Button("OK", ImVec2(40, 20))) {
 		App->resources->ImportFile(file_to_import);

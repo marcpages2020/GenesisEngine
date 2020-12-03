@@ -367,7 +367,7 @@ void ModuleResources::DrawImportingWindow()
 	{
 		if (currentImportingFileType == ResourceType::RESOURCE_MODEL) 
 		{
-			_choosingImportingOptions = ModelImporter::DrawImportingWindow(currentImportingFile);
+			_choosingImportingOptions = ModelImporter::DrawImportingWindow(currentImportingFile, modelImportingOptions);
 		}
 		else if (currentImportingFileType == ResourceType::RESOURCE_TEXTURE)
 		{

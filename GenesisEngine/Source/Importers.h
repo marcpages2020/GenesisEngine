@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Globals.h"
+#include "ImportingOptions.h"
 #include <vector>
 #include <string>
 
@@ -29,72 +30,15 @@ typedef unsigned int ILenum;
 
 #pragma endregion
 
-enum Axis
-{
-	X,
-	Y,
-	Z,
-	MINUS_X,
-	MINUS_Y,
-	MINUS_Z
-};
-
-struct ModelImportingOptions
-{
-	float globalScale;
-	Axis forwardAxis;
-	Axis upAxis;
-	bool normalizeScales;
-	bool ignoreCameras;
-	bool ignoreLights;
-};
-
-enum class TextureWrap
-{
-	CLAMP_TO_BORDER,
-	CLAMP,
-	REPEAT,
-	MIRRORED_REPEAT
-};
-
-enum class TextureFiltering
-{
-	NEAREST,
-	LINEAR
-};
-
-struct TextureImportingOptions
-{
-	TextureWrap textureWrap;
-	TextureFiltering textureFiltering;
-	bool flip_x;
-	bool flip_y;
-};
-
-union ImportingOptions
-{
-	ModelImportingOptions model_options;
-	TextureImportingOptions texture_options;
-};
-
-
-
 namespace ModelImporter
 {
-	static float globalScale;
-	static Axis forwardAxis;
-	static Axis upAxis;
-	static bool normalizeScales;
-	static bool ignoreCameras;
-	static bool ignoreLights;
-
 	void Init();
-	ImportingOptions Import(char* fileBuffer, ResourceModel* resource, uint size);
+	void Import(char* fileBuffer, ResourceModel* resource, uint size);
 	void ImportChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, uint parentNodeUID, ResourceModel* model);
 	uint64 Save(ResourceModel* model, char** fileBuffer);
 	void LoadTransform(aiNode* node, ModelNode& modelNode);
 	void Load(const char* path, ResourceModel* model);
-	bool DrawImportingWindow(const char* file_to_import);
+	bool DrawImportingWindow(const char* file_to_import, ModelImportingOptions& importingOptions);
 
 	GameObject* ConvertToGameObject(ResourceModel* model);
 	void ExtractInternalResources(const char* library_path, std::vector<uint>& meshes, std::vector<uint>& materials);

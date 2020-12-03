@@ -18,11 +18,13 @@ uint ResourceModel::SaveMeta(GnJSONObj& base_object, uint last_modification)
 	base_object.AddString("Library path", App->resources->GetLibraryPath(_uid));
 	base_object.AddInt("lastModified", last_modification);
 
-	base_object.AddFloat("global scale", (float)ModelImporter::globalScale);
-	base_object.AddInt("forward axis", (int)ModelImporter::forwardAxis);
-	base_object.AddInt("up axis", (int)ModelImporter::upAxis);
-	base_object.AddBool("ignore cameras", ModelImporter::ignoreCameras);
-	base_object.AddBool("ignore lights", ModelImporter::ignoreLights);
+	ModelImportingOptions importingOptions = App->resources->modelImportingOptions;
+
+	base_object.AddFloat("global scale", (float)importingOptions.globalScale);
+	base_object.AddInt("forward axis", (int)importingOptions.forwardAxis);
+	base_object.AddInt("up axis", (int)importingOptions.upAxis);
+	base_object.AddBool("ignore cameras", importingOptions.ignoreCameras);
+	base_object.AddBool("ignore lights", importingOptions.ignoreLights);
 
 	GnJSONArray nodes_array = base_object.AddArray("Nodes");
 

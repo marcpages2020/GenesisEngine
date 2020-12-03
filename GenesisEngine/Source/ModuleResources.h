@@ -2,6 +2,7 @@
 #include "Globals.h"
 #include "Module.h"
 #include "Resource.h"
+#include "ImportingOptions.h"
 
 #include <map>
 #include <string>
@@ -65,6 +66,10 @@ public:
 	std::string GetLibraryFolder(const char* file_in_assets);
 	const char* GenerateAssetsPath(const char* path);
 	void AddFileExtension(std::string& file, ResourceType type);
+
+public:
+	ModelImportingOptions modelImportingOptions;
+	TextureImportingOptions textureImportingOptions;
 
 private:
 	void CheckAssetsRecursive(const char* directory);

@@ -545,6 +545,9 @@
     <ClInclude Include="WindowAssets.h">
       <Filter>EditorWindows</Filter>
     </ClInclude>
+    <ClInclude Include="ImportingOptions.h">
+      <Filter>FileManagement</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Modules">

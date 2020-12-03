@@ -100,6 +100,7 @@
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GnJSON.h" />
     <ClInclude Include="Importers.h" />
+    <ClInclude Include="ImportingOptions.h" />
     <ClInclude Include="Libs\ImGuizmo\ImGuizmo.h" />
     <ClInclude Include="Libs\MathGeoLib\include\Algorithm\Random\LCG.h" />
     <ClInclude Include="Libs\MathGeoLib\include\Geometry\AABB.h" />
