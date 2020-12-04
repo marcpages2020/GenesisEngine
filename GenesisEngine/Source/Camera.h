@@ -32,9 +32,11 @@ public:
 	void AdjustFieldOfView();
 	void AdjustFieldOfView(float width, float height);
 	void SetVerticalFieldOfView(float verticalFOV, float screen_width, float screen_height);
-	void SetHorizontalFieldOfView(float horizontalFOV, float screen_width, float screen_height);
+	void SetHorizontalFieldOfView(float horizontalFOV, float screen_width = 16.0f, float screen_height = 9.0f);
 	void SetPosition(float3 position);
 	void SetReference(float3 reference);
+	void SetNearPlaneDistance(float distance);
+	void SetFarPlaneDistance(float distance);
 
 	void Look(float3 spot);
 	Frustum GetFrustum();

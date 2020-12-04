@@ -24,10 +24,9 @@
 #pragma comment (lib, "opengl32.lib")     /* link Microsoft OpenGL lib */
 #pragma comment (lib, "glew/libx86/glew32.lib")		  /* link glew lib */
 
-ModuleRenderer3D::ModuleRenderer3D(bool start_enabled) : Module(start_enabled)
+ModuleRenderer3D::ModuleRenderer3D(bool start_enabled) : Module(start_enabled), cullEditorCamera(false), context(nullptr)
 {
 	name = "renderer";
-	context = nullptr;
 
 	_ray = LineSegment();
 
@@ -330,7 +329,10 @@ Camera* ModuleRenderer3D::GetMainCamera()
 
 bool ModuleRenderer3D::IsInsideCameraView(AABB aabb)
 {
-	return _mainCamera->ContainsAABB(aabb);
+	if (cullEditorCamera)
+		return _mainCamera->ContainsAABB(aabb) || App->camera->GetCamera()->ContainsAABB(aabb);
+	else
+		return _mainCamera->ContainsAABB(aabb);
 }
 
 void ModuleRenderer3D::SetCapActive(GLenum cap, bool active)

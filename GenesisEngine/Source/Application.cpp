@@ -97,7 +97,7 @@ void Application::PrepareUpdate()
 // ---------------------------------------------
 void Application::FinishUpdate()
 {
-	Uint32 last_frame_ms = Time::realClock.dt;
+	Uint32 last_frame_ms = Time::realClock.deltaTimer.Read();
 	if (last_frame_ms < capped_ms)
 	{
 		SDL_Delay(capped_ms - last_frame_ms);

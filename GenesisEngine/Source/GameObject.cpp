@@ -111,15 +111,6 @@ void GameObject::Save(GnJSONArray& save_array)
 
 	save_object.AddString("Name", name.c_str());
 
-	//math::float3 position = transform->GetPosition();
-	//save_object.AddFloat3("Position", position);
-
-	//math::Quat rotation = transform->GetRotation();
-	//save_object.AddQuaternion("Rotation", rotation);
-
-	//math::float3 scale = transform->GetScale();
-	//save_object.AddFloat3("Scale", scale);
-
 	GnJSONArray componentsSave = save_object.AddArray("Components");
 
 	for (size_t i = 0; i < components.size(); i++)
@@ -224,6 +215,9 @@ Component* GameObject::AddComponent(ComponentType type)
 		break;
 	case CAMERA:
 		component = new Camera(this);
+		break;
+	case LIGHT:
+		//component = new Light(this);
 		break;
 	default:
 		break;

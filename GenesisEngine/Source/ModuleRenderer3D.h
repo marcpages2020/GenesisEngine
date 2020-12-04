@@ -63,11 +63,12 @@ public:
 
 	Light lights[MAX_LIGHTS];
 	SDL_GLContext context;
-	mat3x3 NormalMatrix;
-	mat4x4 ModelMatrix, ViewMatrix, ProjectionMatrix;
+	//mat3x3 NormalMatrix;
+	//mat4x4 ModelMatrix, ViewMatrix, ProjectionMatrix;
 	DisplayMode display_mode;
 
 	LineSegment _ray;
+	bool cullEditorCamera;
 
 	bool draw_vertex_normals;
 	bool draw_face_normals;

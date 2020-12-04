@@ -13,6 +13,7 @@
 #include "GameObject.h"
 #include "Material.h"
 #include "Transform.h"
+#include "Camera.h"
 #include "GnJSON.h"
 
 #include "Assimp/Assimp/include/cimport.h"
@@ -58,9 +59,33 @@ void ModelImporter::Import(char* fileBuffer, ResourceModel* model, uint size)
 			model->materials.push_back(App->resources->ImportInternalResource(model->assetsFile.c_str(), aimaterial, ResourceType::RESOURCE_MATERIAL));
 		}
 
+		/*
+		for (size_t i = 0; i < scene->mNumLights; i++)
+		{
+			Light light;
+			aiLight* ai_light = scene->mLights[i];
+			light.SetPos(ai_light->mPosition.x, ai_light->mPosition.y, ai_light->mPosition.z);
+			light.ambient = Color(ai_light->mColorAmbient.r, ai_light->mColorAmbient.g, ai_light->mColorAmbient.b);
+			light.diffuse = Color(ai_light->mColorDiffuse.r, ai_light->mColorDiffuse.g, ai_light->mColorDiffuse.b);
+			model->lights.push_back(light);
+		}
+
+		for (size_t i = 0; i < scene->mNumCameras; i++)
+		{
+			Camera camera;
+			aiCamera* aicamera = scene->mCameras[i];
+			//TODO: set aspect ratio
+			camera.SetHorizontalFieldOfView(aicamera->mHorizontalFOV);
+			camera.SetPosition(float3(aicamera->mPosition.x, aicamera->mPosition.y, aicamera->mPosition.z));
+			camera.SetNearPlaneDistance(aicamera->mClipPlaneNear);
+			camera.SetFarPlaneDistance(aicamera->mClipPlaneFar);
+			camera.SetReference(float3(aicamera->mLookAt.x, aicamera->mLookAt.y, aicamera->mLookAt.z));
+		}
+		*/
+
 		aiNode* rootNode = scene->mRootNode;
 		ImportChildren(scene, rootNode, nullptr, 0, model);
-		//ConvertToDesiredAxis(rootNode, model->nodes[0]);
+		//ConvertToDesiredAxis(rootNode, model->nodes[0]);		
 
 		aiReleaseImport(scene);
 

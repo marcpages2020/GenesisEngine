@@ -146,6 +146,16 @@ void Camera::SetReference(float3 reference)
 	_reference = reference;
 }
 
+void Camera::SetNearPlaneDistance(float distance)
+{
+	_frustum.nearPlaneDistance = distance;
+}
+
+void Camera::SetFarPlaneDistance(float distance)
+{
+	_frustum.farPlaneDistance = distance;
+}
+
 void Camera::Look(float3 spot)
 {
 	float3 difference = spot - _frustum.pos;

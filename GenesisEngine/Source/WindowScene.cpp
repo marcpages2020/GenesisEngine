@@ -54,6 +54,8 @@ void WindowScene::Draw()
 			if (ImGui::Checkbox("Show Grid", &show_grid))
 				App->scene->show_grid = show_grid;
 
+			ImGui::Checkbox("Cull editor camera", &App->renderer3D->cullEditorCamera);
+
 			ImGui::EndMenuBar();
 		}
 

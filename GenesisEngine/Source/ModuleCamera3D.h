@@ -24,6 +24,7 @@ public:
 
 	void Look(float3& position);
 	void LookAt(const float3& Spot);
+	Camera* GetCamera();
 	float* GetViewMatrix();
 	float4x4 GetViewMatrixM();
 	float* GetProjectionMatrix();
@@ -55,7 +56,7 @@ public:
 	float sensitivity;
 
 private:
-	mat4x4 ViewMatrix, ViewMatrixInverse;
+	//mat4x4 ViewMatrix, ViewMatrixInverse;
 	float3 X, Y, Z;
 	Camera* _camera;
 	float3 _position;

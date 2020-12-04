@@ -32,8 +32,7 @@ ModuleCamera3D::ModuleCamera3D(bool start_enabled) : Module(start_enabled)
 ModuleCamera3D::~ModuleCamera3D()
 {}
 
-bool ModuleCamera3D::Init()
-{
+bool ModuleCamera3D::Init() {
 	return true;
 }
 
@@ -61,6 +60,9 @@ bool ModuleCamera3D::LoadConfig(GnJSONObj& config)
 bool ModuleCamera3D::CleanUp()
 {
 	LOG("Cleaning camera");
+
+	delete _camera;
+	_camera = nullptr;
 
 	return true;
 }
@@ -156,6 +158,7 @@ void ModuleCamera3D::LookAt(const float3& Spot)
 	_camera->Look(Spot);
 }
 
+Camera* ModuleCamera3D::GetCamera() { return _camera; }
 
 // -----------------------------------------------------------------
 void ModuleCamera3D::Move(const float3& Movement)

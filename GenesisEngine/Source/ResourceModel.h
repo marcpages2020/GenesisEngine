@@ -28,8 +28,10 @@ public:
 	uint SaveMeta(GnJSONObj& base_object, uint last_modification) override;
 
 public:
+	std::vector<ModelNode> nodes;
 	std::vector<uint> meshes;
 	std::vector<uint> materials;
 	std::vector<uint> textures;
-	std::vector<ModelNode> nodes;
+	//std::vector<Light> lights;
+	//std::vector<Camera> cameras;
 };

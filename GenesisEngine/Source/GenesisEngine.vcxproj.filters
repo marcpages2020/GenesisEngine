@@ -19,9 +19,6 @@
     <ClCompile Include="Color.cpp">
       <Filter>Tools</Filter>
     </ClCompile>
-    <ClCompile Include="Light.cpp">
-      <Filter>Tools</Filter>
-    </ClCompile>
     <ClCompile Include="Timer.cpp">
       <Filter>Tools</Filter>
     </ClCompile>
@@ -218,6 +215,9 @@
     <ClCompile Include="WindowAssets.cpp">
       <Filter>EditorWindows</Filter>
     </ClCompile>
+    <ClCompile Include="Light.cpp">
+      <Filter>GameObjects &amp; Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
@@ -236,9 +236,6 @@
       <Filter>Modules</Filter>
     </ClInclude>
     <ClInclude Include="Color.h">
-      <Filter>Tools</Filter>
-    </ClInclude>
-    <ClInclude Include="Light.h">
       <Filter>Tools</Filter>
     </ClInclude>
     <ClInclude Include="Timer.h">
@@ -547,6 +544,9 @@
     </ClInclude>
     <ClInclude Include="ImportingOptions.h">
       <Filter>FileManagement</Filter>
+    </ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>GameObjects &amp; Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
