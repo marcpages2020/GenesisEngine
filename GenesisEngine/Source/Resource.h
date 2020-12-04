@@ -29,6 +29,7 @@ public:
 	virtual void Load(GnJSONObj& base_object) {};
 
 public: 
+	std::string name;
 	std::string assetsFile;
 	std::string libraryFile;
 

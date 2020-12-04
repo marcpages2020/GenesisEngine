@@ -133,6 +133,30 @@ void FileSystem::DiscoverFiles(const char* directory, std::vector<std::string>& 
 	PHYSFS_freeList(rc);
 }
 
+void FileSystem::DiscoverFilesRecursive(const char* directory, std::vector<std::string>& file_list, std::vector<std::string>& dir_list)
+{
+	std::vector<std::string> files;
+	std::vector<std::string> directories;
+
+	DiscoverFiles(directory, files, directories);
+	
+	for (size_t i = 0; i < files.size(); i++)
+	{
+		std::string file = directory;
+		file.append("/" + files[i]);
+		file_list.push_back(file);
+	}
+
+	for (size_t i = 0; i < directories.size(); i++) 
+	{
+		std::string dir = directory;
+		dir.append("/" + directories[i]);
+		dir_list.push_back(dir);
+		DiscoverFilesRecursive(dir.c_str(), file_list, dir_list);
+	}
+
+}
+
 void FileSystem::GetAllFilesWithExtension(const char* directory, const char* extension, std::vector<std::string>& file_list) 
 {
 	std::vector<std::string> files;
@@ -460,8 +484,24 @@ std::string FileSystem::GetFile(const char* path)
 {
 	std::string file;
 	std::string file_path;
+	std::string extension;
+	SplitFilePath(path, &file_path, &file, &extension);
+	return file + "." + extension;
+}
+
+std::string FileSystem::GetFileName(const char* path)
+{
+	std::string file;
+	std::string file_path;
 	SplitFilePath(path, &file_path, &file);
 	return file;
+}
+
+std::string FileSystem::GetFolder(const char* path)
+{
+	std::string folder;
+	SplitFilePath(path, &folder);
+	return folder;
 }
 
 std::string FileSystem::ToLower(const char* path)

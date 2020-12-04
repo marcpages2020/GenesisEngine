@@ -42,6 +42,7 @@ namespace ModelImporter
 
 	GameObject* ConvertToGameObject(ResourceModel* model);
 	void ExtractInternalResources(const char* library_path, std::vector<uint>& meshes, std::vector<uint>& materials);
+	void ConvertToDesiredAxis(aiNode* node, ModelNode& modelNode);
 }
 
 namespace MeshImporter
@@ -56,17 +57,12 @@ namespace MeshImporter
 
 namespace TextureImporter
 {
-	static TextureWrap textureWrap;
-	static TextureFiltering textureFiltering;
-	static bool flip_x;
-	static bool flip_y;
-
 	void Init();
 
 	void Import(char* fileBuffer, ResourceTexture* resource, uint size);
 	uint Save(ResourceTexture* texture, char** fileBuffer);
 	void Load(const char* path, ResourceTexture* texture);
-	bool DrawImportingWindow(const char* file_to_import);
+	bool DrawImportingWindow(const char* file_to_import, TextureImportingOptions& importingOptions);
 
 	std::string FindTexture(const char* texture_name, const char* model_directory);
 	void UnloadTexture(uint imageID);

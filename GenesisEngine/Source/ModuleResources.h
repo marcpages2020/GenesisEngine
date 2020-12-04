@@ -12,6 +12,7 @@ class GameObject;
 struct ResourceData
 {
 	ResourceType type = ResourceType::RESOURCE_UNKNOWN;
+	std::string name;
 	std::string assetsFile;
 	std::string libraryFile;
 };
@@ -59,6 +60,7 @@ public:
 	void ReleaseResourceData(uint UID);
 	bool SaveResource(Resource* resource);
 	bool SaveMetaFile(Resource* resource);
+	bool LoadMetaFile(Resource* resource);
 
 	ResourceType GetTypeFromPath(const char* path);
 	uint GenerateUID();

@@ -36,14 +36,8 @@ enum class TextureFiltering
 
 struct TextureImportingOptions
 {
-	TextureWrap textureWrap;
-	TextureFiltering textureFiltering;
-	bool flip_x;
-	bool flip_y;
-};
-
-union ImportingOptions
-{
-	ModelImportingOptions model_options;
-	TextureImportingOptions texture_options;
+	TextureWrap textureWrap = TextureWrap::REPEAT;
+	TextureFiltering textureFiltering = TextureFiltering::NEAREST;
+	bool flip_x = false;
+	bool flip_y = false;
 };

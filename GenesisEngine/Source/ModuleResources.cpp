@@ -32,7 +32,12 @@ bool ModuleResources::Init()
 	MeshImporter::Init();
 	TextureImporter::Init();
 
+	//std::vector<std::string> files;
+	//std::vector<std::string> dirs;
+	//FileSystem::DiscoverFilesRecursive("Library", files, dirs);
+
 	CheckAssetsRecursive("Assets");
+
 	//LoadEngineAssets();
 
 	return ret;
@@ -295,7 +300,7 @@ uint ModuleResources::ImportFile(const char* assets_file)
 	case RESOURCE_SCENE: 
 		break;
 	default: 
-		LOG_WARNING("Tryig to import unknown file: %s", assets_file);
+		LOG_WARNING("Trying to import unknown file: %s", assets_file);
 		break;
 	}
 
@@ -363,6 +368,7 @@ void ModuleResources::DragDropFile(const char* path)
 void ModuleResources::DrawImportingWindow()
 {
 	ImGuiWindowFlags_ flags = ImGuiWindowFlags_None;
+
 	if (ImGui::Begin("Import File", NULL, flags)) 
 	{
 		if (currentImportingFileType == ResourceType::RESOURCE_MODEL) 
@@ -371,7 +377,7 @@ void ModuleResources::DrawImportingWindow()
 		}
 		else if (currentImportingFileType == ResourceType::RESOURCE_TEXTURE)
 		{
-			_choosingImportingOptions = TextureImporter::DrawImportingWindow(currentImportingFile);
+			_choosingImportingOptions = TextureImporter::DrawImportingWindow(currentImportingFile, textureImportingOptions);
 		}
 	}
 	ImGui::End();
@@ -493,6 +499,7 @@ Resource* ModuleResources::LoadResource(uint UID, ResourceType type)
 		break;
 	case RESOURCE_TEXTURE:
 		TextureImporter::Load(resource->libraryFile.c_str(), (ResourceTexture*)resource);
+		LoadMetaFile(resource);
 		break;
 	case RESOURCE_SCENE:
 		break;
@@ -546,9 +553,11 @@ Resource* ModuleResources::CreateResource(const char* assetsPath, ResourceType t
 	if (resource != nullptr)
 	{
 		resources[UID] = resource;
+		resources[UID]->name = FileSystem::GetFile(assetsPath);
 		resource->assetsFile = FileSystem::ToLower(assetsPath);
 		resource->libraryFile = GenerateLibraryPath(resource);
 
+		resources_data[UID].name = resources[UID]->name;
 		resources_data[UID].assetsFile = resource->assetsFile;
 		resources_data[UID].libraryFile = resource->libraryFile;
 		resources_data[UID].type = type;
@@ -696,6 +705,26 @@ bool ModuleResources::SaveMetaFile(Resource* resource)
 	RELEASE_ARRAY(meta_buffer);
 
 	return true;
+}
+
+bool ModuleResources::LoadMetaFile(Resource* resource)
+{
+	bool ret = true;
+
+	std::string meta_file = resource->assetsFile;
+	meta_file.append(".meta");
+
+	char* buffer = nullptr;
+	FileSystem::Load(meta_file.c_str(), &buffer);
+
+	GnJSONObj meta_data(buffer);
+
+	resource->Load(meta_data);
+
+	meta_data.Release();
+	RELEASE_ARRAY(buffer);
+
+	return ret;
 }
 
 ResourceType ModuleResources::GetTypeFromPath(const char* path)

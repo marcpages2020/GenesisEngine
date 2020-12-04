@@ -21,6 +21,7 @@ namespace FileSystem
 	const char* GetWriteDir();
 
 	void DiscoverFiles(const char* directory, std::vector<std::string>& file_list, std::vector<std::string>& dir_list);
+	void DiscoverFilesRecursive(const char* directory, std::vector<std::string>& file_list, std::vector<std::string>& dir_list);
 	void GetAllFilesWithExtension(const char* directory, const char* extension, std::vector<std::string>& file_list);
 	void GetRealDir(const char* path, std::string& output);
 	std::string GetPathRelativeToAssets(const char* originalPath);
@@ -49,6 +50,8 @@ namespace FileSystem
 
 	std::string GetFileFormat(const char* path);
 	std::string GetFile(const char* path);
+	std::string GetFileName(const char* path);
+	std::string GetFolder(const char* path);
 	std::string ToLower(const char* path);
 }
 

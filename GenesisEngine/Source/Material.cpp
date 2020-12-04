@@ -147,6 +147,7 @@ void Material::OnEditor()
 
 		if(_diffuseTexture != nullptr && checkers_image == false)
 		{
+			ImGui::Text("Texture: %s", _diffuseTexture->assetsFile.c_str());
 			ImGui::Text("Width: %d Height: %d", _diffuseTexture->GeWidth(), _diffuseTexture->GetHeight());
 
 			ImGui::Spacing();

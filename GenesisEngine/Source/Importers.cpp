@@ -43,7 +43,7 @@ void ModelImporter::Import(char* fileBuffer, ResourceModel* model, uint size)
 
 	const aiScene* scene = nullptr;
 	scene = aiImportFileFromMemory(fileBuffer, size, aiProcessPreset_TargetRealtime_MaxQuality, NULL);
-
+	
 	if (scene != nullptr && scene->HasMeshes())
 	{
 		for (size_t i = 0; i < scene->mNumMeshes; i++)
@@ -60,6 +60,7 @@ void ModelImporter::Import(char* fileBuffer, ResourceModel* model, uint size)
 
 		aiNode* rootNode = scene->mRootNode;
 		ImportChildren(scene, rootNode, nullptr, 0, model);
+		//ConvertToDesiredAxis(rootNode, model->nodes[0]);
 
 		aiReleaseImport(scene);
 
@@ -319,6 +320,51 @@ void ModelImporter::ExtractInternalResources(const char* library_path, std::vect
 	RELEASE_ARRAY(buffer);
 }
 
+void ModelImporter::ConvertToDesiredAxis(aiNode* node, ModelNode& modelNode)
+{
+	int upAxis;
+	node->mMetaData->Get("UpAxis", upAxis);
+	int upAxisSign;
+	node->mMetaData->Get("UpAxisSign", upAxisSign);
+	upAxis *= upAxisSign;
+
+	int frontAxis;
+	node->mMetaData->Get("frontAxis", frontAxis);
+	int frontAxisSign;
+	node->mMetaData->Get("frontAxisSign", frontAxisSign);
+	frontAxis *= frontAxisSign;
+
+	int coordAxis;
+	node->mMetaData->Get("coordAxis", coordAxis);
+	int coordAxisSign;
+	node->mMetaData->Get("coordAxisSign", coordAxisSign);
+	coordAxis *= coordAxisSign;
+
+	float3x3 modelBasis = float3x3::zero;
+	modelBasis[coordAxis][0] = coordAxisSign;
+	modelBasis[upAxis][1] = upAxisSign;
+	modelBasis[frontAxis][2] = frontAxisSign;
+
+	float3x3 desiredBasis = float3x3::zero;
+
+	float3 desiredForwardAxis = float3::zero;
+	desiredForwardAxis[App->resources->modelImportingOptions.forwardAxis % 3] = App->resources->modelImportingOptions.forwardAxis;
+
+	float3 desiredUpAxis = float3::zero;
+	desiredUpAxis[App->resources->modelImportingOptions.upAxis % 3] = App->resources->modelImportingOptions.upAxis;
+
+	float3 desiredCoordAxis = float3::zero;
+	desiredCoordAxis = desiredForwardAxis.Cross(desiredUpAxis);
+
+	desiredBasis.SetCol(0, desiredCoordAxis);
+	desiredBasis.SetCol(1, desiredUpAxis);
+	desiredBasis.SetCol(2, desiredForwardAxis);
+
+	float3 rotation = modelBasis.ToEulerXYZ();
+
+	modelNode.rotation = Quat::FromEulerXYZ(rotation.x, rotation.y, rotation.z);
+}
+
 #pragma endregion
 
 #pragma region MeshImporter
@@ -503,7 +549,7 @@ void MeshImporter::Load(const char* fileBuffer, ResourceMesh* mesh)
 	memcpy(mesh->texcoords, cursor, bytes);
 	cursor += bytes;
 
-	LOG("%s loaded in %.3f s", fileBuffer, timer.ReadSec());
+	LOG("%s loaded in %d ms", fileBuffer, timer.Read());
 
 	//mesh->assetsFile = new char[strlen(fileBuffer)];
 	//strcpy(mesh->assetsFile.c_str(), fileBuffer);
@@ -517,12 +563,6 @@ void MeshImporter::Load(const char* fileBuffer, ResourceMesh* mesh)
 
 void TextureImporter::Init()
 {
-	textureWrap = TextureWrap::REPEAT;
-	textureFiltering = TextureFiltering::NEAREST;
-
-	flip_x = false;
-	flip_y = false;
-
 	ilInit();
 	iluInit();
 
@@ -547,7 +587,7 @@ void TextureImporter::Import(char* fileBuffer, ResourceTexture* texture, uint si
 	error = ilGetError();
 	if (error != IL_NO_ERROR)
 	{
-		LOG_ERROR("%s, %d %s", texture->assetsFile.c_str(), ilGetError(), iluErrorString(error));
+		//LOG_ERROR("%s, %d %s", texture->assetsFile.c_str(), ilGetError(), iluErrorString(error));
 		//return;
 	}
 
@@ -573,7 +613,7 @@ void TextureImporter::Import(char* fileBuffer, ResourceTexture* texture, uint si
 	}
 	else
 	{
-		LOG("Texture loaded successfully from: %s in %d ms", texture->assetsFile, timer.Read());
+		LOG("Texture loaded successfully from: %s in %d ms", texture->assetsFile.c_str(), timer.Read());
 
 		texture->FillData(ilGetData(), (uint)imageID, ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT));
 	}
@@ -646,20 +686,19 @@ void TextureImporter::Load(const char* path, ResourceTexture* texture)
 	{
 		ilBindImage(0);
 		ilDeleteImages(1, &imageID);
-		LOG_ERROR("%d: %s", error, iluErrorString(error));
+		LOG_ERROR("Error %d when loading %s: %s", error, path, iluErrorString(error));
 	}
 	else
 	{
 		LOG("Texture loaded successfully from: %s in %d ms", texture->libraryFile.c_str(), timer.Read());
 
 		texture->FillData(ilGetData(), (uint)imageID, ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT));
-		texture->GenerateBuffers();
 	}
 
 	ilBindImage(0);
 }
 
-bool TextureImporter::DrawImportingWindow(const char* file_to_import)
+bool TextureImporter::DrawImportingWindow(const char* file_to_import, TextureImportingOptions& importingOptions)
 {
 	bool ret = true;
 
@@ -670,22 +709,22 @@ bool TextureImporter::DrawImportingWindow(const char* file_to_import)
 	ImGui::Spacing();
 
 	const char* texture_wrap_options[] = { "Clamp To Border", "Clamp", "Repeat", "Mirrored Repeat" };
-	int texture_wrap = (int)textureWrap;
+	int texture_wrap = (int)importingOptions.textureWrap;
 	if (ImGui::Combo("Texture Wrap", &texture_wrap, texture_wrap_options, 4))
-		textureWrap = (TextureWrap)texture_wrap;
+		importingOptions.textureWrap = (TextureWrap)texture_wrap;
 
 	const char* texture_filtering_options[] = { "Nearest", "Linear" };
-	int texture_filtering = (int)textureFiltering;
+	int texture_filtering = (int)importingOptions.textureFiltering;
 	if (ImGui::Combo("Texture Filtering", &texture_filtering, texture_filtering_options, 2))
-		textureFiltering = (TextureFiltering)texture_filtering;
+		importingOptions.textureFiltering = (TextureFiltering)texture_filtering;
 
 	ImGui::Spacing();
 	ImGui::Separator();
 	ImGui::Spacing();
 
-	ImGui::Checkbox("Flip X", &flip_x);
+	ImGui::Checkbox("Flip X", &importingOptions.flip_x);
 
-	ImGui::Checkbox("Flip Y", &flip_y);
+	ImGui::Checkbox("Flip Y", &importingOptions.flip_y);
 
 	if (ImGui::Button("OK", ImVec2(40, 20))) {
 		App->resources->ImportFile(file_to_import);
@@ -767,10 +806,13 @@ void MaterialImporter::Import(const aiMaterial* aimaterial, ResourceMaterial* ma
 	if (path.length > 0)
 	{
 		std::string file_path = material->assetsFile;
+		path = FileSystem::GetFile(path.C_Str());
 		file_path = TextureImporter::FindTexture(path.C_Str(), material->assetsFile.c_str());
 
 		if(file_path.size() > 0)
+		{
 			material->diffuseTextureUID = App->resources->ImportFile(file_path.c_str());
+		}
 
 		//LOG("%s imported in %.3f s", texture->path.c_str(), timer.ReadSec());
 	}

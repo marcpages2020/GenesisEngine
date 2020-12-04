@@ -28,7 +28,7 @@ void Timer::Stop()
 void Timer::Resume()
 {
 	running = true;
-	started_at = stopped_at;
+	started_at = SDL_GetTicks() - (stopped_at - started_at);
 }
 
 // ---------------------------------------------
