@@ -346,7 +346,7 @@ uint ModuleResources::ReimportFile(const char* assets_file)
 	switch (type)
 	{
 	case ResourceType::RESOURCE_MODEL:
-		ModelImporter::ReimportFile(assets_file);
+		ModelImporter::ReimportFile(fileBuffer, (ResourceModel*)resource, size);
 		break;
 	case ResourceType::RESOURCE_TEXTURE:
 		if (FileSystem::Exists(resource->libraryFile.c_str()))
@@ -814,6 +814,41 @@ const char* ModuleResources::GenerateLibraryPath(Resource* resource)
 	}
 
 	return library_path;
+}
+
+std::string ModuleResources::GenerateLibraryPath(uint uid, ResourceType type)
+{
+	std::string path;
+	switch (type)
+	{
+	case RESOURCE_MODEL:
+		path = "Library/Models/";
+		path.append(std::to_string(uid) + ".model");
+		break;
+	case RESOURCE_MESH:
+		path = "Library/Meshes/";
+		path.append(std::to_string(uid) + ".mesh");
+		break;
+	case RESOURCE_MATERIAL:
+		path = "Library/Materials/";
+		path.append(std::to_string(uid) + ".material");
+		break;
+	case RESOURCE_TEXTURE:
+		path = "Library/Textures/";
+		path.append(std::to_string(uid) + ".dds");
+		break;
+	case RESOURCE_SCENE:
+		path = "Library/Scenes/";
+		path.append(std::to_string(uid) + ".scene");
+		break;
+	case RESOURCE_UNKNOWN:
+		LOG("Error trying to generate a path for an unknown file %d", uid);
+		break;
+	default:
+		break;
+	}
+
+	return path;
 }
 
 std::string ModuleResources::GetLibraryFolder(const char* file_in_assets)

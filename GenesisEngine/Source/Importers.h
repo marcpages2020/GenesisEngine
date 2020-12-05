@@ -34,7 +34,7 @@ namespace ModelImporter
 {
 	void Import(char* fileBuffer, ResourceModel* resource, uint size);
 	void ImportChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, uint parentNodeUID, ResourceModel* model);
-	void ReimportFile(const char* assets_file);
+	void ReimportFile(char* fileBuffer, ResourceModel* resource, uint size);
 	uint64 Save(ResourceModel* model, char** fileBuffer);
 	void LoadTransform(aiNode* node, ModelNode& modelNode);
 	void Load(const char* path, ResourceModel* model);

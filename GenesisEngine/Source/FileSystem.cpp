@@ -374,6 +374,17 @@ bool FileSystem::DuplicateFile(const char* srcFile, const char* dstFile)
 	}
 }
 
+void FileSystem::Rename(const char* old_name, const char* new_name)
+{
+	char* fileBuffer;
+	uint size = FileSystem::Load(old_name, &fileBuffer);
+
+	Save(new_name, fileBuffer, size);
+	Delete(old_name);
+
+	RELEASE_ARRAY(fileBuffer);
+}
+
 int close_sdl_rwops(SDL_RWops* rw)
 {
 	RELEASE_ARRAY(rw->hidden.mem.base);

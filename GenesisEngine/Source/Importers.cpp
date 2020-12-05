@@ -162,17 +162,14 @@ void ModelImporter::ImportChildren(const aiScene* scene, aiNode* node, aiNode* p
 	}
 }
 
-void ModelImporter::ReimportFile(const char* assets_file)
+void ModelImporter::ReimportFile(char* fileBuffer, ResourceModel* newModel, uint size)
 {
-	std::string meta_file = assets_file;
+	std::string meta_file = newModel->assetsFile;
 	meta_file.append(".meta");
 
 	ResourceModel oldModel(0);
 	ExtractInternalResources(meta_file.c_str(), oldModel);
 
-	char* fileBuffer;
-	uint size = FileSystem::Load(assets_file, &fileBuffer);
-	ResourceModel* newModel;
 	Import(fileBuffer, newModel, size);
 
 	for (size_t n = 0; n < newModel->nodes.size(); n++)
@@ -182,12 +179,23 @@ void ModelImporter::ReimportFile(const char* assets_file)
 			if (oldModel.nodes[o].name == newModel->nodes[n].name) 
 			{
 				newModel->nodes[n].meshID = oldModel.nodes[o].meshID;
+				std::string mesh_path = App->resources->GenerateLibraryPath(oldModel.nodes[o].meshID, ResourceType::RESOURCE_MESH);
+				if (FileSystem::Exists(mesh_path.c_str()))
+				{
+					std::string temp_path = App->resources->GenerateLibraryPath(newModel->nodes[n].meshID, ResourceType::RESOURCE_MESH);
+					FileSystem::Rename(temp_path.c_str(), mesh_path.c_str());
+				}
+
 				newModel->nodes[n].materialID = oldModel.nodes[o].materialID;
+				std::string material_path = App->resources->GenerateLibraryPath(oldModel.nodes[o].materialID, ResourceType::RESOURCE_MATERIAL);
+				if (FileSystem::Exists(material_path.c_str()))
+				{
+					std::string temp_path = App->resources->GenerateLibraryPath(newModel->nodes[n].materialID, ResourceType::RESOURCE_MATERIAL);
+					FileSystem::Rename(temp_path.c_str(), material_path.c_str());
+				}
 			}
 		}
 	}
-
-	RELEASE_ARRAY(fileBuffer);
 }
 
 void ModelImporter::LoadTransform(aiNode* node, ModelNode& modelNode)

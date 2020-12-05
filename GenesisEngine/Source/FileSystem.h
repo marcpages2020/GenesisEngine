@@ -41,6 +41,8 @@ namespace FileSystem
 	bool DuplicateFile(const char* file, const char* dstFolder, std::string& relativePath);
 	bool DuplicateFile(const char* srcFile, const char* dstFile);
 
+	void Rename(const char* old_name, const char* new_name);
+
 	unsigned int Save(const char* file, const void* buffer, unsigned int size, bool append = false);
 	bool Remove(const char* file);
 	bool Delete(const char* file);
