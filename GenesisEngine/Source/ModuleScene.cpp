@@ -236,6 +236,8 @@ bool ModuleScene::Load(const char* scene_file)
 		}
 	}
 
+	root->UpdateChildrenTransforms();
+
 	if (root != nullptr)
 		LOG("Scene loaded successfully");
 

@@ -32,11 +32,6 @@
 
 #pragma region ModelImporter
 
-void ModelImporter::Init()
-{
-
-}
-
 void ModelImporter::Import(char* fileBuffer, ResourceModel* model, uint size)
 {
 	Timer timer;
@@ -165,6 +160,34 @@ void ModelImporter::ImportChildren(const aiScene* scene, aiNode* node, aiNode* p
 	{
 		ImportChildren(scene, node->mChildren[i], node, modelNode.UID, model);
 	}
+}
+
+void ModelImporter::ReimportFile(const char* assets_file)
+{
+	std::string meta_file = assets_file;
+	meta_file.append(".meta");
+
+	ResourceModel oldModel(0);
+	ExtractInternalResources(meta_file.c_str(), oldModel);
+
+	char* fileBuffer;
+	uint size = FileSystem::Load(assets_file, &fileBuffer);
+	ResourceModel* newModel;
+	Import(fileBuffer, newModel, size);
+
+	for (size_t n = 0; n < newModel->nodes.size(); n++)
+	{
+		for (size_t o = 0; o < oldModel.nodes.size(); o++)
+		{
+			if (oldModel.nodes[o].name == newModel->nodes[n].name) 
+			{
+				newModel->nodes[n].meshID = oldModel.nodes[o].meshID;
+				newModel->nodes[n].materialID = oldModel.nodes[o].materialID;
+			}
+		}
+	}
+
+	RELEASE_ARRAY(fileBuffer);
 }
 
 void ModelImporter::LoadTransform(aiNode* node, ModelNode& modelNode)
@@ -320,7 +343,6 @@ void ModelImporter::ExtractInternalResources(const char* library_path, std::vect
 	for (size_t i = 0; i < nodes_array.Size(); i++)
 	{
 		GnJSONObj nodeObject = nodes_array.GetObjectAt(i);
-		ModelNode modelNode;
 
 		int meshID = nodeObject.GetInt("Mesh UID");
 		if (meshID != -1)
@@ -339,6 +361,27 @@ void ModelImporter::ExtractInternalResources(const char* library_path, std::vect
 				materials.push_back(materialID);
 			}
 		}
+	}
+
+	model_data.Release();
+	RELEASE_ARRAY(buffer);
+}
+
+void ModelImporter::ExtractInternalResources(const char* meta_file, ResourceModel& model)
+{
+	char* buffer = nullptr;
+	uint size = FileSystem::Load(meta_file, &buffer);
+	GnJSONObj model_data(buffer);
+	GnJSONArray nodes_array = model_data.GetArray("Nodes");
+
+	for (size_t i = 0; i < nodes_array.Size(); i++)
+	{
+		GnJSONObj nodeObject = nodes_array.GetObjectAt(i);
+		ModelNode modelNode;
+
+		modelNode.name = nodeObject.GetString("Name", "No Name");
+		modelNode.meshID = nodeObject.GetInt("Mesh UID");
+		modelNode.materialID = nodeObject.GetInt("Material UID");
 	}
 
 	model_data.Release();

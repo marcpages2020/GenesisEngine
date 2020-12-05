@@ -345,9 +345,12 @@ void GameObject::DeleteChildren()
 
 void GameObject::UpdateChildrenTransforms()
 {
+	transform->UpdateGlobalTransform();
+
 	for (size_t i = 0; i < children.size(); i++)
 	{
 		children[i]->GetTransform()->UpdateGlobalTransform(transform->GetGlobalTransform());
+		children[i]->UpdateChildrenTransforms();
 	}
 }
 

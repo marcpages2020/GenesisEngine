@@ -28,7 +28,6 @@ bool ModuleResources::Init()
 {
 	bool ret = true;
 
-	ModelImporter::Init();
 	MeshImporter::Init();
 	TextureImporter::Init();
 
@@ -153,13 +152,18 @@ bool ModuleResources::MetaUpToDate(const char* assets_file, const char* meta_fil
 		resources_data[UID].type = GetTypeFromPath(assets_file);
 
 		if (library_path == "NoPath")
-			resources_data[UID].libraryFile = Find(UID);
-		else
-			resources_data[UID].libraryFile = library_path;
+		{
+			library_path = Find(UID);
+		}
+
+		resources_data[UID].libraryFile = library_path;
 
 		resources_data[UID].type = GetTypeFromPath(library_path.c_str());
 
-		ret = true;
+		if (FileSystem::Exists(library_path.c_str()))
+			ret = true;
+		else
+			ret = false;
 	}
 
 	meta.Release();
@@ -168,30 +172,13 @@ bool ModuleResources::MetaUpToDate(const char* assets_file, const char* meta_fil
 	return ret;
 }
 
-bool ModuleResources::UpdateAssetsResource(const char* assets_path)
-{
-	//char* buffer = nullptr;
-	//std::string meta_file = assets_file;
-	//meta_file.append(".meta");
-
-	//uint size = FileSystem::Load(meta_file.c_str(), &buffer);
-	//GnJSONObj meta(buffer);
-
-	//uint UID = meta.GetInt("UID");
-	//int lastModifiedMeta = meta.GetInt("lastModified");
-	//uint lastModified = FileSystem::GetLastModTime(asset_path);
-
-	//Find(UID);
-	return 0;
-}
-
 uint ModuleResources::GetUIDFromMeta(const char* meta_file)
 {
 	char* buffer = nullptr;
 	uint size = FileSystem::Load(meta_file, &buffer);
 	GnJSONObj meta(buffer);
 
-	int UID = meta.GetInt("UID");
+	int UID = meta.GetInt("UID", 0);
 
 	meta.Release();
 	RELEASE_ARRAY(buffer);
@@ -275,11 +262,14 @@ bool ModuleResources::Exists(uint UID)
 
 uint ModuleResources::ImportFile(const char* assets_file)
 {
+	/*
 	std::string meta_file = assets_file;
 	meta_file.append(".meta");
 
 	if(FileSystem::Exists(meta_file.c_str()))
 		return GetUIDFromMeta(meta_file.c_str());
+
+	*/
 
 	ResourceType type = GetTypeFromPath(assets_file);
 
@@ -317,10 +307,10 @@ uint ModuleResources::ImportFile(const char* assets_file)
 	return ret;
 }
 
-uint ModuleResources::ImportInternalResource(const char* path, const void* data, ResourceType type)
+uint ModuleResources::ImportInternalResource(const char* path, const void* data, ResourceType type, uint UID)
 {
 	uint ret = 0;
-	Resource* resource = CreateResource(path, type);
+	Resource* resource = CreateResource(path, type, UID);
 
 	switch (type)
 	{
@@ -339,6 +329,52 @@ uint ModuleResources::ImportInternalResource(const char* path, const void* data,
 	ReleaseResource(ret);
 
 	return ret;
+}
+
+uint ModuleResources::ReimportFile(const char* assets_file)
+{
+	std::string meta_file = assets_file;
+	meta_file.append(".meta");
+
+	uint ret = GetUIDFromMeta(meta_file.c_str());
+	ResourceType type = GetTypeFromPath(assets_file);
+	Resource* resource = CreateResource(assets_file, type, ret);
+
+	char* fileBuffer;
+	uint size = FileSystem::Load(assets_file, &fileBuffer);
+
+	switch (type)
+	{
+	case ResourceType::RESOURCE_MODEL:
+		ModelImporter::ReimportFile(assets_file);
+		break;
+	case ResourceType::RESOURCE_TEXTURE:
+		if (FileSystem::Exists(resource->libraryFile.c_str()))
+			FileSystem::Delete(resource->libraryFile.c_str());
+
+		TextureImporter::Import(fileBuffer, (ResourceTexture*)resource, size);
+		break;
+	default:
+		break;
+	}
+
+	if (resource == nullptr) 
+	{
+		LOG_ERROR("Fatal error when reimporting file: %s", assets_file);
+		return 0;
+	}
+
+	SaveResource(resource);
+	ret = resource->GetUID();
+	ReleaseResource(ret);
+	RELEASE_ARRAY(fileBuffer);
+
+	//extract internal resources
+	//import file
+	//delete old files
+	//rename new files
+
+	return 0;
 }
 
 void ModuleResources::CreateResourceData(uint UID, const char* assets_path, const char* library_path)
@@ -405,7 +441,7 @@ bool ModuleResources::DeleteAssetsResource(const char* assets_path)
 	return ret;
 }
 
-bool ModuleResources::DeleteResource(uint UID)
+bool ModuleResources::DeleteResource(uint UID, bool delete_assets_file)
 {
 	bool ret = true;
 	std::string assets_file = resources_data[UID].assetsFile;
@@ -520,10 +556,12 @@ void ModuleResources::UnloadResource(uint UID)
 	resources.erase(resources.find(UID));
 }
 
-Resource* ModuleResources::CreateResource(const char* assetsPath, ResourceType type)
+Resource* ModuleResources::CreateResource(const char* assetsPath, ResourceType type, uint UID)
 {
 	Resource* resource = nullptr;
-	uint UID = GenerateUID();
+
+	if(UID == 0)
+		UID = GenerateUID();
 
 	char* buffer;
 	uint size = FileSystem::Load(assetsPath, &buffer);
@@ -567,11 +605,9 @@ Resource* ModuleResources::CreateResource(const char* assetsPath, ResourceType t
 	return resource;
 }
 
-Resource* ModuleResources::CreateResource(uint UID, ResourceType type)
+Resource* ModuleResources::CreateResource(uint UID, ResourceType type, std::string assets_file)
 {
 	Resource* resource = nullptr;
-
-	//ResourceType type = resources_data[UID].type;
 
 	switch (type)
 	{
@@ -598,8 +634,13 @@ Resource* ModuleResources::CreateResource(uint UID, ResourceType type)
 	if (resource != nullptr)
 	{
 		resources[UID] = resource;
-		resource->assetsFile = resources_data[UID].assetsFile;
-		resource->libraryFile = resources_data[UID].libraryFile;
+		resource->libraryFile = GenerateLibraryPath(resource);
+
+		if(assets_file.size() > 0)
+			resource->assetsFile = assets_file;
+		else 
+			resource->assetsFile = resources_data[UID].assetsFile;
+
 	}
 
 	return resource;
@@ -858,7 +899,7 @@ void ModuleResources::CheckAssetsRecursive(const char* directory)
 		{
 			if (!MetaUpToDate(file.c_str(), meta.c_str()))
 			{
-				UpdateAssetsResource(file.c_str());
+				ReimportFile(file.c_str());
 			}
 		}
 		else 

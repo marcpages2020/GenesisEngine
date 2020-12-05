@@ -30,7 +30,6 @@ public:
 	void OnFrameEnd() override;
 
 	bool MetaUpToDate(const char* assets_file, const char* meta_file);
-	bool UpdateAssetsResource(const char* assets_path);
 	uint GetUIDFromMeta(const char* meta_file);
 	int Find(const char* assets_file);
 	const char* Find(uint UID);
@@ -38,22 +37,23 @@ public:
 	bool Exists(uint UID);
 
 	uint ImportFile(const char* assets_file);
-	uint ImportInternalResource(const char* path, const void* data, ResourceType type);
+	uint ImportInternalResource(const char* path, const void* data, ResourceType type, uint UID = 0);
+	uint ReimportFile(const char* assets_file);
 	void CreateResourceData(uint UID, const char* assets_path = "No path", const char* library_path = "No path");
 	void DragDropFile(const char* path);
 	void DrawImportingWindow();
 
 	void AddResourceToDelete(uint UID);
 	bool DeleteAssetsResource(const char* assets_path);
-	bool DeleteResource(uint UID);
+	bool DeleteResource(uint UID, bool delete_assets_file = true);
 	bool DeleteInternalResources(uint UID);
 	bool DeleteInternalResource(uint UID);
 
 	Resource* LoadResource(uint UID, ResourceType type);
 	void UnloadResource(uint UID);
 
-	Resource* CreateResource(const char* assetsPath, ResourceType type);
-	Resource* CreateResource(uint UID, ResourceType type);
+	Resource* CreateResource(const char* assetsPath, ResourceType type, uint UID = 0);
+	Resource* CreateResource(uint UID, ResourceType type, std::string assets_file = "");
 	Resource* RequestResource(uint UID);
 	GameObject* RequestGameObject(const char* assets_file);
 	void ReleaseResource(uint UID);

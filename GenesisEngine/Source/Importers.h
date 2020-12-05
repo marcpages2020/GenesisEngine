@@ -32,9 +32,9 @@ typedef unsigned int ILenum;
 
 namespace ModelImporter
 {
-	void Init();
 	void Import(char* fileBuffer, ResourceModel* resource, uint size);
 	void ImportChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, uint parentNodeUID, ResourceModel* model);
+	void ReimportFile(const char* assets_file);
 	uint64 Save(ResourceModel* model, char** fileBuffer);
 	void LoadTransform(aiNode* node, ModelNode& modelNode);
 	void Load(const char* path, ResourceModel* model);
@@ -42,6 +42,7 @@ namespace ModelImporter
 
 	GameObject* ConvertToGameObject(ResourceModel* model);
 	void ExtractInternalResources(const char* library_path, std::vector<uint>& meshes, std::vector<uint>& materials);
+	void ExtractInternalResources(const char* meta_file, ResourceModel& model);
 	void ConvertToDesiredAxis(aiNode* node, ModelNode& modelNode);
 }
 
