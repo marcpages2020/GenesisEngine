@@ -24,7 +24,6 @@ public:
 	~ModuleResources();
 
 	bool Init() override;
-	update_status PostUpdate(float dt) override;
 	bool CleanUp() override;
 	void OnEditor();
 	void LoadEngineAssets();
@@ -82,8 +81,4 @@ private:
 	std::map<uint, Resource*> resources;
 	std::map<uint, ResourceData> resources_data;
 	int _toDeleteResource;
-	bool _choosingImportingOptions;
-
-	char* currentImportingFile;
-	ResourceType currentImportingFileType;
 };

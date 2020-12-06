@@ -39,4 +39,13 @@ struct TextureImportingOptions
 	TextureWrap textureWrap = TextureWrap::REPEAT;
 	TextureFiltering textureFiltering = TextureFiltering::NEAREST;
 	bool flip = false;
+	bool alienify = false;
+	bool blur = false;
+	bool equialize = false;
+	bool gamma_correction = false;
+	bool negativity = false;
+	bool noise = false;
+	bool pixelize = false;
+	bool sharpening = false;
+	float contrast = 1.0f;
 };

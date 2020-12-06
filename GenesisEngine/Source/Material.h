@@ -30,6 +30,7 @@ public:
 
 private:
 	bool checkers_image;
+	bool colored;
 
 	ResourceMaterial* _resource;
 	ResourceTexture* _diffuseTexture;

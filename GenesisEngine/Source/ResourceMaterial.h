@@ -1,6 +1,7 @@
 #pragma once
 #include "Globals.h"
 #include "Resource.h"
+#include "Color.h"
 
 class ResourceMaterial : public Resource {
 public:
@@ -9,4 +10,5 @@ public:
 
 public:
 	uint diffuseTextureUID;
+	Color diffuseColor;
 };

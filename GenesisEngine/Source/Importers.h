@@ -38,7 +38,6 @@ namespace ModelImporter
 	uint64 Save(ResourceModel* model, char** fileBuffer);
 	void LoadTransform(aiNode* node, ModelNode& modelNode);
 	bool Load(char* fileBuffer, ResourceModel* model, uint size);
-	bool DrawImportingWindow(const char* file_to_import, ModelImportingOptions& importingOptions);
 
 	GameObject* ConvertToGameObject(ResourceModel* model);
 	void ExtractInternalResources(const char* path, std::vector<uint>& meshes, std::vector<uint>& materials);
@@ -64,7 +63,6 @@ namespace TextureImporter
 	void Import(char* fileBuffer, ResourceTexture* resource, uint size);
 	uint Save(ResourceTexture* texture, char** fileBuffer);
 	bool Load(char* fileBuffer, ResourceTexture* texture, uint size);
-	bool DrawImportingWindow(const char* file_to_import, TextureImportingOptions& importingOptions);
 
 	std::string FindTexture(const char* texture_name, const char* model_directory);
 	void UnloadTexture(uint imageID);

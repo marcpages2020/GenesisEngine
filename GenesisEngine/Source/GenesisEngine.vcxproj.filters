@@ -218,6 +218,9 @@
     <ClCompile Include="Light.cpp">
       <Filter>GameObjects &amp; Components</Filter>
     </ClCompile>
+    <ClCompile Include="WindowImport.cpp">
+      <Filter>EditorWindows</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
@@ -547,6 +550,9 @@
     </ClInclude>
     <ClInclude Include="Light.h">
       <Filter>GameObjects &amp; Components</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowImport.h">
+      <Filter>EditorWindows</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

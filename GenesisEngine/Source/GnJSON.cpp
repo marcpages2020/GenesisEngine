@@ -1,6 +1,5 @@
 #include "GnJSON.h"
 #include "parson/parson.h"
-#include "MathGeoLib/include/MathGeoLib.h"
 
 //GnJSONObject ====================================================
 
@@ -17,11 +16,10 @@ GnJSONObj::GnJSONObj(const char* buffer) : _object(nullptr)
 	if (_root != NULL)
 	{
 		_object = json_value_get_object(_root);
-		//LOG("File parsed successfully");
 	}
 	else
 	{
-		LOG_ERROR("Error trying to load config file");
+		LOG_ERROR("Error trying to load json file");
 	}
 }
 
@@ -143,6 +141,25 @@ Quat GnJSONObj::GetQuaternion(const char* name, Quat default)
 		return default;
 }
 
+Color GnJSONObj::GetColor(const char* name, Color default)
+{
+	if (json_object_has_value(_object, name) == 1)
+	{
+		Color color;
+
+		JSON_Array* array;
+		array = json_object_get_array(_object, name);
+
+		color.r = json_array_get_number(array, 0);
+		color.g = json_array_get_number(array, 1);
+		color.b = json_array_get_number(array, 2);
+
+		return color;
+	}
+	else
+		return default;
+}
+
 void GnJSONObj::AddInt(const char* name, int number)
 {
 	json_object_set_number(_object, name, number);
@@ -184,6 +201,17 @@ void GnJSONObj::AddBool(const char* name, bool boolean)
 void GnJSONObj::AddString(const char* name, const char* string)
 {
 	json_object_set_string(_object, name, string);
+}
+
+void GnJSONObj::AddColor(const char* name, Color color)
+{
+	JSON_Value* value = json_value_init_array();
+	JSON_Status status = json_object_set_value(_object, name, value);
+	JSON_Array* _array = json_object_get_array(_object, name);
+
+	json_array_append_number(_array, color.r);
+	json_array_append_number(_array, color.g);
+	json_array_append_number(_array, color.b);
 }
 
 GnJSONArray GnJSONObj::AddArray(const char* name)

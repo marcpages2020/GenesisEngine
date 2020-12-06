@@ -10,7 +10,7 @@
 #include "ResourceMaterial.h"
 #include "WindowAssets.h"
 
-Material::Material() : Component(), checkers_image(false), _resource(nullptr) 
+Material::Material() : Component(), checkers_image(false), _resource(nullptr), colored(false)
 {
 	type = ComponentType::MATERIAL;
 

@@ -25,6 +25,7 @@
 #include "WindowAssets.h"
 #include "WindowConfiguration.h"
 #include "WindowAbout.h"
+#include "WindowImport.h"
 
 #ifdef _WIN32
 #define IM_NEWLINE  "\r\n"
@@ -49,6 +50,7 @@ Editor::Editor(bool start_enabled) : Module(start_enabled)
 	windows[ASSETS_WINDOW] = new WindowAssets();
 	windows[CONFIGURATION_WINDOW] = new WindowConfiguration();
 	windows[ABOUT_WINDOW] = new WindowAbout();
+	windows[IMPORT_WINDOW] = new WindowImport();
 
 	//CONSOLE_WINDOW,
 }

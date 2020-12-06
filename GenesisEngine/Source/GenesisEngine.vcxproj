@@ -203,6 +203,7 @@
     <ClInclude Include="WindowAssets.h" />
     <ClInclude Include="WindowConfiguration.h" />
     <ClInclude Include="WindowHierarchy.h" />
+    <ClInclude Include="WindowImport.h" />
     <ClInclude Include="WindowInspector.h" />
     <ClInclude Include="WindowScene.h" />
   </ItemGroup>
@@ -280,6 +281,7 @@
     <ClCompile Include="WindowAssets.cpp" />
     <ClCompile Include="WindowConfiguration.cpp" />
     <ClCompile Include="WindowHierarchy.cpp" />
+    <ClCompile Include="WindowImport.cpp" />
     <ClCompile Include="WindowInspector.cpp" />
     <ClCompile Include="WindowScene.cpp" />
   </ItemGroup>

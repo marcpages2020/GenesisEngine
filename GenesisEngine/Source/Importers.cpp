@@ -82,7 +82,7 @@ void ModelImporter::Import(char* fileBuffer, ResourceModel* model, uint size)
 
 		aiNode* rootNode = scene->mRootNode;
 		ImportChildren(scene, rootNode, nullptr, 0, model);
-		//ConvertToDesiredAxis(rootNode, model->nodes[0]);		
+		ConvertToDesiredAxis(rootNode, model->nodes[0]);		
 
 		aiReleaseImport(scene);
 
@@ -277,44 +277,6 @@ bool ModelImporter::Load(char* fileBuffer, ResourceModel* model, uint size)
 	return ret;
 }
 
-bool ModelImporter::DrawImportingWindow(const char* file_to_import, ModelImportingOptions& importingOptions)
-{
-	bool ret = true;
-
-	ImGui::Text("Import Model: %s", file_to_import);
-
-	ImGui::Spacing();
-	ImGui::Separator();
-	ImGui::Spacing();
-
-	ImGui::DragFloat("Global Scale", &importingOptions.globalScale, 0.01f, 0.0f, 100.0f);
-
-	const char* possible_axis[] = { "X", "Y", "Z", "-X", "-Y", "-Z" };
-	int forward_axis = (int)importingOptions.forwardAxis;
-	if (ImGui::Combo("Forward Axis", &forward_axis, possible_axis, 6)) 
-		importingOptions.forwardAxis = (Axis)forward_axis;
-
-	int up_axis = (int)importingOptions.upAxis;
-	if (ImGui::Combo("Up Axis", &up_axis, possible_axis, 6))
-		importingOptions.upAxis = (Axis)up_axis;
-
-	ImGui::Checkbox("Ignore Cameras", &importingOptions.ignoreCameras);
-	
-	ImGui::Spacing();
-
-	ImGui::Checkbox("Ignore Lights", &importingOptions.ignoreLights);
-
-	if (ImGui::Button("OK", ImVec2(40, 20))) {
-		App->resources->ImportFile(file_to_import);
-		ret = false;
-	}
-	ImGui::SameLine();
-	if (ImGui::Button("CANCEL", ImVec2(80, 20))) {
-		ret = false;
-	}
-	return ret;
-}
-
 GameObject* ModelImporter::ConvertToGameObject(ResourceModel* model)
 {	
 	if (model == nullptr) {
@@ -468,6 +430,9 @@ bool ModelImporter::InternalResourcesExist(const char* path)
 
 void ModelImporter::ConvertToDesiredAxis(aiNode* node, ModelNode& modelNode)
 {
+	if (node->mMetaData == nullptr)
+		return;
+
 	int upAxis;
 	node->mMetaData->Get("UpAxis", upAxis);
 	int upAxisSign;
@@ -727,13 +692,6 @@ void TextureImporter::Import(char* fileBuffer, ResourceTexture* texture, uint si
 	ilEnable(IL_ORIGIN_SET);
 	//ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
 
-	TextureImportingOptions importingOptions = App->resources->textureImportingOptions;
-
-	if (importingOptions.flip)
-	{
-		iluFlipImage();
-	}
-
 	error = ilGetError();
 	if (error != IL_NO_ERROR)
 	{
@@ -777,6 +735,13 @@ uint TextureImporter::Save(ResourceTexture* texture, char** fileBuffer)
 	ILubyte* data;
 
 	ilBindImage(texture->GetID());
+
+	TextureImportingOptions importingOptions = App->resources->textureImportingOptions;
+
+	if (importingOptions.flip)
+		iluFlipImage();
+
+	iluAlienify();
 
 	ilSetInteger(IL_DXTC_DATA_FORMAT, IL_DXT5);
 	size = ilSaveL(IL_DDS, nullptr, 0);
@@ -848,43 +813,6 @@ bool TextureImporter::Load(char* fileBuffer, ResourceTexture* texture, uint size
 	return ret;
 }
 
-bool TextureImporter::DrawImportingWindow(const char* file_to_import, TextureImportingOptions& importingOptions)
-{
-	bool ret = true;
-
-	ImGui::Text("Import Texture: %s", file_to_import);
-
-	ImGui::Spacing();
-	ImGui::Separator();
-	ImGui::Spacing();
-
-	const char* texture_wrap_options[] = { "Clamp To Border", "Clamp", "Repeat", "Mirrored Repeat" };
-	int texture_wrap = (int)importingOptions.textureWrap;
-	if (ImGui::Combo("Texture Wrap", &texture_wrap, texture_wrap_options, 4))
-		importingOptions.textureWrap = (TextureWrap)texture_wrap;
-
-	const char* texture_filtering_options[] = { "Nearest", "Linear" };
-	int texture_filtering = (int)importingOptions.textureFiltering;
-	if (ImGui::Combo("Texture Filtering", &texture_filtering, texture_filtering_options, 2))
-		importingOptions.textureFiltering = (TextureFiltering)texture_filtering;
-
-	ImGui::Spacing();
-	ImGui::Separator();
-	ImGui::Spacing();
-
-	ImGui::Checkbox("Flip", &importingOptions.flip);
-
-	if (ImGui::Button("OK", ImVec2(40, 20))) {
-		App->resources->ImportFile(file_to_import);
-		ret = false;
-	}
-	ImGui::SameLine();
-	if (ImGui::Button("CANCEL", ImVec2(80, 20))) {
-		ret = false;
-	}
-	return ret;
-}
-
 std::string TextureImporter::FindTexture(const char* texture_name, const char* model_directory)
 {
 	std::string path;
@@ -950,6 +878,8 @@ void MaterialImporter::Import(const aiMaterial* aimaterial, ResourceMaterial* ma
 
 	aiString path;
 	aimaterial->GetTexture(aiTextureType_DIFFUSE, 0, &path);
+	aiColor3D aiDiffuseColor;
+	aimaterial->Get(AI_MATKEY_COLOR_DIFFUSE, aiDiffuseColor);
 
 	if (path.length > 0)
 	{
@@ -962,6 +892,10 @@ void MaterialImporter::Import(const aiMaterial* aimaterial, ResourceMaterial* ma
 			material->diffuseTextureUID = App->resources->ImportFile(file_path.c_str());
 		}
 
+		material->diffuseColor.r = aiDiffuseColor.r;
+		material->diffuseColor.g = aiDiffuseColor.g;
+		material->diffuseColor.b = aiDiffuseColor.b;
+
 		//LOG("%s imported in %.3f s", texture->path.c_str(), timer.ReadSec());
 	}
 }
@@ -970,6 +904,8 @@ uint64 MaterialImporter::Save(ResourceMaterial* material, char** fileBuffer)
 {
 	GnJSONObj base_object;
 	base_object.AddInt("Diffuse Texture", material->diffuseTextureUID);
+
+	base_object.AddColor("diffuseColor", material->diffuseColor);
 
 	char* buffer;
 	uint size = base_object.Save(&buffer);
@@ -987,8 +923,11 @@ bool MaterialImporter::Load(const char* fileBuffer, ResourceMaterial* material, 
 	GnJSONObj material_data(fileBuffer);
 	material->diffuseTextureUID = material_data.GetInt("Diffuse Texture");
 
+
 	if(material->diffuseTextureUID != 0)
 		App->resources->LoadResource(material->diffuseTextureUID, ResourceType::RESOURCE_TEXTURE);
+
+	material->diffuseColor = material_data.GetColor("diffuseColor");
 
 	material_data.Release();
 	return ret;

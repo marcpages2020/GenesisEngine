@@ -1,6 +1,6 @@
 #pragma once
-
 #include "Globals.h"
+#include "Color.h"
 #include "MathGeoLib/include/MathGeoLib.h"
 
 struct json_array_t;
@@ -36,6 +36,7 @@ public:
 	const char* GetString(const char* name, const char* default);
 	math::float3 GetFloat3(const char* name, float3 default = float3(-1,-1,-1));
 	Quat GetQuaternion(const char* name, Quat default = Quat(-1,-1,-1,-1));
+	Color GetColor(const char* name, Color default = Color(0, 0, 0, 1));
 
 	void AddInt(const char* name, int number);
 	void AddFloat(const char* name, float number);
@@ -43,6 +44,7 @@ public:
 	void AddQuaternion(const char* name, math::Quat number);
 	void AddBool(const char* name, bool boolean);
 	void AddString(const char* name, const char* string);
+	void AddColor(const char* name, Color color);
 	GnJSONArray AddArray(const char* name);
 	GnJSONArray AddArray(GnJSONArray array);
 

@@ -13,11 +13,12 @@
 #include "ResourceMaterial.h"
 #include "ResourceTexture.h"
 
+#include "WindowImport.h"
 #include <algorithm>
 
 #include "MathGeoLib/include/MathGeoLib.h"
 
-ModuleResources::ModuleResources(bool start_enabled) : Module(start_enabled), _toDeleteResource(-1), _choosingImportingOptions(false)
+ModuleResources::ModuleResources(bool start_enabled) : Module(start_enabled), _toDeleteResource(-1)
 {
 	name = "resources";
 }
@@ -42,14 +43,6 @@ bool ModuleResources::Init()
 	return ret;
 }
 
-update_status ModuleResources::PostUpdate(float dt)
-{
-	if (_choosingImportingOptions)
-		DrawImportingWindow();
-
-	return UPDATE_CONTINUE;
-}
-
 bool ModuleResources::CleanUp()
 {
 	bool ret = true;
@@ -61,9 +54,6 @@ bool ModuleResources::CleanUp()
 
 	resources.clear();
 	resources_data.clear();
-
-	currentImportingFile = nullptr;
-	currentImportingFileType = ResourceType::RESOURCE_UNKNOWN;
 
 	return ret;
 }
@@ -409,38 +399,18 @@ void ModuleResources::CreateResourceData(uint UID, const char* assets_path, cons
 
 void ModuleResources::DragDropFile(const char* path)
 {
-	_choosingImportingOptions = true;
-	
-	if (FileSystem::Exists(path))
-	{
-		currentImportingFile = (char*)path;
-		currentImportingFileType = GetTypeFromPath(path);
-	}
-	else
-	{
-		const char* new_path = GenerateAssetsPath(path);
-		FileSystem::DuplicateFile(path, new_path);
-		currentImportingFile = (char*)new_path;
-		currentImportingFileType = GetTypeFromPath(new_path);
-	}
-}
+	std::string file_to_import = path;
 
-void ModuleResources::DrawImportingWindow()
-{
-	ImGuiWindowFlags_ flags = ImGuiWindowFlags_None;
-
-	if (ImGui::Begin("Import File", NULL, flags)) 
+	if (!FileSystem::Exists(path))
 	{
-		if (currentImportingFileType == ResourceType::RESOURCE_MODEL) 
-		{
-			_choosingImportingOptions = ModelImporter::DrawImportingWindow(currentImportingFile, modelImportingOptions);
-		}
-		else if (currentImportingFileType == ResourceType::RESOURCE_TEXTURE)
-		{
-			_choosingImportingOptions = TextureImporter::DrawImportingWindow(currentImportingFile, textureImportingOptions);
-		}
+		file_to_import = GenerateAssetsPath(path);
+		FileSystem::DuplicateFile(path, file_to_import.c_str());
 	}
-	ImGui::End();
+
+	char* final_path = new char[sizeof(char) * file_to_import.size()];
+	strcpy(final_path, file_to_import.c_str());
+	WindowImport* import_window = dynamic_cast<WindowImport*>(App->editor->windows[WindowType::IMPORT_WINDOW]);
+	import_window->Enable(final_path, GetTypeFromPath(path));
 }
 
 void ModuleResources::AddResourceToDelete(uint UID)
@@ -537,7 +507,7 @@ bool ModuleResources::DeleteInternalResource(uint UID)
 
 Resource* ModuleResources::LoadResource(uint UID, ResourceType type)
 {
-	Resource* resource = CreateResource(UID, type);
+	Resource* resource = CreateResource(UID, type, resources_data[UID].assetsFile.c_str());
 	bool ret = true;
 
 	char* buffer = nullptr;
@@ -932,7 +902,7 @@ std::string ModuleResources::GetLibraryFolder(const char* file_in_assets)
 const char* ModuleResources::GenerateAssetsPath(const char* path)
 {
 	ResourceType type = GetTypeFromPath(path);
-	std::string file = FileSystem::GetFile(path) + FileSystem::GetFileFormat(path);
+	std::string file = FileSystem::GetFile(path);
 
 	char* library_path = new char[128];
 

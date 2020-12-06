@@ -8,6 +8,7 @@ enum WindowType {
 	ASSETS_WINDOW,
 	CONFIGURATION_WINDOW,
 	ABOUT_WINDOW,
+	IMPORT_WINDOW,
 	MAX_WINDOWS
 };
 
@@ -15,8 +16,9 @@ class EditorWindow {
 public:
 	EditorWindow() : visible(false){};
 	virtual ~EditorWindow() {};
-	virtual void Draw() {};
+	virtual void Draw() = 0;
+
 public:
 	bool visible;
-	WindowType type;
+	WindowType type = MAX_WINDOWS;
 };
