@@ -24,14 +24,14 @@ public:
 	uint* indices = nullptr;
 
 	uint normals_buffer = 0;
+	uint normals_amount = 0;
 	float* normals;
-	uint normals_amount = -1;
 
 	uint texcoords_buffer = 0;
+	uint texcoords_amount = 0;
 	float* texcoords = nullptr;
-	uint texcoords_amount = -1;
 
-	float* colors;
+	float* colors = nullptr;;
 
 private:
 	bool _buffers_created;

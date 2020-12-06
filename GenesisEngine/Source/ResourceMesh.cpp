@@ -2,11 +2,11 @@
 #include "glew/include/glew.h"
 
 ResourceMesh::ResourceMesh(uint UID) : Resource(UID, ResourceType::RESOURCE_MESH),
- vertices_amount(-1), vertices(nullptr), 
- indices_amount(-1), indices(nullptr),
- normals_amount(-1), normals(nullptr), 
- texcoords(nullptr), colors(nullptr),
- _buffers_created(false) {}
+ vertices_amount(0), vertices(nullptr), 
+ indices_amount(0), indices(nullptr),
+ normals_amount(0), normals(nullptr), 
+ texcoords(nullptr), texcoords_amount(0),
+colors(nullptr), _buffers_created(false) {}
 
 ResourceMesh::~ResourceMesh()
 {
@@ -15,15 +15,19 @@ ResourceMesh::~ResourceMesh()
 
 	delete vertices;
 	vertices = nullptr;
+	vertices_amount = 0;
 
 	delete indices;
 	indices = nullptr;
+	indices_amount = 0;
 
 	delete normals;
 	normals = nullptr;
+	normals_amount = 0;
 
 	delete texcoords;
 	texcoords = nullptr;
+	texcoords_amount = 0;
 }
 
 void ResourceMesh::Load(GnJSONObj& base_object) {}
@@ -57,13 +61,19 @@ void ResourceMesh::DeleteBuffers()
 {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glDeleteBuffers(1, &vertices_buffer);
+	vertices_buffer = 0;
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glDeleteBuffers(1, &indices_buffer);
+	indices_buffer = 0;
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glDeleteBuffers(1, &normals_buffer);
+	normals_buffer = 0;
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glDeleteBuffers(1, &texcoords_buffer);
+	texcoords_buffer = 0;
+
+	_buffers_created = false;
 }

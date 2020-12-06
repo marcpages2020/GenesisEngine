@@ -21,8 +21,11 @@ GnMesh::GnMesh() : Component(), draw_face_normals(false), draw_vertex_normals(fa
 
 GnMesh::~GnMesh() 
 {
-	App->resources->ReleaseResource(_resourceUID);
-	_resource = nullptr;
+	if (_resource != nullptr) 
+	{
+		App->resources->ReleaseResource(_resource->GetUID());
+		_resource = nullptr;
+	}
 }
 
 void GnMesh::Save(GnJSONArray& save_array)

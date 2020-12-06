@@ -5,7 +5,13 @@
 
 ResourceModel::ResourceModel(uint UID) : Resource(UID, ResourceType::RESOURCE_MODEL) {}
 
-ResourceModel::~ResourceModel(){}
+ResourceModel::~ResourceModel()
+{
+	nodes.clear();
+	meshes.clear();
+	materials.clear();
+	textures.clear();
+}
 
 uint ResourceModel::Save(GnJSONObj& base_object)
 {

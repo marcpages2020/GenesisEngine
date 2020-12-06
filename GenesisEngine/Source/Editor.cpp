@@ -53,9 +53,7 @@ Editor::Editor(bool start_enabled) : Module(start_enabled)
 	//CONSOLE_WINDOW,
 }
 
-Editor::~Editor() 
-{
-}
+Editor::~Editor() {}
 
 bool Editor::Init()
 {
@@ -148,6 +146,12 @@ bool Editor::CleanUp()
 	ImGui::DestroyContext();
 
 	console_log.clear();
+
+	for (size_t i = 0; i < MAX_WINDOWS; i++)
+	{
+		delete windows[i];
+		windows[i] = nullptr;
+	}
 
 	return true;
 }

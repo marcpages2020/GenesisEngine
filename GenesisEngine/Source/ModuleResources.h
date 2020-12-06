@@ -25,6 +25,7 @@ public:
 
 	bool Init() override;
 	update_status PostUpdate(float dt) override;
+	bool CleanUp() override;
 	void OnEditor();
 	void LoadEngineAssets();
 	void OnFrameEnd() override;

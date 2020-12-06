@@ -50,6 +50,24 @@ update_status ModuleResources::PostUpdate(float dt)
 	return UPDATE_CONTINUE;
 }
 
+bool ModuleResources::CleanUp()
+{
+	bool ret = true;
+
+	for (std::map<uint, Resource*>::iterator it = resources.begin(); it != resources.end(); ++it) 
+	{
+		ReleaseResource(it->second->GetUID());
+	}
+
+	resources.clear();
+	resources_data.clear();
+
+	currentImportingFile = nullptr;
+	currentImportingFileType = ResourceType::RESOURCE_UNKNOWN;
+
+	return ret;
+}
+
 void ModuleResources::OnEditor()
 {
 	std::vector<Resource*> meshes;
@@ -575,6 +593,12 @@ void ModuleResources::UnloadResource(Resource* resource)
 {
 	switch (resource->GetType())
 	{
+	case ResourceType::RESOURCE_MODEL:
+		break;
+	case ResourceType::RESOURCE_MESH:
+		break;
+	case ResourceType::RESOURCE_MATERIAL:
+		break;
 	case ResourceType::RESOURCE_TEXTURE:
 		TextureImporter::UnloadTexture(((ResourceTexture*)resource)->GetID());
 		break;
@@ -582,10 +606,10 @@ void ModuleResources::UnloadResource(Resource* resource)
 		break;
 	}
 
+	resources.erase(resources.find(resource->GetUID()));
+
 	delete resource;
 	resource = nullptr;
-
-	resources.erase(resources.find(resource->GetUID()));
 }
 
 Resource* ModuleResources::CreateResource(const char* assetsPath, ResourceType type, uint UID)

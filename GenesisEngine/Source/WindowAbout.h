@@ -7,6 +7,4 @@ public:
 	WindowAbout();
 	~WindowAbout();
 	void Draw() override;
-public:
-
 };

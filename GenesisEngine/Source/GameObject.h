@@ -54,7 +54,7 @@ public:
 
 public: 
 	bool to_delete;
-	uint UUID = -1;
+	uint UUID = 0;
 
 private:
 	void GenerateAABB(GnMesh* mesh);

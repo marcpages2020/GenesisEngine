@@ -362,6 +362,8 @@ GameObject* ModelImporter::ConvertToGameObject(ResourceModel* model)
 		createdGameObjects.push_back(gameObject);
 	}
 
+	App->resources->ReleaseResource(model->GetUID());
+
 	return root;
 }
 

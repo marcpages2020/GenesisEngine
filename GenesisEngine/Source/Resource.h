@@ -37,6 +37,5 @@ public:
 
 protected:
 	uint _uid = 0;
-
 	ResourceType _type = RESOURCE_UNKNOWN;
 };

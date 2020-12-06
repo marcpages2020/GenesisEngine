@@ -10,6 +10,4 @@ public:
 
 	void Draw() override;
 	void PreorderHierarchy(GameObject* gameObject, int& id);
-
-public:
 };

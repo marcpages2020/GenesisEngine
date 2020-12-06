@@ -218,6 +218,7 @@ bool ModuleRenderer3D::CleanUp()
 	glDeleteTextures(1, &colorTexture);
 
 	SDL_GL_DeleteContext(context);
+	_mainCamera = nullptr;
 
 	return true;
 }

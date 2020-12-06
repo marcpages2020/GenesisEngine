@@ -12,7 +12,10 @@ WindowAssets::WindowAssets() : EditorWindow()
 	current_folder = "Assets";
 }
 
-WindowAssets::~WindowAssets() {}
+WindowAssets::~WindowAssets() 
+{
+	current_folder.clear();
+}
 
 void WindowAssets::Draw()
 {
