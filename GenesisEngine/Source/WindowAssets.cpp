@@ -88,7 +88,7 @@ void WindowAssets::DrawDirectoryRecursive(const char* directory, const char* fil
 				{
 					std::string file_to_delete = directory;
 					file_to_delete.append("/" + str);
-					App->resources->DeleteAssetsResource(file_to_delete.c_str());
+					App->resources->DeleteAsset(file_to_delete.c_str());
 					ImGui::CloseCurrentPopup();
 					ImGui::CloseCurrentPopup();
 				}
@@ -152,7 +152,7 @@ void WindowAssets::DrawCurrentFolder()
 			if (ImGui::Button("Delete"))
 			{
 				std::string file_to_delete = current_folder + "/" + files[i];
-				App->resources->DeleteAssetsResource(file_to_delete.c_str());
+				App->resources->DeleteAsset(file_to_delete.c_str());
 				ImGui::CloseCurrentPopup();
 			}
 			ImGui::EndPopup();

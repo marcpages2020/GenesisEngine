@@ -30,14 +30,14 @@ void GnMesh::Save(GnJSONArray& save_array)
 	GnJSONObj save_object;
 
 	save_object.AddInt("Type", type);
-	save_object.AddInt("Mesh UID", _resource->GetUID());
+	save_object.AddInt("MeshID", _resource->GetUID());
 
 	save_array.AddObject(save_object);
 }
 
 void GnMesh::Load(GnJSONObj& load_object)
 {
-	uint meshUID = load_object.GetInt("Mesh UID");
+	int meshUID = load_object.GetInt("MeshID");
 	SetResourceUID(meshUID);
 }
 
@@ -45,7 +45,9 @@ void GnMesh::SetResourceUID(uint UID)
 {
 	_resourceUID = UID;
 	_resource = (ResourceMesh*)App->resources->RequestResource(_resourceUID);
-	GenerateAABB();
+	if(_resource != nullptr)
+		GenerateAABB();
+
 	//App->resources->ReleaseResource(_resourceUID);
 }
 

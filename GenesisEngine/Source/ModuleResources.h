@@ -44,13 +44,13 @@ public:
 	void DrawImportingWindow();
 
 	void AddResourceToDelete(uint UID);
-	bool DeleteAssetsResource(const char* assets_path);
-	bool DeleteResource(uint UID, bool delete_assets_file = true);
-	bool DeleteInternalResources(uint UID);
+	bool DeleteAsset(const char* assets_path);
+	bool DeleteResource(uint UID);
 	bool DeleteInternalResource(uint UID);
+	bool DeleteInternalResources(uint UID);
 
 	Resource* LoadResource(uint UID, ResourceType type);
-	void UnloadResource(uint UID);
+	void UnloadResource(Resource* resource);
 
 	Resource* CreateResource(const char* assetsPath, ResourceType type, uint UID = 0);
 	Resource* CreateResource(uint UID, ResourceType type, std::string assets_file = "");

@@ -3,6 +3,8 @@
 #include "FileSystem.h"
 #include "Application.h"
 
+#include <unordered_set>
+
 #include "Resource.h"
 #include "ResourceModel.h"
 #include "ResourceMesh.h"
@@ -111,14 +113,14 @@ uint64 ModelImporter::Save(ResourceModel* model, char** fileBuffer)
 
 		if (model->nodes[i].meshID != -1)
 		{
-			node_object.AddInt("Mesh UID", model->nodes[i].meshID);
-			node_object.AddString("Mesh library path", App->resources->GetLibraryPath(model->nodes[i].meshID));
+			node_object.AddInt("MeshID", model->nodes[i].meshID);
+			node_object.AddString("mesh_library_path", App->resources->GetLibraryPath(model->nodes[i].meshID));
 		}
 
 		if (model->nodes[i].materialID != -1)
 		{
-			node_object.AddInt("Material UID", model->nodes[i].materialID);
-			node_object.AddString("Material library path", App->resources->GetLibraryPath(model->nodes[i].materialID));
+			node_object.AddInt("MaterialID", model->nodes[i].materialID);
+			node_object.AddString("material_library_path", App->resources->GetLibraryPath(model->nodes[i].materialID));
 		}
 
 		nodes_array.AddObject(node_object);
@@ -217,13 +219,15 @@ void ModelImporter::LoadTransform(aiNode* node, ModelNode& modelNode)
 	modelNode.scale = float3(scaling.x, scaling.y, scaling.z);
 }
 
-void ModelImporter::Load(const char* path, ResourceModel* model)
+bool ModelImporter::Load(char* fileBuffer, ResourceModel* model, uint size)
 {
-	//Load JSON and transform into Game Objects
-	char* buffer = nullptr;
-	uint size = FileSystem::Load(model->libraryFile.c_str(), &buffer);
-	GnJSONObj model_data(buffer);
+	bool ret = true;
+
+	GnJSONObj model_data(fileBuffer);
 	GnJSONArray nodes_array = model_data.GetArray("Nodes");
+
+	std::unordered_set<uint> meshes;
+	std::unordered_set<uint> materials;
 
 	for (size_t i = 0; i < nodes_array.Size(); i++)
 	{
@@ -237,25 +241,40 @@ void ModelImporter::Load(const char* path, ResourceModel* model)
 		modelNode.rotation = nodeObject.GetQuaternion("Rotation", Quat::identity);
 		modelNode.scale = nodeObject.GetFloat3("Scale", float3::zero);
 
-		modelNode.meshID = nodeObject.GetInt("Mesh UID");
+		modelNode.meshID = nodeObject.GetInt("MeshID");
 		if (modelNode.meshID != -1) 
 		{
-			App->resources->CreateResourceData(modelNode.meshID, model->assetsFile.c_str(), nodeObject.GetString("Mesh library path", "No Path"));
-			App->resources->LoadResource(modelNode.meshID, ResourceType::RESOURCE_MESH);
+			App->resources->CreateResourceData(modelNode.meshID, model->assetsFile.c_str(), nodeObject.GetString("mesh_library_path", "No Path"));
+			meshes.emplace(modelNode.meshID);
+			//if (App->resources->LoadResource(modelNode.meshID, ResourceType::RESOURCE_MESH) == nullptr)
+				//ret = false;
 		}
 
-		modelNode.materialID = nodeObject.GetInt("Material UID");
+		modelNode.materialID = nodeObject.GetInt("MaterialID");
 		if (modelNode.materialID != -1)
 		{
-			App->resources->CreateResourceData(modelNode.materialID, model->assetsFile.c_str(), nodeObject.GetString("Material library path", "No Path"));
-			App->resources->LoadResource(modelNode.materialID, ResourceType::RESOURCE_MATERIAL);
+			App->resources->CreateResourceData(modelNode.materialID, model->assetsFile.c_str(), nodeObject.GetString("material_library_path", "No Path"));
+			materials.emplace(modelNode.materialID);
+
+			//if (App->resources->LoadResource(modelNode.materialID, ResourceType::RESOURCE_MATERIAL) == nullptr)
+				//ret = false;
 		}
 
 		model->nodes.push_back(modelNode);
 	}
 
+	for (auto it = meshes.begin(); it != meshes.end(); ++it) {
+		if (App->resources->LoadResource(*it, ResourceType::RESOURCE_MESH) == nullptr)
+			ret = false;
+	}
+
+	for (auto it = materials.begin(); it != materials.end(); ++it) {
+		if (App->resources->LoadResource(*it, ResourceType::RESOURCE_MATERIAL) == nullptr)
+			ret = false;
+	}
+
 	model_data.Release();
-	RELEASE_ARRAY(buffer);
+	return ret;
 }
 
 bool ModelImporter::DrawImportingWindow(const char* file_to_import, ModelImportingOptions& importingOptions)
@@ -298,6 +317,11 @@ bool ModelImporter::DrawImportingWindow(const char* file_to_import, ModelImporti
 
 GameObject* ModelImporter::ConvertToGameObject(ResourceModel* model)
 {	
+	if (model == nullptr) {
+		LOG_ERROR("Trying to load null model");
+		return nullptr;
+	}
+
 	std::vector<GameObject*> createdGameObjects;
 
 	GameObject* root = nullptr;
@@ -341,10 +365,10 @@ GameObject* ModelImporter::ConvertToGameObject(ResourceModel* model)
 	return root;
 }
 
-void ModelImporter::ExtractInternalResources(const char* library_path, std::vector<uint>& meshes, std::vector<uint>& materials)
+void ModelImporter::ExtractInternalResources(const char* path, std::vector<uint>& meshes, std::vector<uint>& materials)
 {
 	char* buffer = nullptr;
-	uint size = FileSystem::Load(library_path, &buffer);
+	uint size = FileSystem::Load(path, &buffer);
 	GnJSONObj model_data(buffer);
 	GnJSONArray nodes_array = model_data.GetArray("Nodes");
 
@@ -394,6 +418,50 @@ void ModelImporter::ExtractInternalResources(const char* meta_file, ResourceMode
 
 	model_data.Release();
 	RELEASE_ARRAY(buffer);
+}
+
+bool ModelImporter::InternalResourcesExist(const char* path)
+{
+	bool ret = true;
+
+	char* buffer;
+	FileSystem::Load(path, &buffer);
+
+	GnJSONObj meta_data(buffer);
+	GnJSONArray nodes_array = meta_data.GetArray("Nodes");
+
+	for (size_t i = 0; i < nodes_array.Size(); i++)
+	{
+		GnJSONObj nodeObject = nodes_array.GetObjectAt(i);
+
+		int meshID = nodeObject.GetInt("MeshID");
+		if (meshID != -1)
+		{
+			std::string meshLibraryPath = nodeObject.GetString("mesh_library_path", "No path");
+			
+			if (!FileSystem::Exists(meshLibraryPath.c_str())) {
+				ret = false;
+				LOG_ERROR("Mesh: %d not found", meshID);
+				break;
+			}			
+		}
+
+		int materialID = nodeObject.GetInt("MaterialID");
+		if (materialID != -1) 
+		{
+			std::string materialLibraryPath = nodeObject.GetString("material_library_path", "No path");
+
+			if (!FileSystem::Exists(materialLibraryPath.c_str())) {
+				ret = false;
+				LOG_ERROR("Material: %s not found", materialLibraryPath.c_str());
+				break;
+			}
+		}
+	}
+
+	RELEASE_ARRAY(buffer);
+
+	return ret;
 }
 
 void ModelImporter::ConvertToDesiredAxis(aiNode* node, ModelNode& modelNode)
@@ -580,16 +648,14 @@ uint64 MeshImporter::Save(ResourceMesh* mesh, char** fileBuffer)
 	return size;
 }
 
-void MeshImporter::Load(const char* fileBuffer, ResourceMesh* mesh)
+bool MeshImporter::Load(char* fileBuffer, ResourceMesh* mesh, uint size)
 {
+	bool ret = true;
+
 	Timer timer;
 	timer.Start();
 
-	char* buffer = nullptr;
-
-	FileSystem::Load(fileBuffer, &buffer);
-
-	char* cursor = buffer;
+	char* cursor = fileBuffer;
 
 	uint ranges[4];
 	uint bytes = sizeof(ranges);
@@ -625,12 +691,11 @@ void MeshImporter::Load(const char* fileBuffer, ResourceMesh* mesh)
 	memcpy(mesh->texcoords, cursor, bytes);
 	cursor += bytes;
 
-	LOG("%s loaded in %d ms", fileBuffer, timer.Read());
-
-	//mesh->assetsFile = new char[strlen(fileBuffer)];
-	//strcpy(mesh->assetsFile.c_str(), fileBuffer);
+	LOG("%s loaded in %d ms", mesh->libraryFile.c_str(), timer.Read());
 
 	mesh->GenerateBuffers();
+
+	return ret;
 }
 
 #pragma endregion 
@@ -658,7 +723,14 @@ void TextureImporter::Import(char* fileBuffer, ResourceTexture* texture, uint si
 	ilBindImage(imageID);
 
 	ilEnable(IL_ORIGIN_SET);
-	ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
+	//ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
+
+	TextureImportingOptions importingOptions = App->resources->textureImportingOptions;
+
+	if (importingOptions.flip)
+	{
+		iluFlipImage();
+	}
 
 	error = ilGetError();
 	if (error != IL_NO_ERROR)
@@ -729,8 +801,9 @@ uint TextureImporter::Save(ResourceTexture* texture, char** fileBuffer)
 	return size;
 }
 
-void TextureImporter::Load(const char* path, ResourceTexture* texture)
+bool TextureImporter::Load(char* fileBuffer, ResourceTexture* texture, uint size)
 {
+	bool ret = true;
 	Timer timer;
 	timer.Start();
 
@@ -743,16 +816,13 @@ void TextureImporter::Load(const char* path, ResourceTexture* texture)
 	ilEnable(IL_ORIGIN_SET);
 	ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
 
-	char* buffer;
-	uint size = FileSystem::Load(path, &buffer);
-
-	if (ilLoadL(IL_DDS, buffer, size) == IL_FALSE)
+	if (ilLoadL(IL_DDS, fileBuffer, size) == IL_FALSE)
 	{
-		LOG_ERROR("Error importing texture %s - %d: %s", texture->assetsFile, ilGetError(), iluErrorString(ilGetError()));
+		LOG_ERROR("Error loading texture %s - %d: %s", texture->libraryFile.c_str(), ilGetError(), iluErrorString(ilGetError()));
 
 		ilBindImage(0);
 		ilDeleteImages(1, &imageID);
-		return;
+		return false;
 	}
 
 	ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
@@ -762,7 +832,8 @@ void TextureImporter::Load(const char* path, ResourceTexture* texture)
 	{
 		ilBindImage(0);
 		ilDeleteImages(1, &imageID);
-		LOG_ERROR("Error %d when loading %s: %s", error, path, iluErrorString(error));
+		LOG_ERROR("Error %d when loading %s: %s", error, texture->libraryFile.c_str(), iluErrorString(error));
+		//ret = false;
 	}
 	else
 	{
@@ -772,6 +843,7 @@ void TextureImporter::Load(const char* path, ResourceTexture* texture)
 	}
 
 	ilBindImage(0);
+	return ret;
 }
 
 bool TextureImporter::DrawImportingWindow(const char* file_to_import, TextureImportingOptions& importingOptions)
@@ -798,9 +870,7 @@ bool TextureImporter::DrawImportingWindow(const char* file_to_import, TextureImp
 	ImGui::Separator();
 	ImGui::Spacing();
 
-	ImGui::Checkbox("Flip X", &importingOptions.flip_x);
-
-	ImGui::Checkbox("Flip Y", &importingOptions.flip_y);
+	ImGui::Checkbox("Flip", &importingOptions.flip);
 
 	if (ImGui::Button("OK", ImVec2(40, 20))) {
 		App->resources->ImportFile(file_to_import);
@@ -906,22 +976,29 @@ uint64 MaterialImporter::Save(ResourceMaterial* material, char** fileBuffer)
 	return size;
 }
 
-void MaterialImporter::Load(const char* path, ResourceMaterial* material)
+bool MaterialImporter::Load(const char* fileBuffer, ResourceMaterial* material, uint size)
 {
+	bool ret = true;
 	Timer timer;
 	timer.Start();
 
-	char* buffer = nullptr;
-	FileSystem::Load(path, &buffer);
-
-	GnJSONObj material_data(buffer);
+	GnJSONObj material_data(fileBuffer);
 	material->diffuseTextureUID = material_data.GetInt("Diffuse Texture");
 
 	if(material->diffuseTextureUID != 0)
 		App->resources->LoadResource(material->diffuseTextureUID, ResourceType::RESOURCE_TEXTURE);
 
 	material_data.Release();
-	RELEASE_ARRAY(buffer);
+	return ret;
+}
+
+bool MaterialImporter::Unload(uint imageID)
+{
+	bool ret = true;
+
+	ilDeleteImages(1, &imageID);
+
+	return ret;
 }
 
 bool MaterialImporter::DeleteTexture(const char* material_library_path)

@@ -6,7 +6,9 @@
 ResourceTexture::ResourceTexture(uint UID) : Resource(UID, ResourceType::RESOURCE_TEXTURE),
 _id(0), _width(-1), _height(-1), _data(nullptr) , gpu_ID(-1){}
 
-ResourceTexture::~ResourceTexture() {}
+ResourceTexture::~ResourceTexture() {
+	
+}
 
 void ResourceTexture::GenerateBuffers()
 {

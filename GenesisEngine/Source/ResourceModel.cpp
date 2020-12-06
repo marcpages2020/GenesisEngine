@@ -42,14 +42,14 @@ uint ResourceModel::SaveMeta(GnJSONObj& base_object, uint last_modification)
 
 		if (nodes[i].meshID != -1)
 		{
-			node_object.AddInt("Mesh UID", nodes[i].meshID);
-			node_object.AddString("Mesh library path", App->resources->GetLibraryPath(nodes[i].meshID));
+			node_object.AddInt("MeshID", nodes[i].meshID);
+			node_object.AddString("mesh_library_path", App->resources->GetLibraryPath(nodes[i].meshID));
 		}
 
 		if (nodes[i].materialID != -1)
 		{
-			node_object.AddInt("Material UID", nodes[i].materialID);
-			node_object.AddString("Material library path", App->resources->GetLibraryPath(nodes[i].materialID));
+			node_object.AddInt("MaterialID", nodes[i].materialID);
+			node_object.AddString("material_library_path", App->resources->GetLibraryPath(nodes[i].materialID));
 		}
 
 		nodes_array.AddObject(node_object);

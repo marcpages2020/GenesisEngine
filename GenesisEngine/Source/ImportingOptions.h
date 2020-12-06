@@ -38,6 +38,5 @@ struct TextureImportingOptions
 {
 	TextureWrap textureWrap = TextureWrap::REPEAT;
 	TextureFiltering textureFiltering = TextureFiltering::NEAREST;
-	bool flip_x = false;
-	bool flip_y = false;
+	bool flip = false;
 };

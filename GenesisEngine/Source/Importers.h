@@ -37,12 +37,13 @@ namespace ModelImporter
 	void ReimportFile(char* fileBuffer, ResourceModel* resource, uint size);
 	uint64 Save(ResourceModel* model, char** fileBuffer);
 	void LoadTransform(aiNode* node, ModelNode& modelNode);
-	void Load(const char* path, ResourceModel* model);
+	bool Load(char* fileBuffer, ResourceModel* model, uint size);
 	bool DrawImportingWindow(const char* file_to_import, ModelImportingOptions& importingOptions);
 
 	GameObject* ConvertToGameObject(ResourceModel* model);
-	void ExtractInternalResources(const char* library_path, std::vector<uint>& meshes, std::vector<uint>& materials);
+	void ExtractInternalResources(const char* path, std::vector<uint>& meshes, std::vector<uint>& materials);
 	void ExtractInternalResources(const char* meta_file, ResourceModel& model);
+	bool InternalResourcesExist(const char* path);
 	void ConvertToDesiredAxis(aiNode* node, ModelNode& modelNode);
 }
 
@@ -53,7 +54,7 @@ namespace MeshImporter
 
 	void Import(const aiMesh* aimesh, ResourceMesh* mesh);
 	uint64 Save(ResourceMesh* mesh, char** fileBuffer);
-	void Load(const char* fileBuffer, ResourceMesh* mesh);
+	bool Load(char* fileBuffer, ResourceMesh* mesh, uint size);
 }
 
 namespace TextureImporter
@@ -62,7 +63,7 @@ namespace TextureImporter
 
 	void Import(char* fileBuffer, ResourceTexture* resource, uint size);
 	uint Save(ResourceTexture* texture, char** fileBuffer);
-	void Load(const char* path, ResourceTexture* texture);
+	bool Load(char* fileBuffer, ResourceTexture* texture, uint size);
 	bool DrawImportingWindow(const char* file_to_import, TextureImportingOptions& importingOptions);
 
 	std::string FindTexture(const char* texture_name, const char* model_directory);
@@ -74,7 +75,8 @@ namespace MaterialImporter
 {
 	void Import(const aiMaterial* aimaterial, ResourceMaterial* material);
 	uint64 Save(ResourceMaterial* material, char** fileBuffer);
-	void Load(const char* file_path, ResourceMaterial* material);
+	bool Load(const char* fileBuffer, ResourceMaterial* material, uint size);
+	bool Unload(uint imageID);
 
 	bool DeleteTexture(const char* material_library_path);
 	const char* ExtractTexture(const char* material_library_path);

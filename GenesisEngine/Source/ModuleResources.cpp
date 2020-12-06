@@ -164,6 +164,11 @@ bool ModuleResources::MetaUpToDate(const char* assets_file, const char* meta_fil
 			ret = true;
 		else
 			ret = false;
+
+		if (GetTypeFromPath(assets_file) == ResourceType::RESOURCE_MODEL) 
+		{
+			ret = ModelImporter::InternalResourcesExist(meta_file);
+		}
 	}
 
 	meta.Release();
@@ -333,6 +338,8 @@ uint ModuleResources::ImportInternalResource(const char* path, const void* data,
 
 uint ModuleResources::ReimportFile(const char* assets_file)
 {
+	LOG_WARNING("Reimporting file: %s", assets_file);
+
 	std::string meta_file = assets_file;
 	meta_file.append(".meta");
 
@@ -363,18 +370,17 @@ uint ModuleResources::ReimportFile(const char* assets_file)
 		LOG_ERROR("Fatal error when reimporting file: %s", assets_file);
 		return 0;
 	}
+	else
+	{
+		LOG("File: %s reimported successfully", assets_file);
+	}
 
 	SaveResource(resource);
 	ret = resource->GetUID();
 	ReleaseResource(ret);
 	RELEASE_ARRAY(fileBuffer);
 
-	//extract internal resources
-	//import file
-	//delete old files
-	//rename new files
-
-	return 0;
+	return ret;
 }
 
 void ModuleResources::CreateResourceData(uint UID, const char* assets_path, const char* library_path)
@@ -425,27 +431,23 @@ void ModuleResources::AddResourceToDelete(uint UID)
 	App->AddModuleToTaskStack(this);
 }
 
-bool ModuleResources::DeleteAssetsResource(const char* assets_path)
+bool ModuleResources::DeleteAsset(const char* assets_path)
 {
 	bool ret = true;
 
 	int UID = Find(assets_path);
 
 	if (UID != -1)
-	{
 		AddResourceToDelete(UID);
-	}
 
-//	FileSystem::Delete(assets_path);
+	FileSystem::Delete(assets_path);
 
 	return ret;
 }
 
-bool ModuleResources::DeleteResource(uint UID, bool delete_assets_file)
+bool ModuleResources::DeleteResource(uint UID)
 {
 	bool ret = true;
-	std::string assets_file = resources_data[UID].assetsFile;
-	std::string meta_file = assets_file + ".meta";
 
 	switch (resources_data[UID].type)
 	{
@@ -458,12 +460,9 @@ bool ModuleResources::DeleteResource(uint UID, bool delete_assets_file)
 		break;
 	}
 
-	FileSystem::Delete(resources_data[UID].assetsFile.c_str());
-	FileSystem::Delete(resources_data[UID].libraryFile.c_str());
-	FileSystem::Delete(meta_file.c_str());
-
 	ReleaseResource(UID);
-	//ReleaseResourceData(resource->GetUID());
+	FileSystem::Delete(resources_data[UID].libraryFile.c_str());
+	ReleaseResourceData(UID);
 
 	return ret;
 }
@@ -521,39 +520,72 @@ bool ModuleResources::DeleteInternalResource(uint UID)
 Resource* ModuleResources::LoadResource(uint UID, ResourceType type)
 {
 	Resource* resource = CreateResource(UID, type);
+	bool ret = true;
 
+	char* buffer = nullptr;
+	uint size = FileSystem::Load(resource->libraryFile.c_str(), &buffer);
+
+	if (size >= 0)
+	{
+		switch (resource->GetType())
+		{
+		case RESOURCE_MODEL:
+			if(ModelImporter::InternalResourcesExist(resource->libraryFile.c_str()))
+				ret = ModelImporter::Load(buffer, (ResourceModel*)resource, size);
+			else {
+				ReimportFile(resources_data[UID].assetsFile.c_str());
+				ret = ModelImporter::Load(buffer, (ResourceModel*)resource, size);
+			}
+			break;
+		case RESOURCE_MESH:
+			ret = MeshImporter::Load(buffer, (ResourceMesh*)resource, size);
+			break;
+		case RESOURCE_MATERIAL:
+			ret = MaterialImporter::Load(buffer, (ResourceMaterial*)resource, size);
+			break;
+		case RESOURCE_TEXTURE:
+			ret = TextureImporter::Load(buffer, (ResourceTexture*)resource, size);
+			LoadMetaFile(resource);
+			break;
+		case RESOURCE_SCENE:
+			break;
+		case RESOURCE_UNKNOWN:
+			break;
+		default:
+			break;
+		}
+	}
+	else
+		ret = false;
+	
+	if(ret == false)
+	{
+		LOG_ERROR("Resource: %d could not be loaded");
+		ReleaseResource(UID);
+		resource = nullptr;
+		return nullptr;
+	}
+
+	RELEASE_ARRAY(buffer);
+
+	return resource;
+}
+
+void ModuleResources::UnloadResource(Resource* resource)
+{
 	switch (resource->GetType())
 	{
-	case RESOURCE_MODEL:
-		ModelImporter::Load(resource->libraryFile.c_str(), (ResourceModel*)resource);
-		break;
-	case RESOURCE_MESH:
-		MeshImporter::Load(resource->libraryFile.c_str(), (ResourceMesh*)resource);
-		break;
-	case RESOURCE_MATERIAL:
-		MaterialImporter::Load(resource->libraryFile.c_str(), (ResourceMaterial*)resource);
-		break;
-	case RESOURCE_TEXTURE:
-		TextureImporter::Load(resource->libraryFile.c_str(), (ResourceTexture*)resource);
-		LoadMetaFile(resource);
-		break;
-	case RESOURCE_SCENE:
-		break;
-	case RESOURCE_UNKNOWN:
+	case ResourceType::RESOURCE_TEXTURE:
+		TextureImporter::UnloadTexture(((ResourceTexture*)resource)->GetID());
 		break;
 	default:
 		break;
 	}
 
-	return resources[UID];
-}
+	delete resource;
+	resource = nullptr;
 
-void ModuleResources::UnloadResource(uint UID)
-{
-	delete resources[UID];
-	resources[UID] = nullptr;
-
-	resources.erase(resources.find(UID));
+	resources.erase(resources.find(resource->GetUID()));
 }
 
 Resource* ModuleResources::CreateResource(const char* assetsPath, ResourceType type, uint UID)
@@ -640,7 +672,6 @@ Resource* ModuleResources::CreateResource(uint UID, ResourceType type, std::stri
 			resource->assetsFile = assets_file;
 		else 
 			resource->assetsFile = resources_data[UID].assetsFile;
-
 	}
 
 	return resource;
@@ -656,8 +687,11 @@ Resource* ModuleResources::RequestResource(uint UID)
 	}
 
 	const char* library_file = Find(UID);
-	ResourceType type = GetTypeFromPath(library_file);
 
+	if (library_file == nullptr)
+		return nullptr;
+
+	ResourceType type = GetTypeFromPath(library_file);
 	Resource* resource = LoadResource(UID, type);
 	
 	if (resource != nullptr)
@@ -672,6 +706,11 @@ GameObject* ModuleResources::RequestGameObject(const char* assets_file)
 	meta_file.append(".meta");
 	ResourceModel* model = (ResourceModel*)RequestResource(GetUIDFromMeta(meta_file.c_str()));
 
+	if (model == nullptr) 
+	{	
+		model = (ResourceModel*)RequestResource(ReimportFile(assets_file));
+	}
+
 	return ModelImporter::ConvertToGameObject(model);
 }
 
@@ -683,7 +722,7 @@ void ModuleResources::ReleaseResource(uint UID)
 		it->second->referenceCount--;
 
 		if (it->second->referenceCount <= 0)
-			UnloadResource(UID);
+			UnloadResource(it->second);
 	}
 }
 
