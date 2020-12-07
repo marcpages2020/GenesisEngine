@@ -137,7 +137,7 @@ void ModelImporter::ImportChildren(const aiScene* scene, aiNode* node, aiNode* p
 	ModelNode modelNode;
 
 	if (node == scene->mRootNode)
-		modelNode.name = FileSystem::GetFile(model->assetsFile.c_str());
+		modelNode.name = FileSystem::GetFileName(model->assetsFile.c_str());
 	else 
 		modelNode.name = node->mName.C_Str();
 
@@ -394,6 +394,12 @@ bool ModelImporter::InternalResourcesExist(const char* path)
 	GnJSONObj meta_data(buffer);
 	GnJSONArray nodes_array = meta_data.GetArray("Nodes");
 
+	//generate an assets file if the original file is a meta file
+	std::string assets_file = path;
+	size_t size = assets_file.find(".meta");
+	if (size != std::string::npos)
+		assets_file = assets_file.substr(0, size);
+
 	for (size_t i = 0; i < nodes_array.Size(); i++)
 	{
 		GnJSONObj nodeObject = nodes_array.GetObjectAt(i);
@@ -407,7 +413,11 @@ bool ModelImporter::InternalResourcesExist(const char* path)
 				ret = false;
 				LOG_ERROR("Mesh: %d not found", meshID);
 				break;
-			}			
+			}
+			else
+			{
+				App->resources->CreateResourceData(meshID, assets_file.c_str(), meshLibraryPath.c_str());
+			}
 		}
 
 		int materialID = nodeObject.GetInt("MaterialID");
@@ -419,6 +429,10 @@ bool ModelImporter::InternalResourcesExist(const char* path)
 				ret = false;
 				LOG_ERROR("Material: %s not found", materialLibraryPath.c_str());
 				break;
+			}
+			else
+			{
+				App->resources->CreateResourceData(materialID, assets_file.c_str(), materialLibraryPath.c_str());
 			}
 		}
 	}
@@ -741,7 +755,7 @@ uint TextureImporter::Save(ResourceTexture* texture, char** fileBuffer)
 	if (importingOptions.flip)
 		iluFlipImage();
 
-	iluAlienify();
+	ApplyImportingOptions(App->resources->textureImportingOptions);
 
 	ilSetInteger(IL_DXTC_DATA_FORMAT, IL_DXT5);
 	size = ilSaveL(IL_DDS, nullptr, 0);
@@ -775,7 +789,7 @@ bool TextureImporter::Load(char* fileBuffer, ResourceTexture* texture, uint size
 	timer.Start();
 
 	ILuint imageID = 0;
-	ILenum error = IL_NO_ERROR;
+	ILenum error;
 
 	ilGenImages(1, &imageID);
 	ilBindImage(imageID);
@@ -797,16 +811,19 @@ bool TextureImporter::Load(char* fileBuffer, ResourceTexture* texture, uint size
 	error = ilGetError();
 	if (error != IL_NO_ERROR)
 	{
-		ilBindImage(0);
-		ilDeleteImages(1, &imageID);
+		//ilBindImage(0);
+		//ilDeleteImages(1, &imageID);
 		LOG_ERROR("Error %d when loading %s: %s", error, texture->libraryFile.c_str(), iluErrorString(error));
 		//ret = false;
 	}
 	else
 	{
 		LOG("Texture loaded successfully from: %s in %d ms", texture->libraryFile.c_str(), timer.Read());
-
 		texture->FillData(ilGetData(), (uint)imageID, ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT));
+
+		//LOG("Texture loaded successfully from: %s in %d ms", texture->libraryFile.c_str(), timer.Read());
+
+		//texture->FillData(ilGetData(), (uint)imageID, ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT));
 	}
 
 	ilBindImage(0);
@@ -865,6 +882,42 @@ ILenum TextureImporter::GetFileFormat(const char* file)
 		file_format = IL_BMP;
 
 	return file_format;
+}
+
+void TextureImporter::ApplyImportingOptions(TextureImportingOptions importingOptions)
+{
+	if (importingOptions.flip)
+		iluFlipImage();
+
+	if (importingOptions.alienify)
+		iluAlienify();
+
+	if (importingOptions.blur_average)
+		iluBlurAvg(10);
+
+	if (importingOptions.blur_gaussian)
+		iluBlurGaussian;
+
+	if (importingOptions.equalize)
+		iluEqualize();
+
+	if (importingOptions.negativity)
+		iluNegative();
+
+	if (importingOptions.noise)
+		iluNoisify(importingOptions.noise_tolerance);
+
+	if (importingOptions.pixelize)
+		iluPixelize(importingOptions.pixelize_size);
+
+	if (importingOptions.sharpening) 
+		iluSharpen(importingOptions.sharpening_factor, importingOptions.sharpening_iterations);
+
+	iluGammaCorrect(importingOptions.gamma_correction);
+
+	bool pixelize = false;
+	bool sharpening = false;
+	float contrast = 1.0f;
 }
 
 #pragma endregion

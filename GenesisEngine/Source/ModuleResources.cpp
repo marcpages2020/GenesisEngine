@@ -142,7 +142,7 @@ void ModuleResources::OnFrameEnd()
 
 bool ModuleResources::MetaUpToDate(const char* assets_file, const char* meta_file)
 {
-	bool ret = false;
+	bool ret = true;
 
 	char* buffer = nullptr;
 	uint size = FileSystem::Load(meta_file, &buffer);
@@ -156,27 +156,27 @@ bool ModuleResources::MetaUpToDate(const char* assets_file, const char* meta_fil
 	{
 		std::string library_path = meta.GetString("Library path", "NoPath");
 
-		resources_data[UID].assetsFile = assets_file;
-		resources_data[UID].type = GetTypeFromPath(assets_file);
-
 		if (library_path == "NoPath")
-		{
 			library_path = Find(UID);
-		}
 
-		resources_data[UID].libraryFile = library_path;
-
-		resources_data[UID].type = GetTypeFromPath(library_path.c_str());
-
-		if (FileSystem::Exists(library_path.c_str()))
-			ret = true;
-		else
+		//check for the file itself to exist
+		if (!FileSystem::Exists(library_path.c_str())) 
+		{
 			ret = false;
-
-		if (GetTypeFromPath(assets_file) == ResourceType::RESOURCE_MODEL) 
+		}
+		//check its internal resources
+		else if (GetTypeFromPath(assets_file) == ResourceType::RESOURCE_MODEL) 
 		{
 			ret = ModelImporter::InternalResourcesExist(meta_file);
 		}
+
+		resources_data[UID].assetsFile = assets_file;
+		resources_data[UID].libraryFile = library_path;
+		resources_data[UID].type = GetTypeFromPath(assets_file);
+	}
+	else
+	{
+		ret = false;
 	}
 
 	meta.Release();
@@ -393,8 +393,10 @@ uint ModuleResources::ReimportFile(const char* assets_file)
 
 void ModuleResources::CreateResourceData(uint UID, const char* assets_path, const char* library_path)
 {
+	resources_data[UID].name = FileSystem::GetFileName(assets_path);
 	resources_data[UID].assetsFile = assets_path;
 	resources_data[UID].libraryFile = library_path;
+	resources_data[UID].type = GetTypeFromPath(assets_path);
 }
 
 void ModuleResources::DragDropFile(const char* path)
@@ -429,6 +431,12 @@ bool ModuleResources::DeleteAsset(const char* assets_path)
 		AddResourceToDelete(UID);
 
 	FileSystem::Delete(assets_path);
+
+	std::string meta_file = assets_path;
+	meta_file.append(".meta");
+
+	if(FileSystem::Exists(meta_file.c_str()))
+		FileSystem::Delete(meta_file.c_str());
 
 	return ret;
 }

@@ -11,10 +11,10 @@ class GameObject;
 
 struct ResourceData
 {
-	ResourceType type = ResourceType::RESOURCE_UNKNOWN;
 	std::string name;
 	std::string assetsFile;
 	std::string libraryFile;
+	ResourceType type = ResourceType::RESOURCE_UNKNOWN;
 };
 
 class ModuleResources : public Module 

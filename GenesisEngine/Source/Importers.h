@@ -67,6 +67,7 @@ namespace TextureImporter
 	std::string FindTexture(const char* texture_name, const char* model_directory);
 	void UnloadTexture(uint imageID);
 	ILenum GetFileFormat(const char* file);
+	void ApplyImportingOptions(TextureImportingOptions importingOptions);
 }
 
 namespace MaterialImporter

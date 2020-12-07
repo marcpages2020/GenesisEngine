@@ -50,10 +50,25 @@ uint ResourceTexture::SaveMeta(GnJSONObj& base_object, uint last_modification)
 	TextureWrap textureWrap = TextureWrap::REPEAT;
 	TextureFiltering textureFiltering = TextureFiltering::NEAREST;
 	
-	base_object.AddInt("textureWrap", (int)App->resources->textureImportingOptions.textureWrap);
-	base_object.AddInt("textureFiltering", (int)App->resources->textureImportingOptions.textureFiltering);
-	//base_object.AddInt("width", width);
-	//base_object.AddInt("height", height);
+	TextureImportingOptions importingOptions = App->resources->textureImportingOptions;
+
+	base_object.AddInt("texture_wrap", (int)App->resources->textureImportingOptions.textureWrap);
+	base_object.AddInt("texture_filtering", (int)App->resources->textureImportingOptions.textureFiltering);
+	base_object.AddBool("flip", importingOptions.flip);
+	base_object.AddBool("alienify", importingOptions.alienify);
+	base_object.AddBool("blur_average", importingOptions.blur_average);
+	base_object.AddBool("blur_gaussian", importingOptions.blur_gaussian);
+	base_object.AddBool("equalize", importingOptions.equalize);
+	base_object.AddBool("negativity", importingOptions.negativity);
+	base_object.AddBool("noise", importingOptions.noise);
+	base_object.AddFloat("noise_tolerance", importingOptions.noise_tolerance);
+	base_object.AddBool("pixelize", importingOptions.pixelize);
+	base_object.AddFloat("pixel_size", importingOptions.pixelize_size);
+	base_object.AddFloat("gamma_correction", importingOptions.gamma_correction);
+	base_object.AddBool("sharpeining", importingOptions.sharpening);
+	base_object.AddFloat("sharpening_factor", importingOptions.sharpening_factor);
+	base_object.AddInt("sharpening_iterations", importingOptions.sharpening_iterations);
+	base_object.AddFloat("contrast", importingOptions.contrast);
 
 	return 1;
 }

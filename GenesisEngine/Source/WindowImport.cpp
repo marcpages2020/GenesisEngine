@@ -111,12 +111,11 @@ bool WindowImport::DrawTextureImportingWindow()
 		//ImGui::SameLine();
 		ImGui::Checkbox("Alienify", &_textureImportingOptions.alienify);
 		//ImGui::SameLine();
-		ImGui::Checkbox("Equalize", &_textureImportingOptions.equialize);
+		ImGui::Checkbox("Equalize", &_textureImportingOptions.equalize);
 
 		ImGui::NextColumn();
-		ImGui::Checkbox("Blur", &_textureImportingOptions.blur);
-		//ImGui::SameLine();
-		ImGui::Checkbox("Gamma Correction", &_textureImportingOptions.gamma_correction);
+		ImGui::Checkbox("Blur Average", &_textureImportingOptions.blur_average);
+		ImGui::Checkbox("Blur Gaussian", &_textureImportingOptions.blur_gaussian);
 		//ImGui::SameLine();
 		ImGui::Checkbox("Negativity", &_textureImportingOptions.negativity);
 
@@ -131,6 +130,12 @@ bool WindowImport::DrawTextureImportingWindow()
 		ImGui::Spacing();
 		ImGui::Columns(1);
 		ImGui::SliderFloat("Contrast", &_textureImportingOptions.contrast, 0.0f, 1.7f);
+		ImGui::SliderFloat("Gamma Correction", &_textureImportingOptions.gamma_correction, 0.0f, 2.0f);
+		ImGui::SliderFloat("Noise Tolerance", &_textureImportingOptions.noise_tolerance, 0.0f, 1.0f);
+		ImGui::SliderInt("Pixel Size", &_textureImportingOptions.pixelize_size, 0, 20);
+		ImGui::SliderFloat("Sharpening factor", &_textureImportingOptions.sharpening_factor, 0.0f, 2.5f);
+		ImGui::SliderInt("Sharpening Iterations", &_textureImportingOptions.sharpening_iterations, 1, 10);
+
 
 		ImGui::Spacing();
 		if (ImGui::Button("OK", ImVec2(40, 20))) 

@@ -104,15 +104,15 @@ void Material::Save(GnJSONArray& save_array)
 
 void Material::Load(GnJSONObj& load_object)
 {
-	uint materialUID = load_object.GetInt("Material UID");
+	int materialUID = load_object.GetInt("Material UID");
 	_resource = (ResourceMaterial*)App->resources->RequestResource(materialUID);
 
-	uint textureUID = load_object.GetInt("Texture UID", -1);
-	_resource->diffuseTextureUID = textureUID;
+	int textureUID = load_object.GetInt("Texture UID", -1);
 
-	if (textureUID != -1) {
+	if (_resource != nullptr && textureUID != -1) 
+	{
+		_resource->diffuseTextureUID = textureUID;
 		_diffuseTexture = (ResourceTexture*)App->resources->RequestResource(textureUID);
-		//GenerateTextureBuffers();
 	}
 
 	if (_diffuseTexture == nullptr)
