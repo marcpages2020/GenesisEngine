@@ -21,11 +21,12 @@ public:
 	int GeWidth();
 	int GetHeight();
 	GLubyte* GetData();
+	uint GetGpuID();
 
 private:
 	uint _id;
 	int _width;
 	int _height;
 	GLubyte* _data;
-	uint gpu_ID;
+	uint _gpu_ID;
 };

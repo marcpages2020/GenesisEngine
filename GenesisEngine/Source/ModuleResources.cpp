@@ -18,7 +18,7 @@
 
 #include "MathGeoLib/include/MathGeoLib.h"
 
-ModuleResources::ModuleResources(bool start_enabled) : Module(start_enabled), _toDeleteResource(-1)
+ModuleResources::ModuleResources(bool start_enabled) : Module(start_enabled), _toDeleteAsset(-1), _toDeleteResource(-1)
 {
 	name = "resources";
 }
@@ -137,6 +137,15 @@ void ModuleResources::OnFrameEnd()
 	if(_toDeleteResource != -1)
 	{
 		DeleteResource(_toDeleteResource);
+		_toDeleteResource = -1;
+	}
+
+	if (_toDeleteAsset != -1)
+	{
+		std::string assets_path = resources_data[_toDeleteAsset].assetsFile;
+		DeleteResource(_toDeleteAsset);
+		DeleteAsset(assets_path.c_str());
+		_toDeleteAsset = -1;
 	}
 }
 
@@ -185,13 +194,13 @@ bool ModuleResources::MetaUpToDate(const char* assets_file, const char* meta_fil
 	return ret;
 }
 
-uint ModuleResources::GetUIDFromMeta(const char* meta_file)
+int ModuleResources::GetUIDFromMeta(const char* meta_file)
 {
 	char* buffer = nullptr;
 	uint size = FileSystem::Load(meta_file, &buffer);
 	GnJSONObj meta(buffer);
 
-	int UID = meta.GetInt("UID", 0);
+	int UID = meta.GetInt("UID", -1);
 
 	meta.Release();
 	RELEASE_ARRAY(buffer);
@@ -208,13 +217,13 @@ int ModuleResources::Find(const char* assets_file)
 
 	//First we loop through all loaded resources
 	for (resource_it; resource_it != resources.end(); resource_it++) {
-		if (resource_it->second->assetsFile == assets_file)
+		if (resource_it->second->assetsFile == FileSystem::ToLower(assets_file))
 			return resource_it->first;
 	}
 
 	//If not found we loop through all not loaded but known resources
 	for (resources_data_it; resources_data_it != resources_data.end(); resources_data_it++) {
-		if (resources_data_it->second.assetsFile == assets_file)
+		if (resources_data_it->second.assetsFile == FileSystem::ToLower(assets_file))
 			return resources_data_it->first;
 	}
 
@@ -358,6 +367,12 @@ uint ModuleResources::ReimportFile(const char* assets_file)
 	char* fileBuffer;
 	uint size = FileSystem::Load(assets_file, &fileBuffer);
 
+	if (size <= 0)
+	{
+		LOG_ERROR("Trying to load unexisting file: %s", assets_file);
+		return 0;
+	}
+
 	switch (type)
 	{
 	case ResourceType::RESOURCE_MODEL:
@@ -391,12 +406,12 @@ uint ModuleResources::ReimportFile(const char* assets_file)
 	return ret;
 }
 
-void ModuleResources::CreateResourceData(uint UID, const char* assets_path, const char* library_path)
+void ModuleResources::CreateResourceData(uint UID, const char* name, const char* assets_path, const char* library_path)
 {
-	resources_data[UID].name = FileSystem::GetFileName(assets_path);
+	resources_data[UID].name = name;
 	resources_data[UID].assetsFile = assets_path;
 	resources_data[UID].libraryFile = library_path;
-	resources_data[UID].type = GetTypeFromPath(assets_path);
+	resources_data[UID].type = GetTypeFromPath(library_path);
 }
 
 void ModuleResources::DragDropFile(const char* path)
@@ -415,6 +430,14 @@ void ModuleResources::DragDropFile(const char* path)
 	import_window->Enable(final_path, GetTypeFromPath(path));
 }
 
+void ModuleResources::AddAssetToDelete(const char* asset_path)
+{
+	std::string meta_file = asset_path;
+	meta_file.append(".meta");
+	_toDeleteAsset = GetUIDFromMeta(meta_file.c_str());
+	App->AddModuleToTaskStack(this);
+}
+
 void ModuleResources::AddResourceToDelete(uint UID)
 {
 	_toDeleteResource = UID;
@@ -424,11 +447,6 @@ void ModuleResources::AddResourceToDelete(uint UID)
 bool ModuleResources::DeleteAsset(const char* assets_path)
 {
 	bool ret = true;
-
-	int UID = Find(assets_path);
-
-	if (UID != -1)
-		AddResourceToDelete(UID);
 
 	FileSystem::Delete(assets_path);
 
@@ -493,23 +511,10 @@ bool ModuleResources::DeleteInternalResource(uint UID)
 	bool ret = true;
 
 	std::string library_path = Find(UID);
-	ResourceType type = GetTypeFromPath(library_path.c_str());
-
-	if (type == ResourceType::RESOURCE_MESH) 
-	{
-		ret = FileSystem::Delete(library_path.c_str());
-	}
-	else if (type == ResourceType::RESOURCE_MATERIAL) 
-	{
-		const char* texture_library_path = MaterialImporter::ExtractTexture(library_path.c_str());
-
-		if (texture_library_path != nullptr) {
-			DeleteResource(Find(texture_library_path));
-			ret = FileSystem::Delete(library_path.c_str());
-		}
-	}
+	ret = FileSystem::Delete(library_path.c_str());
 
 	ReleaseResource(UID);
+
 	return ret;
 }
 
@@ -597,9 +602,6 @@ Resource* ModuleResources::CreateResource(const char* assetsPath, ResourceType t
 	if(UID == 0)
 		UID = GenerateUID();
 
-	char* buffer;
-	uint size = FileSystem::Load(assetsPath, &buffer);
-
 	switch (type)
 	{
 	case RESOURCE_MODEL:
@@ -635,7 +637,6 @@ Resource* ModuleResources::CreateResource(const char* assetsPath, ResourceType t
 		resources_data[UID].type = type;
 	}
 
-	RELEASE_ARRAY(buffer);
 	return resource;
 }
 
@@ -700,6 +701,14 @@ Resource* ModuleResources::RequestResource(uint UID)
 		resource->referenceCount++;
 
 	return resource;
+}
+
+ResourceData ModuleResources::RequestResourceData(uint UID)
+{
+	std::map<uint, ResourceData>::iterator it = resources_data.find(UID);
+
+	if (it != resources_data.end()) 
+		return it->second;
 }
 
 GameObject* ModuleResources::RequestGameObject(const char* assets_file)
@@ -927,6 +936,13 @@ const char* ModuleResources::GenerateAssetsPath(const char* path)
 	}
 
 	return library_path;
+}
+
+std::string ModuleResources::GenerateMetaFile(const char* assets_path)
+{
+	std::string meta_file = assets_path;
+	meta_file.append(".meta");
+	return meta_file;
 }
 
 void ModuleResources::AddFileExtension(std::string& file, ResourceType type)

@@ -244,7 +244,8 @@ bool ModelImporter::Load(char* fileBuffer, ResourceModel* model, uint size)
 		modelNode.meshID = nodeObject.GetInt("MeshID");
 		if (modelNode.meshID != -1) 
 		{
-			App->resources->CreateResourceData(modelNode.meshID, model->assetsFile.c_str(), nodeObject.GetString("mesh_library_path", "No Path"));
+			App->resources->CreateResourceData(modelNode.meshID, modelNode.name.c_str(),
+							model->assetsFile.c_str(), nodeObject.GetString("mesh_library_path", "No Path"));
 			meshes.emplace(modelNode.meshID);
 			//if (App->resources->LoadResource(modelNode.meshID, ResourceType::RESOURCE_MESH) == nullptr)
 				//ret = false;
@@ -253,7 +254,8 @@ bool ModelImporter::Load(char* fileBuffer, ResourceModel* model, uint size)
 		modelNode.materialID = nodeObject.GetInt("MaterialID");
 		if (modelNode.materialID != -1)
 		{
-			App->resources->CreateResourceData(modelNode.materialID, model->assetsFile.c_str(), nodeObject.GetString("material_library_path", "No Path"));
+			App->resources->CreateResourceData(modelNode.materialID, modelNode.name.c_str(), 
+							model->assetsFile.c_str(), nodeObject.GetString("material_library_path", "No Path"));
 			materials.emplace(modelNode.materialID);
 
 			//if (App->resources->LoadResource(modelNode.materialID, ResourceType::RESOURCE_MATERIAL) == nullptr)
@@ -340,7 +342,7 @@ void ModelImporter::ExtractInternalResources(const char* path, std::vector<uint>
 	{
 		GnJSONObj nodeObject = nodes_array.GetObjectAt(i);
 
-		int meshID = nodeObject.GetInt("Mesh UID");
+		int meshID = nodeObject.GetInt("MeshID");
 		if (meshID != -1)
 		{
 			//avoid duplicating meshes
@@ -349,7 +351,7 @@ void ModelImporter::ExtractInternalResources(const char* path, std::vector<uint>
 			}
 		}
 
-		int materialID = nodeObject.GetInt("Material UID");
+		int materialID = nodeObject.GetInt("MaterialID");
 		if (materialID != -1) 
 		{
 			//avoid duplicating materials
@@ -403,6 +405,7 @@ bool ModelImporter::InternalResourcesExist(const char* path)
 	for (size_t i = 0; i < nodes_array.Size(); i++)
 	{
 		GnJSONObj nodeObject = nodes_array.GetObjectAt(i);
+		std::string nodeName = nodeObject.GetString("Name", "No Name");
 
 		int meshID = nodeObject.GetInt("MeshID");
 		if (meshID != -1)
@@ -416,7 +419,7 @@ bool ModelImporter::InternalResourcesExist(const char* path)
 			}
 			else
 			{
-				App->resources->CreateResourceData(meshID, assets_file.c_str(), meshLibraryPath.c_str());
+				App->resources->CreateResourceData(meshID, nodeName.c_str(),assets_file.c_str(), meshLibraryPath.c_str());
 			}
 		}
 
@@ -432,7 +435,7 @@ bool ModelImporter::InternalResourcesExist(const char* path)
 			}
 			else
 			{
-				App->resources->CreateResourceData(materialID, assets_file.c_str(), materialLibraryPath.c_str());
+				App->resources->CreateResourceData(materialID, nodeName.c_str(), assets_file.c_str(), materialLibraryPath.c_str());
 			}
 		}
 	}
@@ -808,6 +811,9 @@ bool TextureImporter::Load(char* fileBuffer, ResourceTexture* texture, uint size
 
 	ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
 
+	LOG("Texture loaded successfully from: %s in %d ms", texture->libraryFile.c_str(), timer.Read());
+	texture->FillData(ilGetData(), (uint)imageID, ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT));
+
 	error = ilGetError();
 	if (error != IL_NO_ERROR)
 	{
@@ -818,11 +824,7 @@ bool TextureImporter::Load(char* fileBuffer, ResourceTexture* texture, uint size
 	}
 	else
 	{
-		LOG("Texture loaded successfully from: %s in %d ms", texture->libraryFile.c_str(), timer.Read());
-		texture->FillData(ilGetData(), (uint)imageID, ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT));
-
 		//LOG("Texture loaded successfully from: %s in %d ms", texture->libraryFile.c_str(), timer.Read());
-
 		//texture->FillData(ilGetData(), (uint)imageID, ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT));
 	}
 
@@ -942,7 +944,11 @@ void MaterialImporter::Import(const aiMaterial* aimaterial, ResourceMaterial* ma
 
 		if(file_path.size() > 0)
 		{
-			material->diffuseTextureUID = App->resources->ImportFile(file_path.c_str());
+			std::string meta_file = App->resources->GenerateMetaFile(file_path.c_str());
+			if (!FileSystem::Exists(meta_file.c_str()))
+				material->diffuseTextureUID = App->resources->ImportFile(file_path.c_str());
+			else
+				material->diffuseTextureUID = App->resources->Find(file_path.c_str());
 		}
 
 		material->diffuseColor.r = aiDiffuseColor.r;

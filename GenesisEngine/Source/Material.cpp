@@ -152,7 +152,7 @@ void Material::OnEditor()
 
 			ImGui::Spacing();
 
-			ImGui::Image((ImTextureID)_diffuseTexture->GetID(), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
+			ImGui::Image((ImTextureID)_diffuseTexture->GetGpuID(), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
 			if (ImGui::BeginDragDropTarget())
 			{
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSETS"))

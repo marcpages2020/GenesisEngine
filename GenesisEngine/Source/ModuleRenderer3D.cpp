@@ -249,7 +249,6 @@ void ModuleRenderer3D::UpdateProjectionMatrix(float* projectionMatrix)
 	glLoadIdentity();
 	glLoadMatrixf(App->camera->GetViewMatrix());
 
-	//TODO: Load from outside matrix
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glLoadMatrixf(App->camera->GetProjectionMatrix());

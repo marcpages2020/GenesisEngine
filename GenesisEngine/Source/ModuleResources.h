@@ -30,7 +30,7 @@ public:
 	void OnFrameEnd() override;
 
 	bool MetaUpToDate(const char* assets_file, const char* meta_file);
-	uint GetUIDFromMeta(const char* meta_file);
+	int GetUIDFromMeta(const char* meta_file);
 	int Find(const char* assets_file);
 	const char* Find(uint UID);
 	const char* GetLibraryPath(uint UID);
@@ -39,10 +39,10 @@ public:
 	uint ImportFile(const char* assets_file);
 	uint ImportInternalResource(const char* path, const void* data, ResourceType type, uint UID = 0);
 	uint ReimportFile(const char* assets_file);
-	void CreateResourceData(uint UID, const char* assets_path = "No path", const char* library_path = "No path");
+	void CreateResourceData(uint UID, const char* name = "No Name", const char* assets_path = "No path", const char* library_path = "No path");
 	void DragDropFile(const char* path);
-	void DrawImportingWindow();
 
+	void AddAssetToDelete(const char* asset_path);
 	void AddResourceToDelete(uint UID);
 	bool DeleteAsset(const char* assets_path);
 	bool DeleteResource(uint UID);
@@ -55,6 +55,7 @@ public:
 	Resource* CreateResource(const char* assetsPath, ResourceType type, uint UID = 0);
 	Resource* CreateResource(uint UID, ResourceType type, std::string assets_file = "");
 	Resource* RequestResource(uint UID);
+	ResourceData RequestResourceData(uint UID);
 	GameObject* RequestGameObject(const char* assets_file);
 	void ReleaseResource(uint UID);
 	void ReleaseResourceData(uint UID);
@@ -68,6 +69,7 @@ public:
 	std::string GenerateLibraryPath(uint uid, ResourceType type);
 	std::string GetLibraryFolder(const char* file_in_assets);
 	const char* GenerateAssetsPath(const char* path);
+	std::string GenerateMetaFile(const char* assets_path);
 	void AddFileExtension(std::string& file, ResourceType type);
 
 public:
@@ -80,5 +82,6 @@ private:
 private:
 	std::map<uint, Resource*> resources;
 	std::map<uint, ResourceData> resources_data;
+	int _toDeleteAsset;
 	int _toDeleteResource;
 };

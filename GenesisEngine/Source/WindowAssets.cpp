@@ -91,8 +91,7 @@ void WindowAssets::DrawDirectoryRecursive(const char* directory, const char* fil
 				{
 					std::string file_to_delete = directory;
 					file_to_delete.append("/" + str);
-					App->resources->DeleteAsset(file_to_delete.c_str());
-					ImGui::CloseCurrentPopup();
+					App->resources->AddAssetToDelete(file_to_delete.c_str());
 					ImGui::CloseCurrentPopup();
 				}
 				ImGui::EndPopup();
@@ -155,7 +154,7 @@ void WindowAssets::DrawCurrentFolder()
 			if (ImGui::Button("Delete"))
 			{
 				std::string file_to_delete = current_folder + "/" + files[i];
-				App->resources->DeleteAsset(file_to_delete.c_str());
+				App->resources->AddAssetToDelete(file_to_delete.c_str());
 				ImGui::CloseCurrentPopup();
 			}
 			ImGui::EndPopup();
@@ -178,7 +177,8 @@ void WindowAssets::DrawCurrentFolder()
 				for (size_t m = 0; m < meshes.size(); m++)
 				{
 					ImGui::PushID(meshes[m]);
-					ImGui::Text("%d", meshes[m]);
+					ResourceData meshData = App->resources->RequestResourceData(meshes[m]);
+					ImGui::Text("%s", meshData.name.c_str());
 					if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
 					{
 						ImGui::SetDragDropPayload("MESHES", &(meshes[m]), sizeof(int));

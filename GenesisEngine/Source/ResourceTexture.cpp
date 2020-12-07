@@ -4,7 +4,7 @@
 #include "Application.h"
 
 ResourceTexture::ResourceTexture(uint UID) : Resource(UID, ResourceType::RESOURCE_TEXTURE),
-_id(0), _width(-1), _height(-1), _data(nullptr) , gpu_ID(0)
+_id(0), _width(-1), _height(-1), _data(nullptr) , _gpu_ID(0)
 {}
 
 ResourceTexture::~ResourceTexture() 
@@ -15,8 +15,8 @@ ResourceTexture::~ResourceTexture()
 void ResourceTexture::GenerateBuffers()
 {
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	glGenTextures(1, &gpu_ID);
-	glBindTexture(GL_TEXTURE_2D, gpu_ID);
+	glGenTextures(1, &_gpu_ID);
+	glBindTexture(GL_TEXTURE_2D, _gpu_ID);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -30,7 +30,7 @@ void ResourceTexture::GenerateBuffers()
 
 void ResourceTexture::BindTexture()
 {
-	glBindTexture(GL_TEXTURE_2D, gpu_ID);
+	glBindTexture(GL_TEXTURE_2D, _gpu_ID);
 }
 
 void ResourceTexture::FillData(GLubyte* data, uint id, int width, int height)
@@ -76,8 +76,8 @@ uint ResourceTexture::SaveMeta(GnJSONObj& base_object, uint last_modification)
 void ResourceTexture::Load(GnJSONObj& base_object)
 {
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	glGenTextures(1, &gpu_ID);
-	glBindTexture(GL_TEXTURE_2D, gpu_ID);
+	glGenTextures(1, &_gpu_ID);
+	glBindTexture(GL_TEXTURE_2D, _gpu_ID);
 
 	TextureWrap textureWrap = (TextureWrap)base_object.GetInt("textureWrap", 2);
 
@@ -127,4 +127,6 @@ int ResourceTexture::GeWidth() { return _width; }
 int ResourceTexture::GetHeight() {	return _height; }
 
 GLubyte* ResourceTexture::GetData() { return _data; }
+
+uint ResourceTexture::GetGpuID() { return _gpu_ID; }
 

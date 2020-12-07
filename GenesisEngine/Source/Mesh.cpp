@@ -96,8 +96,10 @@ void GnMesh::Update()
 
 void GnMesh::Render()
 {
-	if (!App->resources->Exists(_resourceUID)) 
+	if (!App->resources->Exists(_resourceUID)) {
+		_resource = nullptr;
 		return;
+	}
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);

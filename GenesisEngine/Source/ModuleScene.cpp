@@ -30,8 +30,8 @@ bool ModuleScene::Start()
 	//GameObject* baker_house = App->resources->RequestGameObject("Assets/Models/baker_house/BakerHouse.fbx");
 	//AddGameObject(baker_house);
 	
-	GameObject* street_environment = App->resources->RequestGameObject("Assets/Models/street2/street2.fbx");
-	AddGameObject(street_environment);
+	//GameObject* street_environment = App->resources->RequestGameObject("Assets/Models/street2/street2.fbx");
+	//AddGameObject(street_environment);
 	
 	GameObject* camera = new GameObject();
 	camera->AddComponent(ComponentType::CAMERA);
