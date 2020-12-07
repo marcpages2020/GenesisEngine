@@ -56,34 +56,39 @@ void ModelImporter::Import(char* fileBuffer, ResourceModel* model, uint size)
 			model->materials.push_back(App->resources->ImportInternalResource(model->assetsFile.c_str(), aimaterial, ResourceType::RESOURCE_MATERIAL));
 		}
 
-		/*
-		for (size_t i = 0; i < scene->mNumLights; i++)
+		if (!App->resources->modelImportingOptions.ignoreLights)
 		{
-			Light light;
-			aiLight* ai_light = scene->mLights[i];
-			light.SetPos(ai_light->mPosition.x, ai_light->mPosition.y, ai_light->mPosition.z);
-			light.ambient = Color(ai_light->mColorAmbient.r, ai_light->mColorAmbient.g, ai_light->mColorAmbient.b);
-			light.diffuse = Color(ai_light->mColorDiffuse.r, ai_light->mColorDiffuse.g, ai_light->mColorDiffuse.b);
-			model->lights.push_back(light);
+			for (size_t i = 0; i < scene->mNumLights; i++)
+			{
+				Light* light = new Light();
+				aiLight* ai_light = scene->mLights[i];
+				light->name = ai_light->mName.C_Str();
+				light->SetPos(ai_light->mPosition.x, ai_light->mPosition.y, ai_light->mPosition.z);
+				light->ambient = Color(ai_light->mColorAmbient.r, ai_light->mColorAmbient.g, ai_light->mColorAmbient.b);
+				light->diffuse = Color(ai_light->mColorDiffuse.r, ai_light->mColorDiffuse.g, ai_light->mColorDiffuse.b);
+				model->lights.push_back(light);
+			}
 		}
 
-		for (size_t i = 0; i < scene->mNumCameras; i++)
+		if (!App->resources->modelImportingOptions.ignoreCameras)
 		{
-			Camera camera;
-			aiCamera* aicamera = scene->mCameras[i];
-			//TODO: set aspect ratio
-			camera.SetHorizontalFieldOfView(aicamera->mHorizontalFOV);
-			camera.SetPosition(float3(aicamera->mPosition.x, aicamera->mPosition.y, aicamera->mPosition.z));
-			camera.SetNearPlaneDistance(aicamera->mClipPlaneNear);
-			camera.SetFarPlaneDistance(aicamera->mClipPlaneFar);
-			camera.SetReference(float3(aicamera->mLookAt.x, aicamera->mLookAt.y, aicamera->mLookAt.z));
+			for (size_t i = 0; i < scene->mNumCameras; i++)
+			{
+				Camera* camera = new Camera;
+				aiCamera* aicamera = scene->mCameras[i];
+				camera->name = aicamera->mName.C_Str();
+				camera->SetHorizontalFieldOfView(aicamera->mHorizontalFOV);
+				camera->SetPosition(float3(aicamera->mPosition.x, aicamera->mPosition.y, aicamera->mPosition.z));
+				camera->SetNearPlaneDistance(aicamera->mClipPlaneNear);
+				camera->SetFarPlaneDistance(aicamera->mClipPlaneFar);
+				camera->SetReference(float3(aicamera->mLookAt.x, aicamera->mLookAt.y, aicamera->mLookAt.z));
+				model->cameras.push_back(camera);
+			}
 		}
-		*/
 
 		aiNode* rootNode = scene->mRootNode;
 		ImportChildren(scene, rootNode, nullptr, 0, model);
-		ConvertToDesiredAxis(rootNode, model->nodes[0]);		
-
+		ConvertToDesiredAxis(rootNode, model->nodes[0]);
 		aiReleaseImport(scene);
 
 		LOG("%s: imported in %d ms", model->assetsFile.c_str(), timer.Read());
@@ -124,6 +129,18 @@ uint64 ModelImporter::Save(ResourceModel* model, char** fileBuffer)
 		}
 
 		nodes_array.AddObject(node_object);
+	}
+
+	GnJSONArray lights_array = base_object.AddArray("Lights");
+	for (size_t i = 0; i < model->lights.size(); i++)
+	{
+		model->lights[i]->Save(lights_array);
+	}
+
+	GnJSONArray cameras_array = base_object.AddArray("Cameras");
+	for (size_t i = 0; i < model->cameras.size(); i++)
+	{
+		model->cameras[i]->Save(cameras_array);
 	}
 
 	uint size = base_object.Save(&buffer);
@@ -962,7 +979,7 @@ void MaterialImporter::Import(const aiMaterial* aimaterial, ResourceMaterial* ma
 uint64 MaterialImporter::Save(ResourceMaterial* material, char** fileBuffer)
 {
 	GnJSONObj base_object;
-	base_object.AddInt("Diffuse Texture", material->diffuseTextureUID);
+	base_object.AddInt("diffuseTexture", material->diffuseTextureUID);
 
 	base_object.AddColor("diffuseColor", material->diffuseColor);
 
@@ -980,7 +997,7 @@ bool MaterialImporter::Load(const char* fileBuffer, ResourceMaterial* material, 
 	timer.Start();
 
 	GnJSONObj material_data(fileBuffer);
-	material->diffuseTextureUID = material_data.GetInt("Diffuse Texture");
+	material->diffuseTextureUID = material_data.GetInt("diffuseTexture");
 
 
 	if(material->diffuseTextureUID != 0)
@@ -1010,7 +1027,7 @@ bool MaterialImporter::DeleteTexture(const char* material_library_path)
 
 	GnJSONObj material_data(buffer);
 
-	int diffuseTextureUID = material_data.GetInt("Diffuse Texture");
+	int diffuseTextureUID = material_data.GetInt("diffuseTexture");
 	const char* texture_library_path = App->resources->Find(diffuseTextureUID);
 
 	if (texture_library_path != nullptr)
@@ -1035,7 +1052,7 @@ const char* MaterialImporter::ExtractTexture(const char* material_library_path)
 
 	GnJSONObj material_data(buffer);
 
-	int diffuseTextureUID = material_data.GetInt("Diffuse Texture");
+	int diffuseTextureUID = material_data.GetInt("diffuseTexture");
 	const char* texture_library_path = App->resources->Find(diffuseTextureUID);
 
 	material_data.Release();

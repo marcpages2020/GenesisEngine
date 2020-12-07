@@ -155,20 +155,14 @@ void GnMesh::OnEditor()
 	if (ImGui::CollapsingHeader("Mesh", ImGuiTreeNodeFlags_DefaultOpen))
 	{
 		ImGui::Checkbox(" Enabled", &enabled);
-		ImGui::Text("Vertices: %d Indices: %d", _resource->vertices_amount, _resource->indices_amount);
 
-		ImGui::Spacing();
-
-		ImGui::Checkbox("Vertex Normals", &draw_vertex_normals);
-		ImGui::SameLine();
-		ImGui::Checkbox("Face Normals", &draw_face_normals);
-
+		ImGui::Separator();
 		ImGui::Spacing();
 
 		std::string meshID = "Mesh: ";
-		meshID.append(std::to_string(_resourceUID));
+		meshID.append(_resource->name);
 		ImGui::Button(meshID.c_str());
-		//ImGui::Image((ImTextureID)0, ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
+
 		if (ImGui::BeginDragDropTarget())
 		{
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("MESHES"))
@@ -179,6 +173,26 @@ void GnMesh::OnEditor()
 			}
 			ImGui::EndDragDropTarget();
 		}
+
+		ImGui::Spacing();
+
+		ImGui::Text("Assets path: %s", _resource->assetsFile.c_str());
+		ImGui::Text("Library path: %s", _resource->libraryFile.c_str());
+
+		ImGui::Spacing();
+		ImGui::Separator();
+		ImGui::Spacing();
+
+		ImGui::Text("Vertices: %d Indices: %d", _resource->vertices_amount, _resource->indices_amount);
+		ImGui::Spacing();
+
+
+
+		ImGui::Spacing();
+
+		ImGui::Checkbox("Vertex Normals", &draw_vertex_normals);
+		ImGui::SameLine();
+		ImGui::Checkbox("Face Normals", &draw_face_normals);
 
 		ImGui::Spacing();
 	}

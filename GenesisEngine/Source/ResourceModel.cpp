@@ -2,6 +2,8 @@
 #include "Application.h"
 #include "GnJSON.h"
 #include "Importers.h"
+#include "Camera.h"
+#include "Light.h"
 
 ResourceModel::ResourceModel(uint UID) : Resource(UID, ResourceType::RESOURCE_MODEL) {}
 
@@ -11,6 +13,20 @@ ResourceModel::~ResourceModel()
 	meshes.clear();
 	materials.clear();
 	textures.clear();
+
+	for (size_t i = 0; i < lights.size(); i++)
+	{
+		delete lights[i];
+		lights[i] = nullptr;
+	}
+	lights.clear();
+
+	for (size_t i = 0; i < cameras.size(); i++)
+	{
+		delete cameras[i];
+		cameras[i] = nullptr;
+	}
+	cameras.clear();
 }
 
 uint ResourceModel::Save(GnJSONObj& base_object)
@@ -59,6 +75,18 @@ uint ResourceModel::SaveMeta(GnJSONObj& base_object, uint last_modification)
 		}
 
 		nodes_array.AddObject(node_object);
+	}
+
+	GnJSONArray lights_array = base_object.AddArray("Lights");
+	for (size_t i = 0; i < lights.size(); i++)
+	{
+		lights[i]->Save(lights_array);
+	}
+
+	GnJSONArray cameras_array = base_object.AddArray("Cameras");
+	for (size_t i = 0; i < cameras.size(); i++)
+	{
+		cameras[i]->Save(cameras_array);
 	}
 
 	return 1;

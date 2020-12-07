@@ -34,8 +34,8 @@ public:
 	float GetFloat(const char* name, float default = -1.0f);
 	bool GetBool(const char* name, bool default = false);
 	const char* GetString(const char* name, const char* default);
-	math::float3 GetFloat3(const char* name, float3 default = float3(-1,-1,-1));
-	Quat GetQuaternion(const char* name, Quat default = Quat(-1,-1,-1,-1));
+	math::float3 GetFloat3(const char* name, float3 default = float3(0,0,0));
+	Quat GetQuaternion(const char* name, Quat default = Quat(0,0,0,1));
 	Color GetColor(const char* name, Color default = Color(0, 0, 0, 1));
 
 	void AddInt(const char* name, int number);

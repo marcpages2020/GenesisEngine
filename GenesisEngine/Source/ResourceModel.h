@@ -2,8 +2,10 @@
 #include "Globals.h"
 #include "Resource.h"
 #include "GnJSON.h"
-
 #include <vector>
+
+class Light;
+class Camera;
 
 struct ModelNode
 {
@@ -32,6 +34,6 @@ public:
 	std::vector<uint> meshes;
 	std::vector<uint> materials;
 	std::vector<uint> textures;
-	//std::vector<Light> lights;
-	//std::vector<Camera> cameras;
+	std::vector<Light*> lights;
+	std::vector<Camera*> cameras;
 };

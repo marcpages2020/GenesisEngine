@@ -1,5 +1,6 @@
 #pragma once
 #include "Globals.h"
+#include <string>
 
 class GameObject;
 class GnJSONObj;
@@ -35,6 +36,9 @@ public:
 	GameObject* GetGameObject();
 	virtual void SetResourceUID(uint UID);
 	virtual Resource* GetResource(ResourceType type) { return nullptr; };
+
+public:
+	std::string name;
 
 protected:
 	ComponentType type;

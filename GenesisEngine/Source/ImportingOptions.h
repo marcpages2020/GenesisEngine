@@ -16,8 +16,8 @@ struct ModelImportingOptions
 	Axis forwardAxis = Axis::Z;
 	Axis upAxis = Axis::Y;
 	bool normalizeScales = true;
-	bool ignoreCameras = true;
-	bool ignoreLights = true;
+	bool ignoreCameras = false;
+	bool ignoreLights = false;
 };
 
 enum class TextureWrap

@@ -10,12 +10,6 @@ enum FixedFOV {
 	FIXED_HORIZONTAL_FOV
 };
 
-enum AspectRatio {
-	AR_16_9,
-	AR_16_10,
-	AR_4_3,
-};
-
 class Camera : public Component {
 public:
 	Camera();
@@ -25,8 +19,8 @@ public:
 	void Update() override;
 	void OnEditor() override;
 
-	void Save(GnJSONArray& save_array);
-	void Load(GnJSONObj& load_object);
+	void Save(GnJSONArray& save_array) override;
+	void Load(GnJSONObj& load_object) override;
 
 	void SetFixedFOV(FixedFOV fixedFOV);
 	void AdjustFieldOfView();
@@ -52,6 +46,6 @@ public:
 
 private:
 	Frustum _frustum;
-	AspectRatio _aspectRatio;
+	float _aspectRatio;
 	float3 _reference;
 };

@@ -6,7 +6,7 @@
 #include "ImGui/imgui.h"
 #include "GnJSON.h"
 
-Camera::Camera() : Component(nullptr), _aspectRatio(AspectRatio::AR_16_9), fixedFOV(FIXED_HORIZONTAL_FOV) {
+Camera::Camera() : Component(nullptr), _aspectRatio(16.0f/9.0f), fixedFOV(FIXED_HORIZONTAL_FOV) {
 	type = ComponentType::CAMERA;
 
 	_frustum.type = FrustumType::PerspectiveFrustum;
@@ -22,7 +22,7 @@ Camera::Camera() : Component(nullptr), _aspectRatio(AspectRatio::AR_16_9), fixed
 	_frustum.farPlaneDistance = 1000.0f;
 }
 
-Camera::Camera(GameObject* gameObject) : Component(gameObject), _aspectRatio(AspectRatio::AR_16_9)
+Camera::Camera(GameObject* gameObject) : Component(gameObject), _aspectRatio(16.0f/9.0f)
 {
 	type = ComponentType::CAMERA;
 
@@ -77,9 +77,18 @@ void Camera::Save(GnJSONArray& save_array)
 {
 	GnJSONObj save_object;
 
+	save_object.AddString("name", name.c_str());
 	save_object.AddInt("Type", type);
 	bool mainCamera = App->renderer3D->GetMainCamera() == this;
 	save_object.AddBool("Main Camera", mainCamera);
+	save_object.AddFloat3("position", _frustum.pos);
+	save_object.AddFloat3("up", _frustum.up);
+	save_object.AddFloat3("front", _frustum.front);
+	save_object.AddFloat("horizontalFOV", _frustum.horizontalFov * DEGTORAD);
+	save_object.AddFloat("verticalFOV", _frustum.verticalFov * DEGTORAD);
+	save_object.AddFloat("nearPlane", _frustum.nearPlaneDistance);
+	save_object.AddFloat("farPlane", _frustum.farPlaneDistance);
+	save_object.AddFloat("aspectRatio", _aspectRatio);
 
 	save_array.AddObject(save_object);
 }
@@ -88,6 +97,13 @@ void Camera::Load(GnJSONObj& load_object)
 {
 	if (load_object.GetBool("Main Camera", false))
 		App->renderer3D->SetMainCamera(this);
+	_frustum.pos = load_object.GetFloat3("position");
+	_frustum.up = load_object.GetFloat3("up");
+	_frustum.front = load_object.GetFloat3("front");
+	_frustum.horizontalFov = load_object.GetFloat("horizontalFOV") * RADTODEG;
+	_frustum.verticalFov = load_object.GetFloat("verticalFOV") * RADTODEG;
+	_frustum.nearPlaneDistance = load_object.GetFloat("nearPlane");
+	_frustum.farPlaneDistance = load_object.GetFloat("farPlane");
 }
 
 void Camera::SetFixedFOV(FixedFOV g_fixedFOV)
@@ -97,6 +113,8 @@ void Camera::SetFixedFOV(FixedFOV g_fixedFOV)
 
 void Camera::AdjustFieldOfView()
 {
+	_frustum.verticalFov = 2 * atan(tan(_frustum.horizontalFov * 0.5f) * (1/_aspectRatio));
+	/*
 	switch (_aspectRatio)
 	{
 	case AR_16_9:
@@ -114,6 +132,7 @@ void Camera::AdjustFieldOfView()
 	default:
 		break;
 	}
+	*/
 }
 
 void Camera::AdjustFieldOfView(float width, float height)

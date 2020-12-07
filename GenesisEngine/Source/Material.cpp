@@ -168,7 +168,8 @@ void Material::OnEditor()
 				}
 				ImGui::EndDragDropTarget();
 			}
-
+				
+			ImGui::SameLine();
 			if (ImGui::Button("Remove Texture"))
 			{
 				_diffuseTexture = nullptr;

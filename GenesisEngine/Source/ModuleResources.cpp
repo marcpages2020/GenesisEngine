@@ -87,6 +87,7 @@ void ModuleResources::OnEditor()
 		ImGui::Separator();
 		for (size_t i = 0; i < meshes.size(); i++)
 		{
+			ImGui::Text("Name: %s", meshes[i]->name.c_str());
 			ImGui::Text("UID: %d", meshes[i]->GetUID());
 			ImGui::Text("Assets path: %s", meshes[i]->assetsFile.c_str());
 			ImGui::Text("Library path: %s", meshes[i]->libraryFile.c_str());
@@ -101,6 +102,7 @@ void ModuleResources::OnEditor()
 	if (ImGui::TreeNode("Materials")) {
 		for (size_t i = 0; i < materials.size(); i++)
 		{
+			ImGui::Text("Name: %s", materials[i]->name.c_str());
 			ImGui::Text("UID: %d", materials[i]->GetUID());
 			ImGui::Text("Assets path: %s", materials[i]->assetsFile.c_str());
 			ImGui::Text("Library path: %s", materials[i]->libraryFile.c_str());
@@ -115,6 +117,7 @@ void ModuleResources::OnEditor()
 	if (ImGui::TreeNode("Textures")) {
 		for (size_t i = 0; i < textures.size(); i++)
 		{
+			ImGui::Text("Name: %s", textures[i]->name.c_str());
 			ImGui::Text("UID: %d", textures[i]->GetUID());
 			ImGui::Text("Assets path: %s", textures[i]->assetsFile.c_str());
 			ImGui::Text("Library path: %s", textures[i]->libraryFile.c_str());
@@ -217,13 +220,13 @@ int ModuleResources::Find(const char* assets_file)
 
 	//First we loop through all loaded resources
 	for (resource_it; resource_it != resources.end(); resource_it++) {
-		if (resource_it->second->assetsFile == FileSystem::ToLower(assets_file))
+		if (FileSystem::ToLower(resource_it->second->assetsFile.c_str()) == FileSystem::ToLower(assets_file))
 			return resource_it->first;
 	}
 
 	//If not found we loop through all not loaded but known resources
 	for (resources_data_it; resources_data_it != resources_data.end(); resources_data_it++) {
-		if (resources_data_it->second.assetsFile == FileSystem::ToLower(assets_file))
+		if (FileSystem::ToLower(resources_data_it->second.assetsFile.c_str()) == FileSystem::ToLower(assets_file))
 			return resources_data_it->first;
 	}
 
@@ -627,7 +630,7 @@ Resource* ModuleResources::CreateResource(const char* assetsPath, ResourceType t
 	if (resource != nullptr)
 	{
 		resources[UID] = resource;
-		resources[UID]->name = FileSystem::GetFile(assetsPath);
+		resources[UID]->name = FileSystem::GetFileName(assetsPath);
 		resource->assetsFile = FileSystem::ToLower(assetsPath);
 		resource->libraryFile = GenerateLibraryPath(resource);
 
@@ -668,13 +671,15 @@ Resource* ModuleResources::CreateResource(uint UID, ResourceType type, std::stri
 
 	if (resource != nullptr)
 	{
-		resources[UID] = resource;
-		resource->libraryFile = GenerateLibraryPath(resource);
-
-		if(assets_file.size() > 0)
+		if (assets_file.size() > 0)
 			resource->assetsFile = assets_file;
-		else 
+		else
 			resource->assetsFile = resources_data[UID].assetsFile;
+
+		resource->libraryFile = GenerateLibraryPath(resource);
+		resource->name = FileSystem::GetFileName(resource->assetsFile.c_str());
+
+		resources[UID] = resource;
 	}
 
 	return resource;
