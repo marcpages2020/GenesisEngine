@@ -22,7 +22,7 @@ Camera::Camera() : Component(nullptr), _aspectRatio(16.0f/9.0f), fixedFOV(FIXED_
 	_frustum.farPlaneDistance = 1000.0f;
 }
 
-Camera::Camera(GameObject* gameObject) : Component(gameObject), _aspectRatio(16.0f/9.0f)
+Camera::Camera(GameObject* gameObject) : Component(gameObject), _aspectRatio(16.0f/9.0f), fixedFOV(FIXED_HORIZONTAL_FOV)
 {
 	type = ComponentType::CAMERA;
 
@@ -57,17 +57,51 @@ void Camera::OnEditor()
 {
 	if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		float horizontalFOV = _frustum.horizontalFov * RADTODEG;
-		if (ImGui::DragFloat("Horizontal FOV", &horizontalFOV, 0.02f, 0.0f, 130.0f)) {
-			_frustum.horizontalFov = horizontalFOV * DEGTORAD;
-			AdjustFieldOfView();
+		ImGui::Spacing();
+
+		bool fixedVerticalFOV = fixedFOV == FixedFOV::FIXED_VERTICAL_FOV;
+		bool fixedHorizontalFOV = fixedFOV == FixedFOV::FIXED_HORIZONTAL_FOV;
+
+		if (ImGui::RadioButton("Fixed VerticalFOV", fixedVerticalFOV))
+			fixedFOV = FixedFOV::FIXED_VERTICAL_FOV;
+		ImGui::SameLine();
+		if (ImGui::RadioButton("Fixed HorizontalFOV", fixedHorizontalFOV))
+			fixedFOV = FixedFOV::FIXED_HORIZONTAL_FOV;
+
+		ImGui::Spacing();
+
+		//Fixed Vertical FOV Settings
+		if (fixedVerticalFOV)
+		{
+			float verticalFOV = _frustum.verticalFov * RADTODEG;
+			if (ImGui::SliderFloat("Vertical FOV", &verticalFOV, 20.0f, 60.0f))
+			{
+				_frustum.verticalFov = verticalFOV * DEGTORAD;
+				_frustum.horizontalFov = 2.0f * std::atan(std::tan(_frustum.verticalFov * 0.5f) * (_aspectRatio));
+			}
+
+			ImGui::Spacing();
+			ImGui::Text("Horizontal FOV: %.2f", _frustum.horizontalFov * RADTODEG);
+		}
+		//Fixed Horizontal FOV Settings
+		else
+		{
+			float horizontalFOV = _frustum.horizontalFov * RADTODEG;
+			if (ImGui::SliderFloat("Horizontal FOV", &horizontalFOV, 55.0f, 110.0f))
+			{
+				_frustum.horizontalFov = horizontalFOV * DEGTORAD;
+				_frustum.verticalFov = 2.0f * std::atan(std::tan(_frustum.horizontalFov * 0.5f) * (1 / _aspectRatio));
+			}
+			ImGui::Spacing();
+			ImGui::Text("Vertical FOV: %.2f", _frustum.verticalFov * RADTODEG);
 		}
 
-		float verticalFOV = _frustum.verticalFov * RADTODEG;
-		if (ImGui::DragFloat("Vertical FOV", &verticalFOV, 0.02f, 0.0f, 60.0f)) {
-			_frustum.verticalFov = verticalFOV * DEGTORAD;
-			AdjustFieldOfView();
-		}
+		ImGui::Spacing();
+		ImGui::Separator();
+		ImGui::Spacing();
+
+		ImGui::DragFloat("Near Plane", &_frustum.nearPlaneDistance, 0.05f, 100.0f);
+		ImGui::DragFloat("Far Plane", &_frustum.farPlaneDistance, 5.0f, 2000.0f);
 
 		ImGui::Spacing();
 	}

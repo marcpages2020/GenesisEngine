@@ -33,7 +33,8 @@ bool ModuleScene::Start()
 	GameObject* rayman = App->resources->RequestGameObject("Assets/Models/Rayman/rayman.fbx");
 	AddGameObject(rayman);
 
-	GameObject* street_environment = App->resources->RequestGameObject("Assets/Models/street2/street2.fbx");
+	GameObject* street_environment = App->resources->RequestGameObject("Assets/Models/street2/Street environment_V01.fbx");
+	//GameObject* street_environment = App->resources->RequestGameObject("Assets/Models/street2/street2.fbx");
 	AddGameObject(street_environment);
 	
 	GameObject* camera = new GameObject();

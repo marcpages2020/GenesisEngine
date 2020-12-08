@@ -217,7 +217,7 @@ Component* GameObject::AddComponent(ComponentType type)
 		component = new Camera(this);
 		break;
 	case LIGHT:
-		//component = new Light(this);
+		component = new Light(this);
 		break;
 	default:
 		break;
@@ -285,6 +285,8 @@ void GameObject::AddChild(GameObject* child)
 {
 	if(child != nullptr)
 		children.push_back(child);
+
+	child->SetParent(this);
 }
 
 int GameObject::GetChildrenAmount()

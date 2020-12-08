@@ -162,6 +162,7 @@
     <ClInclude Include="Libs\MathGeoLib\include\Math\TransformOps.h" />
     <ClInclude Include="Libs\MathGeoLib\include\Time\Clock.h" />
     <ClInclude Include="Material.h" />
+    <ClInclude Include="MaterialImporter.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Application.h" />
     <ClInclude Include="Color.h" />
@@ -184,6 +185,8 @@
     <ClInclude Include="Libs\parson\parson.h" />
     <ClInclude Include="Libs\SDL\include\SDL.h" />
     <ClInclude Include="Light.h" />
+    <ClInclude Include="MeshImporter.h" />
+    <ClInclude Include="ModelImporter.h" />
     <ClInclude Include="ModuleCamera3D.h" />
     <ClInclude Include="ModuleRenderer3D.h" />
     <ClInclude Include="Module.h" />
@@ -196,6 +199,7 @@
     <ClInclude Include="ResourceMesh.h" />
     <ClInclude Include="ResourceModel.h" />
     <ClInclude Include="ResourceTexture.h" />
+    <ClInclude Include="TextureImporter.h" />
     <ClInclude Include="Time.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Transform.h" />
@@ -217,7 +221,6 @@
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="glmath.cpp" />
     <ClCompile Include="GnJSON.cpp" />
-    <ClCompile Include="Importers.cpp" />
     <ClCompile Include="Libs\ImGuizmo\ImGuizmo.cpp" />
     <ClCompile Include="Libs\ImGui\imgui.cpp" />
     <ClCompile Include="Libs\ImGui\imgui_demo.cpp" />
@@ -262,7 +265,10 @@
     <ClCompile Include="log.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Material.cpp" />
+    <ClCompile Include="MaterialImporter.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="MeshImporter.cpp" />
+    <ClCompile Include="ModelImporter.cpp" />
     <ClCompile Include="ModuleCamera3D.cpp" />
     <ClCompile Include="ModuleInput.cpp" />
     <ClCompile Include="ModuleRenderer3D.cpp" />
@@ -274,6 +280,7 @@
     <ClCompile Include="ResourceMesh.cpp" />
     <ClCompile Include="ResourceModel.cpp" />
     <ClCompile Include="ResourceTexture.cpp" />
+    <ClCompile Include="TextureImporter.cpp" />
     <ClCompile Include="Time.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="Transform.cpp" />

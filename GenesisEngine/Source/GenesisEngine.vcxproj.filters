@@ -47,7 +47,7 @@
       <Filter>Libs\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="Libs\parson\parson.c">
-      <Filter>FileManagement\parson</Filter>
+      <Filter>Libs\parson</Filter>
     </ClCompile>
     <ClCompile Include="GameObject.cpp">
       <Filter>GameObjects &amp; Components</Filter>
@@ -175,9 +175,6 @@
     <ClCompile Include="GnJSON.cpp">
       <Filter>FileManagement</Filter>
     </ClCompile>
-    <ClCompile Include="Importers.cpp">
-      <Filter>FileManagement</Filter>
-    </ClCompile>
     <ClCompile Include="ResourceMesh.cpp">
       <Filter>Resources</Filter>
     </ClCompile>
@@ -220,6 +217,18 @@
     </ClCompile>
     <ClCompile Include="WindowImport.cpp">
       <Filter>EditorWindows</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelImporter.cpp">
+      <Filter>FileManagement\Importers</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshImporter.cpp">
+      <Filter>FileManagement\Importers</Filter>
+    </ClCompile>
+    <ClCompile Include="MaterialImporter.cpp">
+      <Filter>FileManagement\Importers</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureImporter.cpp">
+      <Filter>FileManagement\Importers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -290,7 +299,7 @@
       <Filter>Libs\SDL</Filter>
     </ClInclude>
     <ClInclude Include="Libs\parson\parson.h">
-      <Filter>FileManagement\parson</Filter>
+      <Filter>Libs\parson</Filter>
     </ClInclude>
     <ClInclude Include="GameObject.h">
       <Filter>GameObjects &amp; Components</Filter>
@@ -502,9 +511,6 @@
     <ClInclude Include="GnJSON.h">
       <Filter>FileManagement</Filter>
     </ClInclude>
-    <ClInclude Include="Importers.h">
-      <Filter>FileManagement</Filter>
-    </ClInclude>
     <ClInclude Include="ResourceMesh.h">
       <Filter>Resources</Filter>
     </ClInclude>
@@ -554,6 +560,21 @@
     <ClInclude Include="WindowImport.h">
       <Filter>EditorWindows</Filter>
     </ClInclude>
+    <ClInclude Include="ModelImporter.h">
+      <Filter>FileManagement\Importers</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshImporter.h">
+      <Filter>FileManagement\Importers</Filter>
+    </ClInclude>
+    <ClInclude Include="MaterialImporter.h">
+      <Filter>FileManagement\Importers</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureImporter.h">
+      <Filter>FileManagement\Importers</Filter>
+    </ClInclude>
+    <ClInclude Include="Importers.h">
+      <Filter>FileManagement\Importers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Modules">
@@ -598,14 +619,17 @@
     <Filter Include="FileManagement">
       <UniqueIdentifier>{91cef25d-3934-42bd-a5d5-ee898422979d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="FileManagement\parson">
-      <UniqueIdentifier>{03cd38a1-3ea2-4234-89ff-3f9057e2f643}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Libs\ImGuizmo">
       <UniqueIdentifier>{b53402f4-cb07-479e-aece-ca6b6fcee811}</UniqueIdentifier>
     </Filter>
     <Filter Include="EditorWindows">
       <UniqueIdentifier>{627bcd62-5937-4fdf-9955-217f87331806}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="FileManagement\Importers">
+      <UniqueIdentifier>{8c1bb638-0751-49fd-8e14-d45f59e5a273}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libs\parson">
+      <UniqueIdentifier>{03cd38a1-3ea2-4234-89ff-3f9057e2f643}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -16,14 +16,12 @@ ResourceModel::~ResourceModel()
 
 	for (size_t i = 0; i < lights.size(); i++)
 	{
-		delete lights[i];
 		lights[i] = nullptr;
 	}
 	lights.clear();
 
 	for (size_t i = 0; i < cameras.size(); i++)
 	{
-		delete cameras[i];
 		cameras[i] = nullptr;
 	}
 	cameras.clear();
