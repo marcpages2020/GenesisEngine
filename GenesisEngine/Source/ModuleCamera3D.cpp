@@ -94,10 +94,7 @@ update_status ModuleCamera3D::Update(float dt)
 	{
 		if (App->scene->selectedGameObject != nullptr)
 		{
-			float3 center(App->scene->selectedGameObject->GetTransform()->GetPosition().x,
-				          App->scene->selectedGameObject->GetTransform()->GetPosition().y,
-				          App->scene->selectedGameObject->GetTransform()->GetPosition().z);
-
+			float3 center(App->scene->selectedGameObject->GetTransform()->GetPosition());
 			LookAt(center);
 		}
 	}
@@ -156,6 +153,7 @@ void ModuleCamera3D::Look(float3& position)
 void ModuleCamera3D::LookAt(const float3& Spot)
 {
 	_camera->Look(Spot);
+	_reference = Spot;
 }
 
 Camera* ModuleCamera3D::GetCamera() { return _camera; }

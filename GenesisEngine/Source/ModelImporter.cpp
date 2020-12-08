@@ -3,11 +3,6 @@
 #include "FileSystem.h"
 #include <unordered_set>
 
-#include "Assimp/Assimp/include/cimport.h"
-#include "Assimp/Assimp/include/scene.h"
-#include "Assimp/Assimp/include/postprocess.h"
-#pragma comment (lib, "Assimp/Assimp/libx86/assimp.lib")
-
 #include "GameObject.h"
 #include "Transform.h"
 #include "Mesh.h"
@@ -15,6 +10,11 @@
 #include "Camera.h"
 
 #include "ResourceModel.h"
+
+#include "Assimp/Assimp/include/cimport.h"
+#include "Assimp/Assimp/include/scene.h"
+#include "Assimp/Assimp/include/postprocess.h"
+#pragma comment (lib, "Assimp/Assimp/libx86/assimp.lib")
 
 void ModelImporter::Import(char* fileBuffer, ResourceModel* model, uint size)
 {
@@ -69,7 +69,7 @@ void ModelImporter::Import(char* fileBuffer, ResourceModel* model, uint size)
 		}
 
 		aiNode* rootNode = scene->mRootNode;
-		ImportChildren(scene, rootNode, nullptr, 0, model);
+		ImportChildren(scene, rootNode, nullptr, nullptr, model);
 		ConvertToDesiredAxis(rootNode, model->nodes[0]);
 		aiReleaseImport(scene);
 
@@ -133,36 +133,57 @@ uint64 ModelImporter::Save(ResourceModel* model, char** fileBuffer)
 	return size;
 }
 
-void ModelImporter::ImportChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, uint parentNodeUID, ResourceModel* model)
+void ModelImporter::ImportChildren(const aiScene* scene, aiNode* ainode, aiNode* parentAiNode, ModelNode* parentNode, ResourceModel* model)
 {
 	ModelNode modelNode;
 
-	if (node == scene->mRootNode)
+	if (ainode == scene->mRootNode)
+	{
 		modelNode.name = FileSystem::GetFileName(model->assetsFile.c_str());
+		modelNode.parentUID = 0;
+	}
 	else
-		modelNode.name = node->mName.C_Str();
+	{
+		modelNode.name = ainode->mName.C_Str();
+		modelNode.parentUID = parentNode->UID;
+	}
 
 	modelNode.UID = App->resources->GenerateUID();
-	modelNode.parentUID = parentNodeUID;
 
-	LoadTransform(node, modelNode);
+	LoadTransform(ainode, modelNode);
 
-	if (node->mMeshes != nullptr)
+	if (modelNode.name.find("_$AssimpFbx$_") != std::string::npos && ainode->mNumChildren == 1)
 	{
-		//Mesh --------------------------------------------------------------
-		modelNode.meshID = model->meshes[*node->mMeshes];
+		modelNode.UID = parentNode->UID;
+		modelNode.parentUID = parentNode->parentUID;
+		AddParentTransform(&modelNode, parentNode);
+	}
+	else
+	{
+		if (ainode->mMeshes != nullptr)
+		{
+			//Mesh --------------------------------------------------------------
+			modelNode.meshID = model->meshes[*ainode->mMeshes];
 
-		//Materials ----------------------------------------------------------
-		aiMesh* aimesh = scene->mMeshes[*node->mMeshes];
-		modelNode.materialID = model->materials[aimesh->mMaterialIndex];
+			//Materials ----------------------------------------------------------
+			aiMesh* aimesh = scene->mMeshes[*ainode->mMeshes];
+			modelNode.materialID = model->materials[aimesh->mMaterialIndex];
+		}
+
+		model->nodes.push_back(modelNode);
 	}
 
-	model->nodes.push_back(modelNode);
-
-	for (size_t i = 0; i < node->mNumChildren; i++)
+	for (size_t i = 0; i < ainode->mNumChildren; i++)
 	{
-		ImportChildren(scene, node->mChildren[i], node, modelNode.UID, model);
+		ImportChildren(scene, ainode->mChildren[i], ainode, &modelNode, model);
 	}
+}
+
+void ModelImporter::AddParentTransform(ModelNode* node, ModelNode* parentNode)
+{
+	node->position += parentNode->position;
+	node->rotation = node->rotation.Mul(parentNode->rotation);
+	node->scale = node->scale.Mul(parentNode->scale);
 }
 
 void ModelImporter::ReimportFile(char* fileBuffer, ResourceModel* newModel, uint size)
@@ -347,12 +368,14 @@ GameObject* ModelImporter::ConvertToGameObject(ResourceModel* model)
 
 	for (size_t i = 0; i < model->lights.size(); i++) {
 		GameObject* light = new GameObject();
+		light->SetName(model->lights[i]->name.c_str());
 		light->AddComponent(model->lights[i]);
 		root->AddChild(light);
 	}
 
 	for (size_t i = 0; i < model->cameras.size(); i++) {
 		GameObject* camera = new GameObject();
+		camera->SetName(model->cameras[i]->name.c_str());
 		camera->AddComponent(model->cameras[i]);
 		root->AddChild(camera);
 	}

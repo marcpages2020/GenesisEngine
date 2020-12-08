@@ -23,10 +23,13 @@ class aiScene;
 struct aiNode;
 class aiMaterial;
 
+#include "MathGeoLib/include/MathGeoLib.h"
+
 namespace ModelImporter
 {
 	void Import(char* fileBuffer, ResourceModel* resource, uint size);
-	void ImportChildren(const aiScene* scene, aiNode* node, aiNode* parentNode, uint parentNodeUID, ResourceModel* model);
+	void ImportChildren(const aiScene* scene, aiNode* ainode, aiNode* parentAiNode, ModelNode* parentNode, ResourceModel* model);
+	void AddParentTransform(ModelNode* node, ModelNode* parentNode);
 	void LoadTransform(aiNode* node, ModelNode& modelNode);
 	void ReimportFile(char* fileBuffer, ResourceModel* resource, uint size);
 	uint64 Save(ResourceModel* model, char** fileBuffer);
