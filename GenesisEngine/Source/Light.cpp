@@ -74,6 +74,7 @@ void Light::Save(GnJSONArray& save_array)
 	GnJSONObj save_object;
 
 	save_object.AddString("name", name.c_str());
+	save_object.AddInt("Type", type);
 	save_object.AddFloat3("position", float3(position.x, position.y, position.z));
 	save_object.AddColor("diffuse", diffuse);
 	save_object.AddColor("ambient", ambient);

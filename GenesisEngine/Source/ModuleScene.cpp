@@ -205,6 +205,13 @@ bool ModuleScene::Load(const char* scene_file)
 {
 	bool ret = true;
 
+	std::string format = FileSystem::GetFileFormat(scene_file);
+	if (format != ".scene")
+	{
+		LOG_WARNING("%s is not a valid scene format and can't be loaded", scene_file);
+		return false;
+	}
+
 	ClearScene();
 
 	char* buffer = NULL;
@@ -242,7 +249,7 @@ bool ModuleScene::Load(const char* scene_file)
 	root->UpdateChildrenTransforms();
 
 	if (root != nullptr)
-		LOG("Scene loaded successfully");
+		LOG("Scene: %s loaded successfully", scene_file);
 
 	return ret;
 }

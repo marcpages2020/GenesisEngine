@@ -160,6 +160,11 @@ void ModelImporter::ImportChildren(const aiScene* scene, aiNode* ainode, aiNode*
 	}
 	else
 	{
+		if (parentNode != nullptr && parentNode->name.find("_$AssimpFbx$_") != std::string::npos)
+		{
+			AddParentTransform(&modelNode, parentNode);
+		}
+
 		if (ainode->mMeshes != nullptr)
 		{
 			//Mesh --------------------------------------------------------------
@@ -381,6 +386,7 @@ GameObject* ModelImporter::ConvertToGameObject(ResourceModel* model)
 	}
 
 	App->resources->ReleaseResource(model->GetUID());
+	root->UpdateChildrenTransforms();
 
 	return root;
 }
@@ -501,7 +507,8 @@ bool ModelImporter::InternalResourcesExist(const char* path)
 
 void ModelImporter::ConvertToDesiredAxis(aiNode* node, ModelNode& modelNode)
 {
-	if (node->mMetaData == nullptr)
+	/*
+		if (node->mMetaData == nullptr)
 		return;
 
 	int upAxis;
@@ -545,4 +552,6 @@ void ModelImporter::ConvertToDesiredAxis(aiNode* node, ModelNode& modelNode)
 	float3 rotation = modelBasis.ToEulerXYZ();
 
 	modelNode.rotation = Quat::FromEulerXYZ(rotation.x, rotation.y, rotation.z);
+	*/
+	modelNode;
 }

@@ -132,7 +132,7 @@ update_status Editor::Draw()
 		ShowPreferencesWindow();
 
 	if (file_dialog == opened)
-		LoadFile(nullptr, "Library/");
+		LoadFile(".scene", "Assets/");
 
 	ImGui::Render();
 
@@ -286,11 +286,14 @@ bool Editor::CreateMainMenuBar() {
 		{
 			if (ImGui::MenuItem("Save Scene"))
 			{
-				App->Save("Library/Scenes/new_scene.scene");
+				App->Save("Assets/Scenes/new_scene.scene");
+				//file_dialog = opened;
+				//scene_operation = SceneOperation::SAVE;
 			}
 			else if (ImGui::MenuItem("Load Scene"))
 			{
 				file_dialog = opened;
+				scene_operation = SceneOperation::LOAD;
 			}
 			else if (ImGui::MenuItem("Exit"))
 			{
@@ -482,8 +485,46 @@ void Editor::LoadFile(const char* filter_extension, const char* from_dir)
 
 		ImGui::PopItemWidth();
 		ImGui::SameLine();
-		if (ImGui::Button("Ok", ImVec2(50, 20)))
+		if (ImGui::Button("Ok", ImVec2(50, 20))) {
 			file_dialog = ready_to_close;
+			App->Load(selected_file);
+		}
+		ImGui::SameLine();
+
+		if (ImGui::Button("Cancel", ImVec2(50, 20)))
+		{
+			file_dialog = ready_to_close;
+			selected_file[0] = '\0';
+		}
+
+		ImGui::EndPopup();
+	}
+}
+
+void Editor::SaveFile(const char* filter_extension, const char* from_dir)
+{
+	ImGui::OpenPopup("Load File");
+	if (ImGui::BeginPopupModal("Load File", nullptr))
+	{
+		in_modal = true;
+
+		ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
+		ImGui::BeginChild("File Browser", ImVec2(0, 300), true);
+		DrawDirectoryRecursive(from_dir, filter_extension);
+		ImGui::EndChild();
+		ImGui::PopStyleVar();
+
+		ImGui::PushItemWidth(250.f);
+		if (ImGui::InputText("##file_selector", selected_file, 256, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll))
+			file_dialog = ready_to_close;
+
+		ImGui::PopItemWidth();
+		ImGui::SameLine();
+		if (ImGui::Button("Ok", ImVec2(50, 20)))
+		{
+			file_dialog = ready_to_close;
+			App->Load(selected_file);
+		}
 		ImGui::SameLine();
 
 		if (ImGui::Button("Cancel", ImVec2(50, 20)))
@@ -523,7 +564,7 @@ void Editor::DrawDirectoryRecursive(const char* directory, const char* filter_ex
 
 		bool ok = true;
 
-		if (filter_extension && str.substr(str.find_last_of(".") + 1) != filter_extension)
+		if (filter_extension && str.find(filter_extension) == std::string::npos)
 			ok = false;
 
 		if (ok && ImGui::TreeNodeEx(str.c_str(), ImGuiTreeNodeFlags_Leaf))

@@ -35,6 +35,7 @@ public:
 
 	void OnResize(ImVec2 window_size);
 	void LoadFile(const char* filter_extension, const char* from_dir);
+	void SaveFile(const char* filter_extension, const char* from_dir);
 	void DrawDirectoryRecursive(const char* directory, const char* filter_extension);
 
 private:
@@ -78,6 +79,13 @@ private:
 		opened,
 		ready_to_close
 	} file_dialog = closed;
+
+	enum class SceneOperation
+	{
+		SAVE,
+		LOAD, 
+		NONE
+	}scene_operation = SceneOperation::NONE;
 
 	bool in_modal = false;
 	char selected_file[256];
