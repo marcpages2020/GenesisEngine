@@ -112,7 +112,6 @@ bool FileSystem::IsDirectory(const char* file)
 
 const char* FileSystem::GetWriteDir() 
 {
-	//TODO: erase first annoying dot (".")
 	return PHYSFS_getWriteDir();
 }
 
@@ -350,7 +349,6 @@ bool FileSystem::DuplicateFile(const char* file, const char* dstFolder, std::str
 
 bool FileSystem::DuplicateFile(const char* srcFile, const char* dstFile)
 {
-	//TODO: Compare performance to calling Load(srcFile) and then Save(dstFile)
 	std::ifstream src;
 	src.open(srcFile, std::ios::binary);
 	bool srcOpen = src.is_open();
@@ -451,7 +449,6 @@ uint64 FileSystem::GetLastModTime(const char* filename)
 
 std::string FileSystem::GetUniqueName(const char* path, const char* name)
 {
-	//TODO: modify to distinguix files and dirs?
 	std::vector<std::string> files, dirs;
 	DiscoverFiles(path, files, dirs);
 

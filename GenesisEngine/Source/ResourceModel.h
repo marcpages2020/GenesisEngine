@@ -10,15 +10,15 @@ class Camera;
 struct ModelNode
 {
 	std::string name;
-	float3 position;
-	Quat rotation;
-	float3 scale;
+	float3 position = float3::zero;
+	Quat rotation = Quat::identity;
+	float3 scale = float3::one;
 
 	int meshID = -1;
 	int materialID = -1;
 
-	uint UID;
-	uint parentUID;
+	uint UID = 0u;
+	uint parentUID = 0u;
 };
 
 class ResourceModel : public Resource {

@@ -70,13 +70,66 @@ void ModelImporter::Import(char* fileBuffer, ResourceModel* model, uint size)
 
 		aiNode* rootNode = scene->mRootNode;
 		ImportChildren(scene, rootNode, nullptr, nullptr, model);
-		ConvertToDesiredAxis(rootNode, model->nodes[0]);
+
 		aiReleaseImport(scene);
 
 		LOG("%s: imported in %d ms", model->assetsFile.c_str(), timer.Read());
 	}
 	else
 		LOG_ERROR("Error importing: %s", model->assetsFile.c_str());
+}
+
+void ModelImporter::ImportChildren(const aiScene* scene, aiNode* ainode, aiNode* parentAiNode, ModelNode* parentNode, ResourceModel* model)
+{
+	ModelNode modelNode;
+
+	LoadTransform(ainode, modelNode);
+
+	if (ainode == scene->mRootNode)
+	{
+		modelNode.name = FileSystem::GetFileName(model->assetsFile.c_str());
+		modelNode.parentUID = 0;
+		ConvertToDesiredAxis(ainode, modelNode);
+		modelNode.scale *= App->resources->modelImportingOptions.globalScale;
+	}
+	else
+	{
+		modelNode.name = ainode->mName.C_Str();
+		modelNode.parentUID = parentNode->UID;
+	}
+
+	modelNode.UID = App->resources->GenerateUID();
+
+	if (modelNode.name.find("_$AssimpFbx$_") != std::string::npos && ainode->mNumChildren == 1)
+	{
+		modelNode.UID = parentNode->UID;
+		modelNode.parentUID = parentNode->parentUID;
+		AddParentTransform(&modelNode, parentNode);
+	}
+	else
+	{
+		if (parentNode != nullptr && parentNode->name.find("_$AssimpFbx$_") != std::string::npos)
+		{
+			AddParentTransform(&modelNode, parentNode);
+		}
+
+		if (ainode->mMeshes != nullptr)
+		{
+			//Mesh --------------------------------------------------------------
+			modelNode.meshID = model->meshes[*ainode->mMeshes];
+
+			//Materials ----------------------------------------------------------
+			aiMesh* aimesh = scene->mMeshes[*ainode->mMeshes];
+			modelNode.materialID = model->materials[aimesh->mMaterialIndex];
+		}
+
+		model->nodes.push_back(modelNode);
+	}
+
+	for (size_t i = 0; i < ainode->mNumChildren; i++)
+	{
+		ImportChildren(scene, ainode->mChildren[i], ainode, &modelNode, model);
+	}
 }
 
 uint64 ModelImporter::Save(ResourceModel* model, char** fileBuffer)
@@ -131,57 +184,6 @@ uint64 ModelImporter::Save(ResourceModel* model, char** fileBuffer)
 	*fileBuffer = buffer;
 
 	return size;
-}
-
-void ModelImporter::ImportChildren(const aiScene* scene, aiNode* ainode, aiNode* parentAiNode, ModelNode* parentNode, ResourceModel* model)
-{
-	ModelNode modelNode;
-
-	if (ainode == scene->mRootNode)
-	{
-		modelNode.name = FileSystem::GetFileName(model->assetsFile.c_str());
-		modelNode.parentUID = 0;
-	}
-	else
-	{
-		modelNode.name = ainode->mName.C_Str();
-		modelNode.parentUID = parentNode->UID;
-	}
-
-	modelNode.UID = App->resources->GenerateUID();
-
-	LoadTransform(ainode, modelNode);
-
-	if (modelNode.name.find("_$AssimpFbx$_") != std::string::npos && ainode->mNumChildren == 1)
-	{
-		modelNode.UID = parentNode->UID;
-		modelNode.parentUID = parentNode->parentUID;
-		AddParentTransform(&modelNode, parentNode);
-	}
-	else
-	{
-		if (parentNode != nullptr && parentNode->name.find("_$AssimpFbx$_") != std::string::npos)
-		{
-			AddParentTransform(&modelNode, parentNode);
-		}
-
-		if (ainode->mMeshes != nullptr)
-		{
-			//Mesh --------------------------------------------------------------
-			modelNode.meshID = model->meshes[*ainode->mMeshes];
-
-			//Materials ----------------------------------------------------------
-			aiMesh* aimesh = scene->mMeshes[*ainode->mMeshes];
-			modelNode.materialID = model->materials[aimesh->mMaterialIndex];
-		}
-
-		model->nodes.push_back(modelNode);
-	}
-
-	for (size_t i = 0; i < ainode->mNumChildren; i++)
-	{
-		ImportChildren(scene, ainode->mChildren[i], ainode, &modelNode, model);
-	}
 }
 
 void ModelImporter::AddParentTransform(ModelNode* node, ModelNode* parentNode)
@@ -239,7 +241,7 @@ void ModelImporter::LoadTransform(aiNode* node, ModelNode& modelNode)
 		scaling.x = scaling.y = scaling.z = 1.0f;
 	}
 
-	scaling *= App->resources->modelImportingOptions.globalScale;
+	//scaling *= App->resources->modelImportingOptions.globalScale;
 
 	modelNode.position = float3(position.x, position.y, position.z);
 	modelNode.rotation = Quat(rotation.x, rotation.y, rotation.z, rotation.w);
@@ -507,51 +509,25 @@ bool ModelImporter::InternalResourcesExist(const char* path)
 
 void ModelImporter::ConvertToDesiredAxis(aiNode* node, ModelNode& modelNode)
 {
-	/*
-		if (node->mMetaData == nullptr)
-		return;
+	ModelImportingOptions importingOptions = App->resources->modelImportingOptions;
+	Axis upAxisEnum = importingOptions.upAxis;
+	Axis forwardAxisEnum = importingOptions.forwardAxis;
 
-	int upAxis;
-	node->mMetaData->Get("UpAxis", upAxis);
-	int upAxisSign;
-	node->mMetaData->Get("UpAxisSign", upAxisSign);
-	upAxis *= upAxisSign;
+	int forwardAxisSign = forwardAxisEnum < 3 ? 1 : -1;
+	int upAxisSign = upAxisEnum < 3 ? 1 : -1;
 
-	int frontAxis;
-	node->mMetaData->Get("frontAxis", frontAxis);
-	int frontAxisSign;
-	node->mMetaData->Get("frontAxisSign", frontAxisSign);
-	frontAxis *= frontAxisSign;
+	float3 upAxis = float3::zero;
+	upAxis.At(upAxisEnum % 3) = upAxisSign;
 
-	int coordAxis;
-	node->mMetaData->Get("coordAxis", coordAxis);
-	int coordAxisSign;
-	node->mMetaData->Get("coordAxisSign", coordAxisSign);
-	coordAxis *= coordAxisSign;
+	float3 forwardAxis = float3::zero;
+	forwardAxis.At(forwardAxisEnum % 3) = forwardAxisSign;
 
-	float3x3 modelBasis = float3x3::zero;
-	modelBasis[coordAxis][0] = coordAxisSign;
-	modelBasis[upAxis][1] = upAxisSign;
-	modelBasis[frontAxis][2] = frontAxisSign;
+	float3 rightAxis = forwardAxis.Cross(upAxis);
 
-	float3x3 desiredBasis = float3x3::zero;
+	float3x3 desiredAxis(rightAxis, upAxis, forwardAxis);
 
-	float3 desiredForwardAxis = float3::zero;
-	desiredForwardAxis[App->resources->modelImportingOptions.forwardAxis % 3] = App->resources->modelImportingOptions.forwardAxis;
+	float4x4 nodeTransformation = float4x4::FromTRS(modelNode.position, modelNode.rotation, modelNode.scale);
+	nodeTransformation = desiredAxis * nodeTransformation;
 
-	float3 desiredUpAxis = float3::zero;
-	desiredUpAxis[App->resources->modelImportingOptions.upAxis % 3] = App->resources->modelImportingOptions.upAxis;
-
-	float3 desiredCoordAxis = float3::zero;
-	desiredCoordAxis = desiredForwardAxis.Cross(desiredUpAxis);
-
-	desiredBasis.SetCol(0, desiredCoordAxis);
-	desiredBasis.SetCol(1, desiredUpAxis);
-	desiredBasis.SetCol(2, desiredForwardAxis);
-
-	float3 rotation = modelBasis.ToEulerXYZ();
-
-	modelNode.rotation = Quat::FromEulerXYZ(rotation.x, rotation.y, rotation.z);
-	*/
-	modelNode;
+	nodeTransformation.Decompose(modelNode.position, modelNode.rotation, modelNode.scale);
 }

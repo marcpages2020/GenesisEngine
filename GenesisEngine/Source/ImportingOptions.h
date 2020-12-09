@@ -41,7 +41,9 @@ struct TextureImportingOptions
 	bool flip = false;
 	bool alienify = false;
 	bool blur_average = false;
+	int blur_average_iterations = 1;
 	bool blur_gaussian = false;
+	int blur_gaussian_iterations = 1;
 	bool equalize = false;
 	bool negativity = false;
 	bool noise = false;

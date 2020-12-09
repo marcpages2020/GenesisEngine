@@ -50,8 +50,6 @@ void GnMesh::SetResourceUID(uint UID)
 	_resource = (ResourceMesh*)App->resources->RequestResource(_resourceUID);
 	if(_resource != nullptr)
 		GenerateAABB();
-
-	//App->resources->ReleaseResource(_resourceUID);
 }
 
 Resource* GnMesh::GetResource(ResourceType type)
@@ -69,25 +67,6 @@ AABB GnMesh::GetAABB()
 {
 	return _AABB;
 }
-
-//bool GnMesh::SetTexture(GnTexture* g_texture)
-//{
-//	bool ret = false;
-//
-//	if (g_texture != nullptr && g_texture->data != nullptr)
-//	{
-//		glBindTexture(GL_TEXTURE_2D, textureID);
-//		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture->width, texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture->data);
-//		glBindTexture(GL_TEXTURE_2D, 0);
-//		ret = true;
-//	}
-//	else 
-//	{
-//		AssignCheckersImage();
-//	}
-//
-//	return ret;
-//}
 
 void GnMesh::Update()
 {
@@ -116,6 +95,7 @@ void GnMesh::Render()
 	//textures
 	glBindBuffer(GL_ARRAY_BUFFER, _resource->texcoords_buffer);
 	glTexCoordPointer(2, GL_FLOAT, 0, NULL);
+
 	//indices
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _resource->indices_buffer);
 

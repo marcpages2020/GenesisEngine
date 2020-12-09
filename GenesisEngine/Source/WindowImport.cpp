@@ -108,22 +108,17 @@ bool WindowImport::DrawTextureImportingWindow()
 
 		ImGui::Columns(3);
 		ImGui::Checkbox("Flip", &_textureImportingOptions.flip);
-		//ImGui::SameLine();
 		ImGui::Checkbox("Alienify", &_textureImportingOptions.alienify);
-		//ImGui::SameLine();
 		ImGui::Checkbox("Equalize", &_textureImportingOptions.equalize);
 
 		ImGui::NextColumn();
 		ImGui::Checkbox("Blur Average", &_textureImportingOptions.blur_average);
 		ImGui::Checkbox("Blur Gaussian", &_textureImportingOptions.blur_gaussian);
-		//ImGui::SameLine();
 		ImGui::Checkbox("Negativity", &_textureImportingOptions.negativity);
 
 		ImGui::NextColumn();
 		ImGui::Checkbox("Noise", &_textureImportingOptions.noise);
-		//ImGui::SameLine();
 		ImGui::Checkbox("Pixelize", &_textureImportingOptions.pixelize);
-		//ImGui::SameLine();
 		ImGui::Checkbox("Sharpening", &_textureImportingOptions.sharpening);
 
 		ImGui::Separator();
@@ -131,6 +126,13 @@ bool WindowImport::DrawTextureImportingWindow()
 		ImGui::Columns(1);
 		ImGui::SliderFloat("Contrast", &_textureImportingOptions.contrast, 0.0f, 1.7f);
 		ImGui::SliderFloat("Gamma Correction", &_textureImportingOptions.gamma_correction, 0.0f, 2.0f);
+
+		if(_textureImportingOptions.blur_average)
+			ImGui::SliderInt("Blur Average Iterations", &_textureImportingOptions.blur_average_iterations, 1, 10);
+
+		if (_textureImportingOptions.blur_gaussian)
+			ImGui::SliderInt("Blur Gaussian Iterations", &_textureImportingOptions.blur_gaussian_iterations, 1, 10);
+		
 		ImGui::SliderFloat("Noise Tolerance", &_textureImportingOptions.noise_tolerance, 0.0f, 1.0f);
 		ImGui::SliderInt("Pixel Size", &_textureImportingOptions.pixelize_size, 0, 20);
 		ImGui::SliderFloat("Sharpening factor", &_textureImportingOptions.sharpening_factor, 0.0f, 2.5f);

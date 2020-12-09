@@ -82,9 +82,20 @@ void Material::SetResourceUID(uint UID)
 
 void Material::BindTexture()
 {
-	//TODO: Request resource every frame
-	if(!checkers_image)
-		_diffuseTexture->BindTexture();
+	if (!checkers_image) 
+	{
+		if (!App->resources->Exists(_resourceUID)) 
+		{
+			_resource = nullptr;
+			_resourceUID = 0u;
+			checkers_image = true;
+			return;
+		}
+		else
+		{
+			_diffuseTexture->BindTexture();
+		}
+	}
 	else 
 		glBindTexture(GL_TEXTURE_2D, checkersID);
 }

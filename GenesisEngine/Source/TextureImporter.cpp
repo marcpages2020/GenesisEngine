@@ -81,10 +81,6 @@ uint TextureImporter::Save(ResourceTexture* texture, char** fileBuffer)
 	ilBindImage(texture->GetID());
 
 	TextureImportingOptions importingOptions = App->resources->textureImportingOptions;
-
-	if (importingOptions.flip)
-		iluFlipImage();
-
 	ApplyImportingOptions(App->resources->textureImportingOptions);
 
 	ilSetInteger(IL_DXTC_DATA_FORMAT, IL_DXT5);
@@ -181,36 +177,60 @@ ILenum TextureImporter::GetFileFormat(const char* file)
 
 void TextureImporter::ApplyImportingOptions(TextureImportingOptions importingOptions)
 {
-	if (importingOptions.flip)
-		iluFlipImage();
+	if (importingOptions.flip) {
+		if (iluFlipImage() == IL_FALSE)
+			LOG_ERROR("The image couldn't be successfully flipped");
+	}
 
-	if (importingOptions.alienify)
-		iluAlienify();
+	if (importingOptions.alienify) {
+		if(iluAlienify() == IL_FALSE)
+			LOG_ERROR("The image couldn't be successfully alienified");
+	}
 
-	if (importingOptions.blur_average)
-		iluBlurAvg(10);
+	if (importingOptions.blur_average) {
+		if(iluBlurAvg(importingOptions.blur_average_iterations) == IL_FALSE)
+			LOG_ERROR("The image couldn't be successfully averagly blurred");
+	}
 
-	if (importingOptions.blur_gaussian)
-		iluBlurGaussian;
+	if (importingOptions.blur_gaussian) {
+		if(iluBlurGaussian(importingOptions.blur_gaussian_iterations) == IL_FALSE)
+			LOG_ERROR("The image couldn't be successfully gaussiany blurred");
+	}
 
-	if (importingOptions.equalize)
-		iluEqualize();
+	if (importingOptions.equalize) {
+		if(iluEqualize() == IL_FALSE)
+			LOG_ERROR("The image couldn't be successfully equalized");
+	}
 
-	if (importingOptions.negativity)
-		iluNegative();
 
-	if (importingOptions.noise)
-		iluNoisify(importingOptions.noise_tolerance);
+	if (importingOptions.negativity) {
+		if(iluNegative() == IL_FALSE)
+			LOG_ERROR("The image couldn't be successfully negativized");
+	}
 
-	if (importingOptions.pixelize)
-		iluPixelize(importingOptions.pixelize_size);
 
-	if (importingOptions.sharpening)
-		iluSharpen(importingOptions.sharpening_factor, importingOptions.sharpening_iterations);
+	if (importingOptions.noise) {
+		if(iluNoisify(importingOptions.noise_tolerance) == IL_FALSE)
+			LOG_ERROR("Couldn't add noise to the image");
+	}
 
-	iluGammaCorrect(importingOptions.gamma_correction);
+	if (importingOptions.pixelize) {
+		if(iluPixelize(importingOptions.pixelize_size) == IL_FALSE)
+			LOG_ERROR("The image couldn't be successfully pixelized");
+	}
 
-	bool pixelize = false;
-	bool sharpening = false;
+	if (importingOptions.sharpening) {
+		if(iluSharpen(importingOptions.sharpening_factor, importingOptions.sharpening_iterations) == IL_FALSE)
+			LOG_ERROR("The image couldn't be successfully sharpened");
+	}
+	
+	if(iluContrast(importingOptions.contrast) == IL_FALSE)
+		LOG("Couldn't set image's contrast to %.2f", importingOptions.contrast);
+
+	if (iluGammaCorrect(importingOptions.gamma_correction) == IL_FALSE)
+		LOG("Couldn't correct image's gamma");
+
+	//iluImageParameter(ILU_FILTER, );
+
 	float contrast = 1.0f;
 }
