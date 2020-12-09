@@ -166,14 +166,14 @@ void GnMesh::OnEditor()
 		ImGui::Text("Vertices: %d Indices: %d", _resource->vertices_amount, _resource->indices_amount);
 		ImGui::Spacing();
 
-
-
 		ImGui::Spacing();
 
 		ImGui::Checkbox("Vertex Normals", &draw_vertex_normals);
 		ImGui::SameLine();
 		ImGui::Checkbox("Face Normals", &draw_face_normals);
 
+		ImGui::Spacing();
+		ImGui::Text("UID: %d", _resourceUID);
 		ImGui::Spacing();
 	}
 }

@@ -84,17 +84,20 @@ void Material::BindTexture()
 {
 	if (!checkers_image) 
 	{
+		_diffuseTexture->BindTexture();
+		
+		/*
 		if (!App->resources->Exists(_resourceUID)) 
 		{
 			_resource = nullptr;
 			_resourceUID = 0u;
 			checkers_image = true;
-			return;
 		}
 		else
 		{
 			_diffuseTexture->BindTexture();
 		}
+		*/
 	}
 	else 
 		glBindTexture(GL_TEXTURE_2D, checkersID);
@@ -207,6 +210,8 @@ void Material::OnEditor()
 				ImGui::EndDragDropTarget();
 			}
 		}
+
+		ImGui::Text("UID: %d", _resourceUID);
 	}
 }
 

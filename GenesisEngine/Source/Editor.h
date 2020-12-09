@@ -88,6 +88,8 @@ private:
 	}scene_operation = SceneOperation::NONE;
 
 	bool in_modal = false;
+	char selected_folder[256];
+	char scene_name[128];
 	char selected_file[256];
 };
 

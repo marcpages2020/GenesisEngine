@@ -1,7 +1,7 @@
 {
     "Game Objects": [
         {
-            "UUID": 32448309,
+            "UUID": 1922348613,
             "Parent UUID": 0,
             "Name": "Root",
             "Components": [
@@ -28,7 +28,7 @@
         },
         {
             "UUID": 226223663,
-            "Parent UUID": 32448309,
+            "Parent UUID": 1922348613,
             "Name": "rayman",
             "Components": [
                 {
@@ -124,7 +124,7 @@
         },
         {
             "UUID": 696038748,
-            "Parent UUID": 32448309,
+            "Parent UUID": 1922348613,
             "Name": "street environment_v01",
             "Components": [
                 {
@@ -1352,7 +1352,7 @@
             ]
         },
         {
-            "UUID": 1795258133,
+            "UUID": 1980020637,
             "Parent UUID": 696038748,
             "Name": "Sky001",
             "Components": [
@@ -1397,7 +1397,7 @@
             ]
         },
         {
-            "UUID": 1812036794,
+            "UUID": 1998191718,
             "Parent UUID": 696038748,
             "Name": "Spot001",
             "Components": [
@@ -1442,7 +1442,7 @@
             ]
         },
         {
-            "UUID": 1827283793,
+            "UUID": 2013577959,
             "Parent UUID": 696038748,
             "Name": "",
             "Components": [
@@ -1493,8 +1493,8 @@
             ]
         },
         {
-            "UUID": 603113848,
-            "Parent UUID": 32448309,
+            "UUID": 910687796,
+            "Parent UUID": 1922348613,
             "Name": "Camera",
             "Components": [
                 {

@@ -53,6 +53,9 @@ Editor::Editor(bool start_enabled) : Module(start_enabled)
 	windows[IMPORT_WINDOW] = new WindowImport();
 
 	//CONSOLE_WINDOW,
+	scene_name[0] = '\0';
+	selected_file[0] = '\0';
+	selected_folder[0] = '\0';
 }
 
 Editor::~Editor() {}
@@ -132,7 +135,12 @@ update_status Editor::Draw()
 		ShowPreferencesWindow();
 
 	if (file_dialog == opened)
-		LoadFile(".scene", "Assets/");
+	{
+		if (scene_operation == SceneOperation::LOAD)
+			LoadFile(".scene", "Library/");
+		else if (scene_operation == SceneOperation::SAVE)
+			SaveFile(".scene", "Library/");
+	}
 
 	ImGui::Render();
 
@@ -286,9 +294,8 @@ bool Editor::CreateMainMenuBar() {
 		{
 			if (ImGui::MenuItem("Save Scene"))
 			{
-				App->Save("Assets/Scenes/new_scene.scene");
-				//file_dialog = opened;
-				//scene_operation = SceneOperation::SAVE;
+				file_dialog = opened;
+				scene_operation = SceneOperation::SAVE;
 			}
 			else if (ImGui::MenuItem("Load Scene"))
 			{
@@ -503,8 +510,8 @@ void Editor::LoadFile(const char* filter_extension, const char* from_dir)
 
 void Editor::SaveFile(const char* filter_extension, const char* from_dir)
 {
-	ImGui::OpenPopup("Load File");
-	if (ImGui::BeginPopupModal("Load File", nullptr))
+	ImGui::OpenPopup("Save File");
+	if (ImGui::BeginPopupModal("Save File", nullptr))
 	{
 		in_modal = true;
 
@@ -515,15 +522,22 @@ void Editor::SaveFile(const char* filter_extension, const char* from_dir)
 		ImGui::PopStyleVar();
 
 		ImGui::PushItemWidth(250.f);
-		if (ImGui::InputText("##file_selector", selected_file, 256, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll))
+		if (ImGui::InputText("##file_selector", scene_name, 128, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll))
+		{
 			file_dialog = ready_to_close;
+			sprintf_s(selected_file, 128, "%s/%s.scene", selected_folder, scene_name);
+			App->Save(selected_file);
+			LOG("Ye");
+		}
 
 		ImGui::PopItemWidth();
 		ImGui::SameLine();
 		if (ImGui::Button("Ok", ImVec2(50, 20)))
 		{
 			file_dialog = ready_to_close;
-			App->Load(selected_file);
+			sprintf_s(selected_file, 128, "%s/%s.scene", selected_folder, scene_name);
+			App->Save(selected_file);
+			LOG("Ye");
 		}
 		ImGui::SameLine();
 
@@ -541,19 +555,30 @@ void Editor::DrawDirectoryRecursive(const char* directory, const char* filter_ex
 {
 	std::vector<std::string> files;
 	std::vector<std::string> dirs;
+	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None;
 
 	std::string dir((directory) ? directory : "");
-	dir += "/";
 
 	FileSystem::DiscoverFiles(dir.c_str(), files, dirs);
 
 	for (std::vector<std::string>::const_iterator it = dirs.begin(); it != dirs.end(); ++it)
 	{
-		if (ImGui::TreeNodeEx((dir + (*it)).c_str(), 0, "%s/", (*it).c_str()))
+		std::string folder = (dir + (*it)).c_str();
+		if (strcmp(folder.c_str(), selected_folder) == 0)
+			flags = ImGuiTreeNodeFlags_Selected;
+
+		if (ImGui::TreeNodeEx(folder.c_str(), flags, "%s/", (*it).c_str()))
 		{
+			flags = ImGuiTreeNodeFlags_None;
+
+			if(ImGui::IsItemClicked())
+				sprintf_s(selected_folder, 256, "%s%s", directory, (*it).c_str());
+
 			DrawDirectoryRecursive((dir + (*it)).c_str(), filter_extension);
 			ImGui::TreePop();
 		}
+
+		flags = ImGuiTreeNodeFlags_None;
 	}
 
 	std::sort(files.begin(), files.end());
@@ -570,7 +595,7 @@ void Editor::DrawDirectoryRecursive(const char* directory, const char* filter_ex
 		if (ok && ImGui::TreeNodeEx(str.c_str(), ImGuiTreeNodeFlags_Leaf))
 		{
 			if (ImGui::IsItemClicked()) {
-				sprintf_s(selected_file, 256, "%s%s", dir.c_str(), str.c_str());
+				sprintf_s(selected_file, 256, "%s/%s", dir.c_str(), str.c_str());
 
 				if (ImGui::IsMouseDoubleClicked(0))
 				{

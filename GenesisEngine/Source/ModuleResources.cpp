@@ -275,12 +275,10 @@ const char* ModuleResources::GetLibraryPath(uint UID)
 
 bool ModuleResources::Exists(uint UID)
 {
-	std::map<uint, Resource*>::iterator it = resources.find(UID);
+	std::map<uint, Resource*>::iterator resource = resources.find(UID);
+	std::map<uint, ResourceData>::iterator resource_data = resources_data.find(UID);
 
-	if (it != resources.end())
-		return true;
-	else
-		return false;
+	return resource != resources.end() || resource_data != resources_data.end();
 }
 
 
