@@ -28,4 +28,5 @@ private:
 private:
 	std::string current_folder;
 	AssetsIcons icons;
+	char selectedItem[256];
 };

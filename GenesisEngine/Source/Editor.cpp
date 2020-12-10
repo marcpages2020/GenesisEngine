@@ -342,55 +342,39 @@ bool Editor::CreateMainMenuBar() {
 			}
 			else if (ImGui::MenuItem("Cube"))
 			{
-				App->scene->AddGameObject(new GameObject(new GnCube()));
-			}
-			else if (ImGui::MenuItem("FBX: Cube"))
-			{
-				//App->scene->AddGameObject(MeshImporter::ImportFBX("Assets/Models/Primitives/cube.fbx"));
+				App->scene->AddGameObject(App->resources->RequestGameObject("Assets/EngineAssets/Primitives/cube.fbx"));
 			}
 			else if (ImGui::MenuItem("Cylinder"))
 			{
-				App->scene->AddGameObject(new GameObject(new GnCylinder()));
-			}
-			else if (ImGui::MenuItem("FBX: Cylinder"))
-			{
-				//App->scene->AddGameObject(MeshImporter::ImportFBX("Assets/Models/Primitives/cylinder.fbx"));
+				App->scene->AddGameObject(App->resources->RequestGameObject("Assets/EngineAssets/Primitives/cylinder.fbx"));
 			}
 			else if (ImGui::MenuItem("Sphere"))
 			{
-				App->scene->AddGameObject(new GameObject(new GnSphere()));
-			}
-			else if (ImGui::MenuItem("FBX: Sphere"))
-			{
-				//App->scene->AddGameObject(MeshImporter::ImportFBX("Assets/Models/Primitives/sphere.fbx"));
+				App->scene->AddGameObject(App->resources->RequestGameObject("Assets/EngineAssets/Primitives/sphere.fbx"));
 			}
 			else if (ImGui::MenuItem("Pyramid"))
 			{
-				App->scene->AddGameObject(new GameObject(new GnPyramid()));
-			}
-			else if (ImGui::MenuItem("FBX: Pyramid"))
-			{
-				//App->scene->AddGameObject(MeshImporter::ImportFBX("Assets/Models/Primitives/pyramid.fbx"));
+				App->scene->AddGameObject(App->resources->RequestGameObject("Assets/EngineAssets/Primitives/pyramid.fbx"));
 			}
 			else if (ImGui::MenuItem("Plane"))
 			{
-				App->scene->AddGameObject(new GameObject(new GnPlane()));
-			}
-			else if (ImGui::MenuItem("FBX: Plane"))
-			{
-				//App->scene->AddGameObject(MeshImporter::ImportFBX("Assets/Models/Primitives/plane.fbx"));
+				App->scene->AddGameObject(App->resources->RequestGameObject("Assets/EngineAssets/Primitives/plane.fbx"));
 			}
 			else if (ImGui::MenuItem("Cone"))
 			{
-				App->scene->AddGameObject(new GameObject(new GnCone()));
+				App->scene->AddGameObject(App->resources->RequestGameObject("Assets/EngineAssets/Primitives/cone.fbx"));
 			}
-			else if (ImGui::MenuItem("FBX: Cone"))
+			else if (ImGui::MenuItem("Torus"))
 			{
-				//App->scene->AddGameObject(MeshImporter::ImportFBX("Assets/Models/Primitives/cone.fbx"));
+				App->scene->AddGameObject(App->resources->RequestGameObject("Assets/EngineAssets/Primitives/torus.fbx"));
 			}
 			else if (ImGui::MenuItem("Suzanne"))
 			{
-				//App->scene->AddGameObject(MeshImporter::ImportFBX("Assets/Models/Primitives/monkey.fbx"));
+				App->scene->AddGameObject(App->resources->RequestGameObject("Assets/EngineAssets/Primitives/monkey.fbx"));
+			}
+			else if (ImGui::MenuItem("Camera"))
+			{
+				App->scene->AddGameObject(new GameObject(ComponentType::CAMERA));
 			}
 			ImGui::EndMenu();
 		}
@@ -604,7 +588,13 @@ void Editor::DrawDirectoryRecursive(const char* directory, const char* filter_ex
 		if (filter_extension && str.find(filter_extension) == std::string::npos)
 			ok = false;
 
-		if (ok && ImGui::TreeNodeEx(str.c_str(), ImGuiTreeNodeFlags_Leaf))
+		flags = ImGuiTreeNodeFlags_Leaf;
+
+		std::string complete_path = std::string(directory) + "/" + str;
+		if(strcmp(selected_file, complete_path.c_str()) == 0)
+			flags |= ImGuiTreeNodeFlags_Selected;
+
+		if (ok && ImGui::TreeNodeEx(str.c_str(), flags))
 		{
 			if (ImGui::IsItemClicked()) {
 				sprintf_s(selected_file, 256, "%s/%s", dir.c_str(), str.c_str());

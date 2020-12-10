@@ -18,10 +18,21 @@ GameObject::GameObject() : enabled(true), name("Empty Game Object"), _parent(nul
 	UUID = LCG().Int();
 }
 
-GameObject::GameObject(GnMesh* mesh) : GameObject()
+GameObject::GameObject(ComponentType component) : GameObject()
 {
-	SetName(mesh->name);
-	AddComponent((Component*)mesh);
+	AddComponent(component);
+
+	switch (component)
+	{
+	case ComponentType::CAMERA:
+		name = "Camera";
+		break;
+	case ComponentType::LIGHT:
+		name = "Light";
+		break;
+	default:
+		break;
+	}
 }
 
 GameObject::~GameObject()
@@ -78,9 +89,9 @@ void GameObject::OnEditor()
 	ImGui::Checkbox("Enabled", &enabled);
 	ImGui::SameLine();
 
-	static char buf[64] = "Name";
-	strcpy(buf, name.c_str());
-	if (ImGui::InputText("", &buf[0], IM_ARRAYSIZE(buf))){}
+	//if (ImGui::InputText("##file_selector", selected_file, 256, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll))
+	char* buf = (char*)name.c_str();
+	ImGui::InputText("##name", buf, 64, ImGuiInputTextFlags_EnterReturnsTrue);
 
 	for (size_t i = 0; i < components.size(); i++)
 	{

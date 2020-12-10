@@ -11,6 +11,7 @@ WindowAssets::WindowAssets() : EditorWindow()
 {
 	type = WindowType::ASSETS_WINDOW;
 	current_folder = "Assets";
+	selectedItem[0] = '\0';
 }
 
 WindowAssets::~WindowAssets() 
@@ -144,6 +145,9 @@ void WindowAssets::DrawCurrentFolder()
 
 	bool ret = true;
 
+	//if (ImGui::IsMouseClicked(0))
+		//selectedItem[0] = '\0';
+
 	for (size_t r = 0; r < rows && icons_drawn < total_icons && ret; r++)
 	{
 		ImGui::Columns(columns, 0, false);
@@ -264,22 +268,35 @@ void WindowAssets::DrawCurrentFolder()
 bool WindowAssets::DrawIcon(const char* path, int id, bool isFolder)
 {
 	bool ret = true;
+	ImVec4 fileColor = ImVec4(0, 0, 0, 1);
+
+	if (strcmp(selectedItem, path) == 0)
+		fileColor = ImVec4(0, 0, 0, 0);
 
 	if (isFolder)
 	{
 		ImGui::PushID(id);
-		if (ImGui::ImageButton((ImTextureID)icons.folder->GetGpuID(), ImVec2(70, 70), ImVec2(0, 1), ImVec2(1, 0), 0 ,ImVec4(0,0,0,1))) 
+		if (ImGui::ImageButton((ImTextureID)icons.folder->GetGpuID(), ImVec2(70, 70), ImVec2(0, 1), ImVec2(1, 0), 0 , fileColor)) 
 		{
-			current_folder = path;
-			ret = false;
+			if (strcmp(selectedItem, path) == 0)
+			{
+				current_folder = path;
+				selectedItem[0] = '\0';
+				ret = false;
+			}
+			else
+				sprintf_s(selectedItem, path);
 		}
+
 		ImGui::Text("%s", FileSystem::GetFileName(path).c_str());
 		ImGui::PopID();
 	}
 	else
 	{
 		ImGui::PushID(id);
-		ImGui::ImageButton((ImTextureID)icons.model->GetGpuID(), ImVec2(70, 70), ImVec2(0, 1), ImVec2(1, 0), 0, ImVec4(0, 0, 0, 1));
+		if (ImGui::ImageButton((ImTextureID)icons.model->GetGpuID(), ImVec2(70, 70), ImVec2(0, 1), ImVec2(1, 0), 0, fileColor))
+			sprintf_s(selectedItem, 256, path);
+
 		if (ImGui::BeginDragDropSource())
 		{
 			ImGui::SetDragDropPayload("ASSETS", &id, sizeof(int));

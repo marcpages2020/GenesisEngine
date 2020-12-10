@@ -18,7 +18,7 @@ class GnJSONArray;
 class GameObject {
 public:
 	GameObject();
-	GameObject(GnMesh* mesh);
+	GameObject(ComponentType component);
 	~GameObject();
 
 	void Update();

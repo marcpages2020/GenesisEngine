@@ -216,7 +216,7 @@ int ModuleResources::GetUIDFromMeta(const char* meta_file)
 
 int ModuleResources::Find(const char* assets_file)
 {
-	int UID = -1;
+	int UID = 0;
 
 	std::map<uint, Resource*>::iterator resource_it = resources.begin();
 	std::map<uint, ResourceData>::iterator resources_data_it = resources_data.begin();
