@@ -135,6 +135,7 @@ void ModuleResources::OnEditor()
 void ModuleResources::LoadEngineAssets(AssetsIcons& icons)
 {
 	icons.folder = dynamic_cast<ResourceTexture*>(LoadResource(Find("Assets/EngineAssets/folder.png"), ResourceType::RESOURCE_TEXTURE));
+	icons.model = dynamic_cast<ResourceTexture*>(LoadResource(Find("Assets/EngineAssets/model.png"), ResourceType::RESOURCE_TEXTURE));
 }
 
 void ModuleResources::OnFrameEnd()

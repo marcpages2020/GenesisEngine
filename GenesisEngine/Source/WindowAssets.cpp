@@ -133,7 +133,7 @@ void WindowAssets::DrawCurrentFolder()
 	int total_icons = files.size() + dirs.size();
 	int icons_drawn = 0;
 
-	int columns = floor(ImGui::GetContentRegionAvailWidth() / 110.0f);
+	int columns = floor(ImGui::GetContentRegionAvailWidth() / 100.0f);
 	int rows = ceil(files.size() + dirs.size() / (float)columns);
 
 	int drawn_columns = 0;
@@ -152,16 +152,15 @@ void WindowAssets::DrawCurrentFolder()
 			if (dirs_drawn < dirs.size()) 
 			{
 				std::string path = current_folder + "/" + dirs[dirs_drawn];
-				ret = DrawIcon(path.c_str(), true);
+				ret = DrawIcon(path.c_str(), icons_drawn, true);
 				dirs_drawn++;
 			}
 			else
 			{
 				std::string path = current_folder + "/" + files[files_drawn];
-				DrawIcon(path.c_str(), false);
+				DrawIcon(path.c_str(), icons_drawn, false);
 				files_drawn++;
 			}
-
 			ImGui::NextColumn();
 			icons_drawn++;
 		}
@@ -262,42 +261,75 @@ void WindowAssets::DrawCurrentFolder()
 	*/
 }
 
-bool WindowAssets::DrawIcon(const char* path, bool isFolder)
+bool WindowAssets::DrawIcon(const char* path, int id, bool isFolder)
 {
 	bool ret = true;
 
 	if (isFolder)
 	{
-		ImGui::ImageButton((ImTextureID)icons.folder->GetGpuID(), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
-		ImGui::Text("%s", FileSystem::GetFileName(path).c_str());
-		/*
-		if (ImGui::Button(path, ImVec2(100, 100))) {
-			current_folder.append("/");
-			current_folder.append(dirs[i].c_str());
-		}
-
-		if (ImGui::BeginDragDropTarget())
-		{
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSETS"))
-			{
-				IM_ASSERT(payload->DataSize == sizeof(int));
-				int payload_n = *(const int*)payload->Data;
-			}
-			ImGui::EndDragDropTarget();
-		}
-		*/
-		if (ImGui::IsMouseDoubleClicked(0))
+		ImGui::PushID(id);
+		if (ImGui::ImageButton((ImTextureID)icons.folder->GetGpuID(), ImVec2(70, 70), ImVec2(0, 1), ImVec2(1, 0), 0 ,ImVec4(0,0,0,1))) 
 		{
 			current_folder = path;
 			ret = false;
 		}
+		ImGui::Text("%s", FileSystem::GetFileName(path).c_str());
+		ImGui::PopID();
 	}
 	else
 	{
-		ImGui::ImageButton((ImTextureID)icons.folder->GetGpuID(), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
-		ImGui::Text("%s", FileSystem::GetFileName(path).c_str());
-	}
+		ImGui::PushID(id);
+		ImGui::ImageButton((ImTextureID)icons.model->GetGpuID(), ImVec2(70, 70), ImVec2(0, 1), ImVec2(1, 0), 0, ImVec4(0, 0, 0, 1));
+		if (ImGui::BeginDragDropSource())
+		{
+			ImGui::SetDragDropPayload("ASSETS", &id, sizeof(int));
+			ImGui::Text("%s", FileSystem::GetFile(path).c_str());
+			ImGui::EndDragDropSource();
+		}
 
+		if (ImGui::BeginPopupContextItem()) {
+			if (ImGui::Button("Delete"))
+			{
+				App->resources->AddAssetToDelete(path);
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+		std::string file_name = FileSystem::GetFile(path);
+		//if(file_name.size() > 16)
+
+		if (file_name.find(".fbx") != std::string::npos)
+		{
+			ImGui::SameLine();
+			if (ImGui::Button("->"))
+				ImGui::OpenPopup("Meshes");
+			if (ImGui::BeginPopup("Meshes", ImGuiWindowFlags_NoMove))
+			{
+				std::string model = current_folder + "/" + file_name;
+				const char* library_path = App->resources->Find(App->resources->GetUIDFromMeta(model.append(".meta").c_str()));
+
+				std::vector<uint> meshes;
+				std::vector<uint> materials;
+				ModelImporter::ExtractInternalResources(library_path, meshes, materials);
+
+				for (size_t m = 0; m < meshes.size(); m++)
+				{
+					ImGui::PushID(meshes[m]);
+					ResourceData meshData = App->resources->RequestResourceData(meshes[m]);
+					ImGui::Text("%s", meshData.name.c_str());
+					if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+					{
+						ImGui::SetDragDropPayload("MESHES", &(meshes[m]), sizeof(int));
+						ImGui::EndDragDropSource();
+					}
+					ImGui::PopID();
+				}
+				ImGui::EndPopup();
+			}
+		}
+		ImGui::Text("%s", file_name.c_str());
+		ImGui::PopID();
+	}
 	return ret;
 }
 

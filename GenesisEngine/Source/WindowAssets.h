@@ -8,6 +8,7 @@ class ResourceTexture;
 struct AssetsIcons
 {
 	ResourceTexture* folder = nullptr;
+	ResourceTexture* model = nullptr;
 };
 
 class WindowAssets : public EditorWindow {
@@ -22,7 +23,7 @@ public:
 private:
 	void DrawDirectoryRecursive(const char* directory, const char* filter_extension);
 	void DrawCurrentFolder();
-	bool DrawIcon(const char* path, bool isFolder = false);
+	bool DrawIcon(const char* path, int id, bool isFolder = false);
 
 private:
 	std::string current_folder;
