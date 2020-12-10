@@ -73,12 +73,11 @@ public:
 	std::string GenerateMetaFile(const char* assets_path);
 	void AddFileExtension(std::string& file, ResourceType type);
 
+	void CheckAssetsRecursive(const char* from_directory);
+
 public:
 	ModelImportingOptions modelImportingOptions;
 	TextureImportingOptions textureImportingOptions;
-
-private:
-	void CheckAssetsRecursive(const char* directory);
 
 private:
 	std::map<uint, Resource*> resources;

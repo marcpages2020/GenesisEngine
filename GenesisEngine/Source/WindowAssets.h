@@ -24,6 +24,7 @@ private:
 	void DrawDirectoryRecursive(const char* directory, const char* filter_extension);
 	void DrawCurrentFolder();
 	bool DrawIcon(const char* path, int id, bool isFolder = false);
+	void DrawPathButtons();
 
 private:
 	std::string current_folder;

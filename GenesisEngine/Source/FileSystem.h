@@ -33,6 +33,7 @@ namespace FileSystem
 	std::string ProcessPath(const char* path);
 	std::string NormalizePath(const char* path);
 	void SplitFilePath(const char* full_path, std::string* path, std::string* file = nullptr, std::string* extension = nullptr);
+	void SplitFilePath(const char* full_path, std::vector<std::string>* splits);
 
 	// Open for Read/Write
 	unsigned int Load(const char* path, const char* file, char** buffer);

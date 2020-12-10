@@ -291,6 +291,23 @@ void FileSystem::SplitFilePath(const char* full_path, std::string* path, std::st
 	}
 }
 
+void FileSystem::SplitFilePath(const char* full_path, std::vector<std::string>* splits)
+{
+	std::string tmp;
+	std::string substring;
+
+	tmp = full_path;
+	while (tmp.find("/") != std::string::npos)
+	{
+		size_t found = tmp.find("/");
+		substring = tmp.substr(0, found);
+		tmp.erase(tmp.begin(), tmp.begin() + found +1);
+		splits->push_back(substring);
+	}
+
+	splits->push_back(tmp);
+}
+
 unsigned int FileSystem::Load(const char* path, const char* file, char** buffer) 
 {
 	std::string full_path(path);

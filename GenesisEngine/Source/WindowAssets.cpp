@@ -30,15 +30,23 @@ bool WindowAssets::Init()
 
 void WindowAssets::Draw()
 {
-	if (ImGui::Begin("Assets", &visible)) {
+	if (ImGui::Begin("Assets", &visible)) 
+	{
         ImGuiWindowFlags window_flags = ImGuiWindowFlags_AlwaysVerticalScrollbar;
         ImGui::BeginChild("Tree", ImVec2(ImGui::GetWindowContentRegionWidth() * 0.15f, ImGui::GetContentRegionAvail().y), false, window_flags);
 		ImGui::Text("Assets");
 		DrawDirectoryRecursive("Assets", nullptr);
+		ImGui::Spacing();
+		if (ImGui::Button("Reload", ImVec2(50, 16)))
+			App->resources->CheckAssetsRecursive("Assets");
         ImGui::EndChild();
 
 		ImGui::SameLine();
         ImGui::BeginChild("Folder", ImVec2(0, ImGui::GetContentRegionAvail().y), true);
+		ImGui::Columns(1);
+		DrawPathButtons();
+		ImGui::Spacing();
+		ImGui::Spacing();
 		DrawCurrentFolder();
         ImGui::EndChild();
 	}
@@ -58,25 +66,26 @@ void WindowAssets::DrawDirectoryRecursive(const char* directory, const char* fil
 
 	for (std::vector<std::string>::const_iterator it = dirs.begin(); it != dirs.end(); ++it)
 	{
-		if (ImGui::TreeNodeEx((dir + (*it)).c_str(), 0, "%s/", (*it).c_str(), tree_flags))
+		bool open = ImGui::TreeNodeEx((dir + (*it)).c_str(), 0, "%s/", (*it).c_str(), tree_flags);
+		
+		if (ImGui::BeginPopupContextItem()) {
+			if (ImGui::Button("Delete"))
+			{
+				//gameObject->to_delete = true;
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+
+		if (ImGui::IsItemClicked()) {
+			current_folder = directory;
+			current_folder.append("/");
+			current_folder.append(*it).c_str();
+		}
+
+		if (open) 
 		{
-			if (ImGui::BeginPopupContextItem()) {
-				if (ImGui::Button("Delete"))
-				{
-					//gameObject->to_delete = true;
-					ImGui::CloseCurrentPopup();
-				}
-				ImGui::EndPopup();
-			}
-
-			if (ImGui::IsItemClicked()) {
-				current_folder = directory;
-				current_folder.append("/");
-				current_folder.append(*it).c_str();
-			}
-
 			DrawDirectoryRecursive((dir + (*it)).c_str(), filter_extension);
-
 			ImGui::TreePop();
 		}
 	}
@@ -313,7 +322,11 @@ bool WindowAssets::DrawIcon(const char* path, int id, bool isFolder)
 			ImGui::EndPopup();
 		}
 		std::string file_name = FileSystem::GetFile(path);
-		//if(file_name.size() > 16)
+		if (file_name.size() > 14)
+		{
+			file_name.resize(14);
+			file_name.replace(file_name.end() - 3, file_name.end(), "...");
+		}
 
 		if (file_name.find(".fbx") != std::string::npos)
 		{
@@ -348,6 +361,46 @@ bool WindowAssets::DrawIcon(const char* path, int id, bool isFolder)
 		ImGui::PopID();
 	}
 	return ret;
+}
+
+void WindowAssets::DrawPathButtons()
+{
+	std::vector<std::string> splits;
+	const char* path = selectedItem;
+
+	if (selectedItem[0] == '\0')
+		path = current_folder.c_str();
+
+	FileSystem::SplitFilePath(path, &splits);
+	for (size_t i = 0; i < splits.size(); i++)
+	{
+		if(i < splits.size()- 1)
+		{
+			if (ImGui::Button(splits[i].append("/").c_str(), ImVec2(splits[i].size() * ImGui::GetFontSize() * 0.75f, 20))) {
+				for (size_t j = 1; j <= i; j++)
+				{
+					splits[0].append(splits[j]);
+				}
+				splits[0].erase(splits[0].end()-1);
+				current_folder = splits[0].c_str();
+				selectedItem[0] = '\0';
+				break;
+			}
+		}
+		else
+		{
+			if (ImGui::Button(splits[i].c_str(), ImVec2(splits[i].size() * ImGui::GetFontSize() * 0.75f, 20))) {
+				for (size_t j = 1; j <= i; j++)
+				{
+					splits[0].append(splits[j]);
+				}
+				break;
+			}
+		}
+
+		ImGui::SameLine();
+	}
+
 }
 
 const char* WindowAssets::GetFileAt(int i)
