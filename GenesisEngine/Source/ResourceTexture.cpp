@@ -10,6 +10,7 @@ _id(0), _width(-1), _height(-1), _data(nullptr) , _gpu_ID(0)
 ResourceTexture::~ResourceTexture() 
 {
 	_data = nullptr;
+	glDeleteTextures(1, &_gpu_ID);
 }
 
 void ResourceTexture::GenerateBuffers()
@@ -114,7 +115,7 @@ void ResourceTexture::Load(GnJSONObj& base_object)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	}
 
-	glGenerateMipmap(GL_TEXTURE_2D);
+	//glGenerateMipmap(GL_TEXTURE_2D);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _width, _height, 0, GL_RGBA, GL_UNSIGNED_BYTE, _data);
 	glBindTexture(GL_TEXTURE_2D, 0);
 

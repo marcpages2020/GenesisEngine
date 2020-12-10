@@ -24,6 +24,7 @@ public:
 	~Editor();
 
 	bool Init();
+	bool Start() override;
 	bool LoadConfig(GnJSONObj& config) override;
 	update_status Update(float dt);
 	update_status Draw();

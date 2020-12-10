@@ -3,6 +3,7 @@
 #include "ImGui/imgui.h"
 #include "FileSystem.h"
 #include "Importers.h"
+#include "ResourceTexture.h"
 
 #include <algorithm>
 
@@ -15,6 +16,15 @@ WindowAssets::WindowAssets() : EditorWindow()
 WindowAssets::~WindowAssets() 
 {
 	current_folder.clear();
+}
+
+bool WindowAssets::Init()
+{
+	bool ret = true;
+
+	App->resources->LoadEngineAssets(icons);
+
+	return ret;
 }
 
 void WindowAssets::Draw()
@@ -104,14 +114,70 @@ void WindowAssets::DrawDirectoryRecursive(const char* directory, const char* fil
 
 void WindowAssets::DrawCurrentFolder()
 {
+	std::vector<std::string> tmp_files;
 	std::vector<std::string> files;
 	std::vector<std::string> dirs;
 
-	FileSystem::DiscoverFiles(current_folder.c_str(), files, dirs);
+	FileSystem::DiscoverFiles(current_folder.c_str(), tmp_files, dirs);
 
+	for (size_t i = 0; i < tmp_files.size(); ++i)
+	{
+		if (tmp_files[i].find(".meta") == std::string::npos) 
+		{
+			files.push_back(tmp_files[i]);
+		}
+	}
+
+	tmp_files.clear();
+
+	int total_icons = files.size() + dirs.size();
+	int icons_drawn = 0;
+
+	int columns = floor(ImGui::GetContentRegionAvailWidth() / 110.0f);
+	int rows = ceil(files.size() + dirs.size() / (float)columns);
+
+	int drawn_columns = 0;
+	int drawn_rows = 0;
+
+	int dirs_drawn = 0;
+	int files_drawn = 0;
+
+	bool ret = true;
+
+	for (size_t r = 0; r < rows && icons_drawn < total_icons && ret; r++)
+	{
+		ImGui::Columns(columns, 0, false);
+		for (size_t c = 0; c < columns && icons_drawn < total_icons && ret; c++)
+		{
+			if (dirs_drawn < dirs.size()) 
+			{
+				std::string path = current_folder + "/" + dirs[dirs_drawn];
+				ret = DrawIcon(path.c_str(), true);
+				dirs_drawn++;
+			}
+			else
+			{
+				std::string path = current_folder + "/" + files[files_drawn];
+				DrawIcon(path.c_str(), false);
+				files_drawn++;
+			}
+
+			ImGui::NextColumn();
+			icons_drawn++;
+		}
+		ImGui::Columns(1);
+	}
+
+	/*
 	for (size_t i = 0; i < dirs.size(); i++)
 	{
 		ImGui::PushID(i);
+		std::string path = current_folder;
+		path.append(dirs[i].c_str());
+
+		//DrawIcon(dirs[i].c_str(), true);
+
+		
 		if (ImGui::Button(dirs[i].c_str(), ImVec2(100, 100))) {
 			current_folder.append("/");
 			current_folder.append(dirs[i].c_str());
@@ -131,7 +197,7 @@ void WindowAssets::DrawCurrentFolder()
 		{
 			current_folder = current_folder + dirs[i];
 		}
-
+		
 		ImGui::PopID();
 		ImGui::SameLine();
 	}
@@ -193,6 +259,46 @@ void WindowAssets::DrawCurrentFolder()
 		ImGui::PopID();
 		ImGui::SameLine();
 	}
+	*/
+}
+
+bool WindowAssets::DrawIcon(const char* path, bool isFolder)
+{
+	bool ret = true;
+
+	if (isFolder)
+	{
+		ImGui::ImageButton((ImTextureID)icons.folder->GetGpuID(), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::Text("%s", FileSystem::GetFileName(path).c_str());
+		/*
+		if (ImGui::Button(path, ImVec2(100, 100))) {
+			current_folder.append("/");
+			current_folder.append(dirs[i].c_str());
+		}
+
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSETS"))
+			{
+				IM_ASSERT(payload->DataSize == sizeof(int));
+				int payload_n = *(const int*)payload->Data;
+			}
+			ImGui::EndDragDropTarget();
+		}
+		*/
+		if (ImGui::IsMouseDoubleClicked(0))
+		{
+			current_folder = path;
+			ret = false;
+		}
+	}
+	else
+	{
+		ImGui::ImageButton((ImTextureID)icons.folder->GetGpuID(), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::Text("%s", FileSystem::GetFileName(path).c_str());
+	}
+
+	return ret;
 }
 
 const char* WindowAssets::GetFileAt(int i)

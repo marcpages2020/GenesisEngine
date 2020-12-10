@@ -292,6 +292,7 @@ void ModuleRenderer3D::DrawAABB(float3* cornerPoints)
 
 	glVertex3f(cornerPoints[7].x, cornerPoints[7].y, cornerPoints[7].z);
 	glVertex3f(cornerPoints[3].x, cornerPoints[3].y, cornerPoints[3].z);
+
 	glEnd();
 }
 

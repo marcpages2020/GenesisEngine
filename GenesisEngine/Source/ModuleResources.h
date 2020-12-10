@@ -8,6 +8,7 @@
 #include <string>
 
 class GameObject;
+struct AssetsIcons;
 
 struct ResourceData
 {
@@ -26,7 +27,7 @@ public:
 	bool Init() override;
 	bool CleanUp() override;
 	void OnEditor();
-	void LoadEngineAssets();
+	void LoadEngineAssets(AssetsIcons& icons);
 	void OnFrameEnd() override;
 
 	bool MetaUpToDate(const char* assets_file, const char* meta_file);

@@ -14,6 +14,7 @@
 #include "ResourceTexture.h"
 
 #include "WindowImport.h"
+#include "WindowAssets.h"
 #include <algorithm>
 
 #include "MathGeoLib/include/MathGeoLib.h"
@@ -38,19 +39,20 @@ bool ModuleResources::Init()
 
 	CheckAssetsRecursive("Assets");
 
-	//LoadEngineAssets();
-
 	return ret;
 }
 
 bool ModuleResources::CleanUp()
 {
 	bool ret = true;
+	std::map<uint, Resource*>::iterator it = resources.begin();
 
-	for (std::map<uint, Resource*>::iterator it = resources.begin(); it != resources.end(); ++it) 
+	/*
+	for (it; it != resources.end(); ++it) 
 	{
 		ReleaseResource(it->second->GetUID());
 	}
+	*/
 
 	resources.clear();
 	resources_data.clear();
@@ -130,9 +132,9 @@ void ModuleResources::OnEditor()
 	}
 }
 
-void ModuleResources::LoadEngineAssets()
+void ModuleResources::LoadEngineAssets(AssetsIcons& icons)
 {
-	ResourceTexture* folder_tex = dynamic_cast<ResourceTexture*>(RequestResource(Find("Assets/EngineAssets/folder.png")));
+	icons.folder = dynamic_cast<ResourceTexture*>(LoadResource(Find("Assets/EngineAssets/folder.png"), ResourceType::RESOURCE_TEXTURE));
 }
 
 void ModuleResources::OnFrameEnd()

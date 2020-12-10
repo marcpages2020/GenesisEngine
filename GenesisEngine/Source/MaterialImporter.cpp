@@ -60,7 +60,7 @@ bool MaterialImporter::Load(const char* fileBuffer, ResourceMaterial* material, 
 	timer.Start();
 
 	GnJSONObj material_data(fileBuffer);
-	material->diffuseTextureUID = material_data.GetInt("diffuseTexture");
+	material->diffuseTextureUID = material_data.GetInt("diffuseTexture", 0);
 
 
 	if (material->diffuseTextureUID != 0)

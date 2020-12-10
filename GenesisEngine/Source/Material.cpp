@@ -57,6 +57,8 @@ Material::~Material()
 			_diffuseTexture = nullptr;
 		}
 	}
+
+	glDeleteTextures(1, &checkersID);
 }
 
 void Material::Update() {}

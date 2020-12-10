@@ -16,6 +16,7 @@ class EditorWindow {
 public:
 	EditorWindow() : visible(false){};
 	virtual ~EditorWindow() {};
+	virtual bool Init() { return true; };
 	virtual void Draw() = 0;
 
 public:

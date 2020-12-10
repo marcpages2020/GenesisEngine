@@ -76,6 +76,18 @@ bool Editor::Init()
 	return true;
 }
 
+bool Editor::Start()
+{
+	bool ret = true;
+
+	for (size_t i = 0; i < MAX_WINDOWS; i++)
+	{
+		windows[i]->Init();
+	}
+
+	return ret;
+}
+
 update_status Editor::Update(float dt)
 {
 	update_status ret = UPDATE_CONTINUE;
