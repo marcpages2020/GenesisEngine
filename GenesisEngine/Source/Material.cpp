@@ -97,7 +97,6 @@ void Material::BindTexture()
 	else
 	{
 		glBindTexture(GL_TEXTURE_2D, checkersID);
-		//_resourceUID = 0u;
 	}
 }
 
@@ -182,6 +181,7 @@ void Material::OnEditor()
 			ImGui::SameLine();
 			if (ImGui::Button("Remove Texture"))
 			{
+				App->resources->ReleaseResource(_diffuseTexture->GetUID());
 				_diffuseTexture = nullptr;
 				AssignCheckersImage();
 			}

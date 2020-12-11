@@ -147,26 +147,10 @@ void Camera::SetFixedFOV(FixedFOV g_fixedFOV)
 
 void Camera::AdjustFieldOfView()
 {
-	_frustum.verticalFov = 2 * atan(tan(_frustum.horizontalFov * 0.5f) * (1/_aspectRatio));
-	/*
-	switch (_aspectRatio)
-	{
-	case AR_16_9:
-		//_frustum.horizontalFov = 2.0f * std::atan(std::tan(_frustum.verticalFov * 0.5f) * (16.0f / 9.0f));
-		_frustum.verticalFov = 2 * atan(tan(_frustum.horizontalFov * 0.5f) * (9.0f / 16.0f));
-		break;
-	case AR_16_10:
-		//_frustum.horizontalFov = 2.0f * std::atan(std::tan(_frustum.verticalFov * 0.5f) * (16.0f / 10.0f));
-		_frustum.verticalFov = 2 * atan(tan(_frustum.horizontalFov * 0.5f) * (10.0f / 16.0f));
-		break;
-	case AR_4_3:
-		//_frustum.horizontalFov = 2.0f * std::atan(std::tan(_frustum.verticalFov * 0.5f) * (4.0f / 3.0f));
-		_frustum.verticalFov = 2 * atan(tan(_frustum.horizontalFov * 0.5f) * (3.0f / 4.0f));
-		break;
-	default:
-		break;
-	}
-	*/
+	if(fixedFOV == FixedFOV::FIXED_HORIZONTAL_FOV)
+		_frustum.verticalFov = 2 * atan(tan(_frustum.horizontalFov * 0.5f) * (1/_aspectRatio));
+	else 
+		_frustum.horizontalFov = 2.0f * std::atan(std::tan(_frustum.verticalFov * 0.5f) * (_aspectRatio));
 }
 
 void Camera::AdjustFieldOfView(float width, float height)

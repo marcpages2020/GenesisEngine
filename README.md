@@ -42,11 +42,14 @@
 
  - About: Get the pages where the project is held in GitHub and get more information about the engine.
 
+### Scene Saving
+ - Scenes can be saved and loaded from the editor main bar. Even though they can be saved anywhere it is recommended to do so in the scenes folder to keep everything organised. 
+
 ### Importing Files
  For proper file import it is recommended that the files are already inside the Assets folder before starting the engine. If they are not, files can be dragged and dropped onto the engine in order to be imported. One last way to import files is copying them in the Assets folder and push the Reload button under the Assets hierarchy in the Assets window. 
 
  ### Importing Options
-There are plenty of importing options specially for textures. When the file is dropped onto the engine an importing window will pop up to select the desired options. 
+There are plenty of importing options specially for textures. When the file is dropped onto the engine an importing window will pop up to select the desired options. The only model format supported is fbx so if a warning or error message is displayed saying that a file from a different format can't be imported, this is the reason. 
 
  ## Additional functionality
 
@@ -58,4 +61,5 @@ There are plenty of importing options specially for textures. When the file is d
  - Objects can be deleted selecting them and pressing SUPR.  
 
 ## Second Assignment
- 
+ - Scenes can be saved with custom name.
+ - Textures can be previewed in the assets window. 

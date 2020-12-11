@@ -134,15 +134,12 @@ bool TextureImporter::Load(char* fileBuffer, ResourceTexture* texture, uint size
 
 	ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
 
-	LOG("Texture loaded successfully from: %s in %d ms", texture->libraryFile.c_str(), timer.Read());
-	texture->FillData(ilGetData(), (uint)imageID, ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT));
-
 	error = ilGetError();
 	if (error != IL_NO_ERROR)
 	{
 		//ilBindImage(0);
 		//ilDeleteImages(1, &imageID);
-		LOG_ERROR("Error %d when loading %s: %s", error, texture->libraryFile.c_str(), iluErrorString(error));
+		//LOG_ERROR("Error %d when loading %s: %s", error, texture->libraryFile.c_str(), iluErrorString(error));
 		//ret = false;
 	}
 	else
@@ -150,6 +147,9 @@ bool TextureImporter::Load(char* fileBuffer, ResourceTexture* texture, uint size
 		//LOG("Texture loaded successfully from: %s in %d ms", texture->libraryFile.c_str(), timer.Read());
 		//texture->FillData(ilGetData(), (uint)imageID, ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT));
 	}
+
+	LOG("Texture loaded successfully from: %s in %d ms", texture->libraryFile.c_str(), timer.Read());
+	texture->FillData(ilGetData(), (uint)imageID, ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT));
 
 	ilBindImage(0);
 	return ret;

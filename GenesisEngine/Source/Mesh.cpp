@@ -46,6 +46,9 @@ void GnMesh::Load(GnJSONObj& load_object)
 
 void GnMesh::SetResourceUID(uint UID)
 {
+	if (_resource != nullptr)
+		App->resources->ReleaseResource(_resourceUID);
+
 	_resourceUID = UID;
 	_resource = (ResourceMesh*)App->resources->RequestResource(_resourceUID);
 	if(_resource != nullptr)
@@ -77,6 +80,7 @@ void GnMesh::Render()
 {
 	if (!App->resources->Exists(_resourceUID)) {
 		_resource = nullptr;
+		_resourceUID = 0u;
 		return;
 	}
 

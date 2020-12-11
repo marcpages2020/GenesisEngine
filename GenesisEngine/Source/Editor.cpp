@@ -436,7 +436,7 @@ bool Editor::CreateMainMenuBar() {
 
 void Editor::ShowGameButtons()
 {
-	ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove;
+	ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration;
 
 	ImGui::SetNextWindowSize(ImVec2(130, 40));
 	if (ImGui::Begin("Game Buttons", &show_game_buttons, flags))
