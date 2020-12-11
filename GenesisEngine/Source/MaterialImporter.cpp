@@ -29,6 +29,9 @@ void MaterialImporter::Import(const aiMaterial* aimaterial, ResourceMaterial* ma
 				material->diffuseTextureUID = App->resources->ImportFile(file_path.c_str());
 			else
 				material->diffuseTextureUID = App->resources->Find(file_path.c_str());
+
+			if (material->diffuseTextureUID == 0)
+				LOG("Texture %s not found", file_path.c_str());
 		}
 
 		material->diffuseColor.r = aiDiffuseColor.r;

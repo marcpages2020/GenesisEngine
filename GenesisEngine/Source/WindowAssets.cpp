@@ -34,8 +34,13 @@ void WindowAssets::Draw()
 	{
         ImGuiWindowFlags window_flags = ImGuiWindowFlags_AlwaysVerticalScrollbar;
         ImGui::BeginChild("Tree", ImVec2(ImGui::GetWindowContentRegionWidth() * 0.15f, ImGui::GetContentRegionAvail().y), false, window_flags);
-		ImGui::Text("Assets");
-		DrawDirectoryRecursive("Assets", nullptr);
+		if (ImGui::TreeNodeEx("Assets", ImGuiTreeNodeFlags_DefaultOpen)) {
+			if (ImGui::IsItemClicked())
+				current_folder = "Assets";
+
+			DrawDirectoryRecursive("Assets", nullptr);
+			ImGui::TreePop();
+		}
 		ImGui::Spacing();
 		if (ImGui::Button("Reload", ImVec2(50, 16)))
 			App->resources->CheckAssetsRecursive("Assets");
@@ -143,7 +148,7 @@ void WindowAssets::DrawCurrentFolder()
 	int total_icons = files.size() + dirs.size();
 	int icons_drawn = 0;
 
-	int columns = floor(ImGui::GetContentRegionAvailWidth() / 100.0f);
+	int columns = floor(ImGui::GetContentRegionAvailWidth() / 105.0f);
 	int rows = ceil(files.size() + dirs.size() / (float)columns);
 
 	int drawn_columns = 0;
@@ -303,7 +308,7 @@ bool WindowAssets::DrawIcon(const char* path, int id, bool isFolder)
 	else
 	{
 		ImGui::PushID(id);
-		if (ImGui::ImageButton((ImTextureID)icons.model->GetGpuID(), ImVec2(70, 70), ImVec2(0, 1), ImVec2(1, 0), 0, fileColor))
+		if (ImGui::ImageButton((ImTextureID)icons.model->GetGpuID(), ImVec2(75, 70), ImVec2(0, 1), ImVec2(1, 0), 0, fileColor))
 			sprintf_s(selectedItem, 256, path);
 
 		if (ImGui::BeginDragDropSource())
@@ -331,7 +336,7 @@ bool WindowAssets::DrawIcon(const char* path, int id, bool isFolder)
 		if (file_name.find(".fbx") != std::string::npos)
 		{
 			ImGui::SameLine();
-			if (ImGui::Button("->"))
+			if (ImGui::Button("->", ImVec2(20,20)))
 				ImGui::OpenPopup("Meshes");
 			if (ImGui::BeginPopup("Meshes", ImGuiWindowFlags_NoMove))
 			{
@@ -372,6 +377,9 @@ void WindowAssets::DrawPathButtons()
 		path = current_folder.c_str();
 
 	FileSystem::SplitFilePath(path, &splits);
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0,0,0,1));
+	//ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVe);
+
 	for (size_t i = 0; i < splits.size(); i++)
 	{
 		if(i < splits.size()- 1)
@@ -389,17 +397,11 @@ void WindowAssets::DrawPathButtons()
 		}
 		else
 		{
-			if (ImGui::Button(splits[i].c_str(), ImVec2(splits[i].size() * ImGui::GetFontSize() * 0.75f, 20))) {
-				for (size_t j = 1; j <= i; j++)
-				{
-					splits[0].append(splits[j]);
-				}
-				break;
-			}
+			ImGui::Button(splits[i].c_str(), ImVec2(splits[i].size() * ImGui::GetFontSize() * 0.75f, 20)); 
 		}
-
 		ImGui::SameLine();
 	}
+	ImGui::PopStyleColor(1);
 
 }
 

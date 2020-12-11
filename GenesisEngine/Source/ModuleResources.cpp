@@ -472,13 +472,13 @@ bool ModuleResources::DeleteResource(uint UID)
 	case ResourceType::RESOURCE_MODEL:
 		DeleteInternalResources(UID);
 		break;
-	case ResourceType::RESOURCE_TEXTURE:
-		break;
 	default:
 		break;
 	}
 
-	ReleaseResource(UID);
+	if (resources.find(UID) != resources.end())
+		UnloadResource(resources[UID]);
+
 	FileSystem::Delete(resources_data[UID].libraryFile.c_str());
 	ReleaseResourceData(UID);
 
@@ -514,10 +514,12 @@ bool ModuleResources::DeleteInternalResource(uint UID)
 {
 	bool ret = true;
 
-	std::string library_path = Find(UID);
-	ret = FileSystem::Delete(library_path.c_str());
+	ret = FileSystem::Delete(resources[UID]->libraryFile.c_str());
 
-	ReleaseResource(UID);
+	if (resources.find(UID) != resources.end())
+		UnloadResource(resources[UID]);
+
+	resources_data.erase(resources_data.find(UID));
 
 	return ret;
 }

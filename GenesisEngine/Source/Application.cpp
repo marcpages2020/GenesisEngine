@@ -126,24 +126,25 @@ update_status Application::Update()
 	{
 		ret = modules_vector[i]->PostUpdate(dt);
 	}
+	
+	if (!endFrameTasks.empty()) {
+		for (size_t i = 0; i < endFrameTasks.size(); i++)
+		{
+			endFrameTasks.top()->OnFrameEnd();
+			endFrameTasks.pop();
+		}
+	}
 
 	if (want_to_save)
 	{
 		scene->Save(_file_to_save);
 		want_to_save = false;
 	}
-	else if (want_to_load)
+
+	if (want_to_load)
 	{
 		scene->Load(_file_to_load);
 		want_to_load = false;
-	}
-
-	if (!endFrameTasks.empty()) {
-		for (size_t i = 0; i < endFrameTasks.size(); i++) 
-		{
-			endFrameTasks.top()->OnFrameEnd();
-			endFrameTasks.pop();
-		}
 	}
 
 	FinishUpdate();

@@ -139,38 +139,57 @@ void GnMesh::OnEditor()
 		ImGui::Separator();
 		ImGui::Spacing();
 
-		std::string meshID = "Mesh: ";
-		meshID.append(_resource->name);
-		ImGui::Button(meshID.c_str());
-
-		if (ImGui::BeginDragDropTarget())
+		if (_resource != nullptr)
 		{
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("MESHES"))
+			std::string meshID = "Mesh: ";
+			meshID.append(_resource->name);
+			ImGui::Button(meshID.c_str());
+
+			if (ImGui::BeginDragDropTarget())
 			{
-				IM_ASSERT(payload->DataSize == sizeof(int));
-				int payload_n = *(const int*)payload->Data;
-				SetResourceUID(payload_n);
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("MESHES"))
+				{
+					IM_ASSERT(payload->DataSize == sizeof(int));
+					int payload_n = *(const int*)payload->Data;
+					SetResourceUID(payload_n);
+				}
+				ImGui::EndDragDropTarget();
 			}
-			ImGui::EndDragDropTarget();
+
+			ImGui::Spacing();
+
+			ImGui::Text("Assets path: %s", _resource->assetsFile.c_str());
+			ImGui::Text("Library path: %s", _resource->libraryFile.c_str());
+
+			ImGui::Spacing();
+			ImGui::Separator();
+			ImGui::Spacing();
+
+			ImGui::Text("Vertices: %d Indices: %d", _resource->vertices_amount, _resource->indices_amount);
+			ImGui::Spacing();
+
+			ImGui::Spacing();
+
+			ImGui::Checkbox("Vertex Normals", &draw_vertex_normals);
+			ImGui::SameLine();
+			ImGui::Checkbox("Face Normals", &draw_face_normals);
+		}
+		else
+		{
+			ImGui::Button("Unknown Mesh");
+
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("MESHES"))
+				{
+					IM_ASSERT(payload->DataSize == sizeof(int));
+					int payload_n = *(const int*)payload->Data;
+					SetResourceUID(payload_n);
+				}
+				ImGui::EndDragDropTarget();
+			}
 		}
 
-		ImGui::Spacing();
-
-		ImGui::Text("Assets path: %s", _resource->assetsFile.c_str());
-		ImGui::Text("Library path: %s", _resource->libraryFile.c_str());
-
-		ImGui::Spacing();
-		ImGui::Separator();
-		ImGui::Spacing();
-
-		ImGui::Text("Vertices: %d Indices: %d", _resource->vertices_amount, _resource->indices_amount);
-		ImGui::Spacing();
-
-		ImGui::Spacing();
-
-		ImGui::Checkbox("Vertex Normals", &draw_vertex_normals);
-		ImGui::SameLine();
-		ImGui::Checkbox("Face Normals", &draw_face_normals);
 
 		ImGui::Spacing();
 		ImGui::Text("UID: %d", _resourceUID);

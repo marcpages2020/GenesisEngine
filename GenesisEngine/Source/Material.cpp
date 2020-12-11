@@ -84,25 +84,21 @@ void Material::SetResourceUID(uint UID)
 
 void Material::BindTexture()
 {
-	if (!checkers_image) 
+	if (!App->resources->Exists(_resourceUID)) 
+	{
+		_resource = nullptr;
+		_resourceUID = 0u;
+		checkers_image = true;
+	}
+	else if (!checkers_image) 
 	{
 		_diffuseTexture->BindTexture();
-		
-		/*
-		if (!App->resources->Exists(_resourceUID)) 
-		{
-			_resource = nullptr;
-			_resourceUID = 0u;
-			checkers_image = true;
-		}
-		else
-		{
-			_diffuseTexture->BindTexture();
-		}
-		*/
 	}
-	else 
+	else
+	{
 		glBindTexture(GL_TEXTURE_2D, checkersID);
+		//_resourceUID = 0u;
+	}
 }
 
 void Material::Save(GnJSONArray& save_array)
@@ -120,8 +116,8 @@ void Material::Save(GnJSONArray& save_array)
 
 void Material::Load(GnJSONObj& load_object)
 {
-	int materialUID = load_object.GetInt("Material UID");
-	_resource = (ResourceMaterial*)App->resources->RequestResource(materialUID);
+	_resourceUID = load_object.GetInt("Material UID", 0);
+	_resource = (ResourceMaterial*)App->resources->RequestResource(_resourceUID);
 
 	int textureUID = load_object.GetInt("Texture UID", -1);
 
@@ -133,8 +129,6 @@ void Material::Load(GnJSONObj& load_object)
 
 	if (_diffuseTexture == nullptr)
 		AssignCheckersImage();
-	else
-		SetTexture(_diffuseTexture);
 }
 
 void Material::OnEditor()
@@ -192,7 +186,7 @@ void Material::OnEditor()
 				AssignCheckersImage();
 			}
 		}
-		else
+		else if (_resource != nullptr)
 		{
 			ImGui::Image((ImTextureID)checkersID, ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
 

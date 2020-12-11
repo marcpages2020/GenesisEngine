@@ -241,7 +241,6 @@ bool ModuleScene::Load(const char* scene_file)
 			if (createdObjects[i]->UUID == parentUUID)
 			{
 				createdObjects[i]->AddChild(gameObject);
-				gameObject->SetParent(createdObjects[i]);
 			}
 		}
 	}
