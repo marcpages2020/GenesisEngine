@@ -1,6 +1,8 @@
 #pragma once
 #include "EditorWindow.h"
 
+#include <map>
+#include <vector>
 #include <string>
 
 class ResourceTexture;
@@ -26,8 +28,12 @@ private:
 	bool DrawIcon(const char* path, int id, bool isFolder = false);
 	void DrawPathButtons();
 
+	void LoadPreviews(std::vector<std::string> current_folder_files);
+	void UnloadPreviews();
+
 private:
 	std::string current_folder;
 	AssetsIcons icons;
 	char selectedItem[256];
+	std::map<std::string, ResourceTexture*> previews;
 };

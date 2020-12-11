@@ -86,6 +86,8 @@ void WindowAssets::DrawDirectoryRecursive(const char* directory, const char* fil
 			current_folder = directory;
 			current_folder.append("/");
 			current_folder.append(*it).c_str();
+			ImGui::TreePop();
+			break;
 		}
 
 		if (open) 
@@ -145,22 +147,19 @@ void WindowAssets::DrawCurrentFolder()
 
 	tmp_files.clear();
 
+	if (previews.empty())
+		LoadPreviews(files);
+
 	int total_icons = files.size() + dirs.size();
 	int icons_drawn = 0;
 
 	int columns = floor(ImGui::GetContentRegionAvailWidth() / 105.0f);
 	int rows = ceil(files.size() + dirs.size() / (float)columns);
 
-	int drawn_columns = 0;
-	int drawn_rows = 0;
-
 	int dirs_drawn = 0;
 	int files_drawn = 0;
 
 	bool ret = true;
-
-	//if (ImGui::IsMouseClicked(0))
-		//selectedItem[0] = '\0';
 
 	for (size_t r = 0; r < rows && icons_drawn < total_icons && ret; r++)
 	{
@@ -184,99 +183,6 @@ void WindowAssets::DrawCurrentFolder()
 		}
 		ImGui::Columns(1);
 	}
-
-	/*
-	for (size_t i = 0; i < dirs.size(); i++)
-	{
-		ImGui::PushID(i);
-		std::string path = current_folder;
-		path.append(dirs[i].c_str());
-
-		//DrawIcon(dirs[i].c_str(), true);
-
-		
-		if (ImGui::Button(dirs[i].c_str(), ImVec2(100, 100))) {
-			current_folder.append("/");
-			current_folder.append(dirs[i].c_str());
-		}
-
-		if (ImGui::BeginDragDropTarget())
-		{
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSETS"))
-			{
-				IM_ASSERT(payload->DataSize == sizeof(int));
-				int payload_n = *(const int*)payload->Data;
-			}
-			ImGui::EndDragDropTarget();
-		}
-
-		if (ImGui::IsMouseDoubleClicked(0))
-		{
-			current_folder = current_folder + dirs[i];
-		}
-		
-		ImGui::PopID();
-		ImGui::SameLine();
-	}
-
-	for (size_t i = 0; i < files.size(); i++)
-	{
-		if (files[i].find(".meta") != -1)
-			continue;
-
-		ImGui::PushID(i);
-		ImGui::Button(files[i].c_str(), ImVec2(120, 120));
-
-		if (ImGui::BeginDragDropSource())
-		{
-			ImGui::SetDragDropPayload("ASSETS", &i, sizeof(int));
-			ImGui::EndDragDropSource();
-		}
-
-		if (ImGui::BeginPopupContextItem()) {
-			if (ImGui::Button("Delete"))
-			{
-				std::string file_to_delete = current_folder + "/" + files[i];
-				App->resources->AddAssetToDelete(file_to_delete.c_str());
-				ImGui::CloseCurrentPopup();
-			}
-			ImGui::EndPopup();
-		}
-
-		if (files[i].find(".fbx") != std::string::npos)
-		{
-			ImGui::SameLine();
-			if (ImGui::Button("->"))
-				ImGui::OpenPopup("Meshes");
-			if (ImGui::BeginPopup("Meshes", ImGuiWindowFlags_NoMove))
-			{
-				std::string model = current_folder + "/" + files[i];
-				const char* library_path = App->resources->Find(App->resources->GetUIDFromMeta(model.append(".meta").c_str()));
-
-				std::vector<uint> meshes;
-				std::vector<uint> materials;
-				ModelImporter::ExtractInternalResources(library_path, meshes, materials);
-
-				for (size_t m = 0; m < meshes.size(); m++)
-				{
-					ImGui::PushID(meshes[m]);
-					ResourceData meshData = App->resources->RequestResourceData(meshes[m]);
-					ImGui::Text("%s", meshData.name.c_str());
-					if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
-					{
-						ImGui::SetDragDropPayload("MESHES", &(meshes[m]), sizeof(int));
-						ImGui::EndDragDropSource();
-					}
-					ImGui::PopID();
-				}
-				ImGui::EndPopup();
-			}
-		}
-
-		ImGui::PopID();
-		ImGui::SameLine();
-	}
-	*/
 }
 
 bool WindowAssets::DrawIcon(const char* path, int id, bool isFolder)
@@ -296,6 +202,7 @@ bool WindowAssets::DrawIcon(const char* path, int id, bool isFolder)
 			{
 				current_folder = path;
 				selectedItem[0] = '\0';
+				UnloadPreviews();
 				ret = false;
 			}
 			else
@@ -308,9 +215,34 @@ bool WindowAssets::DrawIcon(const char* path, int id, bool isFolder)
 	else
 	{
 		ImGui::PushID(id);
-		if (ImGui::ImageButton((ImTextureID)icons.model->GetGpuID(), ImVec2(75, 70), ImVec2(0, 1), ImVec2(1, 0), 0, fileColor))
-			sprintf_s(selectedItem, 256, path);
+		std::string file_name = FileSystem::GetFile(path);
 
+		if(App->resources->GetTypeFromPath(path) == ResourceType::RESOURCE_TEXTURE)
+		{
+			ResourceTexture* preview = nullptr;
+			
+			for (std::map<std::string, ResourceTexture*>::iterator it = previews.begin(); it != previews.end(); it++)
+			{
+				if (it->first == file_name) 
+					preview = it->second;
+			}
+
+			if (preview != nullptr) 
+			{
+				if (ImGui::ImageButton((ImTextureID)preview->GetGpuID(), ImVec2(75, 70), ImVec2(0, 1), ImVec2(1, 0), 0, fileColor))
+					sprintf_s(selectedItem, 256, path);
+			}
+			else 
+			{
+				if (ImGui::ImageButton((ImTextureID)icons.model->GetGpuID(), ImVec2(75, 70), ImVec2(0, 1), ImVec2(1, 0), 0, fileColor))
+					sprintf_s(selectedItem, 256, path);
+			}
+		}
+		else 
+		{
+			if (ImGui::ImageButton((ImTextureID)icons.model->GetGpuID(), ImVec2(75, 70), ImVec2(0, 1), ImVec2(1, 0), 0, fileColor))
+				sprintf_s(selectedItem, 256, path);
+		}
 		if (ImGui::BeginDragDropSource())
 		{
 			ImGui::SetDragDropPayload("ASSETS", &id, sizeof(int));
@@ -326,7 +258,6 @@ bool WindowAssets::DrawIcon(const char* path, int id, bool isFolder)
 			}
 			ImGui::EndPopup();
 		}
-		std::string file_name = FileSystem::GetFile(path);
 		if (file_name.size() > 14)
 		{
 			file_name.resize(14);
@@ -363,6 +294,7 @@ bool WindowAssets::DrawIcon(const char* path, int id, bool isFolder)
 			}
 		}
 		ImGui::Text("%s", file_name.c_str());
+
 		ImGui::PopID();
 	}
 	return ret;
@@ -378,7 +310,6 @@ void WindowAssets::DrawPathButtons()
 
 	FileSystem::SplitFilePath(path, &splits);
 	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0,0,0,1));
-	//ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVe);
 
 	for (size_t i = 0; i < splits.size(); i++)
 	{
@@ -391,6 +322,7 @@ void WindowAssets::DrawPathButtons()
 				}
 				splits[0].erase(splits[0].end()-1);
 				current_folder = splits[0].c_str();
+				UnloadPreviews();
 				selectedItem[0] = '\0';
 				break;
 			}
@@ -402,7 +334,30 @@ void WindowAssets::DrawPathButtons()
 		ImGui::SameLine();
 	}
 	ImGui::PopStyleColor(1);
+}
 
+void WindowAssets::LoadPreviews(std::vector<std::string> current_folder_files)
+{
+	for (size_t i = 0; i < current_folder_files.size(); i++)
+	{
+		if (App->resources->GetTypeFromPath(current_folder_files[i].c_str()) == ResourceType::RESOURCE_TEXTURE)
+		{
+			std::string path = current_folder;
+			path.append("/" + current_folder_files[i]);
+			ResourceTexture* preview = dynamic_cast<ResourceTexture*>(App->resources->RequestResource(App->resources->Find(path.c_str())));
+			previews[FileSystem::GetFile(current_folder_files[i].c_str())] = preview;
+		}
+	}
+}
+
+void WindowAssets::UnloadPreviews()
+{
+	for (std::map<std::string, ResourceTexture*>::iterator preview = previews.begin(); preview != previews.end(); preview++)
+	{
+		App->resources->ReleaseResource(preview->second->GetUID());
+	}
+
+	previews.clear();
 }
 
 const char* WindowAssets::GetFileAt(int i)
