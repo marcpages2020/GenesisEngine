@@ -69,7 +69,7 @@ public:
 	const char* GenerateLibraryPath(Resource* resource);
 	std::string GenerateLibraryPath(uint uid, ResourceType type);
 	std::string GetLibraryFolder(const char* file_in_assets);
-	const char* GenerateAssetsPath(const char* path);
+	std::string GenerateAssetsPath(const char* path);
 	std::string GenerateMetaFile(const char* assets_path);
 	void AddFileExtension(std::string& file, ResourceType type);
 

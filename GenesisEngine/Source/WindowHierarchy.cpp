@@ -41,10 +41,10 @@ void WindowHierarchy::PreorderHierarchy(GameObject* gameObject, int& id)
 		if (ImGui::IsItemClicked())
 			App->scene->selectedGameObject = gameObject;
 
-		ImGui::PushID(id);
+		ImGui::PushID(gameObject->UUID);
 		if (ImGui::BeginDragDropSource())
 		{
-			ImGui::SetDragDropPayload("HIERARCHY", &id, sizeof(int));
+			ImGui::SetDragDropPayload("HIERARCHY", &gameObject->UUID, sizeof(int));
 			ImGui::Text("Reparent");
 			ImGui::EndDragDropSource();
 		}
@@ -56,7 +56,16 @@ void WindowHierarchy::PreorderHierarchy(GameObject* gameObject, int& id)
 				int payload_n = *(const int*)payload->Data;
 
 				std::vector<GameObject*> gameObjects = App->scene->GetAllGameObjects();
-				GameObject* target = gameObjects[payload_n];
+				GameObject* target = nullptr;
+
+				for (size_t i = 0; i < gameObjects.size(); i++)
+				{
+					if (gameObjects[i]->UUID == payload_n) {
+						target = gameObjects[i];
+						break;
+					}
+				}
+
 				target->Reparent(gameObject);
 			}
 			ImGui::EndDragDropTarget();

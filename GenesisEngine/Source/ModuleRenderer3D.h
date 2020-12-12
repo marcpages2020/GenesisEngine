@@ -68,14 +68,14 @@ public:
 	DisplayMode display_mode;
 
 	LineSegment _ray;
-	bool cullEditorCamera;
+	bool cull_editor_camera;
 
+	bool draw_aabbs;
 	bool draw_vertex_normals;
 	bool draw_face_normals;
 
 	bool vsync;
 
-private:
-	bool debug;
+private: 
 	Camera* _mainCamera;
 };

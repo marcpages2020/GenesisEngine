@@ -384,7 +384,7 @@ bool FileSystem::DuplicateFile(const char* srcFile, const char* dstFile)
 	}
 	else
 	{
-		LOG("[error] File could not be duplicated");
+		LOG_ERROR("File %s could not be duplicated into %s, %s", srcFile, dstFile , PHYSFS_getLastError());
 		return false;
 	}
 }

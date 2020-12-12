@@ -61,7 +61,7 @@ bool Application::Init()
 	GnJSONArray modules_array(config.GetArray("modules_config"));
 
 	// Call Init() in all modules
-	for (int i = 0; i < modules_vector.size() && ret == true; i++)
+	for (size_t i = 0; i < modules_vector.size() && ret == true; i++)
 	{
 		GnJSONObj module_config(modules_array.GetObjectInArray(modules_vector[i]->name));
 
@@ -71,7 +71,7 @@ bool Application::Init()
 
 	// After all Init calls we call Start() in all modules
 	LOG("Application Start --------------");
-	for (int i = 0; i < modules_vector.size() && ret == true; i++)
+	for (size_t i = 0; i < modules_vector.size() && ret == true; i++)
 	{
 		ret = modules_vector[i]->Start();
 	}
@@ -112,17 +112,17 @@ update_status Application::Update()
 	update_status ret = UPDATE_CONTINUE;
 	PrepareUpdate();
 	
-	for (int i = 0; i < modules_vector.size() && ret == UPDATE_CONTINUE; i++)
+	for (size_t i = 0; i < modules_vector.size() && ret == UPDATE_CONTINUE; i++)
 	{
 		ret = modules_vector[i]->PreUpdate(dt);
 	}
 
-	for (int i = 0; i < modules_vector.size() && ret == UPDATE_CONTINUE; i++)
+	for (size_t i = 0; i < modules_vector.size() && ret == UPDATE_CONTINUE; i++)
 	{
 		ret = modules_vector[i]->Update(dt);
 	}
 
-	for (int i = 0; i < modules_vector.size() && ret == UPDATE_CONTINUE; i++)
+	for (size_t i = 0; i < modules_vector.size() && ret == UPDATE_CONTINUE; i++)
 	{
 		ret = modules_vector[i]->PostUpdate(dt);
 	}
@@ -194,19 +194,19 @@ int Application::GetFPSCap()
 
 void Application::SetFPSCap(int fps_cap)
 {
-	capped_ms = 1000 / fps_cap;
+	capped_ms = 1000.0f / (float)fps_cap;
 }
 
 void Application::Save(const char* filePath)
 {
 	want_to_save = true;
-	strcpy(_file_to_save, filePath);
+	strcpy_s(_file_to_save, filePath);
 }
 
 void Application::Load(const char* filePath)
 {
 	want_to_load = true;
-	strcpy(_file_to_load, filePath);
+	strcpy_s(_file_to_load, filePath);
 }
 
 void Application::AddModuleToTaskStack(Module* callback)
@@ -223,7 +223,7 @@ HardwareSpecs Application::GetHardware()
 	specs.cache = SDL_GetCPUCacheLineSize();
 
 	//RAM
-	specs.ram = SDL_GetSystemRAM() / 1000;
+	specs.ram = SDL_GetSystemRAM() / 1000.0f;
 	
 	//Caps
 	specs.RDTSC = SDL_HasRDTSC();

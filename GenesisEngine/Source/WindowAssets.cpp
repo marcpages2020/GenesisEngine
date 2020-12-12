@@ -255,6 +255,8 @@ bool WindowAssets::DrawIcon(const char* path, int id, bool isFolder)
 			{
 				App->resources->AddAssetToDelete(path);
 				ImGui::CloseCurrentPopup();
+				selectedItem[0] = '\0';
+				ret = false;
 			}
 			ImGui::EndPopup();
 		}

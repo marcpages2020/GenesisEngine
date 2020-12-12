@@ -927,26 +927,29 @@ std::string ModuleResources::GetLibraryFolder(const char* file_in_assets)
 	}
 }
 
-const char* ModuleResources::GenerateAssetsPath(const char* path)
+std::string ModuleResources::GenerateAssetsPath(const char* path)
 {
 	ResourceType type = GetTypeFromPath(path);
-	std::string file = FileSystem::GetFile(path);
+	std::string file = FileSystem::NormalizePath(path);
+	file = FileSystem::GetFile(file.c_str());
 
-	char* library_path = new char[128];
+	std::string assets_path;
 
 	switch (type)
 	{
 	case RESOURCE_MODEL:
-		sprintf_s(library_path, 128, "Assets/Models/%s", file.c_str()); break;
+		assets_path = "Assets/Models/"; break;
 	case RESOURCE_TEXTURE:
-		sprintf_s(library_path, 128, "Assets/Textures/%s", file.c_str()); break;
+		assets_path = "Assets/Textures/"; break;
 	case RESOURCE_SCENE:
-		sprintf_s(library_path, 128, "Assets/Scenes/%s", file.c_str()); break;
+		assets_path = "Assets/Scenes/"; break;
 	default:
 		break;
 	}
 
-	return library_path;
+	assets_path.append(file);
+
+	return assets_path;
 }
 
 std::string ModuleResources::GenerateMetaFile(const char* assets_path)

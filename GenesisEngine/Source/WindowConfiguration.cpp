@@ -112,6 +112,13 @@ void WindowConfiguration::Draw()
 
 			if (ImGui::Checkbox("VSYNC", &vsync))
 				App->renderer3D->SetVSYNC(vsync);
+
+			ImGui::Separator();
+			ImGui::Spacing();
+
+			ImGui::Checkbox("Draw AABBs", &App->renderer3D->draw_aabbs);
+
+			ImGui::Spacing();
 		}
 
 		if (ImGui::CollapsingHeader("Camera")) {
@@ -150,7 +157,7 @@ void WindowConfiguration::Draw()
 					App->camera->SetVerticalFieldOfView(verticalFOV * DEGTORAD, App->editor->image_size.x, App->editor->image_size.y);
 
 				ImGui::Spacing();
-				ImGui::Text("Horizontal FOV: %.2f", App->camera->GetHorizontalFieldOfView() * RADTODEG);
+				ImGui::Text("Horizontal FOV: %.2f", (float)App->camera->GetHorizontalFieldOfView() * RADTODEG);
 			}
 			//Fixed Horizontal FOV Settings
 			else

@@ -24,12 +24,13 @@
 #pragma comment (lib, "opengl32.lib")     /* link Microsoft OpenGL lib */
 #pragma comment (lib, "glew/libx86/glew32.lib")		  /* link glew lib */
 
-ModuleRenderer3D::ModuleRenderer3D(bool start_enabled) : Module(start_enabled), cullEditorCamera(false), context(nullptr)
+ModuleRenderer3D::ModuleRenderer3D(bool start_enabled) : Module(start_enabled), cull_editor_camera(false), context(nullptr), 
+_mainCamera(nullptr), colorTexture(0), draw_aabbs(true), draw_vertex_normals(false), draw_face_normals(false),
+frameBuffer(0), renderBuffer(0), depthTexture(0), depthRenderBuffer(0), display_mode(SOLID), vsync(false)
 {
 	name = "renderer";
 
 	_ray = LineSegment();
-	display_mode = SOLID;
 }
 
 // Destructor
@@ -147,7 +148,7 @@ bool ModuleRenderer3D::Init()
 
 bool ModuleRenderer3D::LoadConfig(GnJSONObj& config)
 {
-	debug = config.GetBool("debug");
+	//debug = config.GetBool("debug");
 	vsync = config.GetBool("vsync");
 
 	draw_vertex_normals = config.GetBool("draw_vertex_normals");
@@ -255,6 +256,9 @@ void ModuleRenderer3D::UpdateProjectionMatrix(float* projectionMatrix)
 
 void ModuleRenderer3D::DrawAABB(float3* cornerPoints)
 {
+	if (draw_aabbs == false)
+		return;
+
 	glBegin(GL_LINES);
 
 	glVertex3f(cornerPoints[0].x, cornerPoints[0].y, cornerPoints[0].z);
@@ -329,7 +333,7 @@ Camera* ModuleRenderer3D::GetMainCamera()
 
 bool ModuleRenderer3D::IsInsideCameraView(AABB aabb)
 {
-	if (cullEditorCamera)
+	if (cull_editor_camera)
 		return _mainCamera->ContainsAABB(aabb) || App->camera->GetCamera()->ContainsAABB(aabb);
 	else
 		return _mainCamera->ContainsAABB(aabb);
