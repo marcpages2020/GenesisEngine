@@ -9,5 +9,5 @@ public:
 
 	void Draw() override;
 	void DrawGameTimeDataOverlay();
-
+	void ApplyDroppedFile(const char* assets_file);
 };

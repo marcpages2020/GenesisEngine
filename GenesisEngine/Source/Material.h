@@ -15,9 +15,7 @@ public:
 	Material(GameObject* gameObject);
 	~Material();
 
-	void Update() override;
 	void SetResourceUID(uint UID) override;
-
 	void BindTexture();
 
 	void Save(GnJSONArray& save_array) override;

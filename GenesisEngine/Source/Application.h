@@ -99,8 +99,8 @@ private:
 	bool want_to_save;
 	bool want_to_load;
 
-	const char* _file_to_load;
-	const char* _file_to_save;
+	char _file_to_load[256];
+	char _file_to_save[256];
 
 	std::stack<Module*> endFrameTasks;
 };

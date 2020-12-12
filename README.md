@@ -1,4 +1,4 @@
-# Genesis Engine
+# Genesis Engine v0.2
   Genesis Engine is a game engine made in C and C++ for learning purposes. I'm Marc Pagès Francesch, 
   a Game Development Student in CITM (Terrassa, Catalonia, Spain).
 
@@ -20,9 +20,9 @@
  - Middle Mouse: Drag to move horizontally and vertically. 
  - Right Click: Orbit around the selected object. (If an object is not selected it will orbit around the center of the scene).
  - F: Focus the camera around the selected object.(If an object is not selected it will focus around the center of the scene).
+ - O: Move Up.
+ - L: Move Down.
  - Hold Shift: Duplicate movement speed.
-
- If for any reason the camera got stuck or didn't show anything on screen push R to reset it. 
  
 ### Game Objects Inspector actions
  - Transform: Translate, Rotate and Scale the object. 
@@ -51,6 +51,12 @@
  ### Importing Options
 There are plenty of importing options specially for textures. When the file is dropped onto the engine an importing window will pop up to select the desired options. The only model format supported is fbx so if a warning or error message is displayed saying that a file from a different format can't be imported, this is the reason. 
 
+### Camera Culling
+ - The camera in the center of the screen is the main camera. Move it to see how camera culling is applied to objects. In the menu bar editor camera culling can be applied to see all objects in scene. 
+
+### Things to take into account
+ - At the end of the inspector window there is a ab called Resources. In this tab it is shown all the resources which are currently loaded into memory. If numbers seem to not match for textures take into account that assets window icon textures and preview textures are included in the list.
+
  ## Additional functionality
 
  ### First Assignment
@@ -63,3 +69,6 @@ There are plenty of importing options specially for textures. When the file is d
 ## Second Assignment
  - Scenes can be saved with custom name.
  - Textures can be previewed in the assets window. 
+ - Interactive path in assets window which lets the user move easilly bacwards in the file or folder path. 
+ - Meshes can be selected individually from inside a model pushing the arrow next to the file in the assets window. 
+ - Inside the configuration window there is an option under the resources tab which lets you delete all meta files and library files at shutdown so projects can be cleaned before releases or sending to mates. 

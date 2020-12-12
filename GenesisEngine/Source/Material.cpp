@@ -61,11 +61,13 @@ Material::~Material()
 	glDeleteTextures(1, &checkersID);
 }
 
-void Material::Update() {}
-
 void Material::SetResourceUID(uint UID)
 {
 	_resourceUID = UID;
+
+	if (_resource != nullptr)
+		App->resources->ReleaseResource(_resource->GetUID());
+
 	_resource = dynamic_cast<ResourceMaterial*>(App->resources->RequestResource(UID));
 
 	if (_resource->diffuseTextureUID != 0)
@@ -75,11 +77,8 @@ void Material::SetResourceUID(uint UID)
 
 		_diffuseTexture = dynamic_cast<ResourceTexture*>(App->resources->RequestResource(_resource->diffuseTextureUID));
 	}
-
-	if (_diffuseTexture == nullptr)
-		AssignCheckersImage();
 	else
-		SetTexture(_diffuseTexture);
+		AssignCheckersImage();
 }
 
 void Material::BindTexture()
@@ -213,8 +212,14 @@ void Material::OnEditor()
 
 void Material::SetTexture(ResourceTexture* texture)
 {
-	_diffuseTexture = texture;
-	checkers_image = false;
+	if (texture != nullptr)
+	{
+		if (_diffuseTexture != nullptr)
+			App->resources->ReleaseResource(_diffuseTexture->GetUID());
+
+		_diffuseTexture = texture;
+		checkers_image = false;
+	}
 }
 
 void Material::AssignCheckersImage()

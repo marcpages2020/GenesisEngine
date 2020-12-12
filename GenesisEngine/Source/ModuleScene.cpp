@@ -39,8 +39,8 @@ bool ModuleScene::Start()
 	
 	GameObject* camera = new GameObject();
 	camera->AddComponent(ComponentType::CAMERA);
-	camera->SetName("Camera");
-	camera->GetTransform()->SetPosition(float3(0.0f, 0.0f, -5.0f));
+	camera->SetName("Main Camera");
+	camera->GetTransform()->SetPosition(float3(0.0f, 1.0f, -5.0f));
 	AddGameObject(camera);
 	App->renderer3D->SetMainCamera((Camera*)camera->GetComponent(ComponentType::CAMERA));
 
@@ -194,6 +194,11 @@ bool ModuleScene::Save(const char* file_path)
 	uint size = save_file.Save(&buffer);
 
 	FileSystem::Save(file_path, buffer, size);
+
+	std::string assets_path = "Assets/Scenes/";
+	assets_path.append(FileSystem::GetFile(file_path));
+
+	FileSystem::DuplicateFile(file_path, assets_path.c_str());
 
 	save_file.Release();
 	RELEASE_ARRAY(buffer);

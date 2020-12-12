@@ -200,13 +200,13 @@ void Application::SetFPSCap(int fps_cap)
 void Application::Save(const char* filePath)
 {
 	want_to_save = true;
-	_file_to_save = filePath;
+	strcpy(_file_to_save, filePath);
 }
 
 void Application::Load(const char* filePath)
 {
 	want_to_load = true;
-	_file_to_load = filePath;
+	strcpy(_file_to_load, filePath);
 }
 
 void Application::AddModuleToTaskStack(Module* callback)

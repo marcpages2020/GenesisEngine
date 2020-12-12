@@ -4,16 +4,15 @@
 #include "glew/include/glew.h"
 #include "WindowAssets.h"
 #include "Time.h"
-
+#include "GameObject.h"
+#include "Material.h"
 
 WindowScene::WindowScene() : EditorWindow()
 {
 	type = WindowType::SCENE_WINDOW;
 }
 
-WindowScene::~WindowScene()
-{
-}
+WindowScene::~WindowScene() {}
 
 void WindowScene::Draw()
 {
@@ -83,14 +82,13 @@ void WindowScene::Draw()
 				int payload_n = *(const int*)payload->Data;
 				WindowAssets* assets_window = (WindowAssets*)App->editor->windows[ASSETS_WINDOW];
 				const char* file = assets_window->GetFileAt(payload_n);
-				App->scene->AddGameObject(App->resources->RequestGameObject(file));
+				ApplyDroppedFile(file);
 			}
 			ImGui::EndDragDropTarget();
 		}
 		ImGui::PopID();
 
 		App->scene->EditTransform();
-		//ImGui::Image((ImTextureID)App->renderer3D->depthTexture, image_size, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
 	}
 	ImGui::End();
 	ImGui::PopStyleVar();
@@ -126,4 +124,24 @@ void WindowScene::DrawGameTimeDataOverlay()
 	ImGui::PopStyleColor();
 	ImGui::PopStyleVar(2);
 	ImGui::End();
+}
+
+void WindowScene::ApplyDroppedFile(const char* assets_file)
+{
+	ResourceType type = App->resources->GetTypeFromPath(assets_file);
+
+	if (type == ResourceType::RESOURCE_MODEL)
+	{
+		App->scene->AddGameObject(App->resources->RequestGameObject(assets_file));
+	}
+	else if (type == ResourceType::RESOURCE_TEXTURE)
+	{
+		GameObject* selected_object = App->scene->selectedGameObject;
+
+		Material* material = (Material*)selected_object->GetComponent(ComponentType::MATERIAL);
+		if (material != nullptr)
+		{
+			material->SetTexture((ResourceTexture*)App->resources->RequestResource(App->resources->Find(assets_file)));
+		}
+	}
 }

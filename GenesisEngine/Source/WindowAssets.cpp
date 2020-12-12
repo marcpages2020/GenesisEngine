@@ -362,13 +362,21 @@ void WindowAssets::UnloadPreviews()
 
 const char* WindowAssets::GetFileAt(int i)
 {
+	std::vector<std::string> tmp_files;
 	std::vector<std::string> files;
 	std::vector<std::string> dirs;
 
-	FileSystem::DiscoverFiles(current_folder.c_str(), files, dirs);
-	std::string file = current_folder + "/"+ files[i];
-	char* file_cstr = new char[256];
-	sprintf_s(file_cstr, 256,"%s",file.c_str());
+	FileSystem::DiscoverFiles(current_folder.c_str(), tmp_files, dirs);
+
+	for (size_t i = 0; i < tmp_files.size(); i++)
+	{
+		if (tmp_files[i].find(".meta") == std::string::npos) {
+			files.push_back(tmp_files[i]);
+		}
+	}
+
+	char* file_cstr = new char[512];
+	sprintf_s(file_cstr, 512, "%s/%s", current_folder.c_str(), files[i - dirs.size()].c_str());
 
 	return file_cstr;
 }

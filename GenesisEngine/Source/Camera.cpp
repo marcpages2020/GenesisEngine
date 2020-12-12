@@ -234,7 +234,7 @@ bool Camera::ContainsAABB(AABB& aabb)
 	int totalInside = 0;
 
 	//get frustum planes
-	Plane* m_plane = new Plane[6](); 
+	Plane m_plane[6]; 
 	_frustum.GetPlanes(m_plane);
 
 	//get AABB points

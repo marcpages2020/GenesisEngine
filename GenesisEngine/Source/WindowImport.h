@@ -16,7 +16,7 @@ public:
 	void Enable(const char* file, ResourceType resourceType);
 
 private: 
-	const char* _fileToImport;
+	char _fileToImport[256];
 	ModelImportingOptions _modelImportingOptions;
 	TextureImportingOptions _textureImportingOptions;
 	ResourceType _currentResourceType;

@@ -19,9 +19,11 @@
 
 #include "MathGeoLib/include/MathGeoLib.h"
 
-ModuleResources::ModuleResources(bool start_enabled) : Module(start_enabled), _toDeleteAsset(-1), _toDeleteResource(-1)
+ModuleResources::ModuleResources(bool start_enabled) : Module(start_enabled), _toDeleteAsset(-1), _toDeleteResource(-1), cleanLibrary(false)
 {
 	name = "resources";
+	modelImportingOptions = ModelImportingOptions();
+	textureImportingOptions = TextureImportingOptions();
 }
 
 ModuleResources::~ModuleResources() {}
@@ -56,6 +58,11 @@ bool ModuleResources::CleanUp()
 
 	resources.clear();
 	resources_data.clear();
+
+	if (cleanLibrary)
+	{
+		CleanLibrary();
+	}
 
 	return ret;
 }
@@ -134,8 +141,8 @@ void ModuleResources::OnEditor()
 
 void ModuleResources::LoadEngineAssets(AssetsIcons& icons)
 {
-	icons.folder = dynamic_cast<ResourceTexture*>(LoadResource(Find("Assets/EngineAssets/folder.png"), ResourceType::RESOURCE_TEXTURE));
-	icons.model = dynamic_cast<ResourceTexture*>(LoadResource(Find("Assets/EngineAssets/model.png"), ResourceType::RESOURCE_TEXTURE));
+	icons.folder = dynamic_cast<ResourceTexture*>(RequestResource(Find("Assets/EngineAssets/folder.png")));
+	icons.model = dynamic_cast<ResourceTexture*>(RequestResource(Find("Assets/EngineAssets/model.png")));
 }
 
 void ModuleResources::OnFrameEnd()
@@ -288,15 +295,6 @@ bool ModuleResources::Exists(uint UID)
 
 uint ModuleResources::ImportFile(const char* assets_file)
 {
-	/*
-	std::string meta_file = assets_file;
-	meta_file.append(".meta");
-
-	if(FileSystem::Exists(meta_file.c_str()))
-		return GetUIDFromMeta(meta_file.c_str());
-
-	*/
-
 	ResourceType type = GetTypeFromPath(assets_file);
 
 	Resource* resource = CreateResource(assets_file, type);
@@ -304,6 +302,7 @@ uint ModuleResources::ImportFile(const char* assets_file)
 	
 	char* fileBuffer;
 	uint size = FileSystem::Load(assets_file, &fileBuffer);
+	std::string library_path;
 
 	switch (type)
 	{
@@ -314,14 +313,21 @@ uint ModuleResources::ImportFile(const char* assets_file)
 		TextureImporter::Import(fileBuffer, (ResourceTexture*)resource, size);
 		break;
 	case RESOURCE_SCENE: 
+		library_path = "Library/Scenes/";
+		library_path.append(FileSystem::GetFile(assets_file));
+		FileSystem::DuplicateFile(assets_file, library_path.c_str());
+		library_path.clear();
 		break;
 	default: 
 		LOG_WARNING("Trying to import unknown file: %s", assets_file);
 		break;
 	}
 
-	if (resource == nullptr) {
-		LOG_ERROR("Fatal error when importing file: %s", assets_file);
+	if (resource == nullptr) 
+	{
+		if(type != ResourceType::RESOURCE_SCENE)
+			LOG_ERROR("Fatal error when importing file: %s", assets_file);
+
 		return 0;
 	}
 
@@ -420,18 +426,8 @@ void ModuleResources::CreateResourceData(uint UID, const char* name, const char*
 
 void ModuleResources::DragDropFile(const char* path)
 {
-	std::string file_to_import = path;
-
-	if (!FileSystem::Exists(path))
-	{
-		file_to_import = GenerateAssetsPath(path);
-		FileSystem::DuplicateFile(path, file_to_import.c_str());
-	}
-
-	char* final_path = new char[sizeof(char) * file_to_import.size()];
-	strcpy(final_path, file_to_import.c_str());
 	WindowImport* import_window = dynamic_cast<WindowImport*>(App->editor->windows[WindowType::IMPORT_WINDOW]);
-	import_window->Enable(final_path, GetTypeFromPath(path));
+	import_window->Enable(path, GetTypeFromPath(path));
 }
 
 void ModuleResources::AddAssetToDelete(const char* asset_path)
@@ -573,6 +569,7 @@ Resource* ModuleResources::LoadResource(uint UID, ResourceType type)
 		return nullptr;
 	}
 
+	resource->name = resources_data[UID].name;
 	RELEASE_ARRAY(buffer);
 
 	return resource;
@@ -721,6 +718,9 @@ ResourceData ModuleResources::RequestResourceData(uint UID)
 
 GameObject* ModuleResources::RequestGameObject(const char* assets_file)
 {
+	if (App->resources->GetTypeFromPath(assets_file) != ResourceType::RESOURCE_MODEL)
+		return nullptr;
+
 	std::string meta_file = assets_file;
 	meta_file.append(".meta");
 	ResourceModel* model = (ResourceModel*)RequestResource(GetUIDFromMeta(meta_file.c_str()));
@@ -830,17 +830,20 @@ ResourceType ModuleResources::GetTypeFromPath(const char* path)
 {
 	std::string extension = FileSystem::GetFileFormat(path);
 	
-	if (extension == ".fbx" || extension == ".model") 
-		return ResourceType::RESOURCE_MODEL; 
+	if (extension == ".fbx" || extension == ".model")
+		return ResourceType::RESOURCE_MODEL;
 
-	else if (extension == ".mesh") 
-		return ResourceType::RESOURCE_MESH; 
+	else if (extension == ".mesh")
+		return ResourceType::RESOURCE_MESH;
 
-	else if (extension == ".material") 
+	else if (extension == ".material")
 		return ResourceType::RESOURCE_MATERIAL;
 
-	else if (extension == ".png" || extension == ".tga" || extension == ".dds") 
-		return ResourceType::RESOURCE_TEXTURE; 
+	else if (extension == ".png" || extension == ".tga" || extension == ".dds")
+		return ResourceType::RESOURCE_TEXTURE;
+
+	else if (extension == ".scene")
+		return ResourceType::RESOURCE_SCENE;
 
 	else 
 		return ResourceType::RESOURCE_UNKNOWN;
@@ -1007,4 +1010,35 @@ void ModuleResources::CheckAssetsRecursive(const char* directory)
 			ImportFile(file.c_str());
 		}
 	}
+}
+
+void ModuleResources::CleanLibrary()
+{
+	std::vector<std::string> folders;
+	std::vector<std::string> files;
+
+	FileSystem::DiscoverFilesRecursive("Library", files, folders);
+
+	for (size_t i = 0; i < files.size(); i++)
+	{
+		//avoid deleting config files
+		if(files[i].find("Config") == std::string::npos)
+			FileSystem::Delete(files[i].c_str());
+	}
+
+	folders.clear();
+	files.clear();
+
+	FileSystem::DiscoverFilesRecursive("Assets", files, folders);
+
+	for (size_t i = 0; i < files.size(); i++)
+	{
+		if (files[i].find(".meta") != std::string::npos) 
+		{
+			FileSystem::Delete(files[i].c_str());
+		}
+	}
+
+	folders.clear();
+	files.clear();
 }

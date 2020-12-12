@@ -495,9 +495,12 @@ void Editor::LoadFile(const char* filter_extension, const char* from_dir)
 		ImGui::SameLine();
 
 		if (ImGui::Button("Cancel", ImVec2(50, 20)))
-		{
 			file_dialog = ready_to_close;
+
+		if (file_dialog == ready_to_close)
+		{
 			selected_file[0] = '\0';
+			strcpy(selected_folder, "Assets/Scenes");
 		}
 
 		ImGui::EndPopup();
@@ -521,9 +524,13 @@ void Editor::SaveFile(const char* filter_extension, const char* from_dir)
 		if (ImGui::InputText("##file_selector", scene_name, 128, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll))
 		{
 			file_dialog = ready_to_close;
+			if (scene_name[0] == '\0')
+				strcpy(scene_name, "untitled");
+
 			sprintf_s(selected_file, 128, "%s/%s.scene", selected_folder, scene_name);
 			App->Save(selected_file);
-			LOG("Ye");
+
+			selected_file[0] = '\0';
 		}
 
 		ImGui::PopItemWidth();
@@ -531,16 +538,24 @@ void Editor::SaveFile(const char* filter_extension, const char* from_dir)
 		if (ImGui::Button("Ok", ImVec2(50, 20)))
 		{
 			file_dialog = ready_to_close;
+			if (scene_name[0] == '\0')
+				strcpy(scene_name, "untitled");
+
 			sprintf_s(selected_file, 128, "%s/%s.scene", selected_folder, scene_name);
 			App->Save(selected_file);
-			LOG("Ye");
 		}
 		ImGui::SameLine();
 
 		if (ImGui::Button("Cancel", ImVec2(50, 20)))
 		{
 			file_dialog = ready_to_close;
+		}
+
+		if (file_dialog == ready_to_close)
+		{
 			selected_file[0] = '\0';
+			strcpy(selected_folder, "Library/Scenes");
+			scene_name[0] = '\0';
 		}
 
 		ImGui::EndPopup();

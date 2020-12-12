@@ -272,10 +272,17 @@ void WindowConfiguration::Draw()
 			ImGui::Text("Time since game start: %.2f", Time::gameClock.timeSinceStartup());
 		}
 
+		if (ImGui::CollapsingHeader("Resources"))
+		{
+			ImGui::Checkbox("Delete Library at shutdown", &App->resources->cleanLibrary);
+		}
+
+		/*
 		if (ImGui::CollapsingHeader("File System"))
 		{
-			//ImGui::Checkbox("Normalize imported meshes", &FileSystem::normalize_scales);
+			ImGui::Checkbox("Normalize imported meshes", &FileSystem::normalize_scales);
 		}
+		*/
 
 	}
 	ImGui::End();

@@ -74,10 +74,12 @@ public:
 	void AddFileExtension(std::string& file, ResourceType type);
 
 	void CheckAssetsRecursive(const char* from_directory);
+	void CleanLibrary();
 
 public:
 	ModelImportingOptions modelImportingOptions;
 	TextureImportingOptions textureImportingOptions;
+	bool cleanLibrary;
 
 private:
 	std::map<uint, Resource*> resources;

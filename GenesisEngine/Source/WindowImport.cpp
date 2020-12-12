@@ -1,14 +1,17 @@
 #include "WindowImport.h"
 #include "Application.h"
 #include "ImGui/imgui.h"
+#include "FileSystem.h"
 
-WindowImport::WindowImport() : EditorWindow(), _fileToImport(nullptr), _currentResourceType(ResourceType::RESOURCE_UNKNOWN)
-{}
+WindowImport::WindowImport() : EditorWindow(), _currentResourceType(ResourceType::RESOURCE_UNKNOWN)
+{
+	_fileToImport[0] = '\0';
+	_modelImportingOptions = ModelImportingOptions();
+	_textureImportingOptions = TextureImportingOptions();
+}
 
 WindowImport::~WindowImport()
-{
-	_fileToImport = nullptr;
-}
+{}
 
 void WindowImport::Draw()
 {
@@ -28,7 +31,7 @@ void WindowImport::Draw()
 
 void WindowImport::Enable(const char* file, ResourceType resourceType)
 {
-	_fileToImport = file;
+	sprintf_s(_fileToImport, 256, file);
 	_currentResourceType = resourceType;
 	visible = true;
 }
@@ -64,8 +67,16 @@ bool WindowImport::DrawModelImportingWindow()
 
 		if (ImGui::Button("OK", ImVec2(40, 20))) 
 		{
+			std::string final_path = _fileToImport;
+
+			if (!FileSystem::Exists(_fileToImport))
+			{
+				final_path = App->resources->GenerateAssetsPath(_fileToImport);
+				FileSystem::DuplicateFile(_fileToImport, final_path.c_str());
+			}
+
 			App->resources->modelImportingOptions = _modelImportingOptions;
-			App->resources->ImportFile(_fileToImport);
+			App->resources->ImportFile(final_path.c_str());
 			ret = false;
 		}
 		ImGui::SameLine();
@@ -142,8 +153,16 @@ bool WindowImport::DrawTextureImportingWindow()
 		ImGui::Spacing();
 		if (ImGui::Button("OK", ImVec2(40, 20))) 
 		{
+			std::string final_path = _fileToImport;
+
+			if (!FileSystem::Exists(_fileToImport))
+			{
+				final_path = App->resources->GenerateAssetsPath(_fileToImport);
+				FileSystem::DuplicateFile(_fileToImport, final_path.c_str());
+			}
+
 			App->resources->textureImportingOptions = _textureImportingOptions;
-			App->resources->ImportFile(_fileToImport);
+			App->resources->ImportFile(final_path.c_str());
 			ret = false;
 		}
 		ImGui::SameLine();
