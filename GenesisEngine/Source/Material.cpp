@@ -168,8 +168,7 @@ void Material::OnEditor()
 					IM_ASSERT(payload->DataSize == sizeof(int));
 					int payload_n = *(const int*)payload->Data;
 					WindowAssets* assets_window = (WindowAssets*)App->editor->windows[ASSETS_WINDOW];
-					const char* file = assets_window->GetFileAt(payload_n);
-					Resource* possible_texture = App->resources->RequestResource(App->resources->Find(file));
+					Resource* possible_texture = App->resources->RequestResource(payload_n);
 
 					if (possible_texture->GetType() == ResourceType::RESOURCE_TEXTURE)
 						_diffuseTexture = (ResourceTexture*)possible_texture;

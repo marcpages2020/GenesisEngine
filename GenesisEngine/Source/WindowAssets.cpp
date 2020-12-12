@@ -86,7 +86,8 @@ void WindowAssets::DrawDirectoryRecursive(const char* directory, const char* fil
 			current_folder = directory;
 			current_folder.append("/");
 			current_folder.append(*it).c_str();
-			ImGui::TreePop();
+			if(open)
+				ImGui::TreePop();
 			break;
 		}
 
@@ -214,10 +215,15 @@ bool WindowAssets::DrawIcon(const char* path, int id, bool isFolder)
 	}
 	else
 	{
-		ImGui::PushID(id);
+		std::string meta_file = App->resources->GenerateMetaFile(path);
+		uint UID = App->resources->GetUIDFromMeta(meta_file.c_str());
+		ImGui::PushID(UID);
 		std::string file_name = FileSystem::GetFile(path);
 
-		if(App->resources->GetTypeFromPath(path) == ResourceType::RESOURCE_TEXTURE)
+		ResourceType type = App->resources->GetTypeFromPath(path);
+		uint imageID = icons.model->GetGpuID();
+
+		if(type == ResourceType::RESOURCE_TEXTURE)
 		{
 			ResourceTexture* preview = nullptr;
 			
@@ -227,25 +233,16 @@ bool WindowAssets::DrawIcon(const char* path, int id, bool isFolder)
 					preview = it->second;
 			}
 
-			if (preview != nullptr) 
-			{
-				if (ImGui::ImageButton((ImTextureID)preview->GetGpuID(), ImVec2(75, 70), ImVec2(0, 1), ImVec2(1, 0), 0, fileColor))
-					sprintf_s(selectedItem, 256, path);
-			}
-			else 
-			{
-				if (ImGui::ImageButton((ImTextureID)icons.model->GetGpuID(), ImVec2(75, 70), ImVec2(0, 1), ImVec2(1, 0), 0, fileColor))
-					sprintf_s(selectedItem, 256, path);
-			}
+			if (preview != nullptr)
+				imageID = preview->GetGpuID();
 		}
-		else 
-		{
-			if (ImGui::ImageButton((ImTextureID)icons.model->GetGpuID(), ImVec2(75, 70), ImVec2(0, 1), ImVec2(1, 0), 0, fileColor))
-				sprintf_s(selectedItem, 256, path);
-		}
+
+		if (ImGui::ImageButton((ImTextureID)imageID, ImVec2(75, 70), ImVec2(0, 1), ImVec2(1, 0), 0, fileColor))
+			sprintf_s(selectedItem, 256, path);
+
 		if (ImGui::BeginDragDropSource())
 		{
-			ImGui::SetDragDropPayload("ASSETS", &id, sizeof(int));
+			ImGui::SetDragDropPayload("ASSETS", &UID, sizeof(int));
 			ImGui::Text("%s", FileSystem::GetFile(path).c_str());
 			ImGui::EndDragDropSource();
 		}
@@ -260,46 +257,53 @@ bool WindowAssets::DrawIcon(const char* path, int id, bool isFolder)
 			}
 			ImGui::EndPopup();
 		}
-		if (file_name.size() > 14)
-		{
-			file_name.resize(14);
-			file_name.replace(file_name.end() - 3, file_name.end(), "...");
-		}
 
-		if (file_name.find(".fbx") != std::string::npos)
+		if (FileSystem::ToLower(file_name.c_str()).find(".fbx") != std::string::npos)
 		{
 			ImGui::SameLine();
 			if (ImGui::Button("->", ImVec2(20,20)))
 				ImGui::OpenPopup("Meshes");
-			if (ImGui::BeginPopup("Meshes", ImGuiWindowFlags_NoMove))
-			{
-				std::string model = current_folder + "/" + file_name;
-				const char* library_path = App->resources->Find(App->resources->GetUIDFromMeta(model.append(".meta").c_str()));
 
-				std::vector<uint> meshes;
-				std::vector<uint> materials;
-				ModelImporter::ExtractInternalResources(library_path, meshes, materials);
-
-				for (size_t m = 0; m < meshes.size(); m++)
-				{
-					ImGui::PushID(meshes[m]);
-					ResourceData meshData = App->resources->RequestResourceData(meshes[m]);
-					ImGui::Text("%s", meshData.name.c_str());
-					if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
-					{
-						ImGui::SetDragDropPayload("MESHES", &(meshes[m]), sizeof(int));
-						ImGui::EndDragDropSource();
-					}
-					ImGui::PopID();
-				}
-				ImGui::EndPopup();
-			}
+			DrawModelInternalResources(file_name.c_str());
+		}
+		
+		if (file_name.size() > 14)
+		{
+			file_name.resize(14);
+			file_name.replace(file_name.end() - 3, file_name.end(), "...");
 		}
 		ImGui::Text("%s", file_name.c_str());
 
 		ImGui::PopID();
 	}
 	return ret;
+}
+
+void WindowAssets::DrawModelInternalResources(const char* file_name)
+{
+	if (ImGui::BeginPopup("Meshes", ImGuiWindowFlags_NoMove))
+	{
+		std::string model = current_folder + "/" + file_name;
+		const char* library_path = App->resources->Find(App->resources->GetUIDFromMeta(model.append(".meta").c_str()));
+
+		std::vector<uint> meshes;
+		std::vector<uint> materials;
+		ModelImporter::ExtractInternalResources(library_path, meshes, materials);
+
+		for (size_t m = 0; m < meshes.size(); m++)
+		{
+			ImGui::PushID(meshes[m]);
+			ResourceData meshData = App->resources->RequestResourceData(meshes[m]);
+			ImGui::Text("%s", meshData.name.c_str());
+			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+			{
+				ImGui::SetDragDropPayload("MESHES", &(meshes[m]), sizeof(int));
+				ImGui::EndDragDropSource();
+			}
+			ImGui::PopID();
+		}
+		ImGui::EndPopup();
+	}
 }
 
 void WindowAssets::DrawPathButtons()

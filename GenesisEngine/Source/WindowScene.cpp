@@ -81,8 +81,8 @@ void WindowScene::Draw()
 				IM_ASSERT(payload->DataSize == sizeof(int));
 				int payload_n = *(const int*)payload->Data;
 				WindowAssets* assets_window = (WindowAssets*)App->editor->windows[ASSETS_WINDOW];
-				const char* file = assets_window->GetFileAt(payload_n);
-				ApplyDroppedFile(file);
+				std::string file = App->resources->FindAsset(payload_n);
+				ApplyDroppedFile(file.c_str());
 			}
 			ImGui::EndDragDropTarget();
 		}
@@ -137,6 +137,9 @@ void WindowScene::ApplyDroppedFile(const char* assets_file)
 	else if (type == ResourceType::RESOURCE_TEXTURE)
 	{
 		GameObject* selected_object = App->scene->selectedGameObject;
+
+		if (selected_object == nullptr)
+			return;
 
 		Material* material = (Material*)selected_object->GetComponent(ComponentType::MATERIAL);
 		if (material != nullptr)

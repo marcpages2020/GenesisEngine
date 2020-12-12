@@ -26,6 +26,7 @@ private:
 	void DrawDirectoryRecursive(const char* directory, const char* filter_extension);
 	void DrawCurrentFolder();
 	bool DrawIcon(const char* path, int id, bool isFolder = false);
+	void DrawModelInternalResources(const char* file_name);
 	void DrawPathButtons();
 
 	void LoadPreviews(std::vector<std::string> current_folder_files);

@@ -269,6 +269,15 @@ const char* ModuleResources::Find(uint UID)
 	return nullptr;
 }
 
+std::string ModuleResources::FindAsset(uint UID)
+{
+	std::map<uint, ResourceData>::iterator resources_data_it = resources_data.find(UID);
+
+	if (resources_data_it != resources_data.end()) {
+		return resources_data_it->second.assetsFile;
+	}
+}
+
 const char* ModuleResources::GetLibraryPath(uint UID)
 {
 	std::map<uint, Resource*>::iterator resources_it = resources.find(UID);
@@ -510,7 +519,7 @@ bool ModuleResources::DeleteInternalResource(uint UID)
 {
 	bool ret = true;
 
-	ret = FileSystem::Delete(resources[UID]->libraryFile.c_str());
+	ret = FileSystem::Delete(resources_data[UID].libraryFile.c_str());
 
 	if (resources.find(UID) != resources.end())
 		UnloadResource(resources[UID]);

@@ -123,7 +123,20 @@ void ModelImporter::ImportChildren(const aiScene* scene, aiNode* ainode, aiNode*
 			modelNode.materialID = model->materials[aimesh->mMaterialIndex];
 		}
 
-		model->nodes.push_back(modelNode);
+		
+		if(modelNode.name.find(".Target") == std::string::npos)
+			model->nodes.push_back(modelNode);
+		else
+		{
+			for (size_t i = 0; i < model->cameras.size(); i++)
+			{
+				if (modelNode.name.find(model->cameras[i]->name) != std::string::npos) 
+				{
+					model->cameras[i]->LookAt(modelNode.position);
+				}
+			}
+			//model->nodes.push_back(modelNode);
+		}
 	}
 
 	for (size_t i = 0; i < ainode->mNumChildren; i++)
@@ -319,6 +332,7 @@ bool ModelImporter::Load(char* fileBuffer, ResourceModel* model, uint size)
 		GnJSONObj cameras_object = cameras_array.GetObjectAt(i);
 		Camera* camera = new Camera();
 		camera->Load(cameras_object);
+		camera->LookAt(camera->GetPosition() + camera->GetReference());
 		model->cameras.push_back(camera);
 	}
 
@@ -374,17 +388,26 @@ GameObject* ModelImporter::ConvertToGameObject(ResourceModel* model)
 	}
 
 	for (size_t i = 0; i < model->lights.size(); i++) {
-		GameObject* light = new GameObject();
-		light->SetName(model->lights[i]->name.c_str());
-		light->AddComponent(model->lights[i]);
-		root->AddChild(light);
+		for (size_t j = 0; j < createdGameObjects.size(); j++)
+		{
+			if (model->lights[i]->name.compare(createdGameObjects[j]->GetName()) == 0)
+			{
+				createdGameObjects[j]->SetName(model->lights[i]->name.c_str());
+				createdGameObjects[j]->AddComponent(model->lights[i]);
+			}
+		}
 	}
 
-	for (size_t i = 0; i < model->cameras.size(); i++) {
-		GameObject* camera = new GameObject();
-		camera->SetName(model->cameras[i]->name.c_str());
-		camera->AddComponent(model->cameras[i]);
-		root->AddChild(camera);
+	for (size_t i = 0; i < model->cameras.size(); i++) 
+	{
+		for (size_t j = 0; j < createdGameObjects.size(); j++)
+		{
+			if (model->cameras[i]->name.compare(createdGameObjects[j]->GetName()) == 0) 
+			{
+				createdGameObjects[j]->SetName(model->cameras[i]->name.c_str());
+				createdGameObjects[j]->AddComponent(model->cameras[i]);
+			}
+		}
 	}
 
 	App->resources->ReleaseResource(model->GetUID());

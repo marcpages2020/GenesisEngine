@@ -123,6 +123,7 @@ void Camera::Save(GnJSONArray& save_array)
 	save_object.AddFloat("nearPlane", _frustum.nearPlaneDistance);
 	save_object.AddFloat("farPlane", _frustum.farPlaneDistance);
 	save_object.AddFloat("aspectRatio", _aspectRatio);
+	save_object.AddFloat3("reference", _reference);
 
 	save_array.AddObject(save_object);
 }
@@ -131,6 +132,8 @@ void Camera::Load(GnJSONObj& load_object)
 {
 	if (load_object.GetBool("Main Camera", false))
 		App->renderer3D->SetMainCamera(this);
+
+	name = load_object.GetString("name", "camera");
 	_frustum.pos = load_object.GetFloat3("position");
 	_frustum.up = load_object.GetFloat3("up");
 	_frustum.front = load_object.GetFloat3("front");
@@ -138,6 +141,7 @@ void Camera::Load(GnJSONObj& load_object)
 	_frustum.verticalFov = load_object.GetFloat("verticalFOV") * RADTODEG;
 	_frustum.nearPlaneDistance = load_object.GetFloat("nearPlane");
 	_frustum.farPlaneDistance = load_object.GetFloat("farPlane");
+	_reference = load_object.GetFloat3("reference");
 }
 
 void Camera::SetFixedFOV(FixedFOV g_fixedFOV)
@@ -178,9 +182,19 @@ void Camera::SetPosition(float3 position)
 	_frustum.pos = position;
 }
 
+float3 Camera::GetPosition()
+{
+	return _frustum.pos;
+}
+
 void Camera::SetReference(float3 reference)
 {
 	_reference = reference;
+}
+
+float3 Camera::GetReference()
+{
+	return _reference;
 }
 
 void Camera::SetNearPlaneDistance(float distance)
@@ -193,7 +207,7 @@ void Camera::SetFarPlaneDistance(float distance)
 	_frustum.farPlaneDistance = distance;
 }
 
-void Camera::Look(float3 spot)
+void Camera::LookAt(float3 spot)
 {
 	float3 difference = spot - _frustum.pos;
 

@@ -34,6 +34,7 @@ public:
 	int GetUIDFromMeta(const char* meta_file);
 	int Find(const char* assets_file);
 	const char* Find(uint UID);
+	std::string FindAsset(uint UID);
 	const char* GetLibraryPath(uint UID);
 	bool Exists(uint UID);
 

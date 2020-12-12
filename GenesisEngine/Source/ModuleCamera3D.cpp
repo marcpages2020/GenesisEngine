@@ -24,7 +24,7 @@ ModuleCamera3D::ModuleCamera3D(bool start_enabled) : Module(start_enabled)
 	_camera = new Camera();
 	_camera->SetPosition(float3(_position));
 	_camera->SetReference(_reference);
-	Look(_reference);
+	LookAt(_reference);
 
 	background = { 0.12f, 0.12f, 0.12f, 1.0f };
 }
@@ -32,9 +32,7 @@ ModuleCamera3D::ModuleCamera3D(bool start_enabled) : Module(start_enabled)
 ModuleCamera3D::~ModuleCamera3D()
 {}
 
-bool ModuleCamera3D::Init() {
-	return true;
-}
+bool ModuleCamera3D::Init() {return true; }
 
 // -----------------------------------------------------------------
 bool ModuleCamera3D::Start()
@@ -143,16 +141,9 @@ update_status ModuleCamera3D::Update(float dt)
 }
 
 // -----------------------------------------------------------------
-void ModuleCamera3D::Look(float3& position)
-{
-	_camera->Look(position);
-	_reference = position;
-}
-
-// -----------------------------------------------------------------
 void ModuleCamera3D::LookAt(const float3& Spot)
 {
-	_camera->Look(Spot);
+	_camera->LookAt(Spot);
 	_reference = Spot;
 }
 
@@ -179,7 +170,7 @@ void ModuleCamera3D::Orbit(float dt)
 
 	_position = distance + _reference;
 	_camera->SetPosition(_position);
-	_camera->Look(_reference);
+	_camera->LookAt(_reference);
 }
 
 // -----------------------------------------------------------------
@@ -246,6 +237,10 @@ GameObject* ModuleCamera3D::PickGameObject()
 		ray_local_space.Transform(gameObject->GetTransform()->GetGlobalTransform().Inverted());
 
 		GnMesh* mesh = (GnMesh*)gameObject->GetComponent(ComponentType::MESH);
+
+		if (mesh == nullptr)
+			continue;
+
 		ResourceMesh* resourceMesh = dynamic_cast<ResourceMesh*>(mesh->GetResource(ResourceType::RESOURCE_MESH));
 
 		for (size_t i = 0; i < resourceMesh->indices_amount; i+=3)

@@ -47,7 +47,7 @@ void TextureImporter::Import(char* fileBuffer, ResourceTexture* texture, uint si
 
 	if (ilLoadL(file_format, fileBuffer, size) == IL_FALSE)
 	{
-		LOG_ERROR("Error importing texture %s - %d: %s", texture->assetsFile, ilGetError(), iluErrorString(ilGetError()));
+		LOG_ERROR("Error importing texture %s - %d: %s", texture->assetsFile.c_str(), ilGetError(), iluErrorString(ilGetError()));
 
 		ilBindImage(0);
 		ilDeleteImages(1, &imageID);

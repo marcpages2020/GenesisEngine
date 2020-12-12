@@ -28,11 +28,13 @@ public:
 	void SetVerticalFieldOfView(float verticalFOV, float screen_width, float screen_height);
 	void SetHorizontalFieldOfView(float horizontalFOV, float screen_width = 16.0f, float screen_height = 9.0f);
 	void SetPosition(float3 position);
+	float3 GetPosition();
 	void SetReference(float3 reference);
+	float3 GetReference();
 	void SetNearPlaneDistance(float distance);
 	void SetFarPlaneDistance(float distance);
 
-	void Look(float3 spot);
+	void LookAt(float3 spot);
 	Frustum GetFrustum();
 
 	float* GetViewMatrix();
