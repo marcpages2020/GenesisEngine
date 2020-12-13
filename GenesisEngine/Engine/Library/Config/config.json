@@ -61,7 +61,7 @@
         },
         {
           "name": "configuration",
-          "visible": false
+          "visible": true
         },
         {
           "name": "preferences",

@@ -167,13 +167,13 @@ uint64 ModelImporter::Save(ResourceModel* model, char** fileBuffer)
 		if (model->nodes[i].meshID != -1)
 		{
 			node_object.AddInt("MeshID", model->nodes[i].meshID);
-			node_object.AddString("mesh_library_path", App->resources->GetLibraryPath(model->nodes[i].meshID));
+			node_object.AddString("mesh_library_path", App->resources->GenerateLibraryPath(model->nodes[i].meshID, ResourceType::RESOURCE_MESH).c_str());
 		}
 
 		if (model->nodes[i].materialID != -1)
 		{
 			node_object.AddInt("MaterialID", model->nodes[i].materialID);
-			node_object.AddString("material_library_path", App->resources->GetLibraryPath(model->nodes[i].materialID));
+			node_object.AddString("material_library_path", App->resources->GenerateLibraryPath(model->nodes[i].materialID, ResourceType::RESOURCE_MATERIAL).c_str());
 		}
 
 		nodes_array.AddObject(node_object);
@@ -211,7 +211,7 @@ void ModelImporter::ReimportFile(char* fileBuffer, ResourceModel* newModel, uint
 	std::string meta_file = newModel->assetsFile;
 	meta_file.append(".meta");
 
-	ResourceModel oldModel(0);
+	ResourceModel oldModel(App->resources->GetUIDFromMeta(meta_file.c_str()));
 	ExtractInternalResources(meta_file.c_str(), oldModel);
 
 	Import(fileBuffer, newModel, size);
@@ -222,24 +222,32 @@ void ModelImporter::ReimportFile(char* fileBuffer, ResourceModel* newModel, uint
 		{
 			if (oldModel.nodes[o].name == newModel->nodes[n].name)
 			{
-				newModel->nodes[n].meshID = oldModel.nodes[o].meshID;
-				std::string mesh_path = App->resources->GenerateLibraryPath(oldModel.nodes[o].meshID, ResourceType::RESOURCE_MESH);
-				if (FileSystem::Exists(mesh_path.c_str()))
+				if (oldModel.nodes[o].meshID != -1) 
 				{
-					std::string temp_path = App->resources->GenerateLibraryPath(newModel->nodes[n].meshID, ResourceType::RESOURCE_MESH);
-					FileSystem::Rename(temp_path.c_str(), mesh_path.c_str());
+					std::string oldModelPath = App->resources->GenerateLibraryPath(oldModel.nodes[o].meshID, ResourceType::RESOURCE_MESH);
+					std::string newModelPath = App->resources->GenerateLibraryPath(newModel->nodes[n].meshID, ResourceType::RESOURCE_MESH);
+					newModel->nodes[n].meshID = oldModel.nodes[o].meshID;
+					
+					if (FileSystem::Exists(newModelPath.c_str()))
+						FileSystem::Rename(newModelPath.c_str(), oldModelPath.c_str());
 				}
 
-				newModel->nodes[n].materialID = oldModel.nodes[o].materialID;
-				std::string material_path = App->resources->GenerateLibraryPath(oldModel.nodes[o].materialID, ResourceType::RESOURCE_MATERIAL);
-				if (FileSystem::Exists(material_path.c_str()))
+				if (oldModel.nodes[o].materialID != -1)
 				{
-					std::string temp_path = App->resources->GenerateLibraryPath(newModel->nodes[n].materialID, ResourceType::RESOURCE_MATERIAL);
-					FileSystem::Rename(temp_path.c_str(), material_path.c_str());
+					std::string oldModelPath = App->resources->GenerateLibraryPath(oldModel.nodes[o].materialID, ResourceType::RESOURCE_MATERIAL);
+					std::string newModelPath = App->resources->GenerateLibraryPath(newModel->nodes[n].materialID, ResourceType::RESOURCE_MATERIAL);
+					newModel->nodes[n].materialID = oldModel.nodes[o].materialID;
+					
+					if(FileSystem::Exists(newModelPath.c_str()))
+						FileSystem::Rename(newModelPath.c_str(), oldModelPath.c_str());
 				}
+
+				break;
 			}
 		}
 	}
+
+	newModel->SetUID(oldModel.GetUID());
 }
 
 void ModelImporter::LoadTransform(aiNode* node, ModelNode& modelNode)
@@ -463,8 +471,10 @@ void ModelImporter::ExtractInternalResources(const char* meta_file, ResourceMode
 		ModelNode modelNode;
 
 		modelNode.name = nodeObject.GetString("Name", "No Name");
-		modelNode.meshID = nodeObject.GetInt("Mesh UID");
-		modelNode.materialID = nodeObject.GetInt("Material UID");
+		modelNode.meshID = nodeObject.GetInt("MeshID");
+		modelNode.materialID = nodeObject.GetInt("MaterialID");
+
+		model.nodes.push_back(modelNode);
 	}
 
 	model_data.Release();

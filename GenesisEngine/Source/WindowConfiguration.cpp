@@ -282,6 +282,7 @@ void WindowConfiguration::Draw()
 		if (ImGui::CollapsingHeader("Resources"))
 		{
 			ImGui::Checkbox("Delete Library at shutdown", &App->resources->cleanLibrary);
+			ImGui::Checkbox("Delete metas at shutdown", &App->resources->cleanMetas);
 		}
 
 		/*

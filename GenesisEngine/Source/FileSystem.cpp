@@ -32,8 +32,6 @@ void FileSystem::Init()
 	CreateLibraryDirectories();
 
 	std::string path = PHYSFS_getWriteDir();
-
-	normalize_scales = true;
 }
 
 void FileSystem::CleanUp()
@@ -393,11 +391,14 @@ void FileSystem::Rename(const char* old_name, const char* new_name)
 {
 	char* fileBuffer;
 	uint size = FileSystem::Load(old_name, &fileBuffer);
+	
+	if(size > 0)
+	{
+		Save(new_name, fileBuffer, size);
+		Delete(old_name);
 
-	Save(new_name, fileBuffer, size);
-	Delete(old_name);
-
-	RELEASE_ARRAY(fileBuffer);
+		RELEASE_ARRAY(fileBuffer);
+	}
 }
 
 int close_sdl_rwops(SDL_RWops* rw)

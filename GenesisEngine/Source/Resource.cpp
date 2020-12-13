@@ -15,3 +15,5 @@ Resource::~Resource()
 ResourceType Resource::GetType() {	return _type; }
 
 uint Resource::GetUID() { return _uid; }
+
+void Resource::SetUID(uint UID) { _uid = UID; }

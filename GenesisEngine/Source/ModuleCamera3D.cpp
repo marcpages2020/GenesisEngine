@@ -243,6 +243,9 @@ GameObject* ModuleCamera3D::PickGameObject()
 
 		ResourceMesh* resourceMesh = dynamic_cast<ResourceMesh*>(mesh->GetResource(ResourceType::RESOURCE_MESH));
 
+		if (resourceMesh == nullptr)
+			continue;
+
 		for (size_t i = 0; i < resourceMesh->indices_amount; i+=3)
 		{
 			//create every triangle

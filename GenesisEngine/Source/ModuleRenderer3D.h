@@ -70,6 +70,7 @@ public:
 	LineSegment _ray;
 	bool cull_editor_camera;
 
+	bool draw_mouse_picking_ray;
 	bool draw_aabbs;
 	bool draw_vertex_normals;
 	bool draw_face_normals;

@@ -19,7 +19,7 @@
 
 #include "MathGeoLib/include/MathGeoLib.h"
 
-ModuleResources::ModuleResources(bool start_enabled) : Module(start_enabled), _toDeleteAsset(-1), _toDeleteResource(-1), cleanLibrary(false)
+ModuleResources::ModuleResources(bool start_enabled) : Module(start_enabled), _toDeleteAsset(-1), _toDeleteResource(-1), cleanLibrary(false), cleanMetas(false)
 {
 	name = "resources";
 	modelImportingOptions = ModelImportingOptions();
@@ -174,11 +174,11 @@ bool ModuleResources::MetaUpToDate(const char* assets_file, const char* meta_fil
 	int lastModifiedMeta = meta.GetInt("lastModified");
 	uint lastModified = FileSystem::GetLastModTime(assets_file);
 
-	if (lastModifiedMeta == lastModified)
+	if (lastModifiedMeta == lastModified && UID != 0)
 	{
-		std::string library_path = meta.GetString("Library path", "NoPath");
+		std::string library_path = meta.GetString("Library path", "Library/NoPath");
 
-		if (library_path == "NoPath")
+		if (library_path == "Library/NoPath")
 			library_path = Find(UID);
 
 		//check for the file itself to exist
@@ -1043,14 +1043,17 @@ void ModuleResources::CleanLibrary()
 
 	FileSystem::DiscoverFilesRecursive("Assets", files, folders);
 
-	for (size_t i = 0; i < files.size(); i++)
+	if (cleanMetas)
 	{
-		if (files[i].find(".meta") != std::string::npos) 
+		for (size_t i = 0; i < files.size(); i++)
 		{
-			FileSystem::Delete(files[i].c_str());
+			if (files[i].find(".meta") != std::string::npos)
+			{
+				FileSystem::Delete(files[i].c_str());
+			}
 		}
 	}
-
+	
 	folders.clear();
 	files.clear();
 }

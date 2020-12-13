@@ -81,6 +81,7 @@ void GnMesh::Render()
 	if (!App->resources->Exists(_resourceUID)) {
 		_resource = nullptr;
 		_resourceUID = 0u;
+		_AABB.SetNegativeInfinity();
 		return;
 	}
 

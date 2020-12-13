@@ -20,7 +20,6 @@ public:
 
 	bool Init() override;
 	void Draw() override;
-	const char* GetFileAt(int i);
 
 private:
 	void DrawDirectoryRecursive(const char* directory, const char* filter_extension);

@@ -369,6 +369,9 @@ void GameObject::UpdateChildrenTransforms()
 
 void GameObject::GenerateAABB(GnMesh* mesh)
 {
+	if (mesh->GetResource(ResourceType::RESOURCE_MESH) == nullptr)
+		return;
+
 	_OBB = mesh->GetAABB();
 	_OBB.Transform(transform->GetGlobalTransform());
 

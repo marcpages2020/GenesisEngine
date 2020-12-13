@@ -34,13 +34,13 @@ void WindowScene::Draw()
 					ImGui::EndMenu();
 				}
 
-				static bool vertex_normals = App->renderer3D->draw_vertex_normals;
-				if (ImGui::Checkbox("Vertex Normals", &vertex_normals))
-					App->renderer3D->draw_vertex_normals = vertex_normals;
+				ImGui::Checkbox("Draw Mouse Picking Ray", &App->renderer3D->draw_mouse_picking_ray);
 
-				static bool face_normals = App->renderer3D->draw_face_normals;
-				if (ImGui::Checkbox("Face Normals", &face_normals))
-					App->renderer3D->draw_face_normals = face_normals;
+				ImGui::Checkbox("Draw AABBs", &App->renderer3D->draw_aabbs);
+
+				ImGui::Checkbox("Vertex Normals", &App->renderer3D->draw_vertex_normals);
+
+				ImGui::Checkbox("Face Normals", &App->renderer3D->draw_face_normals);
 
 				ImGui::EndMenu();
 			}

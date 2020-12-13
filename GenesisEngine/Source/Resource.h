@@ -23,6 +23,7 @@ public:
 
 	ResourceType GetType();
 	uint GetUID();
+	void SetUID(uint UID);
 
 	virtual uint Save(GnJSONObj& base_object) { return -1; };
 	virtual uint SaveMeta(GnJSONObj& base_object, uint last_modification) { return -1; };

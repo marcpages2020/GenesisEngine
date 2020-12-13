@@ -81,7 +81,7 @@ public:
 	ModelImportingOptions modelImportingOptions;
 	TextureImportingOptions textureImportingOptions;
 	bool cleanLibrary;
-
+	bool cleanMetas;
 private:
 	std::map<uint, Resource*> resources;
 	std::map<uint, ResourceData> resources_data;

@@ -142,7 +142,8 @@ void WindowAssets::DrawCurrentFolder()
 	{
 		if (tmp_files[i].find(".meta") == std::string::npos) 
 		{
-			files.push_back(tmp_files[i]);
+			if (App->resources->GetTypeFromPath(tmp_files[i].c_str()) != ResourceType::RESOURCE_UNKNOWN)
+				files.push_back(tmp_files[i]);
 		}
 	}
 
@@ -216,6 +217,9 @@ bool WindowAssets::DrawIcon(const char* path, int id, bool isFolder)
 	else
 	{
 		std::string meta_file = App->resources->GenerateMetaFile(path);
+		if (!FileSystem::Exists(meta_file.c_str()))
+			return ret;
+
 		uint UID = App->resources->GetUIDFromMeta(meta_file.c_str());
 		ImGui::PushID(UID);
 		std::string file_name = FileSystem::GetFile(path);
@@ -253,6 +257,7 @@ bool WindowAssets::DrawIcon(const char* path, int id, bool isFolder)
 				App->resources->AddAssetToDelete(path);
 				ImGui::CloseCurrentPopup();
 				selectedItem[0] = '\0';
+				UnloadPreviews();
 				ret = false;
 			}
 			ImGui::EndPopup();
@@ -364,25 +369,4 @@ void WindowAssets::UnloadPreviews()
 	}
 
 	previews.clear();
-}
-
-const char* WindowAssets::GetFileAt(int i)
-{
-	std::vector<std::string> tmp_files;
-	std::vector<std::string> files;
-	std::vector<std::string> dirs;
-
-	FileSystem::DiscoverFiles(current_folder.c_str(), tmp_files, dirs);
-
-	for (size_t i = 0; i < tmp_files.size(); i++)
-	{
-		if (tmp_files[i].find(".meta") == std::string::npos) {
-			files.push_back(tmp_files[i]);
-		}
-	}
-
-	char* file_cstr = new char[512];
-	sprintf_s(file_cstr, 512, "%s/%s", current_folder.c_str(), files[i - dirs.size()].c_str());
-
-	return file_cstr;
 }

@@ -6,8 +6,6 @@
 
 namespace FileSystem 
 {
-	static bool normalize_scales = true;
-
 	void Init();
 	void CleanUp();
 

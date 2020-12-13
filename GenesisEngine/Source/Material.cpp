@@ -76,6 +76,9 @@ void Material::SetResourceUID(uint UID)
 			App->resources->ReleaseResource(_diffuseTexture->GetUID());
 
 		_diffuseTexture = dynamic_cast<ResourceTexture*>(App->resources->RequestResource(_resource->diffuseTextureUID));
+
+		if (_diffuseTexture == nullptr)
+			AssignCheckersImage();
 	}
 	else
 		AssignCheckersImage();
@@ -89,9 +92,12 @@ void Material::BindTexture()
 		_resourceUID = 0u;
 		checkers_image = true;
 	}
-	else if (!checkers_image) 
+	else if (!checkers_image)
 	{
-		_diffuseTexture->BindTexture();
+		if (_diffuseTexture != nullptr && App->resources->Exists(_resource->diffuseTextureUID))
+			_diffuseTexture->BindTexture();
+		else
+			AssignCheckersImage();
 	}
 	else
 	{
@@ -170,8 +176,9 @@ void Material::OnEditor()
 					WindowAssets* assets_window = (WindowAssets*)App->editor->windows[ASSETS_WINDOW];
 					Resource* possible_texture = App->resources->RequestResource(payload_n);
 
-					if (possible_texture->GetType() == ResourceType::RESOURCE_TEXTURE)
-						_diffuseTexture = (ResourceTexture*)possible_texture;
+					if (possible_texture->GetType() == ResourceType::RESOURCE_TEXTURE) {
+						SetTexture(dynamic_cast<ResourceTexture*>(possible_texture));
+					}
 				}
 				ImGui::EndDragDropTarget();
 			}
@@ -195,11 +202,11 @@ void Material::OnEditor()
 					IM_ASSERT(payload->DataSize == sizeof(int));
 					int payload_n = *(const int*)payload->Data;
 					WindowAssets* assets_window = (WindowAssets*)App->editor->windows[ASSETS_WINDOW];
-					const char* file = assets_window->GetFileAt(payload_n);
-					Resource* possible_texture = App->resources->RequestResource(App->resources->Find(file));
+					Resource* possible_texture = App->resources->RequestResource(payload_n);
 
-					if (possible_texture->GetType() == ResourceType::RESOURCE_TEXTURE)
+					if (possible_texture->GetType() == ResourceType::RESOURCE_TEXTURE) {
 						SetTexture(dynamic_cast<ResourceTexture*>(possible_texture));
+					}
 				}
 				ImGui::EndDragDropTarget();
 			}
@@ -217,6 +224,7 @@ void Material::SetTexture(ResourceTexture* texture)
 			App->resources->ReleaseResource(_diffuseTexture->GetUID());
 
 		_diffuseTexture = texture;
+		_resource->diffuseTextureUID = _diffuseTexture->GetUID();
 		checkers_image = false;
 	}
 }

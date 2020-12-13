@@ -25,7 +25,7 @@
 #pragma comment (lib, "glew/libx86/glew32.lib")		  /* link glew lib */
 
 ModuleRenderer3D::ModuleRenderer3D(bool start_enabled) : Module(start_enabled), cull_editor_camera(false), context(nullptr), 
-_mainCamera(nullptr), colorTexture(0), draw_aabbs(true), draw_vertex_normals(false), draw_face_normals(false),
+_mainCamera(nullptr), colorTexture(0), draw_aabbs(true), draw_mouse_picking_ray(true), draw_vertex_normals(false), draw_face_normals(false),
 frameBuffer(0), renderBuffer(0), depthTexture(0), depthRenderBuffer(0), display_mode(SOLID), vsync(false)
 {
 	name = "renderer";
@@ -185,7 +185,8 @@ update_status ModuleRenderer3D::Update(float dt)
 	update_status ret = UPDATE_CONTINUE;
 
 	//DrawDirectModeCube();
-	DrawRay();
+	if(draw_mouse_picking_ray)
+		DrawRay();
 
 	return ret;
 }

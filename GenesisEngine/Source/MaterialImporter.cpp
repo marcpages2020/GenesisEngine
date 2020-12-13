@@ -27,8 +27,10 @@ void MaterialImporter::Import(const aiMaterial* aimaterial, ResourceMaterial* ma
 			std::string meta_file = App->resources->GenerateMetaFile(file_path.c_str());
 			if (!FileSystem::Exists(meta_file.c_str()))
 				material->diffuseTextureUID = App->resources->ImportFile(file_path.c_str());
-			else
-				material->diffuseTextureUID = App->resources->Find(file_path.c_str());
+			else 
+			{
+				material->diffuseTextureUID = App->resources->GetUIDFromMeta(meta_file.c_str());
+			}
 
 			if (material->diffuseTextureUID == 0)
 				LOG("Texture %s not found", file_path.c_str());
@@ -64,7 +66,6 @@ bool MaterialImporter::Load(const char* fileBuffer, ResourceMaterial* material, 
 
 	GnJSONObj material_data(fileBuffer);
 	material->diffuseTextureUID = material_data.GetInt("diffuseTexture", 0);
-
 
 	if (material->diffuseTextureUID != 0)
 		App->resources->LoadResource(material->diffuseTextureUID, ResourceType::RESOURCE_TEXTURE);

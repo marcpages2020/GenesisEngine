@@ -150,8 +150,10 @@ update_status Editor::Draw()
 	{
 		if (scene_operation == SceneOperation::LOAD)
 			LoadFile(".scene", "Library/");
-		else if (scene_operation == SceneOperation::SAVE)
+		else if (scene_operation == SceneOperation::SAVE) {
+			sprintf_s(selected_folder, 256, "Library/Scenes");
 			SaveFile(".scene", "Library/");
+		}
 	}
 
 	ImGui::Render();
@@ -500,7 +502,7 @@ void Editor::LoadFile(const char* filter_extension, const char* from_dir)
 		if (file_dialog == ready_to_close)
 		{
 			selected_file[0] = '\0';
-			strcpy(selected_folder, "Assets/Scenes");
+			strcpy(selected_folder, "Library/Scenes");
 		}
 
 		ImGui::EndPopup();
