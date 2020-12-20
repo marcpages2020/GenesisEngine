@@ -85,6 +85,6 @@ public:
 private:
 	std::map<uint, Resource*> resources;
 	std::map<uint, ResourceData> resources_data;
-	int _toDeleteAsset;
-	int _toDeleteResource;
+	std::string _toDeleteAsset;
+	uint _toDeleteResource;
 };

@@ -49,7 +49,7 @@ namespace FileSystem
 	uint64 GetLastModTime(const char* filename);
 	std::string GetUniqueName(const char* path, const char* name);
 
-	std::string GetFileFormat(const char* path);
+	std::string GetFileExtension(const char* path);
 	std::string GetFile(const char* path);
 	std::string GetFileName(const char* path);
 	std::string GetFolder(const char* path);

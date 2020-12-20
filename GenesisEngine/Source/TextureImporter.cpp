@@ -163,7 +163,7 @@ void TextureImporter::UnloadTexture(uint imageID)
 ILenum TextureImporter::GetFileFormat(const char* file)
 {
 	ILenum file_format = IL_TYPE_UNKNOWN;
-	std::string format = FileSystem::GetFileFormat(file);
+	std::string format = FileSystem::GetFileExtension(file);
 
 	if (format == ".png")
 		file_format = IL_PNG;
