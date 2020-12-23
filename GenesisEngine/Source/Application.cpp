@@ -23,9 +23,9 @@ Application::Application(int argc, char* args[]) : argc(argc), args(args), want_
 	AddModule(camera);
 	AddModule(input);
 	AddModule(scene);
-	AddModule(editor);
 
 	// Renderer last!
+	AddModule(editor);
 	AddModule(renderer3D);
 
 	int cap = 60;

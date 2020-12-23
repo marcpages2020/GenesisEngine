@@ -224,22 +224,13 @@ Frustum Camera::GetFrustum()
 
 float* Camera::GetViewMatrix()
 {
-	float4x4 viewMatrix;
-
-	viewMatrix = _frustum.ViewMatrix();
-	viewMatrix.Transpose();
-
-	return (float*)viewMatrix.v;
+	float4x4 mat = _frustum.ViewMatrix();
+	return mat.Transposed().ptr();
 }
 
 float* Camera::GetProjectionMatrix()
 {
-	float4x4 projectionMatrix;
-
-	projectionMatrix = _frustum.ProjectionMatrix();
-	projectionMatrix.Transpose();
-
-	return (float*)projectionMatrix.v;
+	return _frustum.ProjectionMatrix().Transposed().ptr();
 }
 
 bool Camera::ContainsAABB(AABB& aabb)

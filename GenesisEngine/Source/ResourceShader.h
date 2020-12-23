@@ -18,10 +18,15 @@ public:
 
 	void Use();
 
+	void SetBool(const char* name, bool value);
+	void SetInt(const char* name, int value);
+	void SetFloat(const char* name, float value);
+	void SetMat4(const char* name, float* matrix);
+
 public:
-	int vertexShader;
-	int fragmentShader;
-	int id;
+	uint vertexShader;
+	uint fragmentShader;
+	uint id;
 };
 
 #endif

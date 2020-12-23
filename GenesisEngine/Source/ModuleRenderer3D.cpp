@@ -130,9 +130,9 @@ bool ModuleRenderer3D::Init()
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_COLOR_MATERIAL);
 		glEnable(GL_TEXTURE_2D);
-		//glEnable(GL_POLYGON_SMOOTH);
 		glEnable(GL_LIGHTING);
 		glEnable(GL_STENCIL_TEST);
+
 		lights[0].Active(true);
 	}
 
@@ -194,7 +194,6 @@ update_status ModuleRenderer3D::Update(float dt)
 // PostUpdate present buffer to screen
 update_status ModuleRenderer3D::PostUpdate(float dt)
 {
-	glBindVertexArray(0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	App->editor->Draw();

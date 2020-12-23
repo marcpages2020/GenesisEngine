@@ -66,12 +66,11 @@ bool Editor::Init()
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_NavEnableSetMousePos;
-	//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
 	ImGui::StyleColorsDark();
 
 	ImGui_ImplSDL2_InitForOpenGL(App->window->window, App->renderer3D->context);
-	ImGui_ImplOpenGL3_Init();
+	ImGui_ImplOpenGL3_Init("#version 330");
 
 	return true;
 }
@@ -91,18 +90,19 @@ bool Editor::Start()
 update_status Editor::Update(float dt)
 {
 	update_status ret = UPDATE_CONTINUE;
-	//Update the frames
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplSDL2_NewFrame(App->window->window);
-	ImGui::NewFrame();
-
-	ret = ShowDockSpace(open_dockspace);
 
 	return ret;
 }
 
 update_status Editor::Draw()
 {
+	//Update the frames
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplSDL2_NewFrame(App->window->window);
+	ImGui::NewFrame();
+
+	ShowDockSpace(open_dockspace);
+
 	for (size_t i = 0; i < MAX_WINDOWS; i++)
 	{
 		if(windows[i]->visible)

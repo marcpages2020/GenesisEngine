@@ -86,31 +86,27 @@ void GnMesh::Render()
 		return;
 	}
 
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_NORMAL_ARRAY);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
 	Material* material = dynamic_cast<Material*>(_gameObject->GetComponent(ComponentType::MATERIAL));
 	if (material != nullptr)
 	{
+		material->UseShader();
+
 		material->BindTexture();
 
-		GLint modelLoc = glGetUniformLocation(material->shader->id, "model_matrix");
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, _gameObject->GetTransform()->GetGlobalTransform().Transposed().ptr());
+		float4x4 identity = float4x4::identity;
+		material->shader->SetMat4("model_matrix", _gameObject->GetTransform()->GetGlobalTransform().Transposed().ptr());
+		material->shader->SetMat4("view", App->camera->GetViewMatrixM().Transposed().ptr());
+		material->shader->SetMat4("projection", App->camera->GetProjectionMatrixM().Transposed().ptr());
 
-		material->UseShader();
+		/*material->shader->SetMat4("model_matrix", _gameObject->GetTransform()->GetGlobalTransform().Transposed().ptr());
+		material->shader->SetMat4("view", App->camera->GetViewMatrix());
+		material->shader->SetMat4("projection", App->camera->GetProjectionMatrix());*/
 	}
 
 	//vertices
 	glBindVertexArray(_resource->VAO);
-
-	//normals
-	//glBindBuffer(GL_NORMAL_ARRAY, _resource->normals_buffer);
-	//glNormalPointer(GL_FLOAT, 0, NULL);
-
-	//indices
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _resource->EBO);
-	//glDrawElements(GL_TRIANGLES, _resource->indices_amount, GL_UNSIGNED_INT, NULL);
+	glDrawElements(GL_TRIANGLES, _resource->indices_amount, GL_UNSIGNED_INT, NULL);
+	glBindVertexArray(0);
 
 	/*if(draw_vertex_normals ||App->renderer3D->draw_vertex_normals)
 		DrawVertexNormals();
@@ -121,16 +117,8 @@ void GnMesh::Render()
 	//App->renderer3D->DrawAABB(_AABB);
 
 	//clean buffers
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_NORMAL_ARRAY, 0);
-	glBindBuffer(GL_TEXTURE_COORD_ARRAY, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glUseProgram(0);
-
-	glBindVertexArray(0);
-	glDisableClientState(GL_VERTEX_ARRAY);
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
 void GnMesh::OnEditor()
