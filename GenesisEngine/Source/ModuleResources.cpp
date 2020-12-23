@@ -311,6 +311,11 @@ uint ModuleResources::ImportFile(const char* assets_file)
 {
 	ResourceType type = GetTypeFromPath(assets_file);
 
+	//ignore fragment shaders, when importing vertex shaders they will be compiled too
+	std::string path(assets_file);
+	if (path.find(".frag") != std::string::npos) 
+		return 0;
+
 	Resource* resource = CreateResource(assets_file, type);
 	uint ret = 0;
 	
@@ -352,8 +357,10 @@ uint ModuleResources::ImportFile(const char* assets_file)
 
 	SaveResource(resource);
 	ret = resource->GetUID();
-	ReleaseResource(ret);
 	RELEASE_ARRAY(fileBuffer);
+
+	if(type != ResourceType::RESOURCE_SHADER)
+		ReleaseResource(ret);
 
 	return ret;
 }

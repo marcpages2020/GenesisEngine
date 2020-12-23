@@ -46,49 +46,6 @@ private:
 	
 };
 
-class GnCube : public GnMesh {
-public:
-	GnCube();
-	~GnCube();
-};
-
-class GnPlane : public GnMesh {
-public:
-	GnPlane();
-	~GnPlane();
-};
-
-class GnPyramid : public GnMesh {
-public:
-	GnPyramid();
-	~GnPyramid();
-};
-
-class GnSphere : public GnMesh {
-public:
-	GnSphere();
-	~GnSphere();
-
-	void Render() override;
-
-private: 
-	std::vector<GLfloat> vertices;
-	std::vector<GLushort> indices;
-};
-
-class GnCylinder : public GnMesh {
-public:
-	GnCylinder();
-	GnCylinder(float radius, float height, int sides);
-	~GnCylinder();
-	
-	void CalculateGeometry();
-private:
-	float radius = 0;
-	float height = 0;
-	unsigned int sides = 0;
-};
-
 class GnGrid {
 public:
 	GnGrid(int size);
@@ -100,15 +57,3 @@ private:
 	int size;
 };
 
-class GnCone : public GnMesh {
-public:
-	GnCone();
-	GnCone(float radius, float height, int sides);
-	~GnCone();
-
-	void CalculateGeometry(int sides);
-
-private: 
-	float radius;
-	float height;
-};

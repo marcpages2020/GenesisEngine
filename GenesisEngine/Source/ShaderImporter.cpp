@@ -23,6 +23,8 @@ void ShaderImporter::Import(char* fileBuffer, ResourceShader* shader, const char
 		shader->vertexShader = Compile(buffer, ShaderType::VERTEX_SHADER);
 	}
 
+	CreateProgram(shader);
+
 	RELEASE_ARRAY(buffer);
 }
 
@@ -120,7 +122,10 @@ void ShaderImporter::CreateProgram(ResourceShader* shader)
 	}
 	else
 	{
-		shader->shaderProgram = shaderProgram;
+		shader->id = shaderProgram;
+
+		glDeleteShader(shader->vertexShader);
+		glDeleteShader(shader->fragmentShader);
 	}
 }
 

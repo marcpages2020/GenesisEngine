@@ -15,23 +15,18 @@ public:
 	void DeleteBuffers();
 
 public:
-	uint vertices_buffer = 0;
-	uint vertices_amount = 0;
-	float* vertices = nullptr;
+	uint VBO;
+	uint VAO;
+	uint vertices_amount;
+	float* vertices;
 
-	uint indices_buffer = 0;
-	uint indices_amount = 0;
-	uint* indices = nullptr;
+	uint EBO;
+	uint indices_amount;
+	uint* indices;
 
-	uint normals_buffer = 0;
-	uint normals_amount = 0;
+	uint normals_buffer;
+	uint normals_amount;
 	float* normals;
-
-	uint texcoords_buffer = 0;
-	uint texcoords_amount = 0;
-	float* texcoords = nullptr;
-
-	float* colors = nullptr;;
 
 private:
 	bool _buffers_created;
