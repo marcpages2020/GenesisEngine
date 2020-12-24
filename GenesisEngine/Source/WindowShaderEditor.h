@@ -10,6 +10,13 @@ public:
 
 	void Open(const char* assets_file_path);
 	void Draw() override;
+
+private:
+	char vertexShaderBuffer[2048];
+	char fragmentShaderBuffer[2048];
+
+	char vertexShaderPath[128];
+	char fragmentShaderPath[128];
 };
 
 #endif // !_WINDOW_SHADER_EDITOR_H_

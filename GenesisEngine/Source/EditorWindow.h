@@ -22,7 +22,4 @@ public:
 public:
 	bool visible;
 	WindowType type = MAX_WINDOWS;
-
-	char vertexShaderBuffer[2048];
-	char fragmentShaderBuffer[2048];
 };

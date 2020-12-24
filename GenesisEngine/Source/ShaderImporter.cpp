@@ -1,6 +1,7 @@
 #include "ShaderImporter.h"
 #include "ResourceShader.h"
 #include "FileSystem.h"
+#include "Application.h"
 
 #include "glew/include/glew.h"
 
@@ -58,6 +59,8 @@ GLuint ShaderImporter::Compile(char* fileBuffer, ShaderType type)
 	{
 		LOG_ERROR("Trying to import unknown shader type");
 	}
+
+	return 0;
 }
 
 /*
@@ -163,4 +166,33 @@ ShaderType ShaderImporter::GetTypeFromPath(const char* path)
 		return ShaderType::VERTEX_SHADER;
 	else if (path_str.find(".frag") != std::string::npos)
 		return ShaderType::FRAGMENT_SHADER;
+}
+
+void ShaderImporter::RecompileShader(const char* vertexShaderPath, const char* fragmentShaderPath)
+{
+	ResourceShader* shader = dynamic_cast<ResourceShader*>(App->resources->RequestResource(App->resources->Find(vertexShaderPath)));
+
+	if (shader == nullptr) {
+		LOG_ERROR("Shader: %s could not be recompiled. It was not found");
+		return;
+	}
+
+	char* vertexShaderBuffer;
+	FileSystem::Load(vertexShaderPath, &vertexShaderBuffer);
+	GLuint vertexShader = Compile(vertexShaderBuffer, ShaderType::VERTEX_SHADER);
+
+	char* fragmentShaderBuffer;
+	FileSystem::Load(fragmentShaderPath, &fragmentShaderBuffer);
+	GLuint fragmentShader = Compile(fragmentShaderBuffer, ShaderType::FRAGMENT_SHADER);
+
+	if (vertexShader != 0 && fragmentShader != 0)
+	{
+		shader->vertexShader = vertexShader;
+		shader->fragmentShader = fragmentShader;
+	}
+
+	CreateProgram(shader);
+
+	RELEASE_ARRAY(vertexShaderBuffer);
+	RELEASE_ARRAY(fragmentShaderBuffer);
 }
