@@ -297,6 +297,8 @@
     <ClCompile Include="WindowScene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\Engine\Assets\Shaders\default_shader.frag" />
+    <None Include="..\Engine\Assets\Shaders\default_shader.vert" />
     <None Include="..\Engine\Library\Config\config.json" />
     <None Include="Libs\MathGeoLib\include\Geometry\KDTree.inl" />
     <None Include="Libs\MathGeoLib\include\Geometry\QuadTree.inl" />

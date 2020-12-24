@@ -643,6 +643,12 @@
     <Filter Include="Libs\parson">
       <UniqueIdentifier>{03cd38a1-3ea2-4234-89ff-3f9057e2f643}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Assets">
+      <UniqueIdentifier>{418624f5-9363-4ff8-a53f-a3b7d5be459a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Assets\Shaders">
+      <UniqueIdentifier>{9bba69d0-60dd-4b63-89e2-5351d3c747e2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Libs\MathGeoLib\include\Math\Matrix.inl">
@@ -665,6 +671,12 @@
     </None>
     <None Include="..\Engine\Library\Config\config.json">
       <Filter>FileManagement</Filter>
+    </None>
+    <None Include="..\Engine\Assets\Shaders\default_shader.frag">
+      <Filter>Assets\Shaders</Filter>
+    </None>
+    <None Include="..\Engine\Assets\Shaders\default_shader.vert">
+      <Filter>Assets\Shaders</Filter>
     </None>
   </ItemGroup>
 </Project>

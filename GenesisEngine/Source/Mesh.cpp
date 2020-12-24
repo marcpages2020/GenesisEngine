@@ -52,6 +52,7 @@ void GnMesh::SetResourceUID(uint UID)
 
 	_resourceUID = UID;
 	_resource = (ResourceMesh*)App->resources->RequestResource(_resourceUID);
+
 	if(_resource != nullptr)
 		GenerateAABB();
 }
@@ -64,7 +65,19 @@ Resource* GnMesh::GetResource(ResourceType type)
 void GnMesh::GenerateAABB()
 {
 	_AABB.SetNegativeInfinity();
-	_AABB.Enclose((float3*)_resource->vertices, _resource->vertices_amount);
+
+	float3* vertices = new float3[_resource->vertices_amount];
+	
+	for (size_t i = 0; i < _resource->vertices_amount; i++)
+	{
+		vertices[i].x = _resource->vertices[i * 11];
+		vertices[i].y = _resource->vertices[i * 11 + 1];
+		vertices[i].z = _resource->vertices[i * 11 + 2];
+	}
+
+	_AABB.Enclose(vertices, _resource->vertices_amount);
+
+	delete vertices;
 }
 
 AABB GnMesh::GetAABB()
@@ -97,10 +110,6 @@ void GnMesh::Render()
 		material->shader->SetMat4("model_matrix", _gameObject->GetTransform()->GetGlobalTransform().Transposed().ptr());
 		material->shader->SetMat4("view", App->camera->GetViewMatrixM().Transposed().ptr());
 		material->shader->SetMat4("projection", App->camera->GetProjectionMatrixM().Transposed().ptr());
-
-		/*material->shader->SetMat4("model_matrix", _gameObject->GetTransform()->GetGlobalTransform().Transposed().ptr());
-		material->shader->SetMat4("view", App->camera->GetViewMatrix());
-		material->shader->SetMat4("projection", App->camera->GetProjectionMatrix());*/
 	}
 
 	//vertices
@@ -190,6 +199,7 @@ void GnMesh::OnEditor()
 
 void GnMesh::DrawVertexNormals()
 {
+	/*
 	if (_resource->normals_buffer == -1)
 		return;
 
@@ -207,13 +217,14 @@ void GnMesh::DrawVertexNormals()
 			       _resource->vertices[i + 1] + (_resource->normals[i + 1] * normal_lenght),
 			       _resource->vertices[i + 2] + (_resource->normals[i + 2]) * normal_lenght);
 	}
-
+	*/
 	glColor3f(1.0f, 1.0f, 1.0f);
 	glEnd();
 }
 
 void GnMesh::DrawFaceNormals()
 {
+	/*
 	if (_resource->normals_buffer == -1)
 		return;
 
@@ -242,6 +253,7 @@ void GnMesh::DrawFaceNormals()
 	glColor3f(1.0f, 1.0f, 1.0f);
 
 	glEnd();
+	*/
 }
 
 // GnGrid =========================================================================================================================

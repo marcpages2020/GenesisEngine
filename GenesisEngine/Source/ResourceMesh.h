@@ -24,10 +24,6 @@ public:
 	uint indices_amount;
 	uint* indices;
 
-	uint normals_buffer;
-	uint normals_amount;
-	float* normals;
-
 private:
 	bool _buffers_created;
 };
