@@ -4,11 +4,11 @@ enum WindowType {
 	HIERARCHY_WINDOW,
 	INSPECTOR_WINDOW,
 	SCENE_WINDOW,
-	//CONSOLE_WINDOW,
 	ASSETS_WINDOW,
 	CONFIGURATION_WINDOW,
 	ABOUT_WINDOW,
 	IMPORT_WINDOW,
+	SHADER_EDITOR_WINDOW,
 	MAX_WINDOWS
 };
 
@@ -22,4 +22,7 @@ public:
 public:
 	bool visible;
 	WindowType type = MAX_WINDOWS;
+
+	char vertexShaderBuffer[2048];
+	char fragmentShaderBuffer[2048];
 };

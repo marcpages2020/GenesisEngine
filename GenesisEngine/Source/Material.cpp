@@ -10,6 +10,7 @@
 #include "glew/include/glew.h"
 #include "ResourceMaterial.h"
 #include "WindowAssets.h"
+#include "WindowShaderEditor.h"
 
 Material::Material() : Component(), checkers_image(false), _resource(nullptr), colored(false), shader(nullptr)
 {
@@ -222,7 +223,20 @@ void Material::OnEditor()
 			}
 		}
 
-		ImGui::Text("UID: %d", _resourceUID);
+		ImGui::Text("Material UID: %d", _resourceUID);
+
+		ImGui::Spacing();
+		ImGui::Separator();
+		ImGui::Spacing();
+
+		ImGui::Text("Shader: ");
+		ImGui::SameLine();
+		ImGui::TextColored(ImVec4(0.2f,0.8f,1.0f,1.0f),"%s", shader->name.c_str());
+
+		if(ImGui::Button("Open Shader editor")) {
+			WindowShaderEditor* shaderEditor = dynamic_cast<WindowShaderEditor*>(App->editor->windows[SHADER_EDITOR_WINDOW]);
+			shaderEditor->Open(shader->assetsFile.c_str());
+		}
 	}
 }
 

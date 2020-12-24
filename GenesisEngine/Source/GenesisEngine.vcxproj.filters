@@ -236,6 +236,9 @@
     <ClCompile Include="ShaderImporter.cpp">
       <Filter>FileManagement\Importers</Filter>
     </ClCompile>
+    <ClCompile Include="WindowShaderEditor.cpp">
+      <Filter>EditorWindows</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
@@ -586,6 +589,9 @@
     </ClInclude>
     <ClInclude Include="ShaderImporter.h">
       <Filter>FileManagement\Importers</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowShaderEditor.h">
+      <Filter>EditorWindows</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
