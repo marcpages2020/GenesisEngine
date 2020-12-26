@@ -30,10 +30,13 @@ bool ModuleScene::Start()
 	//GameObject* baker_house = App->resources->RequestGameObject("Assets/Models/baker_house/BakerHouse.fbx");
 	//AddGameObject(baker_house);
 	
-	GameObject* rayman = App->resources->RequestGameObject("Assets/Models/Rayman/rayman.fbx");
+	GameObject* water = App->resources->RequestGameObject("Assets/EngineAssets/Primitives/plane.fbx");
+	AddGameObject(water);
+
+	/*GameObject* rayman = App->resources->RequestGameObject("Assets/Models/Rayman/rayman.fbx");
 	AddGameObject(rayman);
 	rayman->GetTransform()->SetScale(float3(0.15, 0.15, 0.15));
-	rayman->UpdateChildrenTransforms();
+	rayman->UpdateChildrenTransforms();*/
 
 	//GameObject* street_environment = App->resources->RequestGameObject("Assets/Models/street/Street environment_V01.fbx");
 	//AddGameObject(street_environment);

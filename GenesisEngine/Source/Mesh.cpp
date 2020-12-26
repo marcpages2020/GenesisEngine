@@ -103,31 +103,24 @@ void GnMesh::Render()
 	if (material != nullptr)
 	{
 		material->UseShader();
-
-		material->BindTexture();
-
-		float4x4 identity = float4x4::identity;
-		material->shader->SetMat4("model_matrix", _gameObject->GetTransform()->GetGlobalTransform().Transposed().ptr());
-		material->shader->SetMat4("view", App->camera->GetViewMatrixM().Transposed().ptr());
-		material->shader->SetMat4("projection", App->camera->GetProjectionMatrixM().Transposed().ptr());
 	}
 
 	//vertices
 	glBindVertexArray(_resource->VAO);
 	glDrawElements(GL_TRIANGLES, _resource->indices_amount, GL_UNSIGNED_INT, NULL);
 	glBindVertexArray(0);
+	glUseProgram(0);
 
-	/*if(draw_vertex_normals ||App->renderer3D->draw_vertex_normals)
+	if(draw_vertex_normals ||App->renderer3D->draw_vertex_normals)
 		DrawVertexNormals();
 
 	if (draw_face_normals || App->renderer3D->draw_face_normals)
-		DrawFaceNormals();*/
+		DrawFaceNormals();
 
 	//App->renderer3D->DrawAABB(_AABB);
 
 	//clean buffers
 	glBindTexture(GL_TEXTURE_2D, 0);
-	glUseProgram(0);
 }
 
 void GnMesh::OnEditor()
@@ -199,25 +192,21 @@ void GnMesh::OnEditor()
 
 void GnMesh::DrawVertexNormals()
 {
-	/*
-	if (_resource->normals_buffer == -1)
-		return;
-
 	float normal_lenght = 0.5f;
 
 	//vertices normals
 	glBegin(GL_LINES);
-	for (size_t i = 0, c = 0; i < _resource->vertices_amount * 3; i += 3, c+= 4)
+	for (size_t i = 0; i < _resource->vertices_amount; i++)
 	{
 		glColor3f(0.0f, 0.85f, 0.85f);
-		//glColor4f(colors[c], colors[c + 1], colors[c + 2], colors[c + 3]);
-		glVertex3f(_resource->vertices[i], _resource->vertices[i + 1], _resource->vertices[i + 2]);
 
-		glVertex3f(_resource->vertices[i] + (_resource->normals[i] * normal_lenght),
-			       _resource->vertices[i + 1] + (_resource->normals[i + 1] * normal_lenght),
-			       _resource->vertices[i + 2] + (_resource->normals[i + 2]) * normal_lenght);
+		glVertex3f(_resource->vertices[i * 11], _resource->vertices[i * 11 + 1], _resource->vertices[i * 11 + 2]);
+
+		glVertex3f(_resource->vertices[i * 11]     + (_resource->vertices[i * 11 + 6] * normal_lenght),
+			       _resource->vertices[i * 11 + 1] + (_resource->vertices[i * 11 + 7] * normal_lenght),
+			       _resource->vertices[i * 11 + 2] + (_resource->vertices[i * 11 + 8]) * normal_lenght);
 	}
-	*/
+	
 	glColor3f(1.0f, 1.0f, 1.0f);
 	glEnd();
 }

@@ -1,6 +1,7 @@
 #version 330 core
 in vec3 ourColor;
 in vec2 TexCoord;
+in vec3 FragPos;
 
 out vec4 color;
 
@@ -9,6 +10,5 @@ uniform float time;
 
 void main()
 {
-    color = texture(ourTexture, TexCoord);
-    //color = vec4(vec3(sin(time * 7.5), 0.75, 0.0), 1.0);
+    color = vec4(ourColor, 1.0);
 }

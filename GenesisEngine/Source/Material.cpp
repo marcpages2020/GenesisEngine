@@ -11,6 +11,8 @@
 #include "ResourceMaterial.h"
 #include "WindowAssets.h"
 #include "WindowShaderEditor.h"
+#include "Transform.h"
+#include "Time.h"
 
 Material::Material() : Component(), checkers_image(false), _resource(nullptr), colored(false), shader(nullptr)
 {
@@ -45,7 +47,8 @@ Material::Material(GameObject* gameObject) : Component(gameObject), checkers_ima
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	shader = dynamic_cast<ResourceShader*>(App->resources->RequestResource(App->resources->Find("Assets/Shaders/default_shader.vert")));
+	//shader = dynamic_cast<ResourceShader*>(App->resources->RequestResource(App->resources->Find("Assets/Shaders/default_shader.vert")));
+	shader = dynamic_cast<ResourceShader*>(App->resources->RequestResource(App->resources->Find("Assets/Shaders/water_shader.vert")));
 }
 
 Material::~Material()
@@ -114,6 +117,19 @@ void Material::BindTexture()
 void Material::UseShader()
 {
 	shader->Use();
+
+	BindTexture();
+
+	shader->SetMat4("model_matrix", _gameObject->GetTransform()->GetGlobalTransform().Transposed().ptr());
+	shader->SetMat4("view", App->camera->GetViewMatrixM().Transposed().ptr());
+	shader->SetMat4("projection", App->camera->GetProjectionMatrixM().Transposed().ptr());
+	
+	float4x4 normalMatrix = _gameObject->GetTransform()->GetGlobalTransform();
+	normalMatrix.Inverse();
+	normalMatrix.Transpose();
+	shader->SetMat4("normalMatrix", normalMatrix.ptr());
+
+	shader->SetFloat("time", Time::realClock.timeSinceStartup());
 }
 
 void Material::Save(GnJSONArray& save_array)

@@ -4,6 +4,9 @@
 #include "Globals.h"
 #include "Resource.h"
 
+#include <vector>
+#include <string>
+
 enum class ShaderType
 {
 	VERTEX_SHADER,

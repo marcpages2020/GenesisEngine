@@ -59,15 +59,15 @@ void WindowShaderEditor::Draw()
 		{
 			if (ImGui::BeginTabItem("Vertex Shader"))
 			{
-				static ImGuiInputTextFlags flags = ImGuiInputTextFlags_AllowTabInput | ImGuiInputTextFlags_CtrlEnterForNewLine;
+				static ImGuiInputTextFlags flags = ImGuiInputTextFlags_AllowTabInput;// | ImGuiInputTextFlags_CtrlEnterForNewLine;
 				ImGui::InputTextMultiline("##source", vertexShaderBuffer, IM_ARRAYSIZE(vertexShaderBuffer), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 24), flags);
 				ImGui::EndTabItem();
 			}
 
 			if (ImGui::BeginTabItem("Fragment Shader"))
 			{
-				static ImGuiInputTextFlags flags = ImGuiInputTextFlags_AllowTabInput | ImGuiInputTextFlags_CtrlEnterForNewLine;
-				ImGui::InputTextMultiline("##source", fragmentShaderBuffer, IM_ARRAYSIZE(fragmentShaderBuffer), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 16), flags);
+				static ImGuiInputTextFlags flags = ImGuiInputTextFlags_AllowTabInput;// | ImGuiInputTextFlags_CtrlEnterForNewLine;
+				ImGui::InputTextMultiline("##source", fragmentShaderBuffer, IM_ARRAYSIZE(fragmentShaderBuffer), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 24), flags);
 				ImGui::EndTabItem();
 			}
 

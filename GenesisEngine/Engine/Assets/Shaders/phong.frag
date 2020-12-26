@@ -10,5 +10,5 @@ uniform float time;
 void main()
 {
     color = texture(ourTexture, TexCoord);
-    //color = vec4(vec3(sin(time * 7.5), 0.75, 0.0), 1.0);
+    //color = vec4(vec3(sin(time * 2.0), 0.0, 0.0), 1.0);
 }
