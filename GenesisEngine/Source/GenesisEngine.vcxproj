@@ -161,6 +161,7 @@
     <ClInclude Include="Libs\MathGeoLib\include\Math\sse_mathfun.h" />
     <ClInclude Include="Libs\MathGeoLib\include\Math\TransformOps.h" />
     <ClInclude Include="Libs\MathGeoLib\include\Time\Clock.h" />
+    <ClInclude Include="Libs\TextEditor\TextEditor.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="MaterialImporter.h" />
     <ClInclude Include="Mesh.h" />
@@ -264,6 +265,7 @@
     <ClCompile Include="Libs\MathGeoLib\include\Math\TransformOps.cpp" />
     <ClCompile Include="Libs\MathGeoLib\include\Time\Clock.cpp" />
     <ClCompile Include="Libs\parson\parson.c" />
+    <ClCompile Include="Libs\TextEditor\TextEditor.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="log.cpp" />
     <ClCompile Include="Main.cpp" />

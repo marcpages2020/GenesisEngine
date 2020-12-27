@@ -239,6 +239,9 @@
     <ClCompile Include="WindowShaderEditor.cpp">
       <Filter>EditorWindows</Filter>
     </ClCompile>
+    <ClCompile Include="Libs\TextEditor\TextEditor.cpp">
+      <Filter>Libs\TextEditor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
@@ -593,6 +596,9 @@
     <ClInclude Include="WindowShaderEditor.h">
       <Filter>EditorWindows</Filter>
     </ClInclude>
+    <ClInclude Include="Libs\TextEditor\TextEditor.h">
+      <Filter>Libs\TextEditor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Modules">
@@ -654,6 +660,9 @@
     </Filter>
     <Filter Include="Assets\Shaders">
       <UniqueIdentifier>{9bba69d0-60dd-4b63-89e2-5351d3c747e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libs\TextEditor">
+      <UniqueIdentifier>{88c0774a-c921-456d-81fe-a2300193a14e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

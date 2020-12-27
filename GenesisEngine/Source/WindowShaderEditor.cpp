@@ -2,11 +2,18 @@
 #include "FileSystem.h"
 #include "ShaderImporter.h"
 #include "ResourceShader.h"
+
 #include "ImGui/imgui.h"
+#include "ImGui/imgui_impl_sdl.h"
+#include "ImGui/imgui_impl_opengl3.h"
+
 
 WindowShaderEditor::WindowShaderEditor() : EditorWindow()
 {
 	type = WindowType::SHADER_EDITOR_WINDOW;
+
+	auto lang = TextEditor::LanguageDefinition::GLSL();
+	editor.SetLanguageDefinition(lang);
 }
 
 WindowShaderEditor::~WindowShaderEditor()
@@ -28,6 +35,8 @@ void WindowShaderEditor::Open(const char* assets_file_path)
 	{
 		strcpy_s(vertexShaderBuffer, buffer);
 		strcpy_s(fragmentShaderBuffer, secondaryBuffer);
+
+		editor.SetText(vertexShaderBuffer);
 
 		strcpy_s(vertexShaderPath, assets_file_path);
 		strcpy_s(fragmentShaderPath, pairingShaderPath.c_str());
@@ -59,8 +68,18 @@ void WindowShaderEditor::Draw()
 		{
 			if (ImGui::BeginTabItem("Vertex Shader"))
 			{
-				static ImGuiInputTextFlags flags = ImGuiInputTextFlags_AllowTabInput;// | ImGuiInputTextFlags_CtrlEnterForNewLine;
-				ImGui::InputTextMultiline("##source", vertexShaderBuffer, IM_ARRAYSIZE(vertexShaderBuffer), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 24), flags);
+				//static ImGuiInputTextFlags flags = ImGuiInputTextFlags_AllowTabInput;// | ImGuiInputTextFlags_CtrlEnterForNewLine;
+				//ImGui::InputTextMultiline("##source", vertexShaderBuffer, IM_ARRAYSIZE(vertexShaderBuffer), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 24), flags);
+
+				auto cpos = editor.GetCursorPosition();
+
+				ImGui::Text("%6d/%-6d %6d lines  | %s | %s | %s | %s", cpos.mLine + 1, cpos.mColumn + 1, editor.GetTotalLines(),
+					editor.IsOverwrite() ? "Ovr" : "Ins",
+					editor.CanUndo() ? "*" : " ",
+					editor.GetLanguageDefinition().mName.c_str(), vertexShaderPath);
+
+				editor.Render("TextEditor");
+
 				ImGui::EndTabItem();
 			}
 
