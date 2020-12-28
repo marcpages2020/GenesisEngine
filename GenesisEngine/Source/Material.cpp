@@ -249,10 +249,18 @@ void Material::OnEditor()
 		ImGui::SameLine();
 		ImGui::TextColored(ImVec4(0.2f,0.8f,1.0f,1.0f),"%s", shader->name.c_str());
 
+		ImGui::Spacing();
+		ImGui::Spacing();
+
 		if(ImGui::Button("Open Shader editor")) {
 			WindowShaderEditor* shaderEditor = dynamic_cast<WindowShaderEditor*>(App->editor->windows[SHADER_EDITOR_WINDOW]);
 			shaderEditor->Open(shader->assetsFile.c_str());
 		}
+
+		ImGui::Spacing();
+		ImGui::Spacing();
+
+		shader->OnEditor();
 	}
 }
 

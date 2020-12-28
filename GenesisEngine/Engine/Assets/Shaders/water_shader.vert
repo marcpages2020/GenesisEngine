@@ -14,6 +14,7 @@ uniform mat4 projection;
 vec3 fNormal;
 
 uniform float time;
+uniform float waveHeight;
 
 void main()
 {
@@ -25,7 +26,7 @@ void main()
   fPosition.z += fNormal.z * 0.02;
 
   vec3 worldPosition = position;
-  worldPosition += fNormal * 0.025;
+  worldPosition += fNormal * 0.025 + waveHeight;
 
   gl_Position = projection * view * model_matrix * vec4(worldPosition, 1.0);
   
@@ -48,3 +49,19 @@ void main()
 
   ourColor = max(intensity * diffuse + specularity, ambient);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

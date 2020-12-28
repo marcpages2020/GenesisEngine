@@ -63,23 +63,6 @@ GLuint ShaderImporter::Compile(char* fileBuffer, ShaderType type)
 	return 0;
 }
 
-/*
-void ShaderImporter::CompilePairingShader(ResourceShader* shader)
-{
-	std::string pairingShaderPath = FindPairingShader(shader->assetsFile.c_str());
-
-	if (FileSystem::Exists(pairingShaderPath.c_str()))
-	{
-		char* buffer;
-		uint size = FileSystem::Load(pairingShaderPath.c_str(), &buffer);
-
-		Compile(buffer, shader);
-
-		RELEASE_ARRAY(buffer);
-	}
-}
-*/
-
 bool ShaderImporter::ShaderHasError(GLuint shader)
 {
 	int success;
@@ -104,10 +87,7 @@ void ShaderImporter::CreateProgram(ResourceShader* shader)
 	GLuint shaderProgram;
 	shaderProgram = glCreateProgram();
 
-	//if (shader->vertexShader != -1)
 	glAttachShader(shaderProgram, shader->vertexShader);
-
-	//if (shader->fragmentShader != -1)
 	glAttachShader(shaderProgram, shader->fragmentShader);
 
 	glLinkProgram(shaderProgram);
@@ -127,6 +107,8 @@ void ShaderImporter::CreateProgram(ResourceShader* shader)
 	else
 	{
 		shader->id = shaderProgram;
+		
+		GetUniforms(shaderProgram, shader);
 
 		LOG("Shader program created porperly");
 
@@ -136,6 +118,60 @@ void ShaderImporter::CreateProgram(ResourceShader* shader)
 		glDeleteShader(shader->vertexShader);
 		glDeleteShader(shader->fragmentShader);
 	}
+}
+
+void ShaderImporter::GetUniforms(GLuint program, ResourceShader* shader)
+{
+	int count = 0;
+	std::vector<Uniform> uniforms;
+
+	glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &count);
+
+	for (size_t i = 0; i < count; i++)
+	{
+		Uniform uniform;
+		GLsizei length;
+		glGetActiveUniform(program, (GLuint)i, 16, &length, &uniform.size, &uniform.type, (GLchar*)&uniform.name);
+
+		if (strcmp(uniform.name, "model_matrix") != 0 && strcmp(uniform.name, "projection") 
+			!= 0 && strcmp(uniform.name, "view") != 0 && strcmp(uniform.name, "time") != 0)
+		{
+			if (uniform.type == GL_FLOAT || uniform.type == GL_INT)
+				uniform.uniformType = UniformType::NUMBER;
+
+			else if (uniform.type == GL_BOOL)
+				uniform.uniformType = UniformType::BOOLEAN;
+
+			else if (uniform.type == GL_FLOAT_VEC2 || uniform.type == GL_INT_VEC2 || uniform.type == GL_DOUBLE_VEC2)
+				uniform.uniformType = UniformType::VEC_2;
+
+			else if (uniform.type == GL_FLOAT_VEC3 || uniform.type == GL_INT_VEC3 || uniform.type == GL_DOUBLE_VEC3)
+				uniform.uniformType = UniformType::VEC_3;
+
+			else if (uniform.type == GL_FLOAT_VEC4 || uniform.type == GL_INT_VEC4 || uniform.type == GL_DOUBLE_VEC4)
+				uniform.uniformType = UniformType::VEC_4;
+
+			else if (uniform.type == GL_SAMPLER_2D)
+				uniform.uniformType = UniformType::TEXTURE;
+
+			else 
+				uniform.uniformType = UniformType::UNKNOWN;
+
+			bool found = false;
+			for (size_t j = 0; j < shader->uniforms.size(); j++)
+			{
+				if (strcmp(shader->uniforms[j].name, uniform.name) == 0)
+				{
+					uniform = shader->uniforms[j];
+					found = true;
+				}
+			}
+			
+			uniforms.push_back(uniform);
+		}
+	}
+
+	shader->uniforms = uniforms;
 }
 
 std::string ShaderImporter::FindPairingShader(const char* current_shader_path)
