@@ -247,7 +247,18 @@ void Material::OnEditor()
 
 		ImGui::Text("Shader: ");
 		ImGui::SameLine();
-		ImGui::TextColored(ImVec4(0.2f,0.8f,1.0f,1.0f),"%s", shader->name.c_str());
+		ImGui::Button(shader->name.c_str());
+
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSETS"))
+			{
+				IM_ASSERT(payload->DataSize == sizeof(int));
+				int UID = *(const int*)payload->Data;
+				shader = dynamic_cast<ResourceShader*>(App->resources->RequestResource(UID));
+			}
+			ImGui::EndDragDropTarget();
+		}
 
 		ImGui::Spacing();
 		ImGui::Spacing();

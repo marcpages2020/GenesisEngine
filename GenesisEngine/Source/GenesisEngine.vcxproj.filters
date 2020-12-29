@@ -563,9 +563,6 @@
     <ClInclude Include="WindowAssets.h">
       <Filter>EditorWindows</Filter>
     </ClInclude>
-    <ClInclude Include="ImportingOptions.h">
-      <Filter>FileManagement</Filter>
-    </ClInclude>
     <ClInclude Include="Light.h">
       <Filter>GameObjects &amp; Components</Filter>
     </ClInclude>
@@ -598,6 +595,9 @@
     </ClInclude>
     <ClInclude Include="Libs\TextEditor\TextEditor.h">
       <Filter>Libs\TextEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="ImportingOptions.h">
+      <Filter>FileManagement\Importers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

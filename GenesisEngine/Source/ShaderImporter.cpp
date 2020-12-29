@@ -157,14 +157,11 @@ void ShaderImporter::GetUniforms(GLuint program, ResourceShader* shader)
 			else 
 				uniform.uniformType = UniformType::UNKNOWN;
 
-			bool found = false;
 			for (size_t j = 0; j < shader->uniforms.size(); j++)
 			{
 				if (strcmp(shader->uniforms[j].name, uniform.name) == 0)
-				{
 					uniform = shader->uniforms[j];
-					found = true;
-				}
+				
 			}
 			
 			uniforms.push_back(uniform);
