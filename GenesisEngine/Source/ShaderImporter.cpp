@@ -2,6 +2,7 @@
 #include "ResourceShader.h"
 #include "FileSystem.h"
 #include "Application.h"
+#include "GnJSON.h"
 
 #include "glew/include/glew.h"
 
@@ -171,6 +172,34 @@ void ShaderImporter::GetUniforms(GLuint program, ResourceShader* shader)
 	shader->uniforms = uniforms;
 }
 
+uint ShaderImporter::Save(ResourceShader* shader, char** fileBuffer)
+{
+	char* buffer;
+
+	GnJSONObj base_object;
+
+	shader->Save(base_object);
+
+	uint size = base_object.Save(&buffer);
+	*fileBuffer = buffer;
+	return size;
+}
+
+bool ShaderImporter::Load(char* fileBuffer, ResourceShader* shader)
+{
+	char* buffer;
+	FileSystem::Load(shader->assetsFile.c_str(), &buffer);
+
+	Import(buffer, shader, shader->assetsFile.c_str());
+
+	GnJSONObj uniforms(fileBuffer);
+	shader->Load(uniforms);
+
+	RELEASE_ARRAY(buffer);
+
+	return true;
+}
+
 std::string ShaderImporter::FindPairingShader(const char* current_shader_path)
 {
 	std::string shader_path = current_shader_path;
@@ -226,6 +255,13 @@ void ShaderImporter::RecompileShader(const char* vertexShaderPath, const char* f
 
 	CreateProgram(shader);
 
+	char* buffer;
+	uint size = 0;
+	size = Save(shader, &buffer);
+
+	FileSystem::Save(shader->libraryFile.c_str(), buffer, size);
+
 	RELEASE_ARRAY(vertexShaderBuffer);
 	RELEASE_ARRAY(fragmentShaderBuffer);
+	RELEASE_ARRAY(buffer);
 }

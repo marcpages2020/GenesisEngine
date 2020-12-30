@@ -16,8 +16,8 @@ vec3 fNormal;
 uniform float time;
 
 uniform float speed;
-float waveHeight;
 uniform vec2 direction;
+uniform float wave_length;
 
 void main()
 {
@@ -26,39 +26,51 @@ void main()
  
  float A = 0.05;
  float Q = 0.5f;
- float speed = 0.1f;
- float wave_length = 0.1f;
+ float speed = 0.15f;
  float pi = 3.1415f;
  float phase_constant = speed * 2.0 * pi / wave_length;
- vec2 Direction = vec2(1.0, 0.5);
- float w = 10.5f;
+ float w = sqrt(9.81 * 2 * pi / wave_length);
+ float Qi = Q / w * A * 3.0;
  
  vec3 wave1;
- float amp1 = 0.1f;
- vec3 dir1 = normalize(vec3(0.25, 0.5, 0.6));
+ float amp1 = 0.045;
+ vec3 dir1 = normalize(vec3(1.0, 1.0, 1.00));
  
- wave1.x = Q * A * dir1.x * cos(dot(w * dir1, position) + phase_constant * time);
- wave1.y = Q * A * dir1.y * cos(dot(w * dir1, position) + phase_constant * time);
- wave1.z = A * sin(dot(w * dir1, position) + phase_constant * time);
+ wave1.x = Qi * amp1 * dir1.x * cos(dot(w * dir1, position) + phase_constant * time);
+ wave1.y = Qi * amp1 * dir1.y * cos(dot(w * dir1, position) + phase_constant * time);
+ wave1.z = amp1 * sin(dot(w * dir1, position) + phase_constant * time);
  
  vec3 wave2;
- float amp2 = 0.1f;
- vec3 dir2 = normalize(vec3(0.65, 0.25, 0.6));
+ float amp2 = 0.015;
+ vec3 dir2 = normalize(vec3(0.0, -0.2, -0.5));
  
- wave2.x = Q * A * dir1.x * cos(dot(w * dir2, position) + phase_constant * time);
- wave2.y = Q * A * dir1.y * cos(dot(w * dir2, position) + phase_constant * time);
- wave2.z = A * sin(dot(w * dir2, position) + phase_constant * time);
+ wave2.x = Qi * amp2 * dir1.x * cos(dot(w * dir2, position) + phase_constant * time);
+ wave2.y = Qi * amp2 * dir1.y * cos(dot(w * dir2, position) + phase_constant * time);
+ wave2.z = amp2 * sin(dot(w * dir2, position) + phase_constant * time);
  
- fPosition += wave1 + wave2;
+ vec3 wave3;
+ float amp3 = 0.015;
+  vec3 dir3 = normalize(vec3(-0.45, -0.2, -0.15));
+ 
+ wave3.x = Qi * amp3 * dir1.x * cos(dot(w * dir3, position) + phase_constant * time);
+ wave3.y = Qi * amp3 * dir1.y * cos(dot(w * dir3, position) + phase_constant * time);
+ wave3.z = amp3 * sin(dot(w * dir3, position) + phase_constant * time);
+ 
+ fPosition += wave1 + wave2 + wave3;
  
  gl_Position = projection * view * model_matrix * vec4(fPosition, 1.0);
   
- vec3 diffuse = vec3(0.2, 0.725, 0.9);
- diffuse.gb += fPosition.z * 2.0;
-
+ vec3 diffuse = vec3(0.2, 0.6, 0.85);
+ diffuse.gb += fPosition.z * 4.0;
 
   ourColor = diffuse;
 }
+
+
+
+
+
+
 
 
 

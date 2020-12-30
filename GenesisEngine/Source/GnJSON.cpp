@@ -102,6 +102,24 @@ const char* GnJSONObj::GetString(const char* name, const char* default)
 		return default;
 }
 
+math::float2 GnJSONObj::GetFloat2(const char* name, float2 default)
+{
+	if (json_object_has_value(_object, name) == 1)
+	{
+		math::float2 number;
+
+		JSON_Array* array;
+		array = json_object_get_array(_object, name);
+
+		number.x = json_array_get_number(array, 0);
+		number.y = json_array_get_number(array, 1);
+
+		return number;
+	}
+	else
+		return default;
+}
+
 math::float3 GnJSONObj::GetFloat3(const char* name, float3 default)
 {
 	if (json_object_has_value(_object, name) == 1)
@@ -114,6 +132,26 @@ math::float3 GnJSONObj::GetFloat3(const char* name, float3 default)
 		number.x = json_array_get_number(array, 0);
 		number.y = json_array_get_number(array, 1);
 		number.z = json_array_get_number(array, 2);
+
+		return number;
+	}
+	else
+		return default;
+}
+
+math::float4 GnJSONObj::GetFloat4(const char* name, float4 default)
+{
+	if (json_object_has_value(_object, name) == 1)
+	{
+		math::float4 number;
+
+		JSON_Array* array;
+		array = json_object_get_array(_object, name);
+
+		number.x = json_array_get_number(array, 0);
+		number.y = json_array_get_number(array, 1);
+		number.z = json_array_get_number(array, 2);
+		number.w = json_array_get_number(array, 3);
 
 		return number;
 	}
@@ -170,6 +208,16 @@ void GnJSONObj::AddFloat(const char* name, float number)
 	json_object_set_number(_object, name, number);
 }
 
+void GnJSONObj::AddFloat2(const char* name, math::float2 number)
+{
+	JSON_Value* value = json_value_init_array();
+	JSON_Status status = json_object_set_value(_object, name, value);
+	JSON_Array* _array = json_object_get_array(_object, name);
+
+	json_array_append_number(_array, number.x);
+	json_array_append_number(_array, number.y);
+}
+
 void GnJSONObj::AddFloat3(const char* name, math::float3 number)
 {
 	JSON_Value* value = json_value_init_array();
@@ -179,6 +227,18 @@ void GnJSONObj::AddFloat3(const char* name, math::float3 number)
 	json_array_append_number(_array, number.x);
 	json_array_append_number(_array, number.y);
 	json_array_append_number(_array, number.z);
+}
+
+void GnJSONObj::AddFloat4(const char* name, math::float4 number)
+{
+	JSON_Value* value = json_value_init_array();
+	JSON_Status status = json_object_set_value(_object, name, value);
+	JSON_Array* _array = json_object_get_array(_object, name);
+
+	json_array_append_number(_array, number.x);
+	json_array_append_number(_array, number.y);
+	json_array_append_number(_array, number.z);
+	json_array_append_number(_array, number.w);
 }
 
 void GnJSONObj::AddQuaternion(const char* name, math::Quat number)

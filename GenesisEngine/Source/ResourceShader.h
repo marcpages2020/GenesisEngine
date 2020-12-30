@@ -5,8 +5,10 @@
 #include "Resource.h"
 
 #include <vector>
+#include "MathGeoLib/include/MathGeoLib.h"
 
 typedef unsigned int GLenum;
+class GnJSONObj;
 
 enum class ShaderType
 {
@@ -28,15 +30,19 @@ enum class UniformType
 
 struct Uniform
 {
+	Uniform();
 	int size = 0;
 	GLenum type;
 	UniformType uniformType = UniformType::UNKNOWN;
-
-	bool boolean = false;
-	float x = 0.0f;
-	float y = 0.0f;
-	float z = 0.0f;
-	float w = 0.0f;
+	
+	union
+	{
+		bool boolean;
+		float number;
+		float2 vec2;
+		float3 vec3;
+		float4 vec4;
+	};
 
 	char name[16];
 };
@@ -46,7 +52,10 @@ public:
 	ResourceShader(uint UID);
 	~ResourceShader();
 
+	uint SaveMeta(GnJSONObj& base_object, uint last_modification) override;
 	void OnEditor();
+	uint Save(GnJSONObj& base_object) override;
+	void Load(GnJSONObj& base_object) override;
 
 	void Use();
 

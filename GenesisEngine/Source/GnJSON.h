@@ -34,13 +34,17 @@ public:
 	float GetFloat(const char* name, float default = -1.0f);
 	bool GetBool(const char* name, bool default = false);
 	const char* GetString(const char* name, const char* default);
+	math::float2 GetFloat2(const char* name, float2 default = float2(0,0));
 	math::float3 GetFloat3(const char* name, float3 default = float3(0,0,0));
+	math::float4 GetFloat4(const char* name, float4 default = float4(0,0,0,0));
 	Quat GetQuaternion(const char* name, Quat default = Quat(0,0,0,1));
 	Color GetColor(const char* name, Color default = Color(0, 0, 0, 1));
 
 	void AddInt(const char* name, int number);
 	void AddFloat(const char* name, float number);
+	void AddFloat2(const char* name, math::float2 number);
 	void AddFloat3(const char* name, math::float3 number);
+	void AddFloat4(const char* name, math::float4 number);
 	void AddQuaternion(const char* name, math::Quat number);
 	void AddBool(const char* name, bool boolean);
 	void AddString(const char* name, const char* string);

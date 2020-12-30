@@ -6,6 +6,7 @@ typedef unsigned int GLuint;
 enum class ShaderType;
 struct Uniform;
 
+#include "Globals.h"
 #include <string>
 #include <vector>
 
@@ -16,6 +17,8 @@ namespace ShaderImporter
 	bool ShaderHasError(GLuint shader);
 	void CreateProgram(ResourceShader* shader);
 	void GetUniforms(GLuint program, ResourceShader* shader);
+	uint Save(ResourceShader* shader, char** fileBuffer);
+	bool Load(char* fileBuffer, ResourceShader* shader);
 	std::string FindPairingShader(const char* current_shader_path);
 	ShaderType GetTypeFromPath(const char* path);
 	void RecompileShader(const char* vertexShaderPath, const char* fragmentShaderPath);
