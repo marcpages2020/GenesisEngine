@@ -77,7 +77,7 @@ update_status ModuleScene::Update(float dt)
 
 void ModuleScene::HandleInput()
 {
-	if ((App->input->GetKey(SDL_SCANCODE_DELETE) == KEY_DOWN) && (selectedGameObject != nullptr) && (selectedGameObject != root))
+	if ((App->input->GetKey(SDL_SCANCODE_DELETE) == KEY_DOWN) && (selectedGameObject != nullptr) && (selectedGameObject != root) && App->editor->scene_window_focused)
 		selectedGameObject->to_delete = true;
 
 	if ((App->input->GetKey(SDL_SCANCODE_W) == KEY_DOWN))

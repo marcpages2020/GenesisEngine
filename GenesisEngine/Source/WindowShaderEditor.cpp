@@ -2,6 +2,7 @@
 #include "FileSystem.h"
 #include "ShaderImporter.h"
 #include "ResourceShader.h"
+#include "Application.h"
 
 #include "ImGui/imgui.h"
 #include "ImGui/imgui_internal.h"
@@ -94,6 +95,8 @@ void WindowShaderEditor::Draw()
 				FileSystem::Save(fragmentShaderPath, fragmentShaderEditor.GetText().c_str(), strlen(fragmentShaderEditor.GetText().c_str()));
 				
 				ShaderImporter::RecompileShader(vertexShaderPath, fragmentShaderPath);
+
+				App->resources->SaveResource(App->resources->GetResource(App->resources->Find(vertexShaderPath)));
 			}
 
 			ImGui::SameLine();
@@ -103,6 +106,8 @@ void WindowShaderEditor::Draw()
 				FileSystem::Save(fragmentShaderPath, fragmentShaderEditor.GetText().c_str(), strlen(fragmentShaderEditor.GetText().c_str()));
 
 				ShaderImporter::RecompileShader(vertexShaderPath, fragmentShaderPath);
+
+				App->resources->SaveResource(App->resources->GetResource(App->resources->Find(vertexShaderPath)));
 
 				visible = false;
 			}

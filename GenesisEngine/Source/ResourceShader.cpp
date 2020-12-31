@@ -85,6 +85,8 @@ uint ResourceShader::Save(GnJSONObj& base_object)
 		case UniformType::VEC_4:
 			uniform.AddFloat4("value", it->second.vec4);
 			break;
+		case UniformType::TEXTURE:
+			break;
 		default:
 			break;
 		}

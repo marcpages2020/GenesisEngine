@@ -729,6 +729,17 @@ Resource* ModuleResources::CreateResource(uint UID, ResourceType type, std::stri
 	return resource;
 }
 
+//Get Resource without requesting it
+//Just for resource management, not usage
+Resource* ModuleResources::GetResource(uint UID)
+{
+	std::map<uint, Resource*>::iterator it = resources.find(UID);
+
+	if (it != resources.end() && it->second != nullptr) {
+		return it->second;
+	}
+}
+
 Resource* ModuleResources::RequestResource(uint UID)
 {
 	std::map<uint, Resource*>::iterator it = resources.find(UID);
@@ -886,7 +897,7 @@ ResourceType ModuleResources::GetTypeFromPath(const char* path)
 	else if (extension == ".material")
 		return ResourceType::RESOURCE_MATERIAL;
 
-	else if (extension == ".png" || extension == ".tga" || extension == ".dds")
+	else if (extension == ".png" || extension == ".jpg" || extension == ".tga" || extension == ".dds")
 		return ResourceType::RESOURCE_TEXTURE;
 
 	else if (extension == ".vert" || extension == ".frag" || extension == ".shader")
