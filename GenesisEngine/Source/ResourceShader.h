@@ -4,7 +4,8 @@
 #include "Globals.h"
 #include "Resource.h"
 
-#include <vector>
+#include <map>
+#include <string>
 #include "MathGeoLib/include/MathGeoLib.h"
 
 typedef unsigned int GLenum;
@@ -44,7 +45,7 @@ struct Uniform
 		float4 vec4;
 	};
 
-	char name[16];
+	std::string name;
 };
 
 class ResourceShader : public Resource {
@@ -74,7 +75,7 @@ public:
 	uint fragmentShader;
 	uint id;
 
-	std::vector<Uniform> uniforms;
+	std::map<std::string, Uniform> uniforms;
 };
 
 #endif

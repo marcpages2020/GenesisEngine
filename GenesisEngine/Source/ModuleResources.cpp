@@ -363,7 +363,7 @@ uint ModuleResources::ImportFile(const char* assets_file)
 	RELEASE_ARRAY(fileBuffer);
 
 	if(type != ResourceType::RESOURCE_SHADER)
-		ReleaseResource(ret);
+	 ReleaseResource(ret);
 
 	return ret;
 }
