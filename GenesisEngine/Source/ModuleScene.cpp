@@ -34,10 +34,10 @@ bool ModuleScene::Start()
 	water->UpdateChildrenTransforms();
 	AddGameObject(water);
 
-	/*GameObject* rayman = App->resources->RequestGameObject("Assets/Models/Rayman/rayman.fbx");
-	AddGameObject(rayman);
-	rayman->GetTransform()->SetScale(float3(0.15, 0.15, 0.15));
-	rayman->UpdateChildrenTransforms();*/
+	//GameObject* rayman = App->resources->RequestGameObject("Assets/Models/Rayman/rayman.fbx");
+	//AddGameObject(rayman);
+	//rayman->GetTransform()->SetScale(float3(0.15, 0.15, 0.15));
+	//rayman->UpdateChildrenTransforms();
 
 	//GameObject* street_environment = App->resources->RequestGameObject("Assets/Models/street/Street environment_V01.fbx");
 	//AddGameObject(street_environment);

@@ -1,6 +1,9 @@
 #include "ResourceShader.h"
 #include "glew/include/glew.h"
 #include "Application.h"
+#include "GameObject.h"
+#include "Transform.h"
+#include "Time.h"
 
 #include "GnJSON.h"
 #include "ImGui/imgui.h"
@@ -29,24 +32,28 @@ void ResourceShader::OnEditor()
 		ImGui::Spacing();
 		for (std::map<std::string, Uniform>::iterator it = uniforms.begin(); it != uniforms.end(); it++)
 		{
-			switch (it->second.uniformType)
+			if (!IsDefaultUniform(it->second.name.c_str()))
 			{
-			case UniformType::BOOLEAN:
+				switch (it->second.uniformType)
+				{
+				case UniformType::BOOLEAN:
+					ImGui::Checkbox(it->first.c_str(), &it->second.boolean);
 					break;
-			case UniformType::NUMBER:
-				ImGui::InputScalar(it->first.c_str(), ImGuiDataType_Float, &it->second.number, &step);
-				break;
-			case UniformType::VEC_2:
-				ImGui::InputFloat2(it->first.c_str(), it->second.vec2.ptr());
-				break;
-			case UniformType::VEC_3:
-				ImGui::InputFloat3(it->first.c_str(), it->second.vec3.ptr());
-				break;
-			case UniformType::VEC_4:
-				ImGui::InputFloat4(it->first.c_str(), it->second.vec4.ptr());
-				break;
-			default:
-				break;
+				case UniformType::NUMBER:
+					ImGui::InputScalar(it->first.c_str(), ImGuiDataType_Float, &it->second.number, &step);
+					break;
+				case UniformType::VEC_2:
+					ImGui::InputFloat2(it->first.c_str(), it->second.vec2.ptr());
+					break;
+				case UniformType::VEC_3:
+					ImGui::InputFloat3(it->first.c_str(), it->second.vec3.ptr());
+					break;
+				case UniformType::VEC_4:
+					ImGui::InputFloat4(it->first.c_str(), it->second.vec4.ptr());
+					break;
+				default:
+					break;
+				}
 			}
 		}
 
@@ -117,19 +124,19 @@ void ResourceShader::Load(GnJSONObj& base_object)
 			break;
 		case UniformType::NUMBER:
 			uniform.type = GL_FLOAT;
-			uniform.number = uniform_object.GetFloat("value");
+			uniform.number = uniform_object.GetFloat("value", 0.0f);
 			break;
 		case UniformType::VEC_2:
 			uniform.type = GL_FLOAT_VEC2;
-			uniform.vec2 = uniform_object.GetFloat2("value");
+			uniform.vec2 = uniform_object.GetFloat2("value", float2().zero);
 			break;
 		case UniformType::VEC_3:
 			uniform.type = GL_FLOAT_VEC3;
-			uniform.vec3 = uniform_object.GetFloat3("value");
+			uniform.vec3 = uniform_object.GetFloat3("value", float3().zero);
 			break;
 		case UniformType::VEC_4:
 			uniform.type = GL_FLOAT_VEC4;
-			uniform.vec4 = uniform_object.GetFloat4("value");
+			uniform.vec4 = uniform_object.GetFloat4("value", float4().zero);
 			break;
 		default:
 			break;
@@ -204,6 +211,63 @@ void ResourceShader::SetUniforms()
 			break;
 		}
 	}
+}
+
+void ResourceShader::UpdateUniforms(float4x4 globalTransform)
+{
+	for (std::map<std::string, Uniform>::iterator it = uniforms.begin(); it != uniforms.end(); it++)
+	{
+		if (it->second.name == "model_matrix") {
+			SetMat4("model_matrix", globalTransform.Transposed().ptr());
+		}
+		else if (it->second.name == "projection") {
+			SetMat4("projection", App->camera->GetProjectionMatrixM().Transposed().ptr());
+		}
+		else if (it->second.name == "view"){
+			SetMat4("view", App->camera->GetViewMatrixM().Transposed().ptr());
+		}
+		else if (it->second.name == "time") {
+			SetFloat("time", Time::realClock.timeSinceStartup());
+		}
+		else if (it->second.name == "normalMatrix") {
+			float4x4 normalMatrix = globalTransform;
+			normalMatrix.Inverse();
+			normalMatrix.Transpose();
+			SetMat4("normalMatrix", normalMatrix.ptr());
+		}
+		else if (it->second.name == "cameraPosition") {
+			float3 cameraPosition = App->camera->GetPosition();
+			SetVec3("cameraPosition", cameraPosition.x, cameraPosition.y, cameraPosition.z);
+		}
+		else {
+			switch (it->second.uniformType)
+			{
+			case UniformType::BOOLEAN:
+				SetBool(it->first.c_str(), it->second.boolean);
+				break;
+			case UniformType::NUMBER:
+				SetFloat(it->first.c_str(), it->second.number);
+				break;
+			case UniformType::VEC_2:
+				SetVec2(it->first.c_str(), it->second.vec2.x, it->second.vec2.y);
+				break;
+			case UniformType::VEC_3:
+				SetVec3(it->first.c_str(), it->second.vec3.x, it->second.vec3.y, it->second.vec3.z);
+				break;
+			case UniformType::VEC_4:
+				SetVec4(it->first.c_str(), it->second.vec4.x, it->second.vec4.y, it->second.vec4.z, it->second.vec4.w);
+				break;
+			default:
+				break;
+			}
+		}
+	}
+}
+
+bool ResourceShader::IsDefaultUniform(const char* uniform_name)
+{
+	return strcmp(uniform_name, "model_matrix") == 0 || strcmp(uniform_name, "projection") == 0 || strcmp(uniform_name, "view") == 0
+		|| strcmp(uniform_name, "time") == 0 || strcmp(uniform_name, "cameraPosition") == 0;
 }
 
 void ResourceShader::SetBool(const char* name, bool value)

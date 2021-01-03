@@ -249,14 +249,14 @@ GameObject* ModuleCamera3D::PickGameObject()
 		for (size_t i = 0; i < resourceMesh->indices_amount; i += 3)
 		{
 			//create every triangle
-			float3 v1(resourceMesh->vertices[resourceMesh->indices[i] * 11], resourceMesh->vertices[resourceMesh->indices[i] * 11 + 1],
-				      resourceMesh->vertices[resourceMesh->indices[i] * 11 + 2]);
+			float3 v1(resourceMesh->vertices[resourceMesh->indices[i] * VERTEX_ATTRIBUTES], resourceMesh->vertices[resourceMesh->indices[i] * VERTEX_ATTRIBUTES + 1],
+				      resourceMesh->vertices[resourceMesh->indices[i] * VERTEX_ATTRIBUTES + 2]);
 
-			float3 v2(resourceMesh->vertices[resourceMesh->indices[i+1] * 11], resourceMesh->vertices[resourceMesh->indices[i+1] * 11 + 1],
-				      resourceMesh->vertices[resourceMesh->indices[i+1] * 11 + 2]);
+			float3 v2(resourceMesh->vertices[resourceMesh->indices[i+1] * VERTEX_ATTRIBUTES], resourceMesh->vertices[resourceMesh->indices[i+1] * VERTEX_ATTRIBUTES + 1],
+				      resourceMesh->vertices[resourceMesh->indices[i+1] * VERTEX_ATTRIBUTES + 2]);
 
-			float3 v3(resourceMesh->vertices[resourceMesh->indices[i+2] * 11], resourceMesh->vertices[resourceMesh->indices[i+2] * 11 + 1],
-				      resourceMesh->vertices[resourceMesh->indices[i+2] * 11 + 2]);
+			float3 v3(resourceMesh->vertices[resourceMesh->indices[i+2] * VERTEX_ATTRIBUTES], resourceMesh->vertices[resourceMesh->indices[i+2] * VERTEX_ATTRIBUTES + 1],
+				      resourceMesh->vertices[resourceMesh->indices[i+2] * VERTEX_ATTRIBUTES + 2]);
 
 			const Triangle triangle(v1, v2, v3);
 

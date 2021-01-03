@@ -132,45 +132,55 @@ void ShaderImporter::GetUniforms(GLuint program, ResourceShader* shader)
 	{
 		Uniform uniform;
 		GLsizei length;
-		GLchar name[16];
-		glGetActiveUniform(program, (GLuint)i, 16, &length, &uniform.size, &uniform.type, name);
+		GLchar name[64];
+		glGetActiveUniform(program, (GLuint)i, 64, &length, &uniform.size, &uniform.type, name);
 
 		uniform.name = name;
 
-		if (uniform.name != "model_matrix" && uniform.name != "projection" &&
-			uniform.name != "view" && uniform.name != "time")
+		if (uniform.type == GL_FLOAT || uniform.type == GL_INT) 
 		{
-			if (uniform.type == GL_FLOAT || uniform.type == GL_INT)
-				uniform.uniformType = UniformType::NUMBER;
-
-			else if (uniform.type == GL_BOOL)
-				uniform.uniformType = UniformType::BOOLEAN;
-
-			else if (uniform.type == GL_FLOAT_VEC2 || uniform.type == GL_INT_VEC2 || uniform.type == GL_DOUBLE_VEC2)
-				uniform.uniformType = UniformType::VEC_2;
-
-			else if (uniform.type == GL_FLOAT_VEC3 || uniform.type == GL_INT_VEC3 || uniform.type == GL_DOUBLE_VEC3)
-				uniform.uniformType = UniformType::VEC_3;
-
-			else if (uniform.type == GL_FLOAT_VEC4 || uniform.type == GL_INT_VEC4 || uniform.type == GL_DOUBLE_VEC4)
-				uniform.uniformType = UniformType::VEC_4;
-
-			else if (uniform.type == GL_SAMPLER_2D)
-				uniform.uniformType = UniformType::TEXTURE;
-
-			else 
-				uniform.uniformType = UniformType::UNKNOWN;
-
-			std::map<std::string, Uniform>::iterator it;
-			it = shader->uniforms.find(uniform.name);
-
-			if (it != shader->uniforms.end()) {
-				uniform = shader->uniforms[uniform.name];
-			}
-			
-			uniforms.push_back(uniform);
+			uniform.uniformType = UniformType::NUMBER;
+			uniform.number = 0.0f;
 		}
+
+		else if (uniform.type == GL_BOOL) {
+			uniform.uniformType = UniformType::BOOLEAN;
+			uniform.boolean = false;
+		}
+
+		else if (uniform.type == GL_FLOAT_VEC2 || uniform.type == GL_INT_VEC2 || uniform.type == GL_DOUBLE_VEC2) {
+			uniform.uniformType = UniformType::VEC_2;
+			uniform.vec2 = float2().zero;
+		}
+
+		else if (uniform.type == GL_FLOAT_VEC3 || uniform.type == GL_INT_VEC3 || uniform.type == GL_DOUBLE_VEC3) {
+			uniform.uniformType = UniformType::VEC_3;
+			uniform.vec3 = float3().zero;
+		}
+
+		else if (uniform.type == GL_FLOAT_VEC4 || uniform.type == GL_INT_VEC4 || uniform.type == GL_DOUBLE_VEC4) {
+			uniform.uniformType = UniformType::VEC_4;
+			uniform.vec4 = float4().zero;
+		}
+
+		else if (uniform.type == GL_SAMPLER_2D)
+			uniform.uniformType = UniformType::TEXTURE;
+
+		else 
+			uniform.uniformType = UniformType::UNKNOWN;
+
+		std::map<std::string, Uniform>::iterator it;
+		it = shader->uniforms.find(uniform.name);
+
+		if (it != shader->uniforms.end()) {
+			uniform = shader->uniforms[uniform.name];
+		}
+			
+		uniforms.push_back(uniform);
+		
 	}
+
+	shader->uniforms.clear();
 
 	for (size_t i = 0; i < uniforms.size(); i++)
 	{

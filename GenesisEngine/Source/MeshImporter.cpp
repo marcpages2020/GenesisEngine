@@ -46,7 +46,7 @@ void MeshImporter::Import(const aiMesh* aimesh, ResourceMesh* mesh)
 
 	//vertex copying
 	mesh->vertices_amount = aimesh->mNumVertices;
-	mesh->vertices = new float[mesh->vertices_amount * 11];
+	mesh->vertices = new float[mesh->vertices_amount * VERTEX_ATTRIBUTES];
 
 	//LOG("%s imported with %d vertices", aimesh->mName.C_Str(), mesh->vertices_amount);
 
@@ -54,49 +54,63 @@ void MeshImporter::Import(const aiMesh* aimesh, ResourceMesh* mesh)
 	for (size_t v = 0; v < aimesh->mNumVertices; v++)
 	{
 		//vertices copying
-		mesh->vertices[v * 11] = aimesh->mVertices[v].x;
-		mesh->vertices[v * 11 + 1] = aimesh->mVertices[v].y;
-		mesh->vertices[v * 11 + 2] = aimesh->mVertices[v].z;
+		mesh->vertices[v * VERTEX_ATTRIBUTES] = aimesh->mVertices[v].x;
+		mesh->vertices[v * VERTEX_ATTRIBUTES + 1] = aimesh->mVertices[v].y;
+		mesh->vertices[v * VERTEX_ATTRIBUTES + 2] = aimesh->mVertices[v].z;
 
 		//color copying
 		if (aimesh->HasVertexColors(v))
 		{
-			mesh->vertices[v * 11 + 3] = aimesh->mColors[v]->r;
-			mesh->vertices[v * 11 + 4] = aimesh->mColors[v]->g;
-			mesh->vertices[v * 11 + 5] = aimesh->mColors[v]->b;
+			mesh->vertices[v * VERTEX_ATTRIBUTES + 3] = aimesh->mColors[v]->r;
+			mesh->vertices[v * VERTEX_ATTRIBUTES + 4] = aimesh->mColors[v]->g;
+			mesh->vertices[v * VERTEX_ATTRIBUTES + 5] = aimesh->mColors[v]->b;
 		}
 		else
 		{
-			mesh->vertices[v * 11 + 3] = 0.0f;
-			mesh->vertices[v * 11 + 4] = 0.0f;
-			mesh->vertices[v * 11 + 5] = 0.0f;
+			mesh->vertices[v * VERTEX_ATTRIBUTES + 3] = 0.0f;
+			mesh->vertices[v * VERTEX_ATTRIBUTES + 4] = 0.0f;
+			mesh->vertices[v * VERTEX_ATTRIBUTES + 5] = 0.0f;
+		}
+
+		if (aimesh->mTextureCoords[0])
+		{
+			//texcoords copying
+			mesh->vertices[v * VERTEX_ATTRIBUTES + 6] = aimesh->mTextureCoords[0][v].x;
+			mesh->vertices[v * VERTEX_ATTRIBUTES + 7] = aimesh->mTextureCoords[0][v].y;
+
+			//tangets copying
+			if (aimesh->mTangents != nullptr)
+			{
+				mesh->vertices[v * VERTEX_ATTRIBUTES + 11] = aimesh->mTangents[v].x;
+				mesh->vertices[v * VERTEX_ATTRIBUTES + 12] = aimesh->mTangents[v].y;
+				mesh->vertices[v * VERTEX_ATTRIBUTES + 13] = aimesh->mTangents[v].z;
+			}
+		}
+		else
+		{
+			//texcoords copying
+			mesh->vertices[v * VERTEX_ATTRIBUTES + 6] = 0.0f;
+			mesh->vertices[v * VERTEX_ATTRIBUTES + 7] = 0.0f;
+
+			//tangets copying
+			mesh->vertices[v * VERTEX_ATTRIBUTES + 11] = 0.0f;
+			mesh->vertices[v * VERTEX_ATTRIBUTES + 12] = 0.0f;
+			mesh->vertices[v * VERTEX_ATTRIBUTES + 13] = 0.0f;
 		}
 
 		//normal copying
 		if (aimesh->HasNormals())
 		{
 			//normal copying
-			mesh->vertices[v * 11 + 6] = aimesh->mNormals[v].x;
-			mesh->vertices[v * 11 + 7] = aimesh->mNormals[v].y;
-			mesh->vertices[v * 11 + 8] = aimesh->mNormals[v].z;
+			mesh->vertices[v * VERTEX_ATTRIBUTES + 8] = aimesh->mNormals[v].x;
+			mesh->vertices[v * VERTEX_ATTRIBUTES + 9] = aimesh->mNormals[v].y;
+			mesh->vertices[v * VERTEX_ATTRIBUTES + 10] = aimesh->mNormals[v].z;
 		}
 		else
 		{
-			mesh->vertices[v * 11 + 6] = 0.0f;
-			mesh->vertices[v * 11 + 7] = 0.0f;
-			mesh->vertices[v * 11 + 8] = 0.0f;
-		}
-
-		//texcoords copying
-		if (aimesh->mTextureCoords[0])
-		{
-			mesh->vertices[v * 11 + 9] = aimesh->mTextureCoords[0][v].x;
-			mesh->vertices[v * 11 + 10] = aimesh->mTextureCoords[0][v].y;
-		}
-		else
-		{
-			mesh->vertices[v * 11 + 9] = 0.0f;
-			mesh->vertices[v * 11 + 10] = 0.0f;
+			mesh->vertices[v * VERTEX_ATTRIBUTES + 8] = 0.0f;
+			mesh->vertices[v * VERTEX_ATTRIBUTES + 9] = 0.0f;
+			mesh->vertices[v * VERTEX_ATTRIBUTES + 10] = 0.0f;
 		}
 	}
 
@@ -108,7 +122,7 @@ uint64 MeshImporter::Save(ResourceMesh* mesh, char** fileBuffer)
 	
 	uint ranges[2] = { mesh->indices_amount, mesh->vertices_amount }; // mesh->normals_amount
 
-	uint size = sizeof(ranges) + sizeof(uint) * mesh->indices_amount + sizeof(float) * mesh->vertices_amount * 11;
+	uint size = sizeof(ranges) + sizeof(uint) * mesh->indices_amount + sizeof(float) * mesh->vertices_amount * VERTEX_ATTRIBUTES;
 
 	char* buffer = new char[size];
 	char* cursor = buffer;
@@ -123,7 +137,7 @@ uint64 MeshImporter::Save(ResourceMesh* mesh, char** fileBuffer)
 	cursor += bytes;
 
 	//store vertices
-	bytes = sizeof(float) * mesh->vertices_amount * 11;
+	bytes = sizeof(float) * mesh->vertices_amount * VERTEX_ATTRIBUTES;
 	memcpy(cursor, mesh->vertices, bytes);
 	//cursor += bytes;
 
@@ -157,8 +171,8 @@ bool MeshImporter::Load(char* fileBuffer, ResourceMesh* mesh, uint size)
 	cursor += bytes;
 
 	//load vertices
-	bytes = sizeof(float) * mesh->vertices_amount * 11;
-	mesh->vertices = new float[mesh->vertices_amount * 11];
+	bytes = sizeof(float) * mesh->vertices_amount * VERTEX_ATTRIBUTES;
+	mesh->vertices = new float[mesh->vertices_amount * VERTEX_ATTRIBUTES];
 	memcpy(mesh->vertices, cursor, bytes);
 	//cursor += bytes;
 

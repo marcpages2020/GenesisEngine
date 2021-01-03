@@ -61,6 +61,8 @@ public:
 	void Use();
 
 	void SetUniforms();
+	void UpdateUniforms(float4x4 globalTransform);
+	bool IsDefaultUniform(const char* uniform_name);
 
 	void SetBool(const char* name, bool value);
 	void SetInt(const char* name, int value);

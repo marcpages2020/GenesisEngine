@@ -1,6 +1,8 @@
 #pragma once
 #include "Resource.h"
 
+#define VERTEX_ATTRIBUTES 14
+
 class GnJSONObj;
 
 class ResourceMesh : public Resource

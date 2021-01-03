@@ -1,27 +1,118 @@
 #version 330 core
-in vec3 ourColor;
-in vec2 TexCoord;
-in vec3 FragPos;
-
 out vec4 color;
 
 uniform sampler2D ourTexture;
+uniform vec3 cameraPosition;
 uniform float time;
 
 uniform float contrast;
+uniform float speed;
 in float relative_position;
+in vec3 Normal;
 
+in VS_OUT{
+  vec3 FragPos;
+  vec2 TexCoords;
+  vec3 TangentLightPos;
+  vec3 TangentViewPos;
+  vec3 TangentFragPos;
+} fs_in;
+
+vec2 rand2( vec2 coord ) {
+  coord = mod(coord, 10000.0);
+  return fract(sin(vec2(dot(coord,vec2(127.1,311.7)),dot(coord,vec2(269.5,183.3))))*43758.5453);
+}
+
+float cellular_noise(vec2 coord){
+  vec2 i = floor(coord);
+  vec2 f = fract(coord);
+  
+  float min_dist = 99999.0;
+  
+  for(float x = -1.0; x <= 1.0; x++)
+  {
+    for(float y = -1.0; y <= 1.0; y++)
+    {
+      vec2 node = rand2(i + vec2(x,y)) + vec2(x,y);
+      float dist = sqrt((f-node).x * (f-node).x + (f - node).y * (f - node).y);
+      
+      min_dist = min(min_dist, dist);
+    }  
+  }
+  
+  return min_dist;
+}
+
+float fbm(vec2 coord) {
+ int octaves = 4;
+ 
+ float normalize_factor = 0.0;
+ float value = 0.0;
+ float scale = 0.5;
+ 
+ for(int i = 0; i < octaves; i++){
+  value += cellular_noise(coord) * scale;
+  normalize_factor += scale;
+  coord *= 2.0;
+  scale *= 0.5;
+ }
+ 
+ return value / normalize_factor;
+}
 
 void main()
 {
-    vec3 ambient_color = vec3(0.1, 0.275, 0.4);
-    vec4 texture =  texture(ourTexture, TexCoord);
+    vec2 coord = fs_in.FragPos.xz * 2.0; // * (2.0 + sin(time) * 0.5);
+    float value = fbm(coord);   
     
-    float shiny = relative_position * contrast;
-    color = texture;
+    vec3 lightPos = vec3(0.1, 1.0, 0.1);
+    vec3 lightColor = vec3(1.0);
     
-    color.rgb += ambient_color + shiny;
+    vec3 objectColor = vec3(0.1, 0.5, 0.9);
+    
+    // ambient
+    float ambientStrength = 0.5;
+    vec3 ambient = ambientStrength * lightColor;
+  	
+    // diffuse 
+    vec3 norm = normalize(Normal);
+    vec3 lightDir = normalize(lightPos - fs_in.FragPos);
+    float diff = max(dot(norm, lightDir), 0.0);
+    vec3 diffuse = diff * lightColor;
+    
+    // specular
+    float specularStrength = 0.5;
+    vec3 viewDir = normalize(cameraPosition - fs_in.FragPos);
+    vec3 reflectDir = reflect(-lightDir, norm);  
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+    vec3 specular = specularStrength * spec * lightColor;  
+        
+    vec3 result = (ambient + diffuse + specular) * objectColor;
+    result += max(value, 0.05) * 0.5;
+    
+    vec3 fNormal = Normal;
+    fNormal += value;
+    color = vec4(fNormal, 1.0);
+    
+    vec3 normal = texture(ourTexture, fs_in.TexCoords).rgb;
+    normal =normalize(normal * 2.0 - 1.0);
+    
+    color.rgb = normal;
+    //color += texture;
 } 
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -70,14 +70,14 @@ void GnMesh::GenerateAABB()
 	
 	for (size_t i = 0; i < _resource->vertices_amount; i++)
 	{
-		vertices[i].x = _resource->vertices[i * 11];
-		vertices[i].y = _resource->vertices[i * 11 + 1];
-		vertices[i].z = _resource->vertices[i * 11 + 2];
+		vertices[i].x = _resource->vertices[i * VERTEX_ATTRIBUTES];
+		vertices[i].y = _resource->vertices[i * VERTEX_ATTRIBUTES + 1];
+		vertices[i].z = _resource->vertices[i * VERTEX_ATTRIBUTES + 2];
 	}
 
 	_AABB.Enclose(vertices, _resource->vertices_amount);
 
-	delete vertices;
+	delete[] vertices;
 }
 
 AABB GnMesh::GetAABB()
@@ -192,19 +192,34 @@ void GnMesh::OnEditor()
 
 void GnMesh::DrawVertexNormals()
 {
-	float normal_lenght = 0.5f;
+	float normal_lenght = _gameObject->GetTransform()->GetGlobalTransform().GetScale().AverageOfElements();
+
+	float4x4 globalMatrix = _gameObject->GetTransform()->GetGlobalTransform();
+	float4x4 normalMatrix = globalMatrix;
 
 	//vertices normals
 	glBegin(GL_LINES);
 	for (size_t i = 0; i < _resource->vertices_amount; i++)
 	{
-		glColor3f(0.0f, 0.85f, 0.85f);
 
-		glVertex3f(_resource->vertices[i * 11], _resource->vertices[i * 11 + 1], _resource->vertices[i * 11 + 2]);
+		float4 vertex = float4(_resource->vertices[i * VERTEX_ATTRIBUTES], _resource->vertices[i * VERTEX_ATTRIBUTES + 1], _resource->vertices[i * VERTEX_ATTRIBUTES + 2], 1.0f);
+		vertex = globalMatrix.Mul(vertex);
 
-		glVertex3f(_resource->vertices[i * 11]     + (_resource->vertices[i * 11 + 6] * normal_lenght),
-			       _resource->vertices[i * 11 + 1] + (_resource->vertices[i * 11 + 7] * normal_lenght),
-			       _resource->vertices[i * 11 + 2] + (_resource->vertices[i * 11 + 8]) * normal_lenght);
+		float4 normal = float4(_resource->vertices[i * VERTEX_ATTRIBUTES + 8], _resource->vertices[i * VERTEX_ATTRIBUTES + 8], _resource->vertices[i * VERTEX_ATTRIBUTES + 8], 1.0f);
+		normalMatrix = globalMatrix;
+		normalMatrix.Inverse();
+		normalMatrix.Transpose();
+		normal = normalMatrix.Mul(normal) * normal_lenght;
+
+		normal = normal.Normalized3();
+
+		glColor3f(0.0f, 1.0f, 0.0f);
+
+		glVertex3f(vertex.x, vertex.y, vertex.z);
+
+		glVertex3f(vertex.x + (normal.x * normal_lenght),
+				   vertex.y + (normal.y * normal_lenght),
+			       vertex.z + (normal.z * normal_lenght));
 	}
 	
 	glColor3f(1.0f, 1.0f, 1.0f);
@@ -279,4 +294,3 @@ void GnGrid::Render()
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
-
