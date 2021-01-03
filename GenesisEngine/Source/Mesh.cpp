@@ -195,7 +195,9 @@ void GnMesh::DrawVertexNormals()
 	float normal_lenght = _gameObject->GetTransform()->GetGlobalTransform().GetScale().AverageOfElements();
 
 	float4x4 globalMatrix = _gameObject->GetTransform()->GetGlobalTransform();
-	float4x4 normalMatrix = globalMatrix;
+	float3x3 normalMatrix = globalMatrix.Float3x3Part();
+	normalMatrix.Inverse();
+	normalMatrix.Transpose();
 
 	//vertices normals
 	glBegin(GL_LINES);
@@ -205,13 +207,10 @@ void GnMesh::DrawVertexNormals()
 		float4 vertex = float4(_resource->vertices[i * VERTEX_ATTRIBUTES], _resource->vertices[i * VERTEX_ATTRIBUTES + 1], _resource->vertices[i * VERTEX_ATTRIBUTES + 2], 1.0f);
 		vertex = globalMatrix.Mul(vertex);
 
-		float4 normal = float4(_resource->vertices[i * VERTEX_ATTRIBUTES + 8], _resource->vertices[i * VERTEX_ATTRIBUTES + 8], _resource->vertices[i * VERTEX_ATTRIBUTES + 8], 1.0f);
-		normalMatrix = globalMatrix;
-		normalMatrix.Inverse();
-		normalMatrix.Transpose();
+		float3 normal = float3(_resource->vertices[i * VERTEX_ATTRIBUTES + 8], _resource->vertices[i * VERTEX_ATTRIBUTES + 9], _resource->vertices[i * VERTEX_ATTRIBUTES + 10]);
 		normal = normalMatrix.Mul(normal) * normal_lenght;
 
-		normal = normal.Normalized3();
+		normal = normal.Normalized();
 
 		glColor3f(0.0f, 1.0f, 0.0f);
 

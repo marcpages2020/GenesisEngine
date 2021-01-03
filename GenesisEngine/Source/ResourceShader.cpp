@@ -230,10 +230,10 @@ void ResourceShader::UpdateUniforms(float4x4 globalTransform)
 			SetFloat("time", Time::realClock.timeSinceStartup());
 		}
 		else if (it->second.name == "normalMatrix") {
-			float4x4 normalMatrix = globalTransform;
+			float3x3 normalMatrix = globalTransform.Float3x3Part();
 			normalMatrix.Inverse();
 			normalMatrix.Transpose();
-			SetMat4("normalMatrix", normalMatrix.ptr());
+			SetMat3("normalMatrix", normalMatrix.ptr());
 		}
 		else if (it->second.name == "cameraPosition") {
 			float3 cameraPosition = App->camera->GetPosition();
@@ -306,6 +306,13 @@ void ResourceShader::SetVec4(const char* name, float x, float y, float z, float 
 	GLint variableLoc = glGetUniformLocation(id, name);
 
 	glUniform4f(variableLoc, (GLfloat)x, (GLfloat)y, (GLfloat)z, (GLfloat)w);
+}
+
+void ResourceShader::SetMat3(const char* name, float* matrix)
+{
+	GLint variableLoc = glGetUniformLocation(id, name);
+
+	glUniformMatrix3fv(variableLoc, 1, GL_FALSE, matrix);
 }
 
 void ResourceShader::SetMat4(const char* name, float* matrix)

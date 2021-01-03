@@ -1,5 +1,5 @@
 #version 330 core
-out vec4 color;
+out vec4 FragColor;
 
 uniform sampler2D ourTexture;
 uniform vec3 cameraPosition;
@@ -10,12 +10,12 @@ uniform float speed;
 in float relative_position;
 in vec3 Normal;
 
-in VS_OUT{
-  vec3 FragPos;
-  vec2 TexCoords;
-  vec3 TangentLightPos;
-  vec3 TangentViewPos;
-  vec3 TangentFragPos;
+in VS_OUT {
+    vec3 FragPos;
+    vec2 TexCoords;
+    vec3 TangentLightPos;
+    vec3 TangentViewPos;
+    vec3 TangentFragPos;
 } fs_in;
 
 vec2 rand2( vec2 coord ) {
@@ -62,44 +62,44 @@ float fbm(vec2 coord) {
 
 void main()
 {
-    vec2 coord = fs_in.FragPos.xz * 2.0; // * (2.0 + sin(time) * 0.5);
+    vec2 coord = fs_in.FragPos.xz * 3.0;
     float value = fbm(coord);   
     
-    vec3 lightPos = vec3(0.1, 1.0, 0.1);
-    vec3 lightColor = vec3(1.0);
+    vec3 normal = texture(ourTexture, fs_in.TexCoords).rgb;
+    normal = normalize(normal * 2.0 - 1.0);
     
-    vec3 objectColor = vec3(0.1, 0.5, 0.9);
+    //diffuse color
+    vec3 color = vec3(0.1, 0.45, 0.65);
     
-    // ambient
-    float ambientStrength = 0.5;
-    vec3 ambient = ambientStrength * lightColor;
+    //ambient 
+    float ambientStrength = 0.2;
+    vec3 ambient = ambientStrength * color;
   	
     // diffuse 
-    vec3 norm = normalize(Normal);
-    vec3 lightDir = normalize(lightPos - fs_in.FragPos);
-    float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = diff * lightColor;
+    vec3 lightDir = normalize(fs_in.TangentLightPos - fs_in.TangentFragPos);
+    float diff = max(dot(lightDir, normal), 0.0);
+    vec3 diffuse = diff * color;
     
     // specular
-    float specularStrength = 0.5;
-    vec3 viewDir = normalize(cameraPosition - fs_in.FragPos);
-    vec3 reflectDir = reflect(-lightDir, norm);  
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
-    vec3 specular = specularStrength * spec * lightColor;  
-        
-    vec3 result = (ambient + diffuse + specular) * objectColor;
-    result += max(value, 0.05) * 0.5;
+    vec3 viewDir = normalize(fs_in.TangentViewPos - fs_in.TangentFragPos);
+    vec3 reflectDir = reflect(-lightDir, normal);
+    vec3 halfwayDir = normalize(lightDir + viewDir);  
+    float spec = pow(max(dot(normal, halfwayDir), 0.0), 64.0);
     
-    vec3 fNormal = Normal;
-    fNormal += value;
-    color = vec4(fNormal, 1.0);
-    
-    vec3 normal = texture(ourTexture, fs_in.TexCoords).rgb;
-    normal =normalize(normal * 2.0 - 1.0);
-    
-    color.rgb = normal;
-    //color += texture;
+    vec3 specular = vec3(0.4) * spec;    
+	FragColor = vec4(ambient + diffuse + specular, 1.0);
+	
+	//if(relative_position > 0)
+	FragColor += value * (relative_position * relative_position * 0.25);
+	//FragColor = vec4(vec3(value), 1.0);
+	//FragColor += value * relative_position;
 } 
+
+
+
+
+
+
 
 
 

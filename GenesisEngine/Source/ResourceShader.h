@@ -70,6 +70,7 @@ public:
 	void SetVec2(const char* name, float x, float y);
 	void SetVec3(const char* name, float x, float y, float z);
 	void SetVec4(const char* name, float x, float y, float z, float w);
+	void SetMat3(const char* name, float* matrix);
 	void SetMat4(const char* name, float* matrix);
 
 public:
