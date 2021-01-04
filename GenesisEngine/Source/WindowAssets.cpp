@@ -31,7 +31,8 @@ bool WindowAssets::Init()
 void WindowAssets::Draw()
 {
 	if (ImGui::Begin("Assets", &visible)) 
-	{
+	{		
+		//Left window part ------------------------------------------------------------------------------------------------------------------------
         ImGuiWindowFlags window_flags = ImGuiWindowFlags_AlwaysVerticalScrollbar;
         ImGui::BeginChild("Tree", ImVec2(ImGui::GetWindowContentRegionWidth() * 0.15f, ImGui::GetContentRegionAvail().y), false, window_flags);
 		if (ImGui::TreeNodeEx("Assets", ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -46,12 +47,18 @@ void WindowAssets::Draw()
 			App->resources->CheckAssetsRecursive("Assets");
         ImGui::EndChild();
 
+		//Right window part ------------------------------------------------------------------------------------------------------------------------
 		ImGui::SameLine();
         ImGui::BeginChild("Folder", ImVec2(0, ImGui::GetContentRegionAvail().y), true);
 		ImGui::Columns(1);
+
+		//Path Buttons
 		DrawPathButtons();
+
 		ImGui::Spacing();
 		ImGui::Spacing();
+
+		//Current Folder
 		DrawCurrentFolder();
         ImGui::EndChild();
 	}
@@ -183,7 +190,61 @@ void WindowAssets::DrawCurrentFolder()
 			ImGui::NextColumn();
 			icons_drawn++;
 		}
+
 		ImGui::Columns(1);
+
+		if (ImGui::IsMouseClicked(1) && ImGui::IsWindowHovered())
+			ImGui::OpenPopup("Create New Item");
+
+		if (ImGui::BeginPopup("Create New Item"))
+		{
+			if (ImGui::BeginMenu("Create"))
+			{
+				static char material_buf[32] = "New Material";
+				static char shader_name[32] = "New Shader";
+	
+				/*
+				if (ImGui::BeginMenu("Material"))
+				{
+					ImGui::InputText("Name", material_buf, IM_ARRAYSIZE(material_buf));
+					ImGui::Button("Done");
+					ImGui::SameLine();
+					if (ImGui::Button("Cancel"))
+						ImGui::CloseCurrentPopup();
+
+					ImGui::EndMenu();
+				}
+				*/
+
+				if (ImGui::BeginMenu("Shader")) 
+				{
+					ImGui::InputText("Name", shader_name, IM_ARRAYSIZE(shader_name));
+					ImGui::Text("Vertex Shader: %s/%s.vert", current_folder.c_str(), shader_name);
+					ImGui::Text("Fragment Shader: %s/%s.frag", current_folder.c_str(), shader_name);
+
+					if (ImGui::Button("Done"))
+					{
+						char shader_buf[64];
+						sprintf_s(shader_buf, 64, "%s/%s", current_folder.c_str(), shader_name);
+						App->resources->CreateNewResource(RESOURCE_SHADER, shader_name, shader_buf);
+						sprintf_s(shader_name, 32, "New Shader");
+						ImGui::CloseCurrentPopup();
+					}
+
+					ImGui::SameLine();
+					if (ImGui::Button("Cancel"))
+					{
+						sprintf_s(shader_name, 32, "New Shader");
+						ImGui::CloseCurrentPopup();
+					}
+
+					ImGui::EndMenu();
+				}
+
+				ImGui::EndMenu();
+			}
+			ImGui::EndPopup();
+		}
 	}
 }
 

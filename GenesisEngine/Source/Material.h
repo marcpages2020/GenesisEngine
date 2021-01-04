@@ -9,6 +9,7 @@ class ResourceMaterial;
 class ResourceTexture;
 class ResourceShader;
 class GnJSONArray;
+enum class TextureType;
 
 class Material : public Component {
 public: 
@@ -24,7 +25,7 @@ public:
 	void Load(GnJSONObj& load_object) override;
 
 	void OnEditor() override;
-	ResourceTexture* DrawTextureInformation(ResourceTexture* texture);
+	ResourceTexture* DrawTextureInformation(ResourceTexture* texture, TextureType type);
 
 	void SetTexture(ResourceTexture* texture);
 	void AssignCheckersImage();

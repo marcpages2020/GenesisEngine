@@ -9,11 +9,14 @@ public:
 	WindowShaderEditor();
 	~WindowShaderEditor();
 
+	bool Init();
 	void Open(const char* assets_file_path);
 	void Draw() override;
 	void DrawEditor(TextEditor& editor, char* path);
 
 private:
+	int text_size;
+
 	char vertexShaderPath[128];
 	char fragmentShaderPath[128];
 

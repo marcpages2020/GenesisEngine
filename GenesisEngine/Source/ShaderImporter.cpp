@@ -281,3 +281,37 @@ void ShaderImporter::RecompileShader(const char* vertexShaderPath, const char* f
 	RELEASE_ARRAY(fragmentShaderBuffer);
 	RELEASE_ARRAY(buffer);
 }
+
+void ShaderImporter::CreateShaderAsset(const char* asset_path)
+{
+	std::string vertex_shader_path = asset_path;
+	vertex_shader_path.append(".vert");
+
+	const char* vertexShaderSource = "#version 330 core\n"
+		"layout (location = 0) in vec3 position;\n"
+		"layout (location = 1) in vec3 color;\n"
+		"layout (location = 2) in vec3 texCoord;\n"
+		"layout (location = 3) in vec3 normal;\n"
+		"layout (location = 4) in vec3 tangent;\n"
+		"uniform mat4 model_matrix;\n"
+		"uniform mat4 view;\n"
+		"uniform mat4 projection;\n"
+		"void main()\n"
+		"{\n"
+		"gl_Position = projection * view * model_matrix * vec4(position, 1.0f);\n"
+		"}\0";
+	
+	FileSystem::Save(vertex_shader_path.c_str(), vertexShaderSource, strlen(vertexShaderSource));
+
+	std::string fragment_shader_path = asset_path;
+	fragment_shader_path.append(".frag");
+
+	const char* fragmentShaderSource = "#version 330 core\n"
+		"out vec4 FragColor;\n"
+		"void main()\n"
+		"{\n"
+		"   FragColor = vec4(0.5f, 0.5f, 0.5f, 1.0f);\n"
+		"}\0";
+
+	FileSystem::Save(fragment_shader_path.c_str(), fragmentShaderSource, strlen(fragmentShaderSource));
+}

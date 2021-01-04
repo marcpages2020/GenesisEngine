@@ -107,13 +107,12 @@ void Material::UseShader()
 	//diffuse map
 	if (checkers_image == false)
 	{
-		shader->SetInt("diffuseMap", 0);
-		glActiveTexture(GL_TEXTURE0);
 
 		if (_resource->diffuseMap != nullptr)
 		{
+			shader->SetInt("diffuseMap", 0);
+			glActiveTexture(GL_TEXTURE0);
 			BindTexture(_resource->diffuseMap);
-			_resource->diffuseMap->texture_type = ResourceTexture::DIFFUSE_MAP;
 		}
 	}
 	else
@@ -124,13 +123,11 @@ void Material::UseShader()
 	//normal map
 	if (_resource->normalMap != nullptr)
 	{
-		shader->SetInt("normalMap", 1);
-		glActiveTexture(GL_TEXTURE1);
-
 		if (_resource->normalMap != nullptr)
 		{
+			shader->SetInt("normalMap", 1);
+			glActiveTexture(GL_TEXTURE1);
 			BindTexture(_resource->normalMap);
-			_resource->normalMap->texture_type = ResourceTexture::NORMAL_MAP;
 		}
 	}
 
@@ -179,11 +176,11 @@ void Material::OnEditor()
 
 		ImGui::Separator();
 
-		_resource->diffuseMap = DrawTextureInformation(_resource->diffuseMap);
+		_resource->diffuseMap = DrawTextureInformation(_resource->diffuseMap, TextureType::DIFFUSE_MAP);
 
 		ImGui::Separator();
 
-		_resource->normalMap = DrawTextureInformation(_resource->normalMap);
+		_resource->normalMap = DrawTextureInformation(_resource->normalMap, TextureType::NORMAL_MAP);
 
 		ImGui::Spacing();
 		ImGui::Separator();
@@ -219,14 +216,14 @@ void Material::OnEditor()
 	}
 }
 
-ResourceTexture* Material::DrawTextureInformation(ResourceTexture* texture)
+ResourceTexture* Material::DrawTextureInformation(ResourceTexture* texture, TextureType type)
 {
 	if (texture != nullptr)
 	{
-		if (_resource->diffuseMapID == texture->GetID())
-			ImGui::Text("Diffuse Texture: %s", texture->assetsFile.c_str());
-		else if (_resource->normalMapID == texture->GetID())
-			ImGui::Text("Normal Map: %s", texture->assetsFile.c_str());
+		if (type == TextureType::DIFFUSE_MAP)
+			ImGui::Text("Diffuse Texture: %s", texture->name.c_str());
+		else if (type == TextureType::NORMAL_MAP)
+			ImGui::Text("Normal Map: %s", texture->name.c_str());
 
 		ImGui::Text("Width: %d Height: %d", texture->GetWidth(), texture->GetHeight());
 	}
@@ -254,6 +251,7 @@ ResourceTexture* Material::DrawTextureInformation(ResourceTexture* texture)
 
 			if (possible_texture->GetType() == ResourceType::RESOURCE_TEXTURE) {
 				texture = dynamic_cast<ResourceTexture*>(possible_texture);
+				texture->type = type;
 			}
 		}
 		ImGui::EndDragDropTarget();
@@ -264,9 +262,9 @@ ResourceTexture* Material::DrawTextureInformation(ResourceTexture* texture)
 		ImGui::SameLine();
 
 		std::string button_text;
-		if (texture->texture_type == texture->DIFFUSE_MAP)
+		if (type == TextureType::DIFFUSE_MAP)
 			button_text = "Remove Diffuse Map";
-		else if (texture->texture_type == texture->NORMAL_MAP)
+		else if (type == TextureType::NORMAL_MAP)
 			button_text = "Remove Normal Map";
 
 		if (ImGui::Button(button_text.c_str()))
@@ -274,6 +272,13 @@ ResourceTexture* Material::DrawTextureInformation(ResourceTexture* texture)
 			App->resources->ReleaseResource(texture->GetUID());
 			texture = nullptr;
 		}
+	}
+
+	if (texture != nullptr)
+	{
+		ImGui::Spacing();
+		ImGui::Text("Assets path: %s", texture->assetsFile.c_str());
+		ImGui::Text("Library path: %s", texture->libraryFile.c_str());
 	}
 
 	return texture;

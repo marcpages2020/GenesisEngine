@@ -9,6 +9,7 @@ uniform mat3 normalMatrix;
 uniform mat4 model_matrix;
 uniform mat4 view;
 uniform mat4 projection;
+uniform vec3 cameraPosition;
 
 uniform float time;
 uniform float speed;
@@ -30,7 +31,6 @@ out VS_OUT {
 } vs_out;
 
 uniform vec3 lightPos;
-uniform vec3 cameraPosition;
 
 vec3 generateWave(float amp, vec3 direction, float num_waves, float steepness, float phase_constant, float w);
 
@@ -57,7 +57,7 @@ void main()
  
  vs_out.FragPos = vec3(model_matrix * vec4(position, 1.0));
  vs_out.TexCoords = texCoord;
-  vs_out.TexCoords.x += cos(time) * speed * 0.25;
+ vs_out.TexCoords.x += cos(time) * speed * 0.25;
  vs_out.TexCoords.y += sin(time) * speed * 0.25;
  
  vec3 T = normalize(normalMatrix * tangent);
@@ -85,6 +85,11 @@ vec3 generateWave(float amp, vec3 direction, float num_waves, float steepness,
  
  return wave;
 }
+
+
+
+
+
 
 
 

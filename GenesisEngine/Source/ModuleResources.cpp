@@ -721,12 +721,29 @@ Resource* ModuleResources::CreateResource(uint UID, ResourceType type, std::stri
 			resource->assetsFile = resources_data[UID].assetsFile;
 
 		resource->libraryFile = GenerateLibraryPath(resource);
-		resource->name = FileSystem::GetFileName(resource->assetsFile.c_str());
+		resource->name = FileSystem::GetFile(resource->assetsFile.c_str());
 
 		resources[UID] = resource;
 	}
 
 	return resource;
+}
+
+uint ModuleResources::CreateNewResource(ResourceType type, const char* name, char* assets_path)
+{
+	uint ret = 0;
+	char tmp_path[64];
+
+	switch (type)
+	{
+	case ResourceType::RESOURCE_SHADER:
+		ShaderImporter::CreateShaderAsset(assets_path);
+		sprintf_s(tmp_path, 64, "%s.vert", assets_path);
+		ret = ImportFile(tmp_path);
+		break;
+	}
+
+	return ret;
 }
 
 //Get Resource without requesting it

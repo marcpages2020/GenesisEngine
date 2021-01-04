@@ -22,6 +22,7 @@ namespace ShaderImporter
 	std::string FindPairingShader(const char* current_shader_path);
 	ShaderType GetTypeFromPath(const char* path);
 	void RecompileShader(const char* vertexShaderPath, const char* fragmentShaderPath);
+	void CreateShaderAsset(const char* asset_path); //introduce the path with the asset name included
 }
 
 #endif

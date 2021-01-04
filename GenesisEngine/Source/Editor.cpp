@@ -45,6 +45,11 @@ Editor::Editor(bool start_enabled) : Module(start_enabled)
 
 	image_size = { 0,0 };
 
+	//CONSOLE_WINDOW,
+	scene_name[0] = '\0';
+	selected_file[0] = '\0';
+	selected_folder[0] = '\0';
+
 	windows[HIERARCHY_WINDOW] = new WindowHierarchy();
 	windows[INSPECTOR_WINDOW] = new WindowInspector();
 	windows[SCENE_WINDOW] = new WindowScene();
@@ -53,11 +58,6 @@ Editor::Editor(bool start_enabled) : Module(start_enabled)
 	windows[ABOUT_WINDOW] = new WindowAbout();
 	windows[IMPORT_WINDOW] = new WindowImport();
 	windows[SHADER_EDITOR_WINDOW] = new WindowShaderEditor();
-
-	//CONSOLE_WINDOW,
-	scene_name[0] = '\0';
-	selected_file[0] = '\0';
-	selected_folder[0] = '\0';
 }
 
 Editor::~Editor() {}

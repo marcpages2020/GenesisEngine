@@ -10,17 +10,24 @@
 #include "ImGui/imgui_impl_opengl3.h"
 
 
-WindowShaderEditor::WindowShaderEditor() : EditorWindow()
+WindowShaderEditor::WindowShaderEditor() : EditorWindow(), text_size(14)
 {
 	type = WindowType::SHADER_EDITOR_WINDOW;
-
-	auto lang = TextEditor::LanguageDefinition::GLSL();
-	vertexShaderEditor.SetLanguageDefinition(lang);
-	fragmentShaderEditor.SetLanguageDefinition(lang);
 }
 
 WindowShaderEditor::~WindowShaderEditor()
 {}
+
+bool WindowShaderEditor::Init()
+{
+	bool ret = true;
+
+	auto lang = TextEditor::LanguageDefinition::GLSL();
+	vertexShaderEditor.SetLanguageDefinition(lang);
+	fragmentShaderEditor.SetLanguageDefinition(lang);
+
+	return ret;
+}
 
 void WindowShaderEditor::Open(const char* assets_file_path)
 {

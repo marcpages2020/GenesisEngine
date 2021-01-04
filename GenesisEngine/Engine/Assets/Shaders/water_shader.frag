@@ -67,14 +67,14 @@ void main()
     vec2 coord = fs_in.FragPos.xz * 3.0;
     float value = fbm(coord);   
     
-    vec3 normal = texture(normalMap, fs_in.TexCoords).rgb;
+    vec3 normal = texture(normalMap, fs_in.TexCoords * 1.5).rgb;
     normal = normalize(normal * 2.0 - 1.0);
     
     //diffuse color
-    vec3 color = vec3(0.1, 0.45, 0.65);
+    vec3 color = vec3(0.1, 0.5, 0.6);
     
     //ambient 
-    float ambientStrength = 0.5;
+    float ambientStrength = 0.55;
     vec3 ambient = ambientStrength * color;
   	
     // diffuse 
@@ -89,13 +89,14 @@ void main()
     float spec = pow(max(dot(normal, halfwayDir), 0.0), 32.0);
     
     vec3 specular = vec3(0.5) * spec;    
-	FragColor = vec4(ambient + diffuse + specular, 1.0) + value * relative_position * 0.2;
-	
-	//if(relative_position > 0)
-	//FragColor += value * (relative_position * relative_position * 0.25);
-	//FragColor = vec4(vec3(value), 1.0);
-	//FragColor += value * relative_position;
+	FragColor = vec4(ambient + diffuse + specular, 1.0);// + value * relative_position * 0.2;
+    //FragColor = vec4(normal, 1.0);
 } 
+
+
+
+
+
 
 
 

@@ -5,6 +5,13 @@
 typedef unsigned char GLubyte;
 class GnJSONObj;
 
+enum class TextureType
+{
+	DIFFUSE_MAP,
+	NORMAL_MAP,
+	UNKNOWN_MAP
+};
+
 class ResourceTexture : public Resource {
 public:
 	ResourceTexture(uint UID);
@@ -24,12 +31,7 @@ public:
 	uint GetGpuID();
 
 public:
-	enum
-	{
-		DIFFUSE_MAP,
-		NORMAL_MAP,
-		UNKNOWN_MAP
-	}texture_type = UNKNOWN_MAP;
+	TextureType type;
 
 private:
 	uint _id;

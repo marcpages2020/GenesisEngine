@@ -57,6 +57,7 @@ public:
 
 	Resource* CreateResource(const char* assetsPath, ResourceType type, uint UID = 0);
 	Resource* CreateResource(uint UID, ResourceType type, std::string assets_file = "");
+	uint CreateNewResource(ResourceType type, const char* name, char* assets_path = nullptr);
 	Resource* GetResource(uint UID);
 	Resource* RequestResource(uint UID);
 	ResourceData RequestResourceData(uint UID);

@@ -4,7 +4,7 @@
 #include "Application.h"
 
 ResourceTexture::ResourceTexture(uint UID) : Resource(UID, ResourceType::RESOURCE_TEXTURE),
-_id(0), _width(-1), _height(-1), _data(nullptr) , _gpu_ID(0)
+_id(0), _width(-1), _height(-1), _data(nullptr) , _gpu_ID(0), type(TextureType::UNKNOWN_MAP)
 {}
 
 ResourceTexture::~ResourceTexture() 
