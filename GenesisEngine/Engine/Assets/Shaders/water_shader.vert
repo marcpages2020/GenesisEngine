@@ -57,7 +57,8 @@ void main()
  
  vs_out.FragPos = vec3(model_matrix * vec4(position, 1.0));
  vs_out.TexCoords = texCoord;
- vs_out.TexCoords.xy += vec2(sin(time) * 0.1, time * 0.1);
+  vs_out.TexCoords.x += cos(time) * speed * 0.25;
+ vs_out.TexCoords.y += sin(time) * speed * 0.25;
  
  vec3 T = normalize(normalMatrix * tangent);
  vec3 N = normalize(normalMatrix * normal);
@@ -84,6 +85,8 @@ vec3 generateWave(float amp, vec3 direction, float num_waves, float steepness,
  
  return wave;
 }
+
+
 
 
 

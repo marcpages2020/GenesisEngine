@@ -123,7 +123,7 @@ void ResourceTexture::Load(GnJSONObj& base_object)
 
 uint ResourceTexture::GetID() {	return _id; }
 
-int ResourceTexture::GeWidth() { return _width; }
+int ResourceTexture::GetWidth() { return _width; }
 
 int ResourceTexture::GetHeight() {	return _height; }
 

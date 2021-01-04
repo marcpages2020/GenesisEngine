@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "Timer.h"
 #include "ResourceMaterial.h"
+#include "ResourceTexture.h"
 #include "GnJSON.h"
 #include "FileSystem.h"
 #include "Assimp/Assimp/include/material.h"
@@ -26,13 +27,15 @@ void MaterialImporter::Import(const aiMaterial* aimaterial, ResourceMaterial* ma
 		{
 			std::string meta_file = App->resources->GenerateMetaFile(file_path.c_str());
 			if (!FileSystem::Exists(meta_file.c_str()))
-				material->diffuseTextureUID = App->resources->ImportFile(file_path.c_str());
+			{
+				material->diffuseMapID = App->resources->ImportFile(file_path.c_str());
+			}
 			else 
 			{
-				material->diffuseTextureUID = App->resources->GetUIDFromMeta(meta_file.c_str());
+				material->diffuseMapID = App->resources->GetUIDFromMeta(meta_file.c_str());
 			}
 
-			if (material->diffuseTextureUID == 0)
+			if (material->diffuseMapID == 0)
 				LOG("Texture %s not found", file_path.c_str());
 		}
 
@@ -47,7 +50,7 @@ void MaterialImporter::Import(const aiMaterial* aimaterial, ResourceMaterial* ma
 uint64 MaterialImporter::Save(ResourceMaterial* material, char** fileBuffer)
 {
 	GnJSONObj base_object;
-	base_object.AddInt("diffuseTexture", material->diffuseTextureUID);
+	base_object.AddInt("diffuseMapID", material->diffuseMapID);
 
 	base_object.AddColor("diffuseColor", material->diffuseColor);
 
@@ -65,12 +68,20 @@ bool MaterialImporter::Load(const char* fileBuffer, ResourceMaterial* material, 
 	timer.Start();
 
 	GnJSONObj material_data(fileBuffer);
-	material->diffuseTextureUID = material_data.GetInt("diffuseTexture", 0);
-
-	if (material->diffuseTextureUID != 0)
-		App->resources->LoadResource(material->diffuseTextureUID, ResourceType::RESOURCE_TEXTURE);
 
 	material->diffuseColor = material_data.GetColor("diffuseColor");
+
+	//diffuse texture
+	uint diffuseTextureID = material_data.GetInt("diffuseMapID", 0);
+
+	if (diffuseTextureID != 0)
+		material->diffuseMap = dynamic_cast<ResourceTexture*>(App->resources->RequestResource(diffuseTextureID));
+
+	//normal map
+	uint normalMapID = material_data.GetInt("normalMapID", 0);
+
+	if (normalMapID != 0)
+		material->normalMap = dynamic_cast<ResourceTexture*>(App->resources->RequestResource(normalMapID));
 
 	material_data.Release();
 	return ret;

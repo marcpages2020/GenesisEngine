@@ -21,8 +21,6 @@ ResourceMesh::~ResourceMesh()
 	indices_amount = 0;
 }
 
-void ResourceMesh::Load(GnJSONObj& base_object) {}
-
 void ResourceMesh::GenerateBuffers()
 {
 	glGenVertexArrays(1, &VAO);

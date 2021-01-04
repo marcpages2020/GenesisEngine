@@ -120,6 +120,7 @@ void GnMesh::Render()
 	//App->renderer3D->DrawAABB(_AABB);
 
 	//clean buffers
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 

@@ -17,12 +17,14 @@ public:
 	~Material();
 
 	void SetResourceUID(uint UID) override;
-	void BindTexture();
+	void BindTexture(ResourceTexture* texture);
 	void UseShader();
 
 	void Save(GnJSONArray& save_array) override;
 	void Load(GnJSONObj& load_object) override;
+
 	void OnEditor() override;
+	ResourceTexture* DrawTextureInformation(ResourceTexture* texture);
 
 	void SetTexture(ResourceTexture* texture);
 	void AssignCheckersImage();
@@ -36,6 +38,5 @@ private:
 	bool colored;
 
 	ResourceMaterial* _resource;
-	ResourceTexture* _diffuseTexture;
 	uint checkersID;
 };

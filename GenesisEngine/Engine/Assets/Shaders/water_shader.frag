@@ -1,7 +1,9 @@
 #version 330 core
 out vec4 FragColor;
 
-uniform sampler2D ourTexture;
+uniform sampler2D diffuseMap;
+uniform sampler2D normalMap;
+
 uniform vec3 cameraPosition;
 uniform float time;
 
@@ -65,14 +67,14 @@ void main()
     vec2 coord = fs_in.FragPos.xz * 3.0;
     float value = fbm(coord);   
     
-    vec3 normal = texture(ourTexture, fs_in.TexCoords).rgb;
+    vec3 normal = texture(normalMap, fs_in.TexCoords).rgb;
     normal = normalize(normal * 2.0 - 1.0);
     
     //diffuse color
     vec3 color = vec3(0.1, 0.45, 0.65);
     
     //ambient 
-    float ambientStrength = 0.2;
+    float ambientStrength = 0.5;
     vec3 ambient = ambientStrength * color;
   	
     // diffuse 
@@ -84,16 +86,18 @@ void main()
     vec3 viewDir = normalize(fs_in.TangentViewPos - fs_in.TangentFragPos);
     vec3 reflectDir = reflect(-lightDir, normal);
     vec3 halfwayDir = normalize(lightDir + viewDir);  
-    float spec = pow(max(dot(normal, halfwayDir), 0.0), 64.0);
+    float spec = pow(max(dot(normal, halfwayDir), 0.0), 32.0);
     
-    vec3 specular = vec3(0.4) * spec;    
-	FragColor = vec4(ambient + diffuse + specular, 1.0);
+    vec3 specular = vec3(0.5) * spec;    
+	FragColor = vec4(ambient + diffuse + specular, 1.0) + value * relative_position * 0.2;
 	
 	//if(relative_position > 0)
-	FragColor += value * (relative_position * relative_position * 0.25);
+	//FragColor += value * (relative_position * relative_position * 0.25);
 	//FragColor = vec4(vec3(value), 1.0);
 	//FragColor += value * relative_position;
 } 
+
+
 
 
 

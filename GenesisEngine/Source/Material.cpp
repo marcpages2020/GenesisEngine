@@ -31,7 +31,7 @@ Material::Material() : Component(), checkers_image(false), _resource(nullptr), c
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-Material::Material(GameObject* gameObject) : Component(gameObject), checkers_image(false), _resource(nullptr), _diffuseTexture(nullptr)
+Material::Material(GameObject* gameObject) : Component(gameObject), checkers_image(false), _resource(nullptr)
 {
 	type = ComponentType::MATERIAL;
 
@@ -55,14 +55,20 @@ Material::~Material()
 {
 	if (_resource != nullptr)
 	{
+		if (_resource->diffuseMap != nullptr)
+		{
+			App->resources->ReleaseResource(_resource->diffuseMap->GetUID());
+			_resource->diffuseMap = nullptr;
+		}
+
+		if (_resource->normalMap != nullptr)
+		{
+			App->resources->ReleaseResource(_resource->normalMap->GetUID());
+			_resource->normalMap = nullptr;
+		}
+
 		App->resources->ReleaseResource(_resourceUID);
 		_resource = nullptr;
-
-		if (_diffuseTexture != nullptr)
-		{
-			App->resources->ReleaseResource(_diffuseTexture->GetUID());
-			_diffuseTexture = nullptr;
-		}
 	}
 
 	glDeleteTextures(1, &checkersID);
@@ -70,28 +76,16 @@ Material::~Material()
 
 void Material::SetResourceUID(uint UID)
 {
-	_resourceUID = UID;
-
+	//Release old material
 	if (_resource != nullptr)
 		App->resources->ReleaseResource(_resource->GetUID());
 
+	//Assign new material
+	_resourceUID = UID;
 	_resource = dynamic_cast<ResourceMaterial*>(App->resources->RequestResource(UID));
-
-	if (_resource->diffuseTextureUID != 0)
-	{
-		if (_diffuseTexture != nullptr)
-			App->resources->ReleaseResource(_diffuseTexture->GetUID());
-
-		_diffuseTexture = dynamic_cast<ResourceTexture*>(App->resources->RequestResource(_resource->diffuseTextureUID));
-
-		if (_diffuseTexture == nullptr)
-			AssignCheckersImage();
-	}
-	else
-		AssignCheckersImage();
 }
 
-void Material::BindTexture()
+void Material::BindTexture(ResourceTexture* texture)
 {
 	if (!App->resources->Exists(_resourceUID)) 
 	{
@@ -99,26 +93,46 @@ void Material::BindTexture()
 		_resourceUID = 0u;
 		checkers_image = true;
 	}
-	else if (!checkers_image)
+	else if(texture != nullptr)
 	{
-		if (_diffuseTexture != nullptr && App->resources->Exists(_resource->diffuseTextureUID))
-		{
-			_diffuseTexture->BindTexture();
-		}
-		else
-			AssignCheckersImage();
+		glBindTexture(GL_TEXTURE_2D, texture->GetGpuID());
 	}
-	else
-	{
-		glBindTexture(GL_TEXTURE_2D, checkersID);
-	}
+
 }
 
 void Material::UseShader()
 {
 	shader->Use();
 
-	BindTexture();
+	//diffuse map
+	if (checkers_image == false)
+	{
+		shader->SetInt("diffuseMap", 0);
+		glActiveTexture(GL_TEXTURE0);
+
+		if (_resource->diffuseMap != nullptr)
+		{
+			BindTexture(_resource->diffuseMap);
+			_resource->diffuseMap->texture_type = ResourceTexture::DIFFUSE_MAP;
+		}
+	}
+	else
+	{
+		glBindTexture(GL_TEXTURE_2D, checkersID);
+	}
+
+	//normal map
+	if (_resource->normalMap != nullptr)
+	{
+		shader->SetInt("normalMap", 1);
+		glActiveTexture(GL_TEXTURE1);
+
+		if (_resource->normalMap != nullptr)
+		{
+			BindTexture(_resource->normalMap);
+			_resource->normalMap->texture_type = ResourceTexture::NORMAL_MAP;
+		}
+	}
 
 	shader->UpdateUniforms(_gameObject->GetTransform()->GetGlobalTransform());
 }
@@ -128,29 +142,15 @@ void Material::Save(GnJSONArray& save_array)
 	GnJSONObj save_object;
 
 	save_object.AddInt("Type", type);
-	save_object.AddInt("Material UID", _resource->GetUID());
-
-	if (_diffuseTexture != nullptr)
-		save_object.AddInt("Texture UID", _diffuseTexture->GetUID());
+	save_object.AddInt("MaterialID", _resource->GetUID());
 
 	save_array.AddObject(save_object);
 }
 
 void Material::Load(GnJSONObj& load_object)
 {
-	_resourceUID = load_object.GetInt("Material UID", 0);
+	_resourceUID = load_object.GetInt("MaterialID", 0);
 	_resource = (ResourceMaterial*)App->resources->RequestResource(_resourceUID);
-
-	int textureUID = load_object.GetInt("Texture UID", -1);
-
-	if (_resource != nullptr && textureUID != -1) 
-	{
-		_resource->diffuseTextureUID = textureUID;
-		_diffuseTexture = (ResourceTexture*)App->resources->RequestResource(textureUID);
-	}
-
-	if (_diffuseTexture == nullptr)
-		AssignCheckersImage();
 }
 
 void Material::OnEditor()
@@ -168,69 +168,22 @@ void Material::OnEditor()
 			}
 			else
 			{
-				if (_diffuseTexture != nullptr)
-					SetTexture(_diffuseTexture);
-				else
-					checkers_image = true;
-			}
-		}
-
-		ImGui::Separator();
-
-		if(_diffuseTexture != nullptr && checkers_image == false)
-		{
-			ImGui::Text("Texture: %s", _diffuseTexture->assetsFile.c_str());
-			ImGui::Text("Width: %d Height: %d", _diffuseTexture->GeWidth(), _diffuseTexture->GetHeight());
-
-			ImGui::Spacing();
-
-			ImGui::Image((ImTextureID)_diffuseTexture->GetGpuID(), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
-			if (ImGui::BeginDragDropTarget())
-			{
-				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSETS"))
-				{
-					IM_ASSERT(payload->DataSize == sizeof(int));
-					int payload_n = *(const int*)payload->Data;
-					WindowAssets* assets_window = (WindowAssets*)App->editor->windows[ASSETS_WINDOW];
-					Resource* possible_texture = App->resources->RequestResource(payload_n);
-
-					if (possible_texture->GetType() == ResourceType::RESOURCE_TEXTURE) {
-						SetTexture(dynamic_cast<ResourceTexture*>(possible_texture));
-					}
-				}
-				ImGui::EndDragDropTarget();
-			}
-				
-			ImGui::SameLine();
-			if (ImGui::Button("Remove Texture"))
-			{
-				App->resources->ReleaseResource(_diffuseTexture->GetUID());
-				_diffuseTexture = nullptr;
-				AssignCheckersImage();
-			}
-		}
-		else if (_resource != nullptr)
-		{
-			ImGui::Image((ImTextureID)checkersID, ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
-
-			if (ImGui::BeginDragDropTarget())
-			{
-				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSETS"))
-				{
-					IM_ASSERT(payload->DataSize == sizeof(int));
-					int payload_n = *(const int*)payload->Data;
-					WindowAssets* assets_window = (WindowAssets*)App->editor->windows[ASSETS_WINDOW];
-					Resource* possible_texture = App->resources->RequestResource(payload_n);
-
-					if (possible_texture->GetType() == ResourceType::RESOURCE_TEXTURE) {
-						SetTexture(dynamic_cast<ResourceTexture*>(possible_texture));
-					}
-				}
-				ImGui::EndDragDropTarget();
+				//if (_diffuseMap != nullptr)
+					//SetTexture(_diffuseMap);
+				//else
+					//checkers_image = true;
 			}
 		}
 
 		ImGui::Text("Material UID: %d", _resourceUID);
+
+		ImGui::Separator();
+
+		_resource->diffuseMap = DrawTextureInformation(_resource->diffuseMap);
+
+		ImGui::Separator();
+
+		_resource->normalMap = DrawTextureInformation(_resource->normalMap);
 
 		ImGui::Spacing();
 		ImGui::Separator();
@@ -266,17 +219,79 @@ void Material::OnEditor()
 	}
 }
 
-void Material::SetTexture(ResourceTexture* texture)
+ResourceTexture* Material::DrawTextureInformation(ResourceTexture* texture)
 {
 	if (texture != nullptr)
 	{
-		if (_diffuseTexture != nullptr)
-			App->resources->ReleaseResource(_diffuseTexture->GetUID());
+		if (_resource->diffuseMapID == texture->GetID())
+			ImGui::Text("Diffuse Texture: %s", texture->assetsFile.c_str());
+		else if (_resource->normalMapID == texture->GetID())
+			ImGui::Text("Normal Map: %s", texture->assetsFile.c_str());
 
-		_diffuseTexture = texture;
-		_resource->diffuseTextureUID = _diffuseTexture->GetUID();
+		ImGui::Text("Width: %d Height: %d", texture->GetWidth(), texture->GetHeight());
+	}
+	else
+	{
+		ImGui::Text("No Texture");
+	}
+
+	ImGui::Spacing();
+
+	if(texture != nullptr)
+		ImGui::Image((ImTextureID)texture->GetGpuID(), ImVec2(60, 60), ImVec2(0, 1), ImVec2(1, 0));
+
+	else
+		ImGui::Image((ImTextureID)checkersID, ImVec2(60, 60), ImVec2(0, 1), ImVec2(1, 0));
+
+	if (ImGui::BeginDragDropTarget())
+	{
+		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSETS"))
+		{
+			IM_ASSERT(payload->DataSize == sizeof(int));
+			int payload_n = *(const int*)payload->Data;
+			WindowAssets* assets_window = (WindowAssets*)App->editor->windows[ASSETS_WINDOW];
+			Resource* possible_texture = App->resources->RequestResource(payload_n);
+
+			if (possible_texture->GetType() == ResourceType::RESOURCE_TEXTURE) {
+				texture = dynamic_cast<ResourceTexture*>(possible_texture);
+			}
+		}
+		ImGui::EndDragDropTarget();
+	}
+
+	if (texture != nullptr) 
+	{
+		ImGui::SameLine();
+
+		std::string button_text;
+		if (texture->texture_type == texture->DIFFUSE_MAP)
+			button_text = "Remove Diffuse Map";
+		else if (texture->texture_type == texture->NORMAL_MAP)
+			button_text = "Remove Normal Map";
+
+		if (ImGui::Button(button_text.c_str()))
+		{
+			App->resources->ReleaseResource(texture->GetUID());
+			texture = nullptr;
+		}
+	}
+
+	return texture;
+}
+
+void Material::SetTexture(ResourceTexture* texture)
+{
+	/*
+	if (texture != nullptr)
+	{
+		if (_diffuseMap != nullptr)
+			App->resources->ReleaseResource(_diffuseMap->GetUID());
+
+		_diffuseMap = texture;
+		_resource->diffuseTextureUID = _diffuseMap->GetUID();
 		checkers_image = false;
 	}
+	*/
 }
 
 void Material::AssignCheckersImage()
@@ -305,5 +320,6 @@ void Material::AssignCheckersImage()
 
 ResourceTexture* Material::GetDiffuseTexture()
 {
-	return _diffuseTexture;
+	//return _diffuseMap;
+	return nullptr;
 }

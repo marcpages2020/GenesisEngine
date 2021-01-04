@@ -18,10 +18,18 @@ public:
 	void Load(GnJSONObj& base_object) override;
 
 	uint GetID();
-	int GeWidth();
+	int GetWidth();
 	int GetHeight();
 	GLubyte* GetData();
 	uint GetGpuID();
+
+public:
+	enum
+	{
+		DIFFUSE_MAP,
+		NORMAL_MAP,
+		UNKNOWN_MAP
+	}texture_type = UNKNOWN_MAP;
 
 private:
 	uint _id;

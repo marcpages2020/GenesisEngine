@@ -11,8 +11,6 @@ public:
 	ResourceMesh(uint UID);
 	~ResourceMesh();
 
-	void Load(GnJSONObj& base_object);
-
 	void GenerateBuffers();
 	void DeleteBuffers();
 
