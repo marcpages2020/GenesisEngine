@@ -77,7 +77,7 @@ public:
 public:
 	uint vertexShader;
 	uint fragmentShader;
-	uint id;
+	uint program_id;
 
 	std::map<std::string, Uniform> uniforms;
 };

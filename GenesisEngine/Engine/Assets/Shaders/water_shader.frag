@@ -22,6 +22,42 @@ in VS_OUT {
     vec3 TangentFragPos;
 } fs_in;
 
+vec2 rand2( vec2 coord );
+float cellular_noise(vec2 coord);
+float fbm(vec2 coord);
+
+void main()
+{
+    vec2 coord = fs_in.FragPos.xz * 5.0;
+    float value = fbm(coord);   
+    
+    vec3 normal = texture(normalMap, fs_in.TexCoords * 1.5).rgb;
+    normal = normalize(normal * 2.0 - 1.0);
+    
+    //ambient 
+    float ambientStrength = 0.55;
+    vec3 ambient = ambientStrength * color;
+  	
+    // diffuse 
+    vec3 lightDir = normalize(fs_in.TangentLightPos - fs_in.TangentFragPos);
+    float diff = max(dot(lightDir, normal), 0.0);
+    vec3 diffuse = diff * color;
+    
+    // specular
+    vec3 viewDir = normalize(fs_in.TangentViewPos - fs_in.TangentFragPos);
+    vec3 reflectDir = reflect(-lightDir, normal);
+    vec3 halfwayDir = normalize(lightDir + viewDir);  
+    float spec = pow(max(dot(normal, halfwayDir), 0.0), 32.0);
+    
+    vec3 specular = vec3(0.5) * spec;  
+    
+    vec3 foam = vec3(0.0);
+    foam = (vec3(value * 2.0) - (specular)) * max(5.0 * relative_position,0.0);
+	FragColor = vec4(ambient + diffuse + specular + foam, 1.0);
+} 
+
+
+
 vec2 rand2( vec2 coord ) {
   coord = mod(coord, 10000.0);
   return fract(sin(vec2(dot(coord,vec2(127.1,311.7)),dot(coord,vec2(269.5,183.3))))*43758.5453);
@@ -63,113 +99,6 @@ float fbm(vec2 coord) {
  
  return value / normalize_factor;
 }
-
-void main()
-{
-    vec2 coord = fs_in.FragPos.xz * 10.0;
-    float value = fbm(coord);   
-    
-    vec3 normal = texture(normalMap, fs_in.TexCoords * 1.5).rgb;
-    normal = normalize(normal * 2.0 - 1.0);
-    
-    //ambient 
-    float ambientStrength = 0.55;
-    vec3 ambient = ambientStrength * color;
-  	
-    // diffuse 
-    vec3 lightDir = normalize(fs_in.TangentLightPos - fs_in.TangentFragPos);
-    float diff = max(dot(lightDir, normal), 0.0);
-    vec3 diffuse = diff * color;
-    
-    // specular
-    vec3 viewDir = normalize(fs_in.TangentViewPos - fs_in.TangentFragPos);
-    vec3 reflectDir = reflect(-lightDir, normal);
-    vec3 halfwayDir = normalize(lightDir + viewDir);  
-    float spec = pow(max(dot(normal, halfwayDir), 0.0), 32.0);
-    
-    vec3 specular = vec3(0.5) * spec;    
-	FragColor = vec4(ambient * 2.0 * relative_position + diffuse + specular, 1.0);
-	
-	FragColor.rgb += vec3(value) * max(relative_position - 0.5, 0.0) * 5.0;
-} 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

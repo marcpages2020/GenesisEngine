@@ -8,16 +8,16 @@
 #include "GnJSON.h"
 #include "ImGui/imgui.h"
 
-ResourceShader::ResourceShader(uint UID) : Resource(UID, ResourceType::RESOURCE_SHADER), vertexShader(-1), fragmentShader(-1), id(-1) 
+ResourceShader::ResourceShader(uint UID) : Resource(UID, ResourceType::RESOURCE_SHADER), vertexShader(-1), fragmentShader(-1), program_id(-1) 
 {}
 
 ResourceShader::~ResourceShader()
 {
-	glDeleteProgram(id);
+	glDeleteProgram(program_id);
 
 	vertexShader = -1;
 	fragmentShader = -1;
-	id = -1;
+	program_id = -1;
 }
 
 uint ResourceShader::SaveMeta(GnJSONObj& base_object, uint last_modification)
@@ -31,9 +31,11 @@ uint ResourceShader::SaveMeta(GnJSONObj& base_object, uint last_modification)
 
 void ResourceShader::OnEditor()
 {
-	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen;
-	if (ImGui::CollapsingHeader("Uniforms", flags)) 
+	ImGuiTreeNodeFlags tree_flags = ImGuiTreeNodeFlags_DefaultOpen;
+	if (ImGui::TreeNodeEx("Uniforms", tree_flags)) 
 	{
+		//ImGuiInputTextFlags_CallbackEdit;
+		ImGuiInputTextFlags uniform_flags = ImGuiInputTextFlags_EnterReturnsTrue;
 		const float step = 1.0f;
 		ImGui::Spacing();
 		for (std::map<std::string, Uniform>::iterator it = uniforms.begin(); it != uniforms.end(); it++)
@@ -45,12 +47,15 @@ void ResourceShader::OnEditor()
 				case UniformType::BOOLEAN:
 					ImGui::Checkbox(it->first.c_str(), &it->second.boolean);
 					break;
+
 				case UniformType::NUMBER:
 					ImGui::InputScalar(it->first.c_str(), ImGuiDataType_Float, &it->second.number, &step);
 					break;
+
 				case UniformType::VEC_2:
-					ImGui::InputFloat2(it->first.c_str(), it->second.vec2.ptr());
+					ImGui::InputFloat2(it->first.c_str(), it->second.vec2.ptr(), 4, uniform_flags);
 					break;
+
 				case UniformType::VEC_3:
 					ImGui::PushID(it->first.c_str());
 					ImGui::Checkbox("Color", &it->second.color);
@@ -62,10 +67,11 @@ void ResourceShader::OnEditor()
 							it->second.vec3 = float3(color.x, color.y, color.z);
 						}
 					}
-					else
-						ImGui::InputFloat3(it->first.c_str(), it->second.vec3.ptr());
+					else if (ImGui::InputFloat3(it->first.c_str(), it->second.vec3.ptr(), 4, uniform_flags))
+						App->resources->SaveResource(this);
 					ImGui::PopID ();
 					break;
+
 				case UniformType::VEC_4:
 					ImGui::PushID(it->first.c_str());
 					ImGui::Checkbox("Color", &it->second.color);
@@ -81,16 +87,19 @@ void ResourceShader::OnEditor()
 						ImGui::InputFloat4(it->first.c_str(), it->second.vec4.ptr());
 					ImGui::PopID();
 					break;
+
 				default:
 					break;
 				}
 			}
 		}
 
+		ImGui::Spacing();
 		if (ImGui::Button("Save Uniforms"))
 			App->resources->SaveResource(this);
 
 		ImGui::Spacing();
+		ImGui::TreePop();
 	}
 }
 
@@ -179,9 +188,9 @@ void ResourceShader::Load(GnJSONObj& base_object)
 void ResourceShader::Use()
 {
 	int success = 0;
-	glGetProgramiv(id, GL_LINK_STATUS, &success);
+	glGetProgramiv(program_id, GL_LINK_STATUS, &success);
 
-	glUseProgram(id);
+	glUseProgram(program_id);
 
 	SetUniforms();
 }
@@ -302,52 +311,52 @@ bool ResourceShader::IsDefaultUniform(const char* uniform_name)
 
 void ResourceShader::SetBool(const char* name, bool value)
 {
-	glUniform1i(glGetUniformLocation(id, name), (int)value);
+	glUniform1i(glGetUniformLocation(program_id, name), (int)value);
 }
 
 void ResourceShader::SetInt(const char* name, int value)
 {
-	glUniform1i(glGetUniformLocation(id, name), value);
+	glUniform1i(glGetUniformLocation(program_id, name), value);
 }
 
 void ResourceShader::SetFloat(const char* name, float value)
 {
-	GLint variableLoc = glGetUniformLocation(id, name);
+	GLint variableLoc = glGetUniformLocation(program_id, name);
 
 	glUniform1f(variableLoc, value);
 }
 
 void ResourceShader::SetVec2(const char* name, float x, float y)
 {
-	GLint variableLoc = glGetUniformLocation(id, name);
+	GLint variableLoc = glGetUniformLocation(program_id, name);
 
 	glUniform2f(variableLoc, (GLfloat)x, (GLfloat)y);
 }
 
 void ResourceShader::SetVec3(const char* name, float x, float y, float z)
 {
-	GLint variableLoc = glGetUniformLocation(id, name);
+	GLint variableLoc = glGetUniformLocation(program_id, name);
 
 	glUniform3f(variableLoc, (GLfloat)x, (GLfloat)y, (GLfloat)z);
 }
 
 void ResourceShader::SetVec4(const char* name, float x, float y, float z, float w)
 {
-	GLint variableLoc = glGetUniformLocation(id, name);
+	GLint variableLoc = glGetUniformLocation(program_id, name);
 
 	glUniform4f(variableLoc, (GLfloat)x, (GLfloat)y, (GLfloat)z, (GLfloat)w);
 }
 
 void ResourceShader::SetMat3(const char* name, float* matrix)
 {
-	GLint variableLoc = glGetUniformLocation(id, name);
+	GLint variableLoc = glGetUniformLocation(program_id, name);
 
 	glUniformMatrix3fv(variableLoc, 1, GL_FALSE, matrix);
 }
 
 void ResourceShader::SetMat4(const char* name, float* matrix)
 {
-	GLint variableLoc = glGetUniformLocation(id, name);
+	GLint variableLoc = glGetUniformLocation(program_id, name);
 
 	glUniformMatrix4fv(variableLoc, 1, GL_FALSE, matrix);
 }

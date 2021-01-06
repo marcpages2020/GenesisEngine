@@ -20,6 +20,8 @@ public:
 
 private:
 	int text_size;
+	bool vertex_shader_has_error;
+	bool fragment_shader_has_error;
 
 	char vertexShaderPath[128];
 	char fragmentShaderPath[128];

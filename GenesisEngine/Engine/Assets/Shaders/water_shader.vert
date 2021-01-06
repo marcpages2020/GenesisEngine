@@ -54,7 +54,7 @@ void main()
  //relative_position = 1.0;
  fPosition += wave1 + wave2 + wave3;
  
- relative_position = ((( wave1.z/amp1 + wave2.z/amp2 + wave3.z/amp3) / 3.0) + 1.0) * 0.5;
+ relative_position = ((( wave1.z/amp1 + wave2.z/amp2 + wave3.z/amp3) / 3.0) + 0.25) * 0.5;
  
  vs_out.FragPos = vec3(model_matrix * vec4(position, 1.0));
  vs_out.TexCoords = texCoord;
@@ -86,83 +86,6 @@ vec3 generateWave(float amp, vec3 direction, float num_waves, float steepness,
  
  return wave;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

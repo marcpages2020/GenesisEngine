@@ -15,18 +15,26 @@ void ShaderImporter::Import(char* fileBuffer, ResourceShader* shader, const char
 	std::string pairingShader = FindPairingShader(assets_path);
 	FileSystem::Load(pairingShader.c_str(), &buffer);
 
+	GLuint vertexShader = 0;
+	GLuint fragmentShader = 0;
+
 	if (type == ShaderType::VERTEX_SHADER)
 	{
-		shader->vertexShader = Compile(fileBuffer, type);
-		shader->fragmentShader = Compile(buffer, ShaderType::FRAGMENT_SHADER);
+	    vertexShader = Compile(fileBuffer, type);
+		fragmentShader = Compile(buffer, ShaderType::FRAGMENT_SHADER);
 	}
 	else if (type == ShaderType::FRAGMENT_SHADER)
 	{
-		shader->fragmentShader = Compile(fileBuffer, type);
-		shader->vertexShader = Compile(buffer, ShaderType::VERTEX_SHADER);
+		fragmentShader = Compile(fileBuffer, type);
+		vertexShader = Compile(buffer, ShaderType::VERTEX_SHADER);
 	}
 
-	CreateProgram(shader);
+	if (vertexShader != 0 && fragmentShader != 0)
+	{
+		shader->vertexShader = vertexShader;
+		shader->fragmentShader = fragmentShader;
+		CreateProgram(shader);
+	}
 
 	RELEASE_ARRAY(buffer);
 }
@@ -74,14 +82,21 @@ bool ShaderImporter::ShaderHasError(GLuint shader, ShaderType type)
 	if (success == 0)
 	{
 		glGetShaderInfoLog(shader, 512, NULL, infoLog);
-		LOG_ERROR("Error compilating shader: %s", infoLog);
+
+		if (type == ShaderType::VERTEX_SHADER) {
+			LOG_ERROR("Error compilating vertex shader: %s", infoLog);}
+		else {
+			LOG_ERROR("Error compilating fragment shader: %s", infoLog);}
 
 		WindowShaderEditor* shader_editor = dynamic_cast<WindowShaderEditor*>(App->editor->windows[WINDOW_SHADER_EDITOR]);
 		shader_editor->SetErrorsOnScreen(infoLog, type);
 	}
 	else
 	{
-		LOG("Shader Compiled properly");
+		if (type == ShaderType::VERTEX_SHADER) {
+			LOG("Vertex shader compiled properly");}
+		else {
+			LOG("Fragment shader compiled properly");}
 	}
 
 	return success == 0;
@@ -105,27 +120,24 @@ void ShaderImporter::CreateProgram(ResourceShader* shader)
 	{
 		glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
 		LOG_ERROR("Error linking shader program: %s", infoLog);
-
-		glDetachShader(shaderProgram, shader->vertexShader);
-		glDetachShader(shaderProgram, shader->fragmentShader);
-
-		glDeleteShader(shader->vertexShader);
-		glDeleteShader(shader->fragmentShader);
 	}
 	else
 	{
-		shader->id = shaderProgram;
+		shader->program_id = shaderProgram;
 		
 		GetUniforms(shaderProgram, shader);
 
 		LOG("Shader program created porperly");
-
-		glDetachShader(shaderProgram, shader->vertexShader);
-		glDetachShader(shaderProgram, shader->fragmentShader);
-
-		glDeleteShader(shader->vertexShader);
-		glDeleteShader(shader->fragmentShader);
 	}
+
+	glDetachShader(shaderProgram, shader->vertexShader);
+	glDetachShader(shaderProgram, shader->fragmentShader);
+
+	glDeleteShader(shader->vertexShader);
+	glDeleteShader(shader->fragmentShader);
+
+	shader->vertexShader = -1;
+	shader->fragmentShader = -1;
 }
 
 void ShaderImporter::GetUniforms(GLuint program, ResourceShader* shader)
@@ -253,40 +265,37 @@ ShaderType ShaderImporter::GetTypeFromPath(const char* path)
 		return ShaderType::FRAGMENT_SHADER;
 }
 
-void ShaderImporter::RecompileShader(const char* vertexShaderPath, const char* fragmentShaderPath)
+bool ShaderImporter::RecompileShader(const char* vertexShaderBuffer, const char* fragmentShaderBuffer, ResourceShader* shader)
 {
-	ResourceShader* shader = dynamic_cast<ResourceShader*>(App->resources->RequestResource(App->resources->Find(vertexShaderPath)));
+	bool ret = true;
 
 	if (shader == nullptr) {
 		LOG_ERROR("Shader: %s could not be recompiled. It was not found");
-		return;
+		return false;
 	}
 
-	char* vertexShaderBuffer;
-	FileSystem::Load(vertexShaderPath, &vertexShaderBuffer);
-	GLuint vertexShader = Compile(vertexShaderBuffer, ShaderType::VERTEX_SHADER);
-
-	char* fragmentShaderBuffer;
-	FileSystem::Load(fragmentShaderPath, &fragmentShaderBuffer);
-	GLuint fragmentShader = Compile(fragmentShaderBuffer, ShaderType::FRAGMENT_SHADER);
+	GLuint vertexShader = Compile((char*)vertexShaderBuffer, ShaderType::VERTEX_SHADER);
+	GLuint fragmentShader = Compile((char*)fragmentShaderBuffer, ShaderType::FRAGMENT_SHADER);
 
 	if (vertexShader != 0 && fragmentShader != 0)
 	{
 		shader->vertexShader = vertexShader;
 		shader->fragmentShader = fragmentShader;
+
+		glDeleteProgram(shader->program_id);
+		CreateProgram(shader);
+
+		char* buffer;
+		uint size = 0;
+		size = Save(shader, &buffer);
+
+		FileSystem::Save(shader->libraryFile.c_str(), buffer, size);
+		RELEASE_ARRAY(buffer);
 	}
+	else
+		ret = false;
 
-	CreateProgram(shader);
-
-	char* buffer;
-	uint size = 0;
-	size = Save(shader, &buffer);
-
-	FileSystem::Save(shader->libraryFile.c_str(), buffer, size);
-
-	RELEASE_ARRAY(vertexShaderBuffer);
-	RELEASE_ARRAY(fragmentShaderBuffer);
-	RELEASE_ARRAY(buffer);
+	return ret;
 }
 
 void ShaderImporter::CreateShaderAsset(const char* asset_path)

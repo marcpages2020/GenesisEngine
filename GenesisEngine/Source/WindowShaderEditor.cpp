@@ -11,7 +11,7 @@
 #include "ImGui/imgui_impl_opengl3.h"
 
 
-WindowShaderEditor::WindowShaderEditor() : EditorWindow(), text_size(14)
+WindowShaderEditor::WindowShaderEditor() : EditorWindow(), text_size(14), vertex_shader_has_error(false), fragment_shader_has_error(false)
 {
 	type = WindowType::WINDOW_SHADER_EDITOR;
 }
@@ -95,11 +95,32 @@ void WindowShaderEditor::Draw()
 		{
 			//Tabs =================================================================================================
 
+			if (vertex_shader_has_error)
+			{
+				ImGui::PushStyleColor(ImGuiCol_Tab, ImVec4(0.8f, 0.2f, 0.2f, 1.0f));
+				ImGui::PushStyleColor(ImGuiCol_TabHovered, ImVec4(0.8f, 0.2f, 0.2f, 1.0f));
+				ImGui::PushStyleColor(ImGuiCol_TabActive, ImVec4(0.8f, 0.2f, 0.2f, 1.0f));
+				ImGui::PushStyleColor(ImGuiCol_TabUnfocused, ImVec4(0.8f, 0.2f, 0.2f, 1.0f));
+				ImGui::PushStyleColor(ImGuiCol_TabUnfocusedActive, ImVec4(0.8f, 0.2f, 0.2f, 1.0f));
+			}
+			
 			if (ImGui::BeginTabItem("Vertex Shader"))
 			{
 				DrawEditor(vertexShaderEditor, vertexShaderPath);
 
 				ImGui::EndTabItem();
+			}
+
+			if (vertex_shader_has_error){
+				ImGui::PopStyleColor(5);}
+
+			if (fragment_shader_has_error)
+			{
+				ImGui::PushStyleColor(ImGuiCol_Tab, ImVec4(0.8f, 0.2f, 0.2f, 1.0f));
+				ImGui::PushStyleColor(ImGuiCol_TabHovered, ImVec4(0.8f, 0.2f, 0.2f, 1.0f));
+				ImGui::PushStyleColor(ImGuiCol_TabActive, ImVec4(0.8f, 0.2f, 0.2f, 1.0f));
+				ImGui::PushStyleColor(ImGuiCol_TabUnfocused, ImVec4(0.8f, 0.2f, 0.2f, 1.0f));
+				ImGui::PushStyleColor(ImGuiCol_TabUnfocusedActive, ImVec4(0.8f, 0.2f, 0.2f, 1.0f));
 			}
 
 			if (ImGui::BeginTabItem("Fragment Shader"))
@@ -108,6 +129,9 @@ void WindowShaderEditor::Draw()
 
 				ImGui::EndTabItem();
 			}
+
+			if (fragment_shader_has_error) {
+				ImGui::PopStyleColor(5);}
 
 			//ImGui::Spacing();
 			ImGui::Dummy(ImVec2(10.0f, 10.0f));
@@ -119,14 +143,18 @@ void WindowShaderEditor::Draw()
 				//clear errors
 				TextEditor::ErrorMarkers markers;
 				vertexShaderEditor.SetErrorMarkers(markers);
+				vertex_shader_has_error = false;
 				fragmentShaderEditor.SetErrorMarkers(markers);
-
-				FileSystem::Save(vertexShaderPath, vertexShaderEditor.GetText().c_str(), strlen(vertexShaderEditor.GetText().c_str()));
-				FileSystem::Save(fragmentShaderPath, fragmentShaderEditor.GetText().c_str(), strlen(fragmentShaderEditor.GetText().c_str()));
+				fragment_shader_has_error = false;
 				
-				ShaderImporter::RecompileShader(vertexShaderPath, fragmentShaderPath);
+				ResourceShader* shader = dynamic_cast<ResourceShader*>(App->resources->RequestResource(App->resources->Find(vertexShaderPath)));
+				if (ShaderImporter::RecompileShader(vertexShaderEditor.GetText().c_str(), fragmentShaderEditor.GetText().c_str(), shader))
+				{
+					FileSystem::Save(vertexShaderPath, vertexShaderEditor.GetText().c_str(), strlen(vertexShaderEditor.GetText().c_str()));
+					FileSystem::Save(fragmentShaderPath, fragmentShaderEditor.GetText().c_str(), strlen(fragmentShaderEditor.GetText().c_str()));
+					App->resources->SaveResource(App->resources->GetResource(App->resources->Find(vertexShaderPath)));
+				}
 
-				App->resources->SaveResource(App->resources->GetResource(App->resources->Find(vertexShaderPath)));
 			}
 
 			ImGui::SameLine();
@@ -135,15 +163,17 @@ void WindowShaderEditor::Draw()
 				//clear errors
 				TextEditor::ErrorMarkers markers;
 				vertexShaderEditor.SetErrorMarkers(markers);
+				vertex_shader_has_error = false;
 				fragmentShaderEditor.SetErrorMarkers(markers);
+				fragment_shader_has_error = false;
 
-				FileSystem::Save(vertexShaderPath, vertexShaderEditor.GetText().c_str(), strlen(vertexShaderEditor.GetText().c_str()));
-				FileSystem::Save(fragmentShaderPath, fragmentShaderEditor.GetText().c_str(), strlen(fragmentShaderEditor.GetText().c_str()));
-
-				ShaderImporter::RecompileShader(vertexShaderPath, fragmentShaderPath);
-
-				App->resources->SaveResource(App->resources->GetResource(App->resources->Find(vertexShaderPath)));
-
+				ResourceShader* shader = dynamic_cast<ResourceShader*>(App->resources->RequestResource(App->resources->Find(vertexShaderPath)));
+				if (ShaderImporter::RecompileShader(vertexShaderEditor.GetText().c_str(), fragmentShaderEditor.GetText().c_str(), shader))
+				{
+					FileSystem::Save(vertexShaderPath, vertexShaderEditor.GetText().c_str(), strlen(vertexShaderEditor.GetText().c_str()));
+					FileSystem::Save(fragmentShaderPath, fragmentShaderEditor.GetText().c_str(), strlen(fragmentShaderEditor.GetText().c_str()));
+					App->resources->SaveResource(App->resources->GetResource(App->resources->Find(vertexShaderPath)));
+				}
 				visible = false;
 			}
 
@@ -190,9 +220,15 @@ void WindowShaderEditor::SetErrorsOnScreen(const char* infoLog, ShaderType type)
 	}
 
 	if (type == ShaderType::VERTEX_SHADER)
+	{
 		vertexShaderEditor.SetErrorMarkers(markers);
+		vertex_shader_has_error = true;
+	}
 	else
+	{
 		fragmentShaderEditor.SetErrorMarkers(markers);
+		fragment_shader_has_error = true;
+	}
 }
 
 std::vector<std::pair<int, std::string>> WindowShaderEditor::SplitErrors(const char* infoLog)

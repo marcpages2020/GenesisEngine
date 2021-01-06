@@ -21,7 +21,7 @@ namespace ShaderImporter
 	bool Load(char* fileBuffer, ResourceShader* shader);
 	std::string FindPairingShader(const char* current_shader_path);
 	ShaderType GetTypeFromPath(const char* path);
-	void RecompileShader(const char* vertexShaderPath, const char* fragmentShaderPath);
+	bool RecompileShader(const char* vertexShaderBuffer, const char* fragmentShaderBuffer, ResourceShader* shader);
 	void CreateShaderAsset(const char* asset_path); //introduce the path with the asset name included
 }
 
