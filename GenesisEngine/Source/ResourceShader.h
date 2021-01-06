@@ -35,7 +35,8 @@ struct Uniform
 	int size = 0;
 	GLenum type;
 	UniformType uniformType = UniformType::UNKNOWN;
-	
+	bool color = false;
+
 	union
 	{
 		bool boolean;

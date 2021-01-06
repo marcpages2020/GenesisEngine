@@ -1,15 +1,14 @@
 #pragma once
 #include "Component.h"
 #include "Globals.h"
+#include "ResourceTexture.h"
 
 #include <string>
 
 class GnMesh;
 class ResourceMaterial;
-class ResourceTexture;
 class ResourceShader;
 class GnJSONArray;
-enum class TextureType;
 
 class Material : public Component {
 public: 
@@ -18,6 +17,7 @@ public:
 	~Material();
 
 	void SetResourceUID(uint UID) override;
+	void SetShader(ResourceShader* new_shader);
 	void BindTexture(ResourceTexture* texture);
 	void UseShader();
 
@@ -27,7 +27,7 @@ public:
 	void OnEditor() override;
 	ResourceTexture* DrawTextureInformation(ResourceTexture* texture, TextureType type);
 
-	void SetTexture(ResourceTexture* texture);
+	void SetTexture(ResourceTexture* texture, TextureType type = TextureType::DIFFUSE_MAP);
 	void AssignCheckersImage();
 	ResourceTexture* GetDiffuseTexture();
 

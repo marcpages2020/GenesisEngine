@@ -7,7 +7,7 @@
 
 WindowAbout::WindowAbout() : EditorWindow() 
 {
-	type = WindowType::ABOUT_WINDOW;
+	type = WindowType::WINDOW_ABOUT;
 }
 
 WindowAbout::~WindowAbout() {}
@@ -16,6 +16,7 @@ void WindowAbout::Draw()
 {
 	if (ImGui::Begin("About", &visible))
 	{
+		focused = ImGui::IsWindowFocused();
 		ImGui::Text("%s v%s", App->engine_name, App->engine_version);
 		ImGui::Text("The first chapter of your creation");
 		ImGui::Spacing();

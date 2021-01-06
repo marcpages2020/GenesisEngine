@@ -51,6 +51,7 @@ uint64 MaterialImporter::Save(ResourceMaterial* material, char** fileBuffer)
 {
 	GnJSONObj base_object;
 	base_object.AddInt("diffuseMapID", material->diffuseMapID);
+	base_object.AddInt("normalMapID", material->normalMapID);
 
 	base_object.AddColor("diffuseColor", material->diffuseColor);
 

@@ -42,18 +42,19 @@ void main()
  float w = sqrt(9.81 * (2 * pi / wave_length));
  float num_waves = 3.0;
  
- float amp1 = 0.045;
+ float amp1 = 0.05;
  vec3 wave1 = generateWave(amp1, direction_1, num_waves, steepness, phase_constant, w);
  
- float amp2 = 0.015;
+ float amp2 = 0.035;
  vec3 wave2 = generateWave(amp2, direction_2, num_waves, steepness, phase_constant, w);
  
- float amp3 = 0.015;
+ float amp3 = 0.035;
  vec3 wave3 = generateWave(amp3, direction_3, num_waves, steepness, phase_constant, w);
- 
- relative_position = (wave1.z / amp1 + wave2.z / amp2 + wave3.z / amp3) * 0.5 + 0.5;
-  
+
+ //relative_position = 1.0;
  fPosition += wave1 + wave2 + wave3;
+ 
+ relative_position = ((( wave1.z/amp1 + wave2.z/amp2 + wave3.z/amp3) / 3.0) + 1.0) * 0.5;
  
  vs_out.FragPos = vec3(model_matrix * vec4(position, 1.0));
  vs_out.TexCoords = texCoord;
@@ -70,7 +71,7 @@ void main()
  vs_out.TangentViewPos  = TBN * cameraPosition;
  vs_out.TangentFragPos  = TBN * vs_out.FragPos;
  
-  gl_Position = projection * view * model_matrix * vec4(fPosition, 1.0);
+ gl_Position = projection * view * model_matrix * vec4(fPosition, 1.0);
 }
 
 vec3 generateWave(float amp, vec3 direction, float num_waves, float steepness,
@@ -85,6 +86,15 @@ vec3 generateWave(float amp, vec3 direction, float num_waves, float steepness,
  
  return wave;
 }
+
+
+
+
+
+
+
+
+
 
 
 

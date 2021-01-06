@@ -38,7 +38,6 @@ Editor::Editor(bool start_enabled) : Module(start_enabled)
 {
 	name = "editor";
 
-	scene_window_focused = false;
 	show_game_buttons = true;
 
 	current_theme = 1;
@@ -50,14 +49,14 @@ Editor::Editor(bool start_enabled) : Module(start_enabled)
 	selected_file[0] = '\0';
 	selected_folder[0] = '\0';
 
-	windows[HIERARCHY_WINDOW] = new WindowHierarchy();
-	windows[INSPECTOR_WINDOW] = new WindowInspector();
-	windows[SCENE_WINDOW] = new WindowScene();
-	windows[ASSETS_WINDOW] = new WindowAssets();
-	windows[CONFIGURATION_WINDOW] = new WindowConfiguration();
-	windows[ABOUT_WINDOW] = new WindowAbout();
-	windows[IMPORT_WINDOW] = new WindowImport();
-	windows[SHADER_EDITOR_WINDOW] = new WindowShaderEditor();
+	windows[WINDOW_HIERARCHY] = new WindowHierarchy();
+	windows[WINDOW_INSPECTOR] = new WindowInspector();
+	windows[WINDOW_SCENE] = new WindowScene();
+	windows[WINDOW_ASSETS] = new WindowAssets();
+	windows[WINDOW_CONFIGURATION] = new WindowConfiguration();
+	windows[WINDOW_ABOUT] = new WindowAbout();
+	windows[WINDOW_IMPORT] = new WindowImport();
+	windows[WINDOW_SHADER_EDITOR] = new WindowShaderEditor();
 }
 
 Editor::~Editor() {}
@@ -187,35 +186,35 @@ bool Editor::LoadConfig(GnJSONObj& config)
 	GnJSONArray jsonWindows(config.GetArray("windows"));
 	
 	GnJSONObj window = jsonWindows.GetObjectInArray("scene");
-	windows[SCENE_WINDOW]->visible = window.GetBool("visible");
+	windows[WINDOW_SCENE]->visible = window.GetBool("visible");
 
 	window = jsonWindows.GetObjectInArray("inspector");
-	windows[INSPECTOR_WINDOW]->visible = window.GetBool("visible");
+	windows[WINDOW_INSPECTOR]->visible = window.GetBool("visible");
 
 	window = jsonWindows.GetObjectInArray("hierarchy");
-	windows[HIERARCHY_WINDOW]->visible = window.GetBool("visible");
+	windows[WINDOW_HIERARCHY]->visible = window.GetBool("visible");
 
 	window = jsonWindows.GetObjectInArray("assets");
-	windows[ASSETS_WINDOW]->visible = window.GetBool("visible");
+	windows[WINDOW_ASSETS]->visible = window.GetBool("visible");
 
 	window = jsonWindows.GetObjectInArray("console");
 	show_console_window = window.GetBool("visible");
 
 	window = jsonWindows.GetObjectInArray("configuration");
-	windows[CONFIGURATION_WINDOW]->visible = window.GetBool("visible");
+	windows[WINDOW_CONFIGURATION]->visible = window.GetBool("visible");
 
 	window = jsonWindows.GetObjectInArray("preferences");
 	show_preferences_window = window.GetBool("visible");
 
 	window = jsonWindows.GetObjectInArray("about");
-	windows[ABOUT_WINDOW]->visible = window.GetBool("visible");
+	windows[WINDOW_ABOUT]->visible = window.GetBool("visible");
 	
 	return true;
 }
 
-bool Editor::IsSceneFocused()
+bool Editor::IsWindowFocused(WindowType window)
 {
-	return scene_window_focused;
+	return windows[window]->focused;
 }
 
 bool Editor::MouseOnScene()
@@ -329,7 +328,7 @@ bool Editor::CreateMainMenuBar() {
 		{
 			if (ImGui::MenuItem("Configuration"))
 			{
-				windows[CONFIGURATION_WINDOW]->visible = true;
+				windows[WINDOW_CONFIGURATION]->visible = true;
 			}
 			else if (ImGui::MenuItem("Preferences"))
 			{
@@ -385,29 +384,29 @@ bool Editor::CreateMainMenuBar() {
 
 		if (ImGui::BeginMenu("Window"))
 		{
-			if (ImGui::MenuItem("Inspector", NULL, windows[INSPECTOR_WINDOW]->visible))
+			if (ImGui::MenuItem("Inspector", NULL, windows[WINDOW_INSPECTOR]->visible))
 			{
-				windows[INSPECTOR_WINDOW]->visible = !windows[INSPECTOR_WINDOW]->visible;
+				windows[WINDOW_INSPECTOR]->visible = !windows[WINDOW_INSPECTOR]->visible;
 			}
-			else if (ImGui::MenuItem("Hierarchy", NULL, windows[HIERARCHY_WINDOW]->visible))
+			else if (ImGui::MenuItem("Hierarchy", NULL, windows[WINDOW_HIERARCHY]->visible))
 			{
-				windows[HIERARCHY_WINDOW]->visible = !windows[HIERARCHY_WINDOW]->visible;
+				windows[WINDOW_HIERARCHY]->visible = !windows[WINDOW_HIERARCHY]->visible;
 			}
-			else if (ImGui::MenuItem("Scene", NULL, windows[SCENE_WINDOW]->visible))
+			else if (ImGui::MenuItem("Scene", NULL, windows[WINDOW_SCENE]->visible))
 			{
-				windows[SCENE_WINDOW]->visible = !windows[SCENE_WINDOW]->visible;
+				windows[WINDOW_SCENE]->visible = !windows[WINDOW_SCENE]->visible;
 			}
-			else if (ImGui::MenuItem("Assets", NULL, windows[ASSETS_WINDOW]->visible))
+			else if (ImGui::MenuItem("Assets", NULL, windows[WINDOW_ASSETS]->visible))
 			{
-				windows[ASSETS_WINDOW]->visible = !windows[ASSETS_WINDOW]->visible;
+				windows[WINDOW_ASSETS]->visible = !windows[WINDOW_ASSETS]->visible;
 			}
 			else if (ImGui::MenuItem("Console", NULL, show_console_window))
 			{
 				show_console_window = !show_console_window;
 			}
-			else if (ImGui::MenuItem("Configuration", NULL, windows[CONFIGURATION_WINDOW]->visible))
+			else if (ImGui::MenuItem("Configuration", NULL, windows[WINDOW_CONFIGURATION]->visible))
 			{
-				windows[CONFIGURATION_WINDOW]->visible = !windows[CONFIGURATION_WINDOW]->visible;
+				windows[WINDOW_CONFIGURATION]->visible = !windows[WINDOW_CONFIGURATION]->visible;
 			}
 			ImGui::EndMenu();
 		}
@@ -427,7 +426,7 @@ bool Editor::CreateMainMenuBar() {
 				ShellExecuteA(NULL, "open", "https://github.com/marcpages2020/GenesisEngine", NULL, NULL, SW_SHOWNORMAL);
 
 			if (ImGui::MenuItem("About"))
-				windows[ABOUT_WINDOW]->visible = true;
+				windows[WINDOW_ABOUT]->visible = true;
 
 			ImGui::EndMenu();
 		}

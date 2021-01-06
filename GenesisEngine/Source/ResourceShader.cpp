@@ -12,7 +12,13 @@ ResourceShader::ResourceShader(uint UID) : Resource(UID, ResourceType::RESOURCE_
 {}
 
 ResourceShader::~ResourceShader()
-{}
+{
+	glDeleteProgram(id);
+
+	vertexShader = -1;
+	fragmentShader = -1;
+	id = -1;
+}
 
 uint ResourceShader::SaveMeta(GnJSONObj& base_object, uint last_modification)
 {
@@ -46,10 +52,34 @@ void ResourceShader::OnEditor()
 					ImGui::InputFloat2(it->first.c_str(), it->second.vec2.ptr());
 					break;
 				case UniformType::VEC_3:
-					ImGui::InputFloat3(it->first.c_str(), it->second.vec3.ptr());
+					ImGui::PushID(it->first.c_str());
+					ImGui::Checkbox("Color", &it->second.color);
+					ImGui::SameLine();
+					if (it->second.color)
+					{
+						ImVec4 color = ImVec4(it->second.vec3.x, it->second.vec3.y, it->second.vec3.z, 1.0);
+						if (ImGui::ColorEdit3("Color##1", (float*)&color)) {
+							it->second.vec3 = float3(color.x, color.y, color.z);
+						}
+					}
+					else
+						ImGui::InputFloat3(it->first.c_str(), it->second.vec3.ptr());
+					ImGui::PopID ();
 					break;
 				case UniformType::VEC_4:
-					ImGui::InputFloat4(it->first.c_str(), it->second.vec4.ptr());
+					ImGui::PushID(it->first.c_str());
+					ImGui::Checkbox("Color", &it->second.color);
+					ImGui::SameLine();
+					if (it->second.color)
+					{
+						ImVec4 color = ImVec4(it->second.vec4.x, it->second.vec4.y, it->second.vec4.z, it->second.vec4.w);
+						if (ImGui::ColorEdit4("Color##1", (float*)&color)) {
+							it->second.vec4 = float4(color.x, color.y, color.z, color.w);
+						}
+					}
+					else
+						ImGui::InputFloat4(it->first.c_str(), it->second.vec4.ptr());
+					ImGui::PopID();
 					break;
 				default:
 					break;

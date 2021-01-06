@@ -23,9 +23,23 @@ void WindowImport::Draw()
 	{
 		visible = DrawTextureImportingWindow();
 	}
+	else if (_currentResourceType == ResourceType::RESOURCE_SHADER)
+	{
+		std::string final_path = _fileToImport;
+
+		if (!FileSystem::Exists(_fileToImport))
+		{
+			final_path = App->resources->GenerateAssetsPath(_fileToImport);
+			FileSystem::DuplicateFile(_fileToImport, final_path.c_str());
+		}
+
+		App->resources->ImportFile(final_path.c_str());
+		visible = false;
+	}
 	else
 	{
 		LOG_ERROR("Trying to import invalid file %s", _fileToImport);
+		visible = false;
 	}
 }
 
@@ -42,6 +56,7 @@ bool WindowImport::DrawModelImportingWindow()
 
 	if (ImGui::Begin("Import File", NULL))
 	{
+		focused = ImGui::IsWindowFocused();
 		ImGui::Text("Import Model: %s", _fileToImport);
 
 		ImGui::Spacing();
@@ -97,6 +112,7 @@ bool WindowImport::DrawTextureImportingWindow()
 
 	if (ImGui::Begin("Import File", NULL))
 	{
+		focused = ImGui::IsWindowFocused();
 		ImGui::Text("Import Texture: %s", _fileToImport);
 
 		ImGui::Spacing();

@@ -77,7 +77,8 @@ update_status ModuleScene::Update(float dt)
 
 void ModuleScene::HandleInput()
 {
-	if ((App->input->GetKey(SDL_SCANCODE_DELETE) == KEY_DOWN) && (selectedGameObject != nullptr) && (selectedGameObject != root) && App->editor->scene_window_focused)
+	if ((App->input->GetKey(SDL_SCANCODE_DELETE) == KEY_DOWN) && (selectedGameObject != nullptr) && (selectedGameObject != root) 
+		&& (App->editor->IsWindowFocused(WindowType::WINDOW_HIERARCHY) || App->editor->IsWindowFocused(WindowType::WINDOW_SCENE)))
 		selectedGameObject->to_delete = true;
 
 	if ((App->input->GetKey(SDL_SCANCODE_W) == KEY_DOWN))
@@ -164,7 +165,7 @@ void ModuleScene::EditTransform()
 	float tempTransform[16];
 	memcpy(tempTransform, objectTransform.ptr(), 16 * sizeof(float));
 
-	ImGuizmo::Manipulate(viewMatrix.ptr(), projectionMatrix.ptr(), mCurrentGizmoOperation, mCurrentGizmoMode, tempTransform);
+	ImGuizmo::Manipulate(viewMatrix.ptr(), projectionMatrix.ptr(), mCurrentGizmoOperation, mCurrentGizmoOperation != ImGuizmo::OPERATION::SCALE ? mCurrentGizmoMode : ImGuizmo::MODE::LOCAL , tempTransform);
 
 	if (ImGuizmo::IsUsing())
 	{

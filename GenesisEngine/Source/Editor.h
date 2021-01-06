@@ -30,7 +30,7 @@ public:
 	update_status Draw();
 	bool CleanUp();
 
-	bool IsSceneFocused();
+	bool IsWindowFocused(WindowType window);
 	bool MouseOnScene();
 	void AddConsoleLog(const char* log, int warning_level);
 
@@ -55,7 +55,6 @@ public:
 	ImVec2 image_size;
 	ImVec2 sceneWindowOrigin;
 	ImVec2 mouseScenePosition;
-	bool scene_window_focused;
 	EditorWindow* windows[MAX_WINDOWS];
 
 private:

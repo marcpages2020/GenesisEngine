@@ -9,7 +9,7 @@
 
 WindowAssets::WindowAssets() : EditorWindow()
 {
-	type = WindowType::ASSETS_WINDOW;
+	type = WindowType::WINDOW_ASSETS;
 	current_folder = "Assets";
 	selectedItem[0] = '\0';
 }
@@ -32,6 +32,7 @@ void WindowAssets::Draw()
 {
 	if (ImGui::Begin("Assets", &visible)) 
 	{		
+		focused = ImGui::IsWindowFocused();
 		//Left window part ------------------------------------------------------------------------------------------------------------------------
         ImGuiWindowFlags window_flags = ImGuiWindowFlags_AlwaysVerticalScrollbar;
         ImGui::BeginChild("Tree", ImVec2(ImGui::GetWindowContentRegionWidth() * 0.15f, ImGui::GetContentRegionAvail().y), false, window_flags);
@@ -280,13 +281,21 @@ bool WindowAssets::DrawIcon(const char* path, int id, bool isFolder)
 		std::string meta_file = App->resources->GenerateMetaFile(path);
 		uint UID = 0;
 
+		std::string file_path = path;
+
+		if (file_path.find(".frag") != std::string::npos) {
+			file_path = FileSystem::GetFolder(path) + FileSystem::GetFileName(path);
+			file_path.append(".vert");
+		}
+
 		if (FileSystem::Exists(meta_file.c_str()))
 			UID = App->resources->GetUIDFromMeta(meta_file.c_str());
 		else
-			UID = App->resources->Find(path);
+			UID = App->resources->Find(file_path.c_str());
+
+		std::string file = FileSystem::GetFile(path);
 
 		ImGui::PushID(UID);
-		std::string file_name = FileSystem::GetFile(path);
 
 		ResourceType type = App->resources->GetTypeFromPath(path);
 		uint imageID = icons.model->GetGpuID();
@@ -297,7 +306,7 @@ bool WindowAssets::DrawIcon(const char* path, int id, bool isFolder)
 			
 			for (std::map<std::string, ResourceTexture*>::iterator it = previews.begin(); it != previews.end(); it++)
 			{
-				if (it->first == file_name) 
+				if (it->first == file) 
 					preview = it->second;
 			}
 
@@ -311,7 +320,7 @@ bool WindowAssets::DrawIcon(const char* path, int id, bool isFolder)
 		if (ImGui::BeginDragDropSource())
 		{
 			ImGui::SetDragDropPayload("ASSETS", &UID, sizeof(int));
-			ImGui::Text("%s", FileSystem::GetFile(path).c_str());
+			ImGui::Text("%s", file.c_str());
 			ImGui::EndDragDropSource();
 		}
 
@@ -327,21 +336,21 @@ bool WindowAssets::DrawIcon(const char* path, int id, bool isFolder)
 			ImGui::EndPopup();
 		}
 
-		if (FileSystem::ToLower(file_name.c_str()).find(".fbx") != std::string::npos)
+		if (FileSystem::ToLower(file.c_str()).find(".fbx") != std::string::npos)
 		{
 			ImGui::SameLine();
 			if (ImGui::Button("->", ImVec2(20,20)))
 				ImGui::OpenPopup("Meshes");
 
-			DrawModelInternalResources(file_name.c_str());
+			DrawModelInternalResources(file.c_str());
 		}
 		
-		if (file_name.size() > 14)
+		if (file.size() > 14)
 		{
-			file_name.resize(14);
-			file_name.replace(file_name.end() - 3, file_name.end(), "...");
+			file.resize(14);
+			file.replace(file.end() - 3, file.end(), "...");
 		}
-		ImGui::Text("%s", file_name.c_str());
+		ImGui::Text("%s", file.c_str());
 
 		ImGui::PopID();
 	}

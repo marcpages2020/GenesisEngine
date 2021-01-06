@@ -85,6 +85,14 @@ void Material::SetResourceUID(uint UID)
 	_resource = dynamic_cast<ResourceMaterial*>(App->resources->RequestResource(UID));
 }
 
+void Material::SetShader(ResourceShader* new_shader)
+{
+	if (shader != nullptr)
+		App->resources->ReleaseResource(shader->GetUID());
+
+	shader = new_shader;
+}
+
 void Material::BindTexture(ResourceTexture* texture)
 {
 	if (!App->resources->Exists(_resourceUID)) 
@@ -196,7 +204,17 @@ void Material::OnEditor()
 			{
 				IM_ASSERT(payload->DataSize == sizeof(int));
 				int UID = *(const int*)payload->Data;
-				shader = dynamic_cast<ResourceShader*>(App->resources->RequestResource(UID));
+
+				Resource* possible_shader = App->resources->RequestResource(UID);
+
+				if (possible_shader != nullptr && possible_shader->GetType() == ResourceType::RESOURCE_SHADER) {
+					SetShader(dynamic_cast<ResourceShader*>(App->resources->RequestResource(UID)));
+
+					//Update shader
+					WindowShaderEditor* shaderEditor = dynamic_cast<WindowShaderEditor*>(App->editor->windows[WINDOW_SHADER_EDITOR]);
+					if (shaderEditor->visible)
+						shaderEditor->Open(shader->assetsFile.c_str());
+				}
 			}
 			ImGui::EndDragDropTarget();
 		}
@@ -205,7 +223,7 @@ void Material::OnEditor()
 		ImGui::Spacing();
 
 		if(ImGui::Button("Open Shader editor")) {
-			WindowShaderEditor* shaderEditor = dynamic_cast<WindowShaderEditor*>(App->editor->windows[SHADER_EDITOR_WINDOW]);
+			WindowShaderEditor* shaderEditor = dynamic_cast<WindowShaderEditor*>(App->editor->windows[WINDOW_SHADER_EDITOR]);
 			shaderEditor->Open(shader->assetsFile.c_str());
 		}
 
@@ -246,7 +264,7 @@ ResourceTexture* Material::DrawTextureInformation(ResourceTexture* texture, Text
 		{
 			IM_ASSERT(payload->DataSize == sizeof(int));
 			int payload_n = *(const int*)payload->Data;
-			WindowAssets* assets_window = (WindowAssets*)App->editor->windows[ASSETS_WINDOW];
+			WindowAssets* assets_window = (WindowAssets*)App->editor->windows[WINDOW_ASSETS];
 			Resource* possible_texture = App->resources->RequestResource(payload_n);
 
 			if (possible_texture->GetType() == ResourceType::RESOURCE_TEXTURE) {
@@ -284,19 +302,27 @@ ResourceTexture* Material::DrawTextureInformation(ResourceTexture* texture, Text
 	return texture;
 }
 
-void Material::SetTexture(ResourceTexture* texture)
+void Material::SetTexture(ResourceTexture* texture, TextureType type)
 {
-	/*
 	if (texture != nullptr)
 	{
-		if (_diffuseMap != nullptr)
-			App->resources->ReleaseResource(_diffuseMap->GetUID());
-
-		_diffuseMap = texture;
-		_resource->diffuseTextureUID = _diffuseMap->GetUID();
-		checkers_image = false;
+		switch (type)
+		{
+		case TextureType::DIFFUSE_MAP:
+			_resource->diffuseMap = texture;
+			_resource->diffuseMapID = texture->GetID();
+			break;
+		case TextureType::NORMAL_MAP:
+			_resource->normalMap = texture;
+			_resource->normalMapID = texture->GetID();
+			break;
+		case TextureType::UNKNOWN_MAP:
+			LOG_ERROR("Trying to apply unwnown texture type: %s", texture->name);
+			break;
+		default:
+			break;
+		}
 	}
-	*/
 }
 
 void Material::AssignCheckersImage()

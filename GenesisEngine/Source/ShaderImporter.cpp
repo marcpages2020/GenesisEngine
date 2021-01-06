@@ -102,6 +102,9 @@ void ShaderImporter::CreateProgram(ResourceShader* shader)
 		glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
 		LOG_ERROR("Error linking shader program: %s", infoLog);
 
+		glDetachShader(shaderProgram, shader->vertexShader);
+		glDetachShader(shaderProgram, shader->fragmentShader);
+
 		glDeleteShader(shader->vertexShader);
 		glDeleteShader(shader->fragmentShader);
 	}

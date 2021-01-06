@@ -6,7 +6,7 @@
 
 WindowHierarchy::WindowHierarchy() : EditorWindow() 
 {
-	type = WindowType::HIERARCHY_WINDOW;
+	type = WindowType::WINDOW_HIERARCHY;
 }
 
 WindowHierarchy::~WindowHierarchy() {}
@@ -15,6 +15,7 @@ void WindowHierarchy::Draw()
 {
 	if (ImGui::Begin("Hierarchy", &visible))
 	{
+		focused = ImGui::IsWindowFocused();
 		GameObject* root = App->scene->GetRoot();
 		int id = 0;
 		PreorderHierarchy(root, id);

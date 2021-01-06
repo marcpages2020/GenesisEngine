@@ -79,6 +79,7 @@ void ModuleResources::OnEditor()
 	std::vector<Resource*> meshes;
 	std::vector<Resource*> materials;
 	std::vector<Resource*> textures;
+	std::vector<Resource*> shaders;
 
 	std::map<uint, Resource*>::iterator it = resources.begin();
 	for (it; it != resources.end(); it++)
@@ -90,6 +91,9 @@ void ModuleResources::OnEditor()
 			break;
 		case ResourceType::RESOURCE_MATERIAL:
 			materials.push_back(it->second);
+			break;
+		case ResourceType::RESOURCE_SHADER:
+			shaders.push_back(it->second);
 			break;
 		case ResourceType::RESOURCE_TEXTURE:
 			textures.push_back(it->second);
@@ -123,6 +127,21 @@ void ModuleResources::OnEditor()
 			ImGui::Text("Assets path: %s", materials[i]->assetsFile.c_str());
 			ImGui::Text("Library path: %s", materials[i]->libraryFile.c_str());
 			ImGui::Text("Reference count: %d", materials[i]->referenceCount);
+			ImGui::Spacing();
+			ImGui::Separator();
+			ImGui::Spacing();
+		}
+		ImGui::TreePop();
+	}
+
+	if (ImGui::TreeNode("Shaders")) {
+		for (size_t i = 0; i < shaders.size(); i++)
+		{
+			ImGui::Text("Name: %s", shaders[i]->name.c_str());
+			ImGui::Text("UID: %d", shaders[i]->GetUID());
+			ImGui::Text("Assets path: %s", shaders[i]->assetsFile.c_str());
+			ImGui::Text("Library path: %s", shaders[i]->libraryFile.c_str());
+			ImGui::Text("Reference count: %d", shaders[i]->referenceCount);
 			ImGui::Spacing();
 			ImGui::Separator();
 			ImGui::Spacing();
@@ -362,8 +381,7 @@ uint ModuleResources::ImportFile(const char* assets_file)
 	ret = resource->GetUID();
 	RELEASE_ARRAY(fileBuffer);
 
-	if(type != ResourceType::RESOURCE_SHADER)
-	 ReleaseResource(ret);
+	ReleaseResource(ret);
 
 	return ret;
 }
@@ -455,7 +473,7 @@ void ModuleResources::CreateResourceData(uint UID, const char* name, const char*
 
 void ModuleResources::DragDropFile(const char* path)
 {
-	WindowImport* import_window = dynamic_cast<WindowImport*>(App->editor->windows[WindowType::IMPORT_WINDOW]);
+	WindowImport* import_window = dynamic_cast<WindowImport*>(App->editor->windows[WindowType::WINDOW_IMPORT]);
 	import_window->Enable(path, GetTypeFromPath(path));
 }
 
@@ -618,6 +636,8 @@ void ModuleResources::UnloadResource(Resource* resource)
 		break;
 	case ResourceType::RESOURCE_MATERIAL:
 		break;
+	case ResourceType::RESOURCE_SHADER:
+		break;
 	case ResourceType::RESOURCE_TEXTURE:
 		TextureImporter::UnloadTexture(((ResourceTexture*)resource)->GetID());
 		break;
@@ -671,7 +691,12 @@ Resource* ModuleResources::CreateResource(const char* assetsPath, ResourceType t
 	if (resource != nullptr)
 	{
 		resources[UID] = resource;
-		resources[UID]->name = FileSystem::GetFileName(assetsPath);
+
+		if (type == ResourceType::RESOURCE_SHADER)
+			resource->name = FileSystem::GetFileName(resource->assetsFile.c_str());
+		else
+			resource->name = FileSystem::GetFile(resource->assetsFile.c_str());
+
 		resource->assetsFile = FileSystem::ToLower(assetsPath);
 		resource->libraryFile = GenerateLibraryPath(resource);
 
@@ -721,7 +746,11 @@ Resource* ModuleResources::CreateResource(uint UID, ResourceType type, std::stri
 			resource->assetsFile = resources_data[UID].assetsFile;
 
 		resource->libraryFile = GenerateLibraryPath(resource);
-		resource->name = FileSystem::GetFile(resource->assetsFile.c_str());
+
+		if(type == ResourceType::RESOURCE_SHADER)
+			resource->name = FileSystem::GetFileName(resource->assetsFile.c_str());
+		else
+			resource->name = FileSystem::GetFile(resource->assetsFile.c_str());
 
 		resources[UID] = resource;
 	}
@@ -1021,10 +1050,12 @@ std::string ModuleResources::GenerateAssetsPath(const char* path)
 		assets_path = "Assets/Models/"; break;
 	case RESOURCE_TEXTURE:
 		assets_path = "Assets/Textures/"; break;
+	case RESOURCE_SHADER:
+		assets_path = "Assets/Shaders/"; break;
 	case RESOURCE_SCENE:
 		assets_path = "Assets/Scenes/"; break;
 	default:
-		break;
+		assets_path = "Assets/"; break;
 	}
 
 	assets_path.append(file);

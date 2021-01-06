@@ -12,7 +12,7 @@
 
 WindowShaderEditor::WindowShaderEditor() : EditorWindow(), text_size(14)
 {
-	type = WindowType::SHADER_EDITOR_WINDOW;
+	type = WindowType::WINDOW_SHADER_EDITOR;
 }
 
 WindowShaderEditor::~WindowShaderEditor()
@@ -72,7 +72,7 @@ void WindowShaderEditor::Draw()
 {
 	if (ImGui::Begin("Shader Editor", &visible), ImGuiWindowFlags_MenuBar)
 	{
-
+		focused = ImGui::IsWindowFocused();
 		if (ImGui::BeginTabBar("##TabBar"))
 		{
 			//Tabs =================================================================================================

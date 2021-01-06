@@ -7,8 +7,10 @@ uniform sampler2D normalMap;
 uniform vec3 cameraPosition;
 uniform float time;
 
+uniform vec3 color;
 uniform float contrast;
 uniform float speed;
+uniform float steepness;
 in float relative_position;
 in vec3 Normal;
 
@@ -64,14 +66,11 @@ float fbm(vec2 coord) {
 
 void main()
 {
-    vec2 coord = fs_in.FragPos.xz * 3.0;
+    vec2 coord = fs_in.FragPos.xz * 10.0;
     float value = fbm(coord);   
     
     vec3 normal = texture(normalMap, fs_in.TexCoords * 1.5).rgb;
     normal = normalize(normal * 2.0 - 1.0);
-    
-    //diffuse color
-    vec3 color = vec3(0.1, 0.5, 0.6);
     
     //ambient 
     float ambientStrength = 0.55;
@@ -89,9 +88,19 @@ void main()
     float spec = pow(max(dot(normal, halfwayDir), 0.0), 32.0);
     
     vec3 specular = vec3(0.5) * spec;    
-	FragColor = vec4(ambient + diffuse + specular, 1.0);// + value * relative_position * 0.2;
-    //FragColor = vec4(normal, 1.0);
+	FragColor = vec4(ambient * 2.0 * relative_position + diffuse + specular, 1.0);
+	
+	FragColor.rgb += vec3(value) * max(relative_position - 0.5, 0.0) * 5.0;
 } 
+
+
+
+
+
+
+
+
+
 
 
 

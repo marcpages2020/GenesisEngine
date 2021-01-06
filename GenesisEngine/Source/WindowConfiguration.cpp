@@ -8,7 +8,7 @@
 
 WindowConfiguration::WindowConfiguration() : EditorWindow() 
 {
-	type = WindowType::CONFIGURATION_WINDOW;
+	type = WindowType::WINDOW_CONFIGURATION;
 
 	fps_log.resize(100, 0);
 	ms_log.resize(100, 0);
@@ -24,6 +24,7 @@ void WindowConfiguration::Draw()
 {
 	if (ImGui::Begin("Configuration", &visible))
 	{
+		focused = ImGui::IsWindowFocused();
 		if (ImGui::CollapsingHeader("Application"))
 		{
 			static int fps_cap = App->GetFPSCap();
