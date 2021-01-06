@@ -4,6 +4,8 @@
 #include "EditorWindow.h"
 #include "TextEditor/TextEditor.h"
 
+enum class ShaderType;
+
 class WindowShaderEditor : public EditorWindow {
 public:
 	WindowShaderEditor();
@@ -13,6 +15,8 @@ public:
 	void Open(const char* assets_file_path);
 	void Draw() override;
 	void DrawEditor(TextEditor& editor, char* path);
+	void SetErrorsOnScreen(const char* infoLog, ShaderType type);
+	std::vector<std::pair<int, std::string>> SplitErrors(const char* infoLog);
 
 private:
 	int text_size;

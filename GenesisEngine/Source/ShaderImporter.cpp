@@ -3,6 +3,7 @@
 #include "FileSystem.h"
 #include "Application.h"
 #include "GnJSON.h"
+#include "WindowShaderEditor.h"
 
 #include "glew/include/glew.h"
 
@@ -39,7 +40,7 @@ GLuint ShaderImporter::Compile(char* fileBuffer, ShaderType type)
 		glShaderSource(vertexShader, 1, &fileBuffer, NULL);
 		glCompileShader(vertexShader);
 
-		if (!ShaderHasError(vertexShader))
+		if (!ShaderHasError(vertexShader, ShaderType::VERTEX_SHADER))
 			return vertexShader;
 		else
 			glDeleteShader(vertexShader);
@@ -51,7 +52,7 @@ GLuint ShaderImporter::Compile(char* fileBuffer, ShaderType type)
 		glShaderSource(fragmentShader, 1, &fileBuffer, NULL);
 		glCompileShader(fragmentShader);
 
-		if (!ShaderHasError(fragmentShader))
+		if (!ShaderHasError(fragmentShader, ShaderType::FRAGMENT_SHADER))
 			return fragmentShader;
 		else
 			glDeleteShader(fragmentShader);
@@ -64,7 +65,7 @@ GLuint ShaderImporter::Compile(char* fileBuffer, ShaderType type)
 	return 0;
 }
 
-bool ShaderImporter::ShaderHasError(GLuint shader)
+bool ShaderImporter::ShaderHasError(GLuint shader, ShaderType type)
 {
 	int success;
 	char infoLog[512];
@@ -74,6 +75,9 @@ bool ShaderImporter::ShaderHasError(GLuint shader)
 	{
 		glGetShaderInfoLog(shader, 512, NULL, infoLog);
 		LOG_ERROR("Error compilating shader: %s", infoLog);
+
+		WindowShaderEditor* shader_editor = dynamic_cast<WindowShaderEditor*>(App->editor->windows[WINDOW_SHADER_EDITOR]);
+		shader_editor->SetErrorsOnScreen(infoLog, type);
 	}
 	else
 	{

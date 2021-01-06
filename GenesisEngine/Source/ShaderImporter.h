@@ -14,7 +14,7 @@ namespace ShaderImporter
 {
 	void Import(char* fileBuffer, ResourceShader* shader, const char* assets_path);
 	GLuint Compile(char* fileBuffer, ShaderType type);
-	bool ShaderHasError(GLuint shader);
+	bool ShaderHasError(GLuint shader, ShaderType type);
 	void CreateProgram(ResourceShader* shader);
 	void GetUniforms(GLuint program, ResourceShader* shader);
 	uint Save(ResourceShader* shader, char** fileBuffer);
