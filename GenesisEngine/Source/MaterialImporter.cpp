@@ -17,6 +17,11 @@ void MaterialImporter::Import(const aiMaterial* aimaterial, ResourceMaterial* ma
 	aiColor3D aiDiffuseColor;
 	aimaterial->Get(AI_MATKEY_COLOR_DIFFUSE, aiDiffuseColor);
 
+	material->diffuseColor.r = aiDiffuseColor.r;
+	material->diffuseColor.g = aiDiffuseColor.g;
+	material->diffuseColor.b = aiDiffuseColor.b;
+	material->diffuseColor.a = 1.0f;
+
 	if (path.length > 0)
 	{
 		std::string file_path = material->assetsFile;
@@ -38,10 +43,6 @@ void MaterialImporter::Import(const aiMaterial* aimaterial, ResourceMaterial* ma
 			if (material->diffuseMapID == 0)
 				LOG("Texture %s not found", file_path.c_str());
 		}
-
-		material->diffuseColor.r = aiDiffuseColor.r;
-		material->diffuseColor.g = aiDiffuseColor.g;
-		material->diffuseColor.b = aiDiffuseColor.b;
 
 		//LOG("%s imported in %.3f s", texture->path.c_str(), timer.ReadSec());
 	}
@@ -70,7 +71,7 @@ bool MaterialImporter::Load(const char* fileBuffer, ResourceMaterial* material, 
 
 	GnJSONObj material_data(fileBuffer);
 
-	material->diffuseColor = material_data.GetColor("diffuseColor");
+	material->diffuseColor = material_data.GetColor("diffuseColor", Color(0.0f, 1.0f, 0.0f, 1.0f));
 
 	//diffuse texture
 	uint diffuseTextureID = material_data.GetInt("diffuseMapID", 0);

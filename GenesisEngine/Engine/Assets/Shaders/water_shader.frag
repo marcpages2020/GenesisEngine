@@ -8,6 +8,7 @@ uniform sampler2D depthMap;
 uniform vec3 cameraPosition;
 uniform float time;
 
+uniform float opacity;
 uniform vec3 color;
 uniform float contrast;
 uniform float speed;
@@ -32,24 +33,14 @@ float LinearizeDepth(float depth);
 
 void main()
 {
-    vec2 coord = fs_in.FragPos.xz * 4.0 / normalMapTiling.x;
+    vec2 coord = fs_in.FragPos.xz * (2 /normalMapTiling.x);
     float value = fbm(coord);   
     
     vec3 normal = texture(normalMap, fs_in.TexCoords * 1.5).rgb;
     normal = normalize(normal * 2.0 - 1.0);
     
-    vec2 ndc = (fs_in.clipSpace.xy / fs_in.clipSpace.w) / 2.0 + 0.5;
-    float depth = texture(depthMap, ndc).r;
-    float near = 0.3;
-    float far = 1000.0;
-    float floorDistance = 2.0 * near * far / (far + near - (2.0 * depth - 1.0) * (far - near));
-    
-    depth = gl_FragCoord.z;
-    float waterDistance = 2.0 * near * far / (far + near - (2.0 * depth - 1.0) * (far - near));
-    float waterDepth = floorDistance - waterDistance;
-    
     //ambient 
-    float ambientStrength = 0.55;
+    float ambientStrength = 0.75;
     vec3 ambient = ambientStrength * color;
   	
     // diffuse 
@@ -66,15 +57,11 @@ void main()
     vec3 specular = vec3(0.5) * spec;  
     
     vec3 foam = vec3(value);
-    //foam = (vec3(value * 2.0) - (specular)) * max(5.0 * relative_position,0.0);
-    //float depth = LinearizeDepth(gl_FragCoord.z) / 50.0;
-    vec4 waterColor = vec4(ambient + diffuse + specular, 0.5);
-	vec4 foamColor = vec4(vec3(foam) * relative_position* 0.45, relative_position * 0.35);
-	foamColor.rgb += diffuse;
+
+    vec4 waterColor = vec4(ambient + diffuse + specular, opacity);
+	vec4 foamColor = vec4(vec3(value * relative_position), value * relative_position);
 	
-	FragColor = waterColor + foamColor;
-	//FragColor = vec4(vec3(relative_position), 1.0);
-	//FragColor = vec4(waterDepth / 50.0);
+	FragColor = vec4(waterColor.rgb, opacity) + foamColor;
 } 
 
 
@@ -127,6 +114,10 @@ float LinearizeDepth(float depth)
  float far = 1000.0;
  return 2.0 * near * far / (far + near - (2.0 * depth - 1.0) * (far - near));
 }
+
+
+
+
 
 
 

@@ -147,6 +147,7 @@ void WindowScene::DrawGameTimeDataOverlay()
 void WindowScene::ApplyDroppedFile(const char* assets_file)
 {
 	ResourceType type = App->resources->GetTypeFromPath(assets_file);
+	GameObject* selected_object = App->scene->selectedGameObject;
 
 	if (type == ResourceType::RESOURCE_MODEL)
 	{
@@ -154,7 +155,6 @@ void WindowScene::ApplyDroppedFile(const char* assets_file)
 	}
 	else if (type == ResourceType::RESOURCE_TEXTURE)
 	{
-		GameObject* selected_object = App->scene->selectedGameObject;
 
 		if (selected_object == nullptr)
 			return;
@@ -162,7 +162,13 @@ void WindowScene::ApplyDroppedFile(const char* assets_file)
 		Material* material = (Material*)selected_object->GetComponent(ComponentType::MATERIAL);
 		if (material != nullptr)
 		{
-			material->SetTexture((ResourceTexture*)App->resources->RequestResource(App->resources->Find(assets_file)));
-		}
+			material->SetTexture((ResourceTexture*)App->resources->RequestResource(App->resources->Find(assets_file)));}
+	}
+	else if (type == ResourceType::RESOURCE_SHADER)
+	{
+		Material* material = (Material*)selected_object->GetComponent(ComponentType::MATERIAL);
+		if (material != nullptr)
+		{
+			material->SetShader((ResourceShader*)App->resources->RequestResource(App->resources->Find(assets_file)));}
 	}
 }

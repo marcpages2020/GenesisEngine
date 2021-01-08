@@ -26,7 +26,7 @@
 #pragma comment (lib, "glew/libx86/glew32.lib")		  /* link glew lib */
 
 ModuleRenderer3D::ModuleRenderer3D(bool start_enabled) : Module(start_enabled), cull_editor_camera(false), context(nullptr), 
-_mainCamera(nullptr), colorTexture(0), draw_aabbs(true), draw_mouse_picking_ray(false), draw_vertex_normals(false), draw_face_normals(false),
+_mainCamera(nullptr), colorTexture(0), draw_aabbs(false), draw_mouse_picking_ray(false), draw_vertex_normals(false), draw_face_normals(false),
 frameBuffer(0), renderBuffer(0), depthTexture(0), depthRenderBuffer(0), display_mode(SOLID), vsync(false)
 {
 	name = "renderer";
@@ -154,6 +154,7 @@ bool ModuleRenderer3D::LoadConfig(GnJSONObj& config)
 	//debug = config.GetBool("debug");
 	vsync = config.GetBool("vsync");
 
+	draw_aabbs = config.GetBool("draw_aabbs");
 	draw_vertex_normals = config.GetBool("draw_vertex_normals");
 	draw_face_normals = config.GetBool("draw_face_normals");
 
@@ -176,6 +177,8 @@ update_status ModuleRenderer3D::PreUpdate(float dt)
 	//light 0 on cam pos
 	float3 cameraPosition = App->camera->GetPosition();
 	lights[0].SetPos(cameraPosition.x, cameraPosition.y, cameraPosition.z);
+
+	blendedMeshes.clear();
 
 	for (uint i = 0; i < MAX_LIGHTS; ++i)
 		lights[i].Render();

@@ -4,6 +4,8 @@
 #include "GameObject.h"
 #include "Transform.h"
 #include "Time.h"
+#include "Material.h"
+#include "ResourceMaterial.h"
 
 #include "GnJSON.h"
 #include "ImGui/imgui.h"
@@ -29,13 +31,15 @@ uint ResourceShader::SaveMeta(GnJSONObj& base_object, uint last_modification)
 	return _uid;
 }
 
-void ResourceShader::OnEditor()
+void ResourceShader::OnEditor(Material* material, ResourceMaterial* resourceMaterial)
 {
+	
 	ImGuiTreeNodeFlags tree_flags = ImGuiTreeNodeFlags_DefaultOpen;
-	if (ImGui::TreeNodeEx("Uniforms", tree_flags)) 
+	if (ImGui::TreeNodeEx("Uniforms", tree_flags))
 	{
 		const float step = 1.0f;
 		ImGui::Spacing();
+
 		for (std::map<std::string, Uniform>::iterator it = uniforms.begin(); it != uniforms.end(); it++)
 		{
 			if (!IsDefaultUniform(it->second.name.c_str()))
@@ -55,6 +59,7 @@ void ResourceShader::OnEditor()
 					break;
 
 				case UniformType::VEC_3:
+					
 					ImGui::PushID(it->first.c_str());
 					ImGui::Checkbox("Color", &it->second.color);
 					ImGui::SameLine();
@@ -66,28 +71,42 @@ void ResourceShader::OnEditor()
 						}
 					}
 					else {
-						ImGui::InputFloat3(it->first.c_str(), it->second.vec3.ptr());}
-					ImGui::PopID ();
+						ImGui::InputFloat3(it->first.c_str(), it->second.vec3.ptr());
+					}
+					ImGui::PopID();
+					
 					break;
 
 				case UniformType::VEC_4:
+					
 					ImGui::PushID(it->first.c_str());
 					ImGui::Checkbox("Color", &it->second.color);
 					ImGui::SameLine();
+
 					if (it->second.color)
 					{
 						ImVec4 color = ImVec4(it->second.vec4.x, it->second.vec4.y, it->second.vec4.z, it->second.vec4.w);
 						if (ImGui::ColorEdit4("Color##1", (float*)&color)) {
-							it->second.vec4 = float4(color.x, color.y, color.z, color.w);}
+							it->second.vec4 = float4(color.x, color.y, color.z, color.w);
+						}
+
+						/*
+						if (it->first == "diffuseColor") {
+							if (resourceMaterial != nullptr) {
+								resourceMaterial->diffuseColor = Color(color.x, color.y, color.z, color.w);
+							}
+						}
+						*/
 					}
 					else {
-						ImGui::InputFloat4(it->first.c_str(), it->second.vec4.ptr());}
+						ImGui::InputFloat4(it->first.c_str(), it->second.vec4.ptr());
+					}
 					ImGui::PopID();
+					
 					break;
-
 				default:
 					break;
-				}
+			}
 			}
 		}
 
@@ -218,6 +237,8 @@ void ResourceShader::SetUniforms()
 			break;
 		case GL_FLOAT_VEC4:
 			SetVec4(it->first.c_str(), it->second.vec4.x, it->second.vec4.y, it->second.vec4.z, it->second.vec4.z);
+			if (it->first == "diffuseColor") 
+				it->second.color = true;
 			break;
 
 		//INT ======================================================================================
@@ -249,37 +270,58 @@ void ResourceShader::SetUniforms()
 			break;
 		default:
 			break;
+
 		}
 	}
 }
 
-void ResourceShader::UpdateUniforms(float4x4 globalTransform)
+void ResourceShader::UpdateUniforms(Material* material, ResourceMaterial* resourceMaterial)
 {
+	float4x4 globalTransform = material->GetGameObject()->GetTransform()->GetGlobalTransform();
+
 	for (std::map<std::string, Uniform>::iterator it = uniforms.begin(); it != uniforms.end(); it++)
 	{
-		if (it->second.name == "model_matrix") {
-			SetMat4("model_matrix", globalTransform.Transposed().ptr());
+		//Default uniforms
+		if (IsDefaultUniform(it->first.c_str()))
+		{
+			if (it->first == "model_matrix") {
+				SetMat4("model_matrix", globalTransform.Transposed().ptr());
+			}
+			else if (it->first == "projection") {
+				SetMat4("projection", App->camera->GetProjectionMatrixM().Transposed().ptr());
+			}
+			else if (it->first == "view") {
+				SetMat4("view", App->camera->GetViewMatrixM().Transposed().ptr());
+			}
+			else if (it->first == "time") {
+				SetFloat("time", Time::realClock.timeSinceStartup());
+			}
+			else if (it->first == "normalMatrix") {
+				float3x3 normalMatrix = globalTransform.Float3x3Part();
+				normalMatrix.Inverse();
+				normalMatrix.Transpose();
+				SetMat3("normalMatrix", normalMatrix.ptr());
+			}
+			else if (it->first == "cameraPosition") {
+				float3 cameraPosition = App->camera->GetPosition();
+				SetVec3("cameraPosition", cameraPosition.x, cameraPosition.y, cameraPosition.z);
+			} 
+			else if (it->first == "diffuseColor") {
+				if (resourceMaterial != nullptr) {
+					SetVec4("diffuseColor", resourceMaterial->diffuseColor.r, resourceMaterial->diffuseColor.g, resourceMaterial->diffuseColor.b, resourceMaterial->diffuseColor.a);
+				}
+			}
 		}
-		else if (it->second.name == "projection") {
-			SetMat4("projection", App->camera->GetProjectionMatrixM().Transposed().ptr());
-		}
-		else if (it->second.name == "view"){
-			SetMat4("view", App->camera->GetViewMatrixM().Transposed().ptr());
-		}
-		else if (it->second.name == "time") {
-			SetFloat("time", Time::realClock.timeSinceStartup());
-		}
-		else if (it->second.name == "normalMatrix") {
-			float3x3 normalMatrix = globalTransform.Float3x3Part();
-			normalMatrix.Inverse();
-			normalMatrix.Transpose();
-			SetMat3("normalMatrix", normalMatrix.ptr());
-		}
-		else if (it->second.name == "cameraPosition") {
-			float3 cameraPosition = App->camera->GetPosition();
-			SetVec3("cameraPosition", cameraPosition.x, cameraPosition.y, cameraPosition.z);
-		}
+		//User Uniforms
 		else {
+			/*
+			if (it->first == "diffuseColor") {
+				if (resourceMaterial != nullptr) {
+					it->second.vec4 = float4(resourceMaterial->diffuseColor.r, resourceMaterial->diffuseColor.g, resourceMaterial->diffuseColor.b, resourceMaterial->diffuseColor.a);
+					it->second.color = true;
+				}
+			}
+			*/
 			switch (it->second.uniformType)
 			{
 			case UniformType::BOOLEAN:
@@ -306,9 +348,10 @@ void ResourceShader::UpdateUniforms(float4x4 globalTransform)
 
 bool ResourceShader::IsDefaultUniform(const char* uniform_name)
 {
-	const char* default_uniforms[7] = { "model_matrix" , "projection", "view", "time", "cameraPosition", "diffuseMapTiling","normalMapTiling" };
+	const char* default_uniforms[10] = { "model_matrix" , "projection", "view", "time", "cameraPosition", "diffuseMapTiling",
+										 "normalMapTiling", "hasDiffuseMap", "hasNormalMap", "diffuseColor"};
 
-	for (size_t i = 0; i < 7; i++)
+	for (size_t i = 0; i < 10; i++)
 	{
 		if (strcmp(uniform_name, default_uniforms[i]) == 0)
 			return true;

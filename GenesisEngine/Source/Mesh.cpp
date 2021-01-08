@@ -89,12 +89,10 @@ AABB GnMesh::GetAABB()
 
 void GnMesh::Update()
 {
-	if (!blend)
-	{
+	if (!blend){
  		Render();
 	}
-	else
-	{
+	else {
 		App->renderer3D->AddBlendedMesh(_gameObject->GetTransform()->GetPosition(), this);
 	}
 }

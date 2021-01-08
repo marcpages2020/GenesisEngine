@@ -29,6 +29,7 @@
       "name": "renderer",
       "debug": false,
       "vsync": false,
+      "draw_aabbs": false,
       "draw_vertex_normals": false,
       "draw_face_normals": false
     },

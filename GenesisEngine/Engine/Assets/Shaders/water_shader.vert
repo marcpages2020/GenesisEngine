@@ -44,7 +44,7 @@ void main()
  float w = sqrt(9.81 * (2 * pi / wave_length));
  float num_waves = 3.0;
  
- float amp1 = 0.05;
+ float amp1 = 0.5;
  vec3 wave1 = generateWave(amp1, direction_1, num_waves, steepness, phase_constant, w);
  
  float amp2 = 0.035;
@@ -55,7 +55,8 @@ void main()
 
  fPosition += wave1 + wave2 + wave3;
  relative_position = fPosition.z / ((amp1 * 2.0 + amp2 * 2.0 + amp3 * 2.0) / num_waves);
- relative_position = (relative_position + 1.0) * 0.5;
+ relative_position = (relative_position + 0.5) * 0.5;
+ relative_position = max(relative_position, 0.0);
  
  vs_out.FragPos = vec3(model_matrix * vec4(position, 1.0));
 
@@ -90,6 +91,10 @@ vec3 generateWave(float amp, vec3 direction, float num_waves, float steepness,
  
  return wave;
 }
+
+
+
+
 
 
 

@@ -6,6 +6,7 @@
 #include "FileSystem.h"
 #include "GameObject.h"
 #include "Transform.h"
+#include "ResourceMaterial.h"
 
 ModuleScene::ModuleScene(bool start_enabled) : Module(start_enabled), show_grid(true), selectedGameObject(nullptr), root(nullptr) 
 {
@@ -34,12 +35,12 @@ bool ModuleScene::Start()
 	water->GetTransform()->SetPosition(float3(0.0f, 1.5f, 0.0f));
 	water->GetTransform()->SetScale(float3(50.0f, 1.0f, 50.0f));
 	water->UpdateChildrenTransforms();
-	AddGameObject(water);
 
-	//GameObject* rayman = App->resources->RequestGameObject("Assets/Models/Rayman/rayman.fbx");
-	//AddGameObject(rayman);
-	//rayman->GetTransform()->SetScale(float3(0.15, 0.15, 0.15));
-	//rayman->UpdateChildrenTransforms();
+	water = water->GetChildAt(0);
+	Material* material = (Material*)water->GetComponent(ComponentType::MATERIAL);
+	material->SetShader((ResourceShader*) App->resources->RequestResource(App->resources->Find("Assets/Shaders/water_shader.vert")));
+
+	AddGameObject(water);
 
 	GameObject* street_environment = App->resources->RequestGameObject("Assets/Models/street/Street environment_V01.fbx");
 	AddGameObject(street_environment);

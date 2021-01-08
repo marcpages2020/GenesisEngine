@@ -13,6 +13,7 @@ typedef unsigned char GLubyte;
 typedef void* SDL_GLContext;
 class Camera;
 class GnMesh;
+class ResourceShader;
 
 enum DisplayMode
 {
@@ -43,6 +44,7 @@ public:
 	Camera* GetMainCamera();
 	bool IsInsideCameraView(AABB aabb);
 	void AddBlendedMesh(float3 position, GnMesh* mesh);
+	void CreateDefaultShader();
 
 	void SetCapActive(GLenum cap, bool active);
 	void SetVSYNC(bool enabled);
@@ -79,6 +81,7 @@ public:
 	bool draw_face_normals;
 
 	bool vsync;
+	ResourceShader* defaultShader;
 
 private: 
 	Camera* _mainCamera;

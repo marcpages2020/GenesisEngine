@@ -10,6 +10,8 @@
 
 typedef unsigned int GLenum;
 class GnJSONObj;
+class Material;
+class ResourceMaterial;
 
 enum class ShaderType
 {
@@ -55,14 +57,14 @@ public:
 	~ResourceShader();
 
 	uint SaveMeta(GnJSONObj& base_object, uint last_modification) override;
-	void OnEditor();
+	void OnEditor(Material* material, ResourceMaterial* resourceMaterial);
 	uint Save(GnJSONObj& base_object) override;
 	void Load(GnJSONObj& base_object) override;
 
 	void Use();
 
 	void SetUniforms();
-	void UpdateUniforms(float4x4 globalTransform);
+	void UpdateUniforms(Material* material, ResourceMaterial* resourceMaterial);
 	bool IsDefaultUniform(const char* uniform_name);
 
 	void SetBool(const char* name, bool value);

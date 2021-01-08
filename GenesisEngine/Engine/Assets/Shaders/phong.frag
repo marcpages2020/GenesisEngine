@@ -1,14 +1,15 @@
 #version 330 core
-in vec3 ourColor;
 in vec2 TexCoord;
 in vec3 Normal;
 in vec3 FragPos;
 
 out vec4 color;
 
+uniform vec4 diffuseColor;
 uniform vec3 cameraPosition;
-uniform sampler2D ourTexture;
+uniform sampler2D diffuseMap;
 uniform float time;
+uniform bool hasDiffuseMap;
 
 struct Material{
     vec3 ambient;
@@ -19,7 +20,6 @@ struct Material{
 
 struct Light {
     vec3 position;
-  
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
@@ -50,9 +50,22 @@ void main()
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
     vec3 specular = light.specular * (spec * material.specular);  
    
-   color = texture(ourTexture, TexCoord);
+   if(hasDiffuseMap) {
+     color = diffuseColor * texture(diffuseMap, TexCoord);
+    }
+    else {
+     color = diffuseColor;
+    }
+    
    color.rgb += diffuse + specular;
 }
+
+
+
+
+
+
+
 
 
 

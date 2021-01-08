@@ -31,7 +31,7 @@ Material::Material() : Component(), checkers_image(false), _resource(nullptr), c
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-Material::Material(GameObject* gameObject) : Component(gameObject), checkers_image(false), _resource(nullptr)
+Material::Material(GameObject* gameObject) : Component(gameObject), checkers_image(false), _resource(nullptr), colored(false)
 {
 	type = ComponentType::MATERIAL;
 
@@ -111,19 +111,22 @@ void Material::BindTexture(ResourceTexture* texture)
 void Material::UseShader()
 {
 	shader->Use();
-
-	shader->UpdateUniforms(_gameObject->GetTransform()->GetGlobalTransform());
+	shader->UpdateUniforms(this, _resource);
 
 	//diffuse map
 	if (checkers_image == false)
 	{
-
 		if (_resource->diffuseMap != nullptr)
 		{
 			shader->SetInt("diffuseMap", 0);
 			glActiveTexture(GL_TEXTURE0);
 			BindTexture(_resource->diffuseMap);
 			shader->SetVec2("diffuseMapTiling", _resource->tiling[DIFFUSE_MAP][0], _resource->tiling[DIFFUSE_MAP][1]);
+			shader->SetBool("hasDiffuseMap", true);
+		}
+		else
+		{
+			shader->SetBool("hasDiffuseMap", false);
 		}
 	}
 	else
@@ -140,6 +143,11 @@ void Material::UseShader()
 			glActiveTexture(GL_TEXTURE1);
 			BindTexture(_resource->normalMap);
 			shader->SetVec2("normalMapTiling", _resource->tiling[NORMAL_MAP][0], _resource->tiling[NORMAL_MAP][1]);
+			shader->SetBool("hasNormalMap", true);
+		}
+		else
+		{
+			shader->SetBool("hasNormalMap", false);
 		}
 	}
 
@@ -229,7 +237,7 @@ void Material::OnEditor()
 		ImGui::Spacing();
 		ImGui::Spacing();
 
-		shader->OnEditor();
+		shader->OnEditor(this, _resource);
 	}
 }
 
@@ -300,6 +308,15 @@ ResourceTexture* Material::DrawTextureInformation(ResourceTexture* texture, Text
 	}
 
 	ImGui::Columns(1);
+
+	ImGui::Spacing();
+	if (type == TextureType::DIFFUSE_MAP)
+	{
+		ImVec4 color = ImVec4(_resource->diffuseColor.r, _resource->diffuseColor.g, _resource->diffuseColor.b, _resource->diffuseColor.a);
+		if (ImGui::ColorEdit4("Albedo", (float*)&color)) {
+			_resource->diffuseColor = Color(color.x, color.y, color.z, color.w);
+		}
+	}
 
 	if (texture != nullptr)
 	{

@@ -324,7 +324,7 @@ bool WindowAssets::DrawIcon(const char* path, int id, bool isFolder)
 			ImGui::EndDragDropSource();
 		}
 
-		if (ImGui::BeginPopupContextItem()) {
+		if (ImGui::BeginPopupContextItem(path)) {
 			if (ImGui::Button("Delete"))
 			{
 				App->resources->AddAssetToDelete(path);

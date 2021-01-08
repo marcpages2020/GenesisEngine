@@ -125,7 +125,7 @@ void ShaderImporter::CreateProgram(ResourceShader* shader)
 	{
 		shader->program_id = shaderProgram;
 		
-		GetUniforms(shaderProgram, shader);
+		SetUniforms(shaderProgram, shader);
 
 		LOG("Shader program created porperly");
 	}
@@ -140,7 +140,7 @@ void ShaderImporter::CreateProgram(ResourceShader* shader)
 	shader->fragmentShader = -1;
 }
 
-void ShaderImporter::GetUniforms(GLuint program, ResourceShader* shader)
+void ShaderImporter::SetUniforms(GLuint program, ResourceShader* shader)
 {
 	int count = 0;
 	std::vector<Uniform> uniforms;
