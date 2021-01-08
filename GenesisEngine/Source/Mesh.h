@@ -29,12 +29,14 @@ public:
 	virtual void Render();
 	virtual void OnEditor() override;
 
+	void Blend(bool blend);
 	void DrawVertexNormals();
 	void DrawFaceNormals();
 
 public:
 	const char* name;
 	char* path;
+	bool blend;
 
 private:
 	AABB _AABB;

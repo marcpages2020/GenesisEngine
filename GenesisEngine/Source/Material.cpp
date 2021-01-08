@@ -47,8 +47,8 @@ Material::Material(GameObject* gameObject) : Component(gameObject), checkers_ima
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	//shader = dynamic_cast<ResourceShader*>(App->resources->RequestResource(App->resources->Find("Assets/Shaders/phong.vert")));
-	shader = dynamic_cast<ResourceShader*>(App->resources->RequestResource(App->resources->Find("Assets/Shaders/water_shader.vert")));
+	shader = dynamic_cast<ResourceShader*>(App->resources->RequestResource(App->resources->Find("Assets/Shaders/phong.vert")));
+	//shader = dynamic_cast<ResourceShader*>(App->resources->RequestResource(App->resources->Find("Assets/Shaders/water_shader.vert")));
 }
 
 Material::~Material()
@@ -112,6 +112,8 @@ void Material::UseShader()
 {
 	shader->Use();
 
+	shader->UpdateUniforms(_gameObject->GetTransform()->GetGlobalTransform());
+
 	//diffuse map
 	if (checkers_image == false)
 	{
@@ -121,6 +123,7 @@ void Material::UseShader()
 			shader->SetInt("diffuseMap", 0);
 			glActiveTexture(GL_TEXTURE0);
 			BindTexture(_resource->diffuseMap);
+			shader->SetVec2("diffuseMapTiling", _resource->tiling[DIFFUSE_MAP][0], _resource->tiling[DIFFUSE_MAP][1]);
 		}
 	}
 	else
@@ -136,10 +139,13 @@ void Material::UseShader()
 			shader->SetInt("normalMap", 1);
 			glActiveTexture(GL_TEXTURE1);
 			BindTexture(_resource->normalMap);
+			shader->SetVec2("normalMapTiling", _resource->tiling[NORMAL_MAP][0], _resource->tiling[NORMAL_MAP][1]);
 		}
 	}
 
-	shader->UpdateUniforms(_gameObject->GetTransform()->GetGlobalTransform());
+	shader->SetInt("depthMap", 2);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, App->renderer3D->depthTexture);
 }
 
 void Material::Save(GnJSONArray& save_array)
@@ -170,13 +176,6 @@ void Material::OnEditor()
 			if (checkers_image)
 			{
 				AssignCheckersImage();
-			}
-			else
-			{
-				//if (_diffuseMap != nullptr)
-					//SetTexture(_diffuseMap);
-				//else
-					//checkers_image = true;
 			}
 		}
 
@@ -252,6 +251,7 @@ ResourceTexture* Material::DrawTextureInformation(ResourceTexture* texture, Text
 
 	ImGui::Spacing();
 
+	ImGui::Columns(2);
 	if(texture != nullptr)
 		ImGui::Image((ImTextureID)texture->GetGpuID(), ImVec2(60, 60), ImVec2(0, 1), ImVec2(1, 0));
 
@@ -275,9 +275,10 @@ ResourceTexture* Material::DrawTextureInformation(ResourceTexture* texture, Text
 		ImGui::EndDragDropTarget();
 	}
 
+	ImGui::NextColumn();
 	if (texture != nullptr) 
 	{
-		ImGui::SameLine();
+		//ImGui::SameLine();
 
 		std::string button_text;
 		if (type == TextureType::DIFFUSE_MAP)
@@ -290,7 +291,15 @@ ResourceTexture* Material::DrawTextureInformation(ResourceTexture* texture, Text
 			App->resources->ReleaseResource(texture->GetUID());
 			texture = nullptr;
 		}
+		else
+		{
+			ImGui::PushID(texture->GetUID());
+			ImGui::DragFloat2("Tiling", _resource->tiling[type], 0.05, -1000.0, 1000.0);
+			ImGui::PopID();
+		}
 	}
+
+	ImGui::Columns(1);
 
 	if (texture != nullptr)
 	{

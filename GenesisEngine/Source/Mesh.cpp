@@ -15,7 +15,7 @@
 
 // GnMesh =========================================================================================================================
 
-GnMesh::GnMesh() : Component(), draw_face_normals(false), draw_vertex_normals(false), name("No name"), _resource(nullptr)
+GnMesh::GnMesh() : Component(), draw_face_normals(false), draw_vertex_normals(false), name("No name"), _resource(nullptr), blend(false)
 {
 	type = ComponentType::MESH;
 }
@@ -35,6 +35,7 @@ void GnMesh::Save(GnJSONArray& save_array)
 
 	save_object.AddInt("Type", type);
 	save_object.AddInt("MeshID", _resource->GetUID());
+	save_object.AddBool("blend", blend);
 
 	save_array.AddObject(save_object);
 }
@@ -42,6 +43,7 @@ void GnMesh::Save(GnJSONArray& save_array)
 void GnMesh::Load(GnJSONObj& load_object)
 {
 	int meshUID = load_object.GetInt("MeshID");
+	blend = load_object.GetBool("blend");
 	SetResourceUID(meshUID);
 }
 
@@ -87,7 +89,14 @@ AABB GnMesh::GetAABB()
 
 void GnMesh::Update()
 {
- 	Render();
+	if (!blend)
+	{
+ 		Render();
+	}
+	else
+	{
+		App->renderer3D->AddBlendedMesh(_gameObject->GetTransform()->GetPosition(), this);
+	}
 }
 
 void GnMesh::Render()
@@ -128,7 +137,9 @@ void GnMesh::OnEditor()
 {
 	if (ImGui::CollapsingHeader("Mesh", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		ImGui::Checkbox(" Enabled", &enabled);
+		ImGui::Checkbox("Enabled", &enabled);
+		ImGui::SameLine();
+		ImGui::Checkbox("Blend", &blend);
 
 		ImGui::Separator();
 		ImGui::Spacing();

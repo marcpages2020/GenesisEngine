@@ -2,6 +2,7 @@
 #include "Globals.h"
 #include "Resource.h"
 #include "Color.h"
+#include "ResourceTexture.h"
 
 class ResourceTexture;
 
@@ -15,6 +16,7 @@ public:
 	ResourceTexture* diffuseMap;
 	uint normalMapID;
 	ResourceTexture* normalMap;
+	float tiling[TextureType::UNKNOWN_MAP][2];
 
 	Color diffuseColor;
 };

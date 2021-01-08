@@ -3,6 +3,7 @@
 #include "Globals.h"
 #include "MathGeoLib/include/MathGeoLib.h"
 #include "Light.h"
+#include <map>
 
 #define MAX_LIGHTS 8
 
@@ -11,6 +12,7 @@ typedef unsigned int GLenum;
 typedef unsigned char GLubyte;
 typedef void* SDL_GLContext;
 class Camera;
+class GnMesh;
 
 enum DisplayMode
 {
@@ -40,6 +42,7 @@ public:
 	void SetMainCamera(Camera* camera);
 	Camera* GetMainCamera();
 	bool IsInsideCameraView(AABB aabb);
+	void AddBlendedMesh(float3 position, GnMesh* mesh);
 
 	void SetCapActive(GLenum cap, bool active);
 	void SetVSYNC(bool enabled);
@@ -79,4 +82,5 @@ public:
 
 private: 
 	Camera* _mainCamera;
+	std::map<float, GnMesh*> blendedMeshes;
 };

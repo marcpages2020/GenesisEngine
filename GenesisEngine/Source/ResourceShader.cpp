@@ -34,8 +34,6 @@ void ResourceShader::OnEditor()
 	ImGuiTreeNodeFlags tree_flags = ImGuiTreeNodeFlags_DefaultOpen;
 	if (ImGui::TreeNodeEx("Uniforms", tree_flags)) 
 	{
-		//ImGuiInputTextFlags_CallbackEdit;
-		ImGuiInputTextFlags uniform_flags = ImGuiInputTextFlags_EnterReturnsTrue;
 		const float step = 1.0f;
 		ImGui::Spacing();
 		for (std::map<std::string, Uniform>::iterator it = uniforms.begin(); it != uniforms.end(); it++)
@@ -53,7 +51,7 @@ void ResourceShader::OnEditor()
 					break;
 
 				case UniformType::VEC_2:
-					ImGui::InputFloat2(it->first.c_str(), it->second.vec2.ptr(), 4, uniform_flags);
+					ImGui::InputFloat2(it->first.c_str(), it->second.vec2.ptr());
 					break;
 
 				case UniformType::VEC_3:
@@ -67,8 +65,8 @@ void ResourceShader::OnEditor()
 							it->second.vec3 = float3(color.x, color.y, color.z);
 						}
 					}
-					else if (ImGui::InputFloat3(it->first.c_str(), it->second.vec3.ptr(), 4, uniform_flags))
-						App->resources->SaveResource(this);
+					else {
+						ImGui::InputFloat3(it->first.c_str(), it->second.vec3.ptr());}
 					ImGui::PopID ();
 					break;
 
@@ -80,11 +78,10 @@ void ResourceShader::OnEditor()
 					{
 						ImVec4 color = ImVec4(it->second.vec4.x, it->second.vec4.y, it->second.vec4.z, it->second.vec4.w);
 						if (ImGui::ColorEdit4("Color##1", (float*)&color)) {
-							it->second.vec4 = float4(color.x, color.y, color.z, color.w);
-						}
+							it->second.vec4 = float4(color.x, color.y, color.z, color.w);}
 					}
-					else
-						ImGui::InputFloat4(it->first.c_str(), it->second.vec4.ptr());
+					else {
+						ImGui::InputFloat4(it->first.c_str(), it->second.vec4.ptr());}
 					ImGui::PopID();
 					break;
 
@@ -127,9 +124,11 @@ uint ResourceShader::Save(GnJSONObj& base_object)
 			break;
 		case UniformType::VEC_3:
 			uniform.AddFloat3("value", it->second.vec3);
+			uniform.AddBool("color", it->second.color);
 			break;
 		case UniformType::VEC_4:
 			uniform.AddFloat4("value", it->second.vec4);
+			uniform.AddBool("color", it->second.color);
 			break;
 		case UniformType::TEXTURE:
 			break;
@@ -172,10 +171,12 @@ void ResourceShader::Load(GnJSONObj& base_object)
 		case UniformType::VEC_3:
 			uniform.type = GL_FLOAT_VEC3;
 			uniform.vec3 = uniform_object.GetFloat3("value", float3().zero);
+			uniform.color = uniform_object.GetBool("color", false);
 			break;
 		case UniformType::VEC_4:
 			uniform.type = GL_FLOAT_VEC4;
 			uniform.vec4 = uniform_object.GetFloat4("value", float4().zero);
+			uniform.color = uniform_object.GetBool("color", false);
 			break;
 		default:
 			break;
@@ -187,12 +188,12 @@ void ResourceShader::Load(GnJSONObj& base_object)
 
 void ResourceShader::Use()
 {
-	int success = 0;
-	glGetProgramiv(program_id, GL_LINK_STATUS, &success);
+	//int success = 0;
+	//glGetProgramiv(program_id, GL_LINK_STATUS, &success);
 
 	glUseProgram(program_id);
 
-	SetUniforms();
+	//SetUniforms();
 }
 
 void ResourceShader::SetUniforms()
@@ -305,8 +306,15 @@ void ResourceShader::UpdateUniforms(float4x4 globalTransform)
 
 bool ResourceShader::IsDefaultUniform(const char* uniform_name)
 {
-	return strcmp(uniform_name, "model_matrix") == 0 || strcmp(uniform_name, "projection") == 0 || strcmp(uniform_name, "view") == 0
-		|| strcmp(uniform_name, "time") == 0 || strcmp(uniform_name, "cameraPosition") == 0;
+	const char* default_uniforms[7] = { "model_matrix" , "projection", "view", "time", "cameraPosition", "diffuseMapTiling","normalMapTiling" };
+
+	for (size_t i = 0; i < 7; i++)
+	{
+		if (strcmp(uniform_name, default_uniforms[i]) == 0)
+			return true;
+	}
+
+	return false;
 }
 
 void ResourceShader::SetBool(const char* name, bool value)

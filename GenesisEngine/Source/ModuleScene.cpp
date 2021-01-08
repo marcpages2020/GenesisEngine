@@ -31,6 +31,8 @@ bool ModuleScene::Start()
 	//AddGameObject(baker_house);
 	
 	GameObject* water = App->resources->RequestGameObject("Assets/Models/complex_plane.fbx");
+	water->GetTransform()->SetPosition(float3(0.0f, 1.5f, 0.0f));
+	water->GetTransform()->SetScale(float3(50.0f, 1.0f, 50.0f));
 	water->UpdateChildrenTransforms();
 	AddGameObject(water);
 
@@ -39,8 +41,8 @@ bool ModuleScene::Start()
 	//rayman->GetTransform()->SetScale(float3(0.15, 0.15, 0.15));
 	//rayman->UpdateChildrenTransforms();
 
-	//GameObject* street_environment = App->resources->RequestGameObject("Assets/Models/street/Street environment_V01.fbx");
-	//AddGameObject(street_environment);
+	GameObject* street_environment = App->resources->RequestGameObject("Assets/Models/street/Street environment_V01.fbx");
+	AddGameObject(street_environment);
 	
 	GameObject* camera = new GameObject();
 	camera->AddComponent(ComponentType::CAMERA);

@@ -4,6 +4,7 @@
 #include "GameObject.h"
 #include "Material.h"
 #include "Camera.h"
+#include "Mesh.h"
 
 #include <vector>
 #include "FileSystem.h"
@@ -132,6 +133,8 @@ bool ModuleRenderer3D::Init()
 		glEnable(GL_TEXTURE_2D);
 		glEnable(GL_LIGHTING);
 		glEnable(GL_STENCIL_TEST);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		lights[0].Active(true);
 	}
@@ -187,6 +190,11 @@ update_status ModuleRenderer3D::Update(float dt)
 	//DrawDirectModeCube();
 	if(draw_mouse_picking_ray)
 		DrawRay();
+
+	for (std::map<float, GnMesh*>::reverse_iterator it = blendedMeshes.rbegin(); it != blendedMeshes.rend(); ++it)
+	{
+		it->second->Render();
+	}
 
 	return ret;
 }
@@ -337,6 +345,12 @@ bool ModuleRenderer3D::IsInsideCameraView(AABB aabb)
 		return _mainCamera->ContainsAABB(aabb) || App->camera->GetCamera()->ContainsAABB(aabb);
 	else
 		return _mainCamera->ContainsAABB(aabb);
+}
+
+void ModuleRenderer3D::AddBlendedMesh(float3 position, GnMesh* mesh)
+{
+	float distance = App->camera->GetPosition().Sub(position).Length();
+	blendedMeshes[distance] = mesh;
 }
 
 void ModuleRenderer3D::SetCapActive(GLenum cap, bool active)

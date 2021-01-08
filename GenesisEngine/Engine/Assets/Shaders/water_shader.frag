@@ -3,6 +3,7 @@ out vec4 FragColor;
 
 uniform sampler2D diffuseMap;
 uniform sampler2D normalMap;
+uniform sampler2D depthMap;
 
 uniform vec3 cameraPosition;
 uniform float time;
@@ -11,10 +12,12 @@ uniform vec3 color;
 uniform float contrast;
 uniform float speed;
 uniform float steepness;
+uniform vec2 normalMapTiling;
 in float relative_position;
 in vec3 Normal;
 
 in VS_OUT {
+	vec4 clipSpace;
     vec3 FragPos;
     vec2 TexCoords;
     vec3 TangentLightPos;
@@ -25,14 +28,25 @@ in VS_OUT {
 vec2 rand2( vec2 coord );
 float cellular_noise(vec2 coord);
 float fbm(vec2 coord);
+float LinearizeDepth(float depth);
 
 void main()
 {
-    vec2 coord = fs_in.FragPos.xz * 5.0;
+    vec2 coord = fs_in.FragPos.xz * 4.0 / normalMapTiling.x;
     float value = fbm(coord);   
     
     vec3 normal = texture(normalMap, fs_in.TexCoords * 1.5).rgb;
     normal = normalize(normal * 2.0 - 1.0);
+    
+    vec2 ndc = (fs_in.clipSpace.xy / fs_in.clipSpace.w) / 2.0 + 0.5;
+    float depth = texture(depthMap, ndc).r;
+    float near = 0.3;
+    float far = 1000.0;
+    float floorDistance = 2.0 * near * far / (far + near - (2.0 * depth - 1.0) * (far - near));
+    
+    depth = gl_FragCoord.z;
+    float waterDistance = 2.0 * near * far / (far + near - (2.0 * depth - 1.0) * (far - near));
+    float waterDepth = floorDistance - waterDistance;
     
     //ambient 
     float ambientStrength = 0.55;
@@ -51,9 +65,16 @@ void main()
     
     vec3 specular = vec3(0.5) * spec;  
     
-    vec3 foam = vec3(0.0);
-    foam = (vec3(value * 2.0) - (specular)) * max(5.0 * relative_position,0.0);
-	FragColor = vec4(ambient + diffuse + specular + foam, 1.0);
+    vec3 foam = vec3(value);
+    //foam = (vec3(value * 2.0) - (specular)) * max(5.0 * relative_position,0.0);
+    //float depth = LinearizeDepth(gl_FragCoord.z) / 50.0;
+    vec4 waterColor = vec4(ambient + diffuse + specular, 0.5);
+	vec4 foamColor = vec4(vec3(foam) * relative_position* 0.45, relative_position * 0.35);
+	foamColor.rgb += diffuse;
+	
+	FragColor = waterColor + foamColor;
+	//FragColor = vec4(vec3(relative_position), 1.0);
+	//FragColor = vec4(waterDepth / 50.0);
 } 
 
 
@@ -99,6 +120,36 @@ float fbm(vec2 coord) {
  
  return value / normalize_factor;
 }
+
+float LinearizeDepth(float depth)
+{
+ float near = 0.1;
+ float far = 1000.0;
+ return 2.0 * near * far / (far + near - (2.0 * depth - 1.0) * (far - near));
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -170,6 +170,9 @@ void WindowConfiguration::Draw()
 				ImGui::Spacing();
 				ImGui::Text("Vertical FOV: %.2f", App->camera->GetVerticalFieldOfView() * RADTODEG);
 			}
+			float3 camera_position = App->camera->GetPosition();
+			ImGui::Text("Position: (%.2f, %.2f, %.2f)", camera_position.x, camera_position.y, camera_position.z);
+
 			ImGui::Spacing();
 		}
 

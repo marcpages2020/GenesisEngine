@@ -18,7 +18,7 @@ ModuleCamera3D::ModuleCamera3D(bool start_enabled) : Module(start_enabled)
 	Y = float3(0.0f, 1.0f, 0.0f);
 	Z = float3(0.0f, 0.0f, 1.0f);
 
-	_position = float3(3.5f, 3.5f, 3.5f);
+	_position = float3(60.5f, 40.5f, 90.5f);
 	_reference = float3(0.0f, 0.0f, 0.0f);
 
 	_camera = new Camera();

@@ -1,0 +1,25 @@
+.paragraph{
+    font-size: 20px; 
+    color: black;  
+}
+
+.header{
+    font-size: 50px;
+    text-align: center;
+}
+
+.contribution{
+    font-size: 18px;
+    color: white;
+    text-align: center;
+    list-style-position: inside;
+    padding-bottom: 2vw;
+    font-weight: bold;
+}
+
+ul {
+    padding-left: 0;
+}
+
+li::before{
+}

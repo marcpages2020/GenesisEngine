@@ -5,7 +5,7 @@
 typedef unsigned char GLubyte;
 class GnJSONObj;
 
-enum class TextureType
+enum TextureType
 {
 	DIFFUSE_MAP,
 	NORMAL_MAP,

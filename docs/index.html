@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8"/>
+        <meta name="description" content="Personal Portfolio"/>
+        <meta name="keywords" conent="Game,Developer,Portfolio,Programmer"/>
+        <meta name="author" content="Marc Pagès Francesch"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>Marc Pagès Francesch | Game Developer</title>
+        <link rel="stylesheet" href="style.css"/>
+        <link rel="stylesheet" href="interactive.css"/>
+        <link rel="stylesheet" href="text.css"/>
+        <link href='https://fonts.googleapis.com/css?family=Carter One' rel='stylesheet'>
+    </head>
+
+<body style="background-color: #333;">
+
+    <!--Banner-->
+    <div class="banner">
+        <!-- Big beginning-->
+        <h1 style="font-size: 5vw; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Genesis Engine</h1>
+    </div>
+
+    <!--Navbar-->
+    <div id="navbar">
+        <a href="#About">About</a>
+        <a href="#Author">Author</a>
+        <a href="#Functionality">Functionality</a>
+        <a href="#Sub-System">Sub-System</a>
+    </div>
+
+    <!--About Me-->
+    <div id="About" class="section" style="background-color: #EBEBEB;">
+        <div class="row" style="padding-bottom: 2.5%;">
+            <div class="col-8" style="padding-left: 2.5%;"> 
+                <p class="paragraph" style="padding-bottom: 5%; margin-top: 2.5%; margin-left: 2.5%;">
+                    Genesis Engine is a game engine developed for the Game Engines subject in CITM (Terrassa).  <br>
+                </p>
+            </div>
+            <div class="col-3" > 
+            </div>
+        </div>
+    </div>
+    
+    <!--Projects-->
+    <div  id="Projects" class="section" style="padding-bottom: 4%;">
+        <!--Projects-->
+        <h2 class="header" style="color:white">Projects</h2>
+        <div class="row">
+            <div class="col-4 container" onClick="openUrlInNewTab('https://kalima-entertainment.github.io/Fallout_Strategy/index.html');">
+                <img src="photos/fallout-strategy.png" alt="Fallout Strategy">
+                <div class="overlay">
+                    <div class="text">Fallout Strategy</div>
+                  </div>
+            </div>
+            <div class="col-4 container" onClick="openUrlInNewTab('https://marcpages2020.github.io/Samurai-Shodown/');">
+                <img src="photos/samurai_shodown.png" alt="Samurai Shodown">
+                <div class="overlay">
+                    <div class="text">Samurai Shodown</div>
+                  </div>
+            </div>
+            <div class="col-4 container" onClick="openUrlInNewTab('https://windfog-studios.github.io/The-Little-Explorer/');">
+                <img src="photos/the_little_explorer.png" alt="The Little Explorer">
+                <div class="overlay">
+                    <div class="text">The Little Explorer</div>
+                </div>
+            </div>
+
+            <!--More Info Button-->
+            <div class="col-4"></div>
+            <div class="col-4" style="padding-top: 2%;">
+                <a href="projects.html" class="change-page-button"><b>more info</b></a>
+            </div>
+            <div class="col-4"></div>
+        </div>
+    </div>
+
+    <div id="Functionality" style="background-color: darkmagenta;">
+        <div class="row">
+            <h2 class="header" style="padding-top: 2vw; padding-bottom: 1vw; margin: auto;; color: white;">Functionality</h2>
+            <div class="col-12">
+                <h3>Mouse Picking</h3>
+            </div>
+        </div>
+    </div>
+
+    <!--Contact-->
+    <div id="Sub-System" class="section" style="background-color: #EBEBEB;;">
+            <div class="row">
+            <h2 class="header" style="padding-top: 2vw; padding-bottom: 1vw; margin: auto;; color: black;">Contact</h2>
+                <div class="col-12" style="padding-left: 40.5%;">
+                    <a href="https://github.com/marcpages2020"><img src="icons/github.png" alt="github" class="contact-button"></a>
+                    <a href="https://www.linkedin.com/in/marc-pagès-francesch-7206b3186/"><img src="icons/linkedin.png" alt="github"class="contact-button"></a>
+                    <a href="https://twitter.com/MarcPF22?s=08"><img src="icons/twitter.png" alt="github" class="contact-button"></a>
+                </div>
+                <div class="col-12">
+                    <a href="mailto:marcpages13@gmail.com?Subject=Hey!" target="_blank" class="mail center">marcpages13@gmail.com</a>
+                </div>
+            </div>
+
+     <!--Recognition-->
+    <div style="text-align: center; background-color: background-color: #EBEBEB;; padding-bottom: 1vw;">Icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+    </div>
+
+    <!--scripting-->
+    <script>
+        window.onscroll = function() {stickyNavbar()};
+        var navbar = document.getElementById("navbar");
+        var sticky = navbar.offsetTop;
+
+        function stickyNavbar(){
+            if (window.pageYOffset >= sticky){
+                navbar.classList.add("sticky")
+            }else{
+                navbar.classList.remove("sticky");
+            }
+        } 
+
+    function openUrlInNewTab(url){
+        window.open(url, "_blank");
+    }
+    </script>
+
+</body>
+</html>

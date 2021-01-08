@@ -1,0 +1,172 @@
+* {
+box-sizing: border-box;
+}
+
+body{
+    margin: 0;
+}
+
+html{
+    font-family: Arial, Helvetica, sans-serif;
+    scroll-behavior: smooth;
+    height: 100%;
+}
+
+img{
+    max-width: 100%;
+}
+
+p{
+    text-align: justify;
+    text-justify: inter-word;
+}
+
+/*Rows and columns*/
+.row::after {
+    content: "";
+    clear: both;
+    display: table;
+}
+
+[class*="col-"] {
+    float: left;
+    padding: 20px;
+    /*border: 1px solid red;*/
+}
+
+a:visited{
+    text-decoration: none;
+}
+
+@media only screen and (min-width: 600px) {
+    /* For tablets: */
+    .col-s-1 {width: 8.33%;}
+    .col-s-2 {width: 16.66%;}
+    .col-s-3 {width: 25%;}
+    .col-s-4 {width: 33.33%;}
+    .col-s-5 {width: 41.66%;}
+    .col-s-6 {width: 50%;}
+    .col-s-7 {width: 58.33%;}
+    .col-s-8 {width: 66.66%;}
+    .col-s-9 {width: 75%;}
+    .col-s-10 {width: 83.33%;}
+    .col-s-11 {width: 91.66%;}
+    .col-s-12 {width: 100%;}
+  }
+  
+  @media only screen and (min-width: 768px) {
+    /* For desktop: */
+    .col-1 {width: 8.33%;}
+    .col-2 {width: 16.66%;}
+    .col-3 {width: 25%;}
+    .col-4 {width: 33.33%;}
+    .col-5 {width: 41.66%;}
+    .col-6 {width: 50%;}
+    .col-7 {width: 58.33%;}
+    .col-8 {width: 66.66%;}
+    .col-9 {width: 75%;}
+    .col-10 {width: 83.33%;}
+    .col-11 {width: 91.66%;}
+    .col-12 {width: 100%;}
+  }
+
+.section{
+    padding-top: 1%;
+    padding-bottom: 1%;
+}
+
+.dark-section{
+      padding-top: 10px;
+      padding-bottom: 2vW;
+      background-color: #202020;
+}
+
+.light-section{
+    background-color: #F6F6F6; 
+    padding-top: 10px;
+    padding-bottom: 2vW;
+}
+
+.banner{
+    background-image:linear-gradient(rgba(75, 75, 75, 0.25), rgba(75, 75, 75, 0.25)), url("photos/procedural.png");
+    color: white;
+    text-align: center;
+    padding: 4%;
+    text-shadow: 1px 1px 4px #000000;
+}
+
+.blurred-banner-image{
+    background-image: url("../photos/procedural.JPG");
+    filter: blur(8px);
+    -webkit-filter: blur(8px);
+}
+
+.column-image{
+    height: 100%;
+    width: 100%;;
+}
+
+
+.container {
+    position: relative;
+    height: fit-content;
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    width: 100%;
+    opacity: 0;
+    transition: .5s ease;
+    background-color: black;
+  }
+
+  .container:hover .overlay {
+    opacity: .75;
+  }
+
+  .text {
+    color: white;
+    font-size: 30px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+
+.content{
+    padding: 16px;
+}
+
+.sticky{
+    position: fixed;
+    top: 0;
+    width: 100%;
+}
+
+.sticky + .content {
+    padding-top: 60px;
+}
+
+.grid{
+    display: table;
+    width: 100%;
+}
+
+.grid-section{
+    display: table-cell;
+    padding: 16px;
+}
+
+.center{
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}

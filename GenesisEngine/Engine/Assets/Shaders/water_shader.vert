@@ -10,6 +10,7 @@ uniform mat4 model_matrix;
 uniform mat4 view;
 uniform mat4 projection;
 uniform vec3 cameraPosition;
+uniform vec2 normalMapTiling;
 
 uniform float time;
 uniform float speed;
@@ -23,6 +24,7 @@ uniform vec3 direction_3;
 out float relative_position;
 
 out VS_OUT {
+	vec4 clipSpace;
     vec3 FragPos;
     vec2 TexCoords;
     vec3 TangentLightPos;
@@ -51,13 +53,13 @@ void main()
  float amp3 = 0.035;
  vec3 wave3 = generateWave(amp3, direction_3, num_waves, steepness, phase_constant, w);
 
- //relative_position = 1.0;
  fPosition += wave1 + wave2 + wave3;
- 
- relative_position = ((( wave1.z/amp1 + wave2.z/amp2 + wave3.z/amp3) / 3.0) + 0.25) * 0.5;
+ relative_position = fPosition.z / ((amp1 * 2.0 + amp2 * 2.0 + amp3 * 2.0) / num_waves);
+ relative_position = (relative_position + 1.0) * 0.5;
  
  vs_out.FragPos = vec3(model_matrix * vec4(position, 1.0));
- vs_out.TexCoords = texCoord;
+
+ vs_out.TexCoords = texCoord * normalMapTiling;
  vs_out.TexCoords.x += cos(time) * speed * 0.25;
  vs_out.TexCoords.y += sin(time) * speed * 0.25;
  
@@ -71,7 +73,9 @@ void main()
  vs_out.TangentViewPos  = TBN * cameraPosition;
  vs_out.TangentFragPos  = TBN * vs_out.FragPos;
  
+ vs_out.clipSpace = projection * view * model_matrix * vec4(fPosition, 1.0);
  gl_Position = projection * view * model_matrix * vec4(fPosition, 1.0);
+
 }
 
 vec3 generateWave(float amp, vec3 direction, float num_waves, float steepness,
@@ -86,6 +90,30 @@ vec3 generateWave(float amp, vec3 direction, float num_waves, float steepness,
  
  return wave;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
