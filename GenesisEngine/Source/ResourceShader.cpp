@@ -89,14 +89,6 @@ void ResourceShader::OnEditor(Material* material, ResourceMaterial* resourceMate
 						if (ImGui::ColorEdit4("Color##1", (float*)&color)) {
 							it->second.vec4 = float4(color.x, color.y, color.z, color.w);
 						}
-
-						/*
-						if (it->first == "diffuseColor") {
-							if (resourceMaterial != nullptr) {
-								resourceMaterial->diffuseColor = Color(color.x, color.y, color.z, color.w);
-							}
-						}
-						*/
 					}
 					else {
 						ImGui::InputFloat4(it->first.c_str(), it->second.vec4.ptr());
@@ -360,6 +352,11 @@ bool ResourceShader::IsDefaultUniform(const char* uniform_name)
 	return false;
 }
 
+void ResourceShader::AddUniform(Uniform uniform)
+{
+	uniforms[uniform.name] = uniform;
+}
+
 void ResourceShader::SetBool(const char* name, bool value)
 {
 	glUniform1i(glGetUniformLocation(program_id, name), (int)value);
@@ -415,4 +412,11 @@ void ResourceShader::SetMat4(const char* name, float* matrix)
 Uniform::Uniform()
 {
 	boolean = false;
+}
+
+Uniform::Uniform(const char* g_name, UniformType g_uniformType, bool g_color)
+{
+	name = g_name;
+	uniformType = g_uniformType;
+	color = g_color;
 }

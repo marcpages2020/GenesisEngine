@@ -372,6 +372,15 @@ void Material::SetTexture(ResourceTexture* texture, TextureType type)
 	}
 }
 
+void Material::SetTiling(TextureType type, float x, float y)
+{
+	if (_resource != nullptr)
+	{
+		_resource->tiling[type][0] = x;
+		_resource->tiling[type][1] = y;
+	}
+}
+
 void Material::AssignCheckersImage()
 {
 	int CHECKERS_WIDTH = 64;

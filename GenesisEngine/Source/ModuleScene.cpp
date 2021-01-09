@@ -7,6 +7,7 @@
 #include "GameObject.h"
 #include "Transform.h"
 #include "ResourceMaterial.h"
+#include "ResourceShader.h"
 
 ModuleScene::ModuleScene(bool start_enabled) : Module(start_enabled), show_grid(true), selectedGameObject(nullptr), root(nullptr) 
 {
@@ -27,24 +28,9 @@ bool ModuleScene::Start()
 	root = new GameObject();
 	selectedGameObject = root;
 	root->SetName("Root");
-
-	//GameObject* baker_house = App->resources->RequestGameObject("Assets/Models/baker_house/BakerHouse.fbx");
-	//AddGameObject(baker_house);
 	
-	GameObject* water = App->resources->RequestGameObject("Assets/Models/complex_plane.fbx");
-	water->GetTransform()->SetPosition(float3(0.0f, 1.5f, 0.0f));
-	water->GetTransform()->SetScale(float3(50.0f, 1.0f, 50.0f));
-	water->UpdateChildrenTransforms();
+	SetDemo();
 
-	water = water->GetChildAt(0);
-	Material* material = (Material*)water->GetComponent(ComponentType::MATERIAL);
-	material->SetShader((ResourceShader*) App->resources->RequestResource(App->resources->Find("Assets/Shaders/water_shader.vert")));
-
-	AddGameObject(water);
-
-	GameObject* street_environment = App->resources->RequestGameObject("Assets/Models/street/Street environment_V01.fbx");
-	AddGameObject(street_environment);
-	
 	GameObject* camera = new GameObject();
 	camera->AddComponent(ComponentType::CAMERA);
 	camera->SetName("Main Camera");
@@ -57,9 +43,44 @@ bool ModuleScene::Start()
 	return ret;
 }
 
-bool ModuleScene::Init()
+void ModuleScene::SetDemo()
 {
-	return true;
+	GameObject* parent_water = App->resources->RequestGameObject("Assets/Models/complex_plane.fbx");
+	parent_water->GetTransform()->SetPosition(float3(0.0f, 1.5f, 0.0f));
+	parent_water->GetTransform()->SetScale(float3(50.0f, 1.0f, 50.0f));
+	parent_water->UpdateChildrenTransforms();
+
+	GameObject* water = parent_water->GetChildAt(0);
+	Material* material = (Material*)water->GetComponent(ComponentType::MATERIAL);
+	material->SetTiling(NORMAL_MAP, 5.0f, 5.0f);
+	material->SetTexture((ResourceTexture*)App->resources->RequestResource(App->resources->Find("Assets/Textures/water_normals.png")), NORMAL_MAP);
+	GnMesh* mesh = (GnMesh*)water->GetComponent(ComponentType::MESH);
+	mesh->blend = true;
+
+	ResourceShader* water_shader = (ResourceShader*)App->resources->RequestResource(App->resources->Find("Assets/Shaders/water_shader.vert"));
+	material->SetShader(water_shader);
+
+	Uniform color("color", UniformType::VEC_3, true);
+	color.vec3 = float3(0.150f, 0.7f, 0.8f);
+	water_shader->AddUniform(color);
+
+	Uniform direction_1("direction_1", UniformType::VEC_3, false);
+	direction_1.vec3 = float3(0.8f, 1.0f, 1.0f);
+	water_shader->AddUniform(direction_1);
+
+	
+	Uniform opacity("opacity", UniformType::NUMBER);
+	opacity.number = 0.65f;
+	water_shader->AddUniform(opacity);
+
+	Uniform wave_length("wave_length", UniformType::NUMBER, true);
+	wave_length.number = 0.4;
+	water_shader->AddUniform(wave_length);
+	
+	AddGameObject(parent_water);
+
+	GameObject* street_environment = App->resources->RequestGameObject("Assets/Models/street/Street environment_V01.fbx");
+	AddGameObject(street_environment);
 }
 
 // Update: draw background

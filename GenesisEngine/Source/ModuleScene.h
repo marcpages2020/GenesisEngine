@@ -16,7 +16,7 @@ public:
 	~ModuleScene();
 
 	bool Start();
-	bool Init();
+	void SetDemo();
 	bool LoadConfig(GnJSONObj& config) override;
 	update_status Update(float dt);
 	void HandleInput();

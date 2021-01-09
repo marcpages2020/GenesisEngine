@@ -620,7 +620,12 @@ void Editor::DrawDirectoryRecursive(const char* directory, const char* filter_ex
 				if (ImGui::IsMouseDoubleClicked(0))
 				{
 					file_dialog = ready_to_close;
-					App->Load(selected_file);
+					if (scene_operation == SceneOperation::SAVE)
+					{
+						App->Save(selected_file);}
+					else if (scene_operation == SceneOperation::LOAD)
+					{
+						App->Load(selected_file);}
 				}
 			}
 

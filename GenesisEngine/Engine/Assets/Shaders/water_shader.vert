@@ -13,13 +13,13 @@ uniform vec3 cameraPosition;
 uniform vec2 normalMapTiling;
 
 uniform float time;
-uniform float speed;
+float speed = 0.25;
 uniform float wave_length;
-uniform float steepness;
+float steepness = 0.5;
 
 uniform vec3 direction_1;
-uniform vec3 direction_2;
-uniform vec3 direction_3;
+vec3 direction_2 = vec3(0.5, 0.5, 0.5);
+vec3 direction_3 = vec3(0.5, 0.5, 0.5);
 
 out float relative_position;
 
@@ -32,7 +32,7 @@ out VS_OUT {
     vec3 TangentFragPos;
 } vs_out;
 
-uniform vec3 lightPos;
+vec3 lightPos = vec3(0.0, 10.0, 0.0);
 
 vec3 generateWave(float amp, vec3 direction, float num_waves, float steepness, float phase_constant, float w);
 
@@ -91,6 +91,10 @@ vec3 generateWave(float amp, vec3 direction, float num_waves, float steepness,
  
  return wave;
 }
+
+
+
+
 
 
 

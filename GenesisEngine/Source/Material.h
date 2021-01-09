@@ -28,6 +28,7 @@ public:
 	ResourceTexture* DrawTextureInformation(ResourceTexture* texture, TextureType type);
 
 	void SetTexture(ResourceTexture* texture, TextureType type = TextureType::DIFFUSE_MAP);
+	void SetTiling(TextureType type, float x, float y);
 	void AssignCheckersImage();
 	ResourceTexture* GetDiffuseTexture();
 

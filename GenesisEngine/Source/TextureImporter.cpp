@@ -148,7 +148,7 @@ bool TextureImporter::Load(char* fileBuffer, ResourceTexture* texture, uint size
 		//texture->FillData(ilGetData(), (uint)imageID, ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT));
 	}
 
-	LOG("Texture loaded successfully from: %s in %d ms", texture->libraryFile.c_str(), timer.Read());
+	//LOG("Texture loaded successfully from: %s in %d ms", texture->libraryFile.c_str(), timer.Read());
 	texture->FillData(ilGetData(), (uint)imageID, ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT));
 
 	ilBindImage(0);

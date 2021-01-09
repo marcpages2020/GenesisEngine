@@ -34,6 +34,7 @@ enum class UniformType
 struct Uniform
 {
 	Uniform();
+	Uniform(const char* name, UniformType uniformType, bool color = false);
 	int size = 0;
 	GLenum type;
 	UniformType uniformType = UniformType::UNKNOWN;
@@ -66,6 +67,7 @@ public:
 	void SetUniforms();
 	void UpdateUniforms(Material* material, ResourceMaterial* resourceMaterial);
 	bool IsDefaultUniform(const char* uniform_name);
+	void AddUniform(Uniform uniform);
 
 	void SetBool(const char* name, bool value);
 	void SetInt(const char* name, int value);
