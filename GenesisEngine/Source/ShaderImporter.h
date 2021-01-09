@@ -18,6 +18,7 @@ namespace ShaderImporter
 	void CreateProgram(ResourceShader* shader);
 	void SetUniforms(GLuint program, ResourceShader* shader);
 	uint Save(ResourceShader* shader, char** fileBuffer);
+	bool Save(ResourceShader* shader, const char* vertexShader, const  char* fragmentShader);
 	bool Load(char* fileBuffer, ResourceShader* shader);
 	std::string FindPairingShader(const char* current_shader_path);
 	ShaderType GetTypeFromPath(const char* path);

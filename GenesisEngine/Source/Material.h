@@ -33,6 +33,7 @@ public:
 
 public: 
 	ResourceShader* shader;
+	uint shaderID;
 
 private:
 	bool checkers_image;

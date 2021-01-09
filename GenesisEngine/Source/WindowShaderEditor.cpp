@@ -152,6 +152,8 @@ void WindowShaderEditor::Draw()
 				{
 					FileSystem::Save(vertexShaderPath, vertexShaderEditor.GetText().c_str(), strlen(vertexShaderEditor.GetText().c_str()));
 					FileSystem::Save(fragmentShaderPath, fragmentShaderEditor.GetText().c_str(), strlen(fragmentShaderEditor.GetText().c_str()));
+
+					ShaderImporter::Save(shader, vertexShaderEditor.GetText().c_str(), fragmentShaderEditor.GetText().c_str());
 					App->resources->SaveResource(App->resources->GetResource(App->resources->Find(vertexShaderPath)));
 				}
 

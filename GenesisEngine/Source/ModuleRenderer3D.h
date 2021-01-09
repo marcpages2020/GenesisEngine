@@ -44,7 +44,7 @@ public:
 	Camera* GetMainCamera();
 	bool IsInsideCameraView(AABB aabb);
 	void AddBlendedMesh(float3 position, GnMesh* mesh);
-	void CreateDefaultShader();
+	ResourceShader* GetDefaultShader();
 
 	void SetCapActive(GLenum cap, bool active);
 	void SetVSYNC(bool enabled);

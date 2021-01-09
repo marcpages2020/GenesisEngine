@@ -22,11 +22,15 @@ void ShaderImporter::Import(char* fileBuffer, ResourceShader* shader, const char
 	{
 	    vertexShader = Compile(fileBuffer, type);
 		fragmentShader = Compile(buffer, ShaderType::FRAGMENT_SHADER);
+
+		Save(shader, fileBuffer, buffer);
 	}
 	else if (type == ShaderType::FRAGMENT_SHADER)
 	{
 		fragmentShader = Compile(fileBuffer, type);
 		vertexShader = Compile(buffer, ShaderType::VERTEX_SHADER);
+
+		Save(shader, buffer, fileBuffer);
 	}
 
 	if (vertexShader != 0 && fragmentShader != 0)
@@ -220,17 +224,53 @@ uint ShaderImporter::Save(ResourceShader* shader, char** fileBuffer)
 	return size;
 }
 
+bool ShaderImporter::Save(ResourceShader* shader, const char* vertexShader, const char* fragmentShader)
+{
+	char* vertexShaderBuffer;
+	char* fragmentShaderBuffer;
+
+	char vertexShaderPath[128];
+	char fragmentShaderPath[128];
+
+	sprintf_s(vertexShaderPath, 128, "Library/Shaders/%d.vert", shader->GetUID());
+	sprintf_s(fragmentShaderPath, 128, "Library/Shaders/%d.frag", shader->GetUID());
+
+	FileSystem::Save(vertexShaderPath, vertexShader, strlen(vertexShader));
+	FileSystem::Save(fragmentShaderPath, fragmentShader, strlen(fragmentShader));
+
+	return true;
+}
+
+
 bool ShaderImporter::Load(char* fileBuffer, ResourceShader* shader)
 {
-	char* buffer;
-	FileSystem::Load(shader->assetsFile.c_str(), &buffer);
+	char* vertexShaderBuffer;
+	char* fragmentShaderBuffer;
 
-	Import(buffer, shader, shader->assetsFile.c_str());
+	char vertexShaderPath[128];
+	char fragmentShaderPath[128];
+
+	sprintf_s(vertexShaderPath, 128, "Library/Shaders/%d.vert", shader->GetUID());
+	sprintf_s(fragmentShaderPath, 128, "Library/Shaders/%d.frag", shader->GetUID());
+
+	FileSystem::Load(vertexShaderPath, &vertexShaderBuffer);
+	FileSystem::Load(fragmentShaderPath, &fragmentShaderBuffer);
+
+	GLuint vertexShader = Compile(vertexShaderBuffer, ShaderType::VERTEX_SHADER);
+	GLuint fragmentShader = Compile(fragmentShaderBuffer, ShaderType::FRAGMENT_SHADER);
+
+	if (vertexShader != 0 && fragmentShader != 0)
+	{
+		shader->vertexShader = vertexShader;
+		shader->fragmentShader = fragmentShader;
+		CreateProgram(shader);
+	}
 
 	GnJSONObj uniforms(fileBuffer);
 	shader->Load(uniforms);
 
-	RELEASE_ARRAY(buffer);
+	RELEASE_ARRAY(vertexShaderBuffer);
+	RELEASE_ARRAY(fragmentShaderBuffer);
 
 	return true;
 }
@@ -303,17 +343,24 @@ void ShaderImporter::CreateShaderAsset(const char* asset_path)
 	std::string vertex_shader_path = asset_path;
 	vertex_shader_path.append(".vert");
 
-	const char* vertexShaderSource = "#version 330 core\n"
+	const char* vertexShaderSource = 
+		"#version 330 core\n"
 		"layout (location = 0) in vec3 position;\n"
 		"layout (location = 1) in vec3 color;\n"
-		"layout (location = 2) in vec3 texCoord;\n"
+		"layout (location = 2) in vec2 texCoord;\n"
 		"layout (location = 3) in vec3 normal;\n"
 		"layout (location = 4) in vec3 tangent;\n"
+		"\n"
 		"uniform mat4 model_matrix;\n"
 		"uniform mat4 view;\n"
 		"uniform mat4 projection;\n"
+		"uniform mat3 normalMatrix;\n"
+		"\n"
+		"out vec3 Normal;\n"
+		"\n"
 		"void main()\n"
 		"{\n"
+		"Normal = normalMatrix * normal;\n"
 		"gl_Position = projection * view * model_matrix * vec4(position, 1.0f);\n"
 		"}\0";
 	
@@ -322,12 +369,63 @@ void ShaderImporter::CreateShaderAsset(const char* asset_path)
 	std::string fragment_shader_path = asset_path;
 	fragment_shader_path.append(".frag");
 
-	const char* fragmentShaderSource = "#version 330 core\n"
-		"out vec4 FragColor;\n"
+	const char* fragmentShaderSource =
+		"#version 330 core\n"
+		"in vec2 TexCoord;\n"
+		"in vec3 Normal;\n"
+		"in vec3 FragPos;\n"
+		"\n"
+		"out vec4 color;\n"
+		"\n"
+		"uniform vec3 cameraPosition;\n"
+		"uniform bool hasDiffuseMap;\n"
+		"\n"
+		"struct Material {\n"
+		"	vec3 ambient;\n"
+		"	vec3 diffuse;\n"
+		"	vec3 specular;\n"
+		"	float shininess;\n"
+		"};\n"
+		"\n"
+		"struct Light {\n"
+		"	vec3 position;\n"
+		"	vec3 ambient;\n"
+		"	vec3 diffuse;\n"
+		"	vec3 specular;\n"
+		"};\n"
+		"\n"
+		"Light light;\n"
+		"\n"
+		"Material material;\n"
+		"\n"
 		"void main()\n"
 		"{\n"
-		"   FragColor = vec4(0.5f, 0.5f, 0.5f, 1.0f);\n"
-		"}\0";
+		"	material.ambient = vec3(0.35, 0.35, 0.35);\n"
+		"	material.diffuse = vec3(0.75, 0.75, 0.75);\n"
+		"	material.specular = vec3(0.65, 0.65, 0.65);\n"
+		"\n"
+		"	light.ambient = vec3(0.2, 0.2, 0.2);\n"
+		"	light.position = vec3(0.0, 10.0, 0.0);\n"
+		"	light.diffuse = vec3(0.5, 0.5, 0.5);\n"
+		"	light.specular = vec3(0.2, 0.2, 0.2);\n"
+		"\n"
+		"	// ambient\n"
+		"	vec3 ambient = light.ambient * material.ambient;\n"
+		"\n"
+		"	// diffuse \n"
+		"	vec3 norm = normalize(Normal);\n"
+		"	vec3 lightDir = normalize(light.position - FragPos);\n"
+		"	float diff = max(dot(norm, lightDir), 0.0);\n"
+		"	vec3 diffuse = light.diffuse * (diff * material.diffuse);\n"
+		"\n"
+		"	// specular\n"
+		"	vec3 viewDir = normalize(cameraPosition - FragPos);\n"
+		"	vec3 reflectDir = reflect(-lightDir, norm);\n"
+		"	float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);\n"
+		"	vec3 specular = light.specular * (spec * material.specular);\n"
+		"\n"
+		"	color = vec4(material.ambient + diffuse + specular, 1.0);\n"
+		"}\n";
 
 	FileSystem::Save(fragment_shader_path.c_str(), fragmentShaderSource, strlen(fragmentShaderSource));
 }

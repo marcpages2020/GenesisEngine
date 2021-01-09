@@ -48,6 +48,11 @@ Material::Material(GameObject* gameObject) : Component(gameObject), checkers_ima
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	shader = dynamic_cast<ResourceShader*>(App->resources->RequestResource(App->resources->Find("Assets/Shaders/phong.vert")));
+
+	if (shader == nullptr)
+		shader = App->renderer3D->GetDefaultShader();
+
+	shaderID = shader->GetUID();
 	//shader = dynamic_cast<ResourceShader*>(App->resources->RequestResource(App->resources->Find("Assets/Shaders/water_shader.vert")));
 }
 
@@ -90,7 +95,14 @@ void Material::SetShader(ResourceShader* new_shader)
 	if (shader != nullptr)
 		App->resources->ReleaseResource(shader->GetUID());
 
-	shader = new_shader;
+	if (new_shader != nullptr)
+	{
+		shader = new_shader;
+		shaderID = new_shader->GetUID();
+	}
+	else
+	{
+		App->renderer3D->GetDefaultShader();}
 }
 
 void Material::BindTexture(ResourceTexture* texture)
@@ -110,8 +122,15 @@ void Material::BindTexture(ResourceTexture* texture)
 
 void Material::UseShader()
 {
-	shader->Use();
-	shader->UpdateUniforms(this, _resource);
+	if(App->resources->Exists(shaderID))
+	{
+		shader->Use();
+		shader->UpdateUniforms(this, _resource);
+	}
+	else
+	{
+		shader = App->renderer3D->GetDefaultShader();
+	}
 
 	//diffuse map
 	if (checkers_image == false)
@@ -124,10 +143,8 @@ void Material::UseShader()
 			shader->SetVec2("diffuseMapTiling", _resource->tiling[DIFFUSE_MAP][0], _resource->tiling[DIFFUSE_MAP][1]);
 			shader->SetBool("hasDiffuseMap", true);
 		}
-		else
-		{
-			shader->SetBool("hasDiffuseMap", false);
-		}
+		else {
+			shader->SetBool("hasDiffuseMap", false);}
 	}
 	else
 	{
@@ -145,15 +162,15 @@ void Material::UseShader()
 			shader->SetVec2("normalMapTiling", _resource->tiling[NORMAL_MAP][0], _resource->tiling[NORMAL_MAP][1]);
 			shader->SetBool("hasNormalMap", true);
 		}
-		else
-		{
-			shader->SetBool("hasNormalMap", false);
-		}
+		else {
+			shader->SetBool("hasNormalMap", false);}
 	}
 
+	
 	shader->SetInt("depthMap", 2);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, App->renderer3D->depthTexture);
+	
 }
 
 void Material::Save(GnJSONArray& save_array)
@@ -162,6 +179,8 @@ void Material::Save(GnJSONArray& save_array)
 
 	save_object.AddInt("Type", type);
 	save_object.AddInt("MaterialID", _resource->GetUID());
+	if (shader != nullptr)
+		save_object.AddInt("ShaderID", shader->GetUID());
 
 	save_array.AddObject(save_object);
 }
@@ -170,6 +189,8 @@ void Material::Load(GnJSONObj& load_object)
 {
 	_resourceUID = load_object.GetInt("MaterialID", 0);
 	_resource = (ResourceMaterial*)App->resources->RequestResource(_resourceUID);
+	uint shaderUID = load_object.GetInt("ShaderID", 0);
+	SetShader((ResourceShader*)App->resources->RequestResource(shaderUID));
 }
 
 void Material::OnEditor()
@@ -260,11 +281,11 @@ ResourceTexture* Material::DrawTextureInformation(ResourceTexture* texture, Text
 	ImGui::Spacing();
 
 	ImGui::Columns(2);
-	if(texture != nullptr)
-		ImGui::Image((ImTextureID)texture->GetGpuID(), ImVec2(60, 60), ImVec2(0, 1), ImVec2(1, 0));
-
-	else
-		ImGui::Image((ImTextureID)checkersID, ImVec2(60, 60), ImVec2(0, 1), ImVec2(1, 0));
+	ImGui::SetColumnWidth(0, 70.0f);
+	if (texture != nullptr) {
+		ImGui::Image((ImTextureID)texture->GetGpuID(), ImVec2(60, 60), ImVec2(0, 1), ImVec2(1, 0));}
+	else {
+		ImGui::Image((ImTextureID)checkersID, ImVec2(60, 60), ImVec2(0, 1), ImVec2(1, 0));}
 
 	if (ImGui::BeginDragDropTarget())
 	{

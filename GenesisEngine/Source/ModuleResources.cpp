@@ -441,6 +441,9 @@ uint ModuleResources::ReimportFile(const char* assets_file)
 
 		TextureImporter::Import(fileBuffer, (ResourceTexture*)resource, size);
 		break;
+	case ResourceType::RESOURCE_SHADER:
+		ShaderImporter::Import(fileBuffer, (ResourceShader*)resource, resource->assetsFile.c_str());
+		break;
 	default:
 		break;
 	}

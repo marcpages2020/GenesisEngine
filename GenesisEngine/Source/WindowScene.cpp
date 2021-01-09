@@ -17,8 +17,6 @@ WindowScene::~WindowScene() {}
 
 bool WindowScene::Init()
 {
-	shader = dynamic_cast<ResourceShader*>(App->resources->RequestResource(App->resources->Find("Assets/Shaders/screen_shader.vert")));
-
 	return true;
 }
 

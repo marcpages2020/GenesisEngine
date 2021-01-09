@@ -1,14 +1,14 @@
 #include "Globals.h"
 #include "Application.h"
+#include <vector>
 
 #include "GameObject.h"
 #include "Material.h"
 #include "Camera.h"
 #include "Mesh.h"
 
-#include <vector>
 #include "FileSystem.h"
-
+#include "ShaderImporter.h"
 #include "GnJSON.h"
 
 #include "ModuleWindow.h"
@@ -145,6 +145,8 @@ bool ModuleRenderer3D::Init()
 	LOG("GLSL: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
 	GenerateBuffers();
+
+	//GetDefaultShader();
 
 	return ret;
 }
@@ -354,6 +356,19 @@ void ModuleRenderer3D::AddBlendedMesh(float3 position, GnMesh* mesh)
 {
 	float distance = App->camera->GetPosition().Sub(position).Length();
 	blendedMeshes[distance] = mesh;
+}
+
+ResourceShader* ModuleRenderer3D::GetDefaultShader()
+{
+	ResourceShader* defaultShader = (ResourceShader*)App->resources->RequestResource(App->resources->Find("Assets/EngineAssets/default_shader.vert"));
+
+	if (defaultShader == nullptr)
+	{
+		uint defaultShaderID = App->resources->CreateNewResource(RESOURCE_SHADER, "default_shader", "Assets/EngineAssets/default_shader");
+		defaultShader = (ResourceShader*)App->resources->RequestResource(App->resources->Find("Assets/EngineAssets/default_shader.vert"));
+	}
+
+	return defaultShader;
 }
 
 void ModuleRenderer3D::SetCapActive(GLenum cap, bool active)

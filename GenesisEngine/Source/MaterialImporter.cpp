@@ -52,7 +52,9 @@ uint64 MaterialImporter::Save(ResourceMaterial* material, char** fileBuffer)
 {
 	GnJSONObj base_object;
 	base_object.AddInt("diffuseMapID", material->diffuseMapID);
+	base_object.AddFloat2("diffuseMapTiling", float2(material->tiling[DIFFUSE_MAP][0], material->tiling[DIFFUSE_MAP][1]));
 	base_object.AddInt("normalMapID", material->normalMapID);
+	base_object.AddFloat2("normalMapTiling", float2(material->tiling[NORMAL_MAP][0], material->tiling[NORMAL_MAP][1]));
 
 	base_object.AddColor("diffuseColor", material->diffuseColor);
 
@@ -75,12 +77,18 @@ bool MaterialImporter::Load(const char* fileBuffer, ResourceMaterial* material, 
 
 	//diffuse texture
 	uint diffuseTextureID = material_data.GetInt("diffuseMapID", 0);
+	float2 diffuseMapTiling = material_data.GetFloat2("diffuseMapTiling");
+	material->tiling[DIFFUSE_MAP][0] = diffuseMapTiling.x;
+	material->tiling[DIFFUSE_MAP][1] = diffuseMapTiling.y;
 
 	if (diffuseTextureID != 0)
 		material->diffuseMap = dynamic_cast<ResourceTexture*>(App->resources->RequestResource(diffuseTextureID));
 
 	//normal map
 	uint normalMapID = material_data.GetInt("normalMapID", 0);
+	float2 normalMapTiling = material_data.GetFloat2("normalMapTiling");
+	material->tiling[NORMAL_MAP][0] = normalMapTiling.x;
+	material->tiling[NORMAL_MAP][1] = normalMapTiling.y;
 
 	if (normalMapID != 0)
 		material->normalMap = dynamic_cast<ResourceTexture*>(App->resources->RequestResource(normalMapID));

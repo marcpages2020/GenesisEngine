@@ -348,10 +348,10 @@ void ResourceShader::UpdateUniforms(Material* material, ResourceMaterial* resour
 
 bool ResourceShader::IsDefaultUniform(const char* uniform_name)
 {
-	const char* default_uniforms[10] = { "model_matrix" , "projection", "view", "time", "cameraPosition", "diffuseMapTiling",
+	const char* default_uniforms[11] = { "model_matrix" , "projection", "view", "time", "normalMatrix","cameraPosition", "diffuseMapTiling",
 										 "normalMapTiling", "hasDiffuseMap", "hasNormalMap", "diffuseColor"};
 
-	for (size_t i = 0; i < 10; i++)
+	for (size_t i = 0; i < 11; i++)
 	{
 		if (strcmp(uniform_name, default_uniforms[i]) == 0)
 			return true;
