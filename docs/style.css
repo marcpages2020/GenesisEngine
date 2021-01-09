@@ -21,16 +21,26 @@ p{
     text-justify: inter-word;
 }
 
+ul li {
+    font-size: large;
+    margin-left: 5%;
+}
+
+li{
+    margin: 10px 0;
+}
+
 /*Rows and columns*/
 .row::after {
     content: "";
     clear: both;
     display: table;
+    border: 1px solid blue;
 }
 
 [class*="col-"] {
     float: left;
-    padding: 20px;
+    padding: 15px;
     /*border: 1px solid red;*/
 }
 
@@ -75,28 +85,17 @@ a:visited{
     padding-bottom: 1%;
 }
 
-.dark-section{
-      padding-top: 10px;
-      padding-bottom: 2vW;
-      background-color: #202020;
-}
-
-.light-section{
-    background-color: #F6F6F6; 
-    padding-top: 10px;
-    padding-bottom: 2vW;
-}
-
 .banner{
-    background-image:linear-gradient(rgba(75, 75, 75, 0.25), rgba(75, 75, 75, 0.25)), url("photos/procedural.png");
+    background-color: darkslateblue;
     color: white;
     text-align: center;
     padding: 4%;
     text-shadow: 1px 1px 4px #000000;
+    /*filter: blur(8px);*/
 }
 
 .blurred-banner-image{
-    background-image: url("../photos/procedural.JPG");
+   background-color: blueviolet;
     filter: blur(8px);
     -webkit-filter: blur(8px);
 }

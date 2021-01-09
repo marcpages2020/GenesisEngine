@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8"/>
-        <meta name="description" content="Personal Portfolio"/>
-        <meta name="keywords" conent="Game,Developer,Portfolio,Programmer"/>
-        <meta name="author" content="Marc Pagès Francesch"/>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-        <title>Marc Pagès Francesch | Game Developer</title>
-        <link rel="stylesheet" href="style.css"/>
-        <link rel="stylesheet" href="interactive.css"/>
-        <link rel="stylesheet" href="text.css"/>
-        <link href='https://fonts.googleapis.com/css?family=Carter One' rel='stylesheet'>
-    </head>
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Game Engine site" />
+    <meta name="keywords" conent="Game Engine" />
+    <meta name="author" content="Marc Pagès Francesch" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Genesis Engine</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="interactive.css" />
+    <link rel="stylesheet" href="text.css" />
+    <link href='https://fonts.googleapis.com/css?family=Carter One' rel='stylesheet'>
+</head>
 
 <body style="background-color: #333;">
 
@@ -19,107 +20,171 @@
     <div class="banner">
         <!-- Big beginning-->
         <h1 style="font-size: 5vw; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Genesis Engine</h1>
+        <h2 style="font-size: 2vw; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">The first chapter of
+            your creation</h2>
     </div>
 
     <!--Navbar-->
     <div id="navbar">
         <a href="#About">About</a>
         <a href="#Author">Author</a>
-        <a href="#Functionality">Functionality</a>
-        <a href="#Sub-System">Sub-System</a>
+        <a href="#MainFunctionality">Functionality</a>
+        <a href="#Shaders">Shaders</a>
     </div>
 
-    <!--About Me-->
+    <!--Description-->
     <div id="About" class="section" style="background-color: #EBEBEB;">
         <div class="row" style="padding-bottom: 2.5%;">
-            <div class="col-8" style="padding-left: 2.5%;"> 
+            <div class="col-7">
+                <h1>The Engine</h1>
                 <p class="paragraph" style="padding-bottom: 5%; margin-top: 2.5%; margin-left: 2.5%;">
-                    Genesis Engine is a game engine developed for the Game Engines subject in CITM (Terrassa).  <br>
+                    Genesis Engine is a game engine developed for the Game Engines subject in CITM (Terrassa). <br>
                 </p>
             </div>
-            <div class="col-3" > 
+            <div class="col-5">
+            </div>
+        </div>
+
+    </div>
+
+    <!--Author-->
+    <div id="Author" class="section">
+        <div class="row">
+            <div class="col-8" style="text-align: start; color: #EBEBEB;"">
+                <h1>About Me</h1>
+                <p style="font-size: 18px;">
+                    My name is Marc Pagès Francesch and I'm a Game Development student from the Game Development Degree in 
+                    CITM (Terrassa). I developed this engine on my own for the Game engines subject.
+                </p>
+            </div>
+            <div class="col-1">
+
+            </div>
+            <div class="col-3">
+                <img src="photos/personal_pic_squared.jpg" alt="Personal Picture" style="border-radius: 100%;">
             </div>
         </div>
     </div>
-    
-    <!--Projects-->
-    <div  id="Projects" class="section" style="padding-bottom: 4%;">
-        <!--Projects-->
-        <h2 class="header" style="color:white">Projects</h2>
-        <div class="row">
-            <div class="col-4 container" onClick="openUrlInNewTab('https://kalima-entertainment.github.io/Fallout_Strategy/index.html');">
-                <img src="photos/fallout-strategy.png" alt="Fallout Strategy">
-                <div class="overlay">
-                    <div class="text">Fallout Strategy</div>
-                  </div>
-            </div>
-            <div class="col-4 container" onClick="openUrlInNewTab('https://marcpages2020.github.io/Samurai-Shodown/');">
-                <img src="photos/samurai_shodown.png" alt="Samurai Shodown">
-                <div class="overlay">
-                    <div class="text">Samurai Shodown</div>
-                  </div>
-            </div>
-            <div class="col-4 container" onClick="openUrlInNewTab('https://windfog-studios.github.io/The-Little-Explorer/');">
-                <img src="photos/the_little_explorer.png" alt="The Little Explorer">
-                <div class="overlay">
-                    <div class="text">The Little Explorer</div>
-                </div>
-            </div>
 
-            <!--More Info Button-->
-            <div class="col-4"></div>
-            <div class="col-4" style="padding-top: 2%;">
-                <a href="projects.html" class="change-page-button"><b>more info</b></a>
-            </div>
-            <div class="col-4"></div>
-        </div>
-    </div>
-
-    <div id="Functionality" style="background-color: darkmagenta;">
+    <div id="MainFunctionality" class="section" style="background-color: #EBEBEB;">
         <div class="row">
-            <h2 class="header" style="padding-top: 2vw; padding-bottom: 1vw; margin: auto;; color: white;">Functionality</h2>
             <div class="col-12">
-                <h3>Mouse Picking</h3>
+                <h1 style="color: #333; text-align: start;">Functionality</h2>
+                    <div class="col-10">
+                        <ul>
+                            <li>
+                                <b>Game Objects and Components: </b>
+                                Game Object and Component structure similar to other engines lets the user have a more
+                                comfortable
+                                experience when using the engine and leads to a more productive work.
+                            </li>
+
+                            <li><b>Mouse Picking:</b>
+                                Objects can easyly be selected in the scene window by clicking on them. </li>
+
+                            <li><b>Extense Configuration: </b>
+                                The user can easily customize the engine settings so the engine can adapt to it's needs.
+                            </li>
+                            <li><b>Own File Format: </b> In order to make file management faster Genesis Engine uses
+                                it's own file
+                                format which increases the load and unload speed reducing waiting times. </li>
+
+                            <li><b>Easy Import: </b> Importing in Genesis Engine is easy, just drag and drop any model
+                                or texture you
+                                need onto the engine and it will be automatically imported. If you want any file to be
+                                imported before start
+                                the engine you can put it into the Assets folder and it will be automativally imported
+                                at Init. </li>
+
+                            <li><b>Scene Management: </b> Save your work by saving it into a scene. Save your scene with
+                                the name you prefer
+                                or overwrite an existing scene. </li>
+
+                            <li><b>Camera Culling: </b> Why should we waste resources printing objects which won't even
+                                be on screen?
+                                That's the question which leads to a camera culling implementation which will discard
+                                objects out of camera
+                                view printing only those which can be seen. to visualize the process Genesis Engine lets
+                                you choose if you want
+                                camera culling to be applied only on the main camera or also on the editor camera.</li>
+
+                            <li><b>Resource Management: </b> Memory management is very important in computer games, so
+                                in order to save some
+                                those resources which won't be used won't be loaded until they are required and at the
+                                time they stop being used
+                                they will be unloaded from memory. </li>
+                        </ul>
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="Shaders" class="section">
+        <div class="row">
+            <div class="col-12" style="color: #EBEBEB;">
+                <h1 style="text-align: start;">Shaders</h1>
+                <div class="col-6">
+                    <h2>Shader editor</h1>
+                        <p>
+                            Easily edit shaders using its shader editor. Uniforms will be automatically detected and
+                            shown in the inspector
+                            so you can edit them faster than writing them into code.
+                        </p>
+                </div>
+                <div class="col-6">
+                    <h2 style="color: #EBEBEB;">Water Shader</h1>
+                        <p>
+                           A water shader examble comes included in the engine. It uses normal maps to simulat minor water movements 
+                           and ondulation and Gerstner Waves to simulate the bigger ones. 
+                        </p>
+                </div>
             </div>
         </div>
     </div>
 
     <!--Contact-->
     <div id="Sub-System" class="section" style="background-color: #EBEBEB;;">
-            <div class="row">
+        <div class="row">
             <h2 class="header" style="padding-top: 2vw; padding-bottom: 1vw; margin: auto;; color: black;">Contact</h2>
-                <div class="col-12" style="padding-left: 40.5%;">
-                    <a href="https://github.com/marcpages2020"><img src="icons/github.png" alt="github" class="contact-button"></a>
-                    <a href="https://www.linkedin.com/in/marc-pagès-francesch-7206b3186/"><img src="icons/linkedin.png" alt="github"class="contact-button"></a>
-                    <a href="https://twitter.com/MarcPF22?s=08"><img src="icons/twitter.png" alt="github" class="contact-button"></a>
-                </div>
-                <div class="col-12">
-                    <a href="mailto:marcpages13@gmail.com?Subject=Hey!" target="_blank" class="mail center">marcpages13@gmail.com</a>
-                </div>
+            <div class="col-12" style="padding-left: 40.5%;">
+                <a href="https://github.com/marcpages2020"><img src="icons/github.png" alt="github"
+                        class="contact-button"></a>
+                <a href="https://www.linkedin.com/in/marc-pagès-francesch-7206b3186/"><img src="icons/linkedin.png"
+                        alt="github" class="contact-button"></a>
+                <a href="https://twitter.com/MarcPF22?s=08"><img src="icons/twitter.png" alt="github"
+                        class="contact-button"></a>
             </div>
+            <div class="col-12">
+                <a href="mailto:marcpages13@gmail.com?Subject=Hey!" target="_blank"
+                    class="mail center">marcpages13@gmail.com</a>
+            </div>
+        </div>
 
-     <!--Recognition-->
-    <div style="text-align: center; background-color: background-color: #EBEBEB;; padding-bottom: 1vw;">Icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+        <!--Recognition-->
+        <div style="text-align: center; background-color: #EBEBEB; padding-bottom: 1vw;">Icons made by <a
+                href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a
+                href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
     </div>
 
     <!--scripting-->
     <script>
-        window.onscroll = function() {stickyNavbar()};
+        window.onscroll = function () { stickyNavbar() };
         var navbar = document.getElementById("navbar");
         var sticky = navbar.offsetTop;
 
-        function stickyNavbar(){
-            if (window.pageYOffset >= sticky){
+        function stickyNavbar() {
+            if (window.pageYOffset >= sticky) {
                 navbar.classList.add("sticky")
-            }else{
+            } else {
                 navbar.classList.remove("sticky");
             }
-        } 
+        }
 
-    function openUrlInNewTab(url){
-        window.open(url, "_blank");
-    }
+        function openUrlInNewTab(url) {
+            window.open(url, "_blank");
+        }
     </script>
 
 </body>
+
 </html>
