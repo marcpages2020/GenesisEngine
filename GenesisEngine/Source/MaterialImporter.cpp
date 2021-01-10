@@ -80,8 +80,8 @@ bool MaterialImporter::Load(const char* fileBuffer, ResourceMaterial* material, 
 
 	if (diffuseMapID != 0)
 	{
-		material->diffuseMap = dynamic_cast<ResourceTexture*>(App->resources->RequestResource(diffuseMapID));
 		material->diffuseMapID = diffuseMapID;
+		material->diffuseMap = dynamic_cast<ResourceTexture*>(App->resources->RequestResource(diffuseMapID));
 		float2 diffuseMapTiling = material_data.GetFloat2("diffuseMapTiling");
 		material->tiling[DIFFUSE_MAP][0] = diffuseMapTiling.x;
 		material->tiling[DIFFUSE_MAP][1] = diffuseMapTiling.y;
@@ -92,8 +92,8 @@ bool MaterialImporter::Load(const char* fileBuffer, ResourceMaterial* material, 
 
 	if (normalMapID != 0)
 	{
-		material->normalMap = dynamic_cast<ResourceTexture*>(App->resources->RequestResource(normalMapID));
 		material->normalMapID = normalMapID;
+		material->normalMap = dynamic_cast<ResourceTexture*>(App->resources->RequestResource(normalMapID));
 		float2 normalMapTiling = material_data.GetFloat2("normalMapTiling");
 		material->tiling[NORMAL_MAP][0] = normalMapTiling.x;
 		material->tiling[NORMAL_MAP][1] = normalMapTiling.y;

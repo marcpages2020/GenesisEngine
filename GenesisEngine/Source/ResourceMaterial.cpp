@@ -1,4 +1,5 @@
 #include "ResourceMaterial.h"
+#include "Application.h"
 
 ResourceMaterial::ResourceMaterial(uint UID) : Resource(UID, ResourceType::RESOURCE_MATERIAL), diffuseMapID(0), normalMapID(0), diffuseMap(nullptr), normalMap(nullptr) 
 {
@@ -7,5 +8,6 @@ ResourceMaterial::ResourceMaterial(uint UID) : Resource(UID, ResourceType::RESOU
 	tiling[TextureType::NORMAL_MAP][0] = tiling[TextureType::NORMAL_MAP][1] = 1.0f;
 }
 
-ResourceMaterial::~ResourceMaterial() {}
+ResourceMaterial::~ResourceMaterial()
+{}
 

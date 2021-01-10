@@ -28,6 +28,7 @@ public:
 	bool Start() override;
 	bool CleanUp() override;
 	void OnEditor();
+	void Save();
 	void LoadEngineAssets(AssetsIcons& icons);
 	void OnFrameEnd() override;
 

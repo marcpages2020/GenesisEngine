@@ -59,25 +59,25 @@ Material::~Material()
 {
 	if (_resource != nullptr)
 	{
-		if (_resource->diffuseMap != nullptr)
-		{
-			App->resources->ReleaseResource(_resource->diffuseMap->GetUID());
-			_resource->diffuseMap = nullptr;
-		}
-
-		if (_resource->normalMap != nullptr)
-		{
-			App->resources->ReleaseResource(_resource->normalMap->GetUID());
-			_resource->normalMap = nullptr;
-		}
-
 		if (shader != nullptr)
 		{
 			App->resources->ReleaseResource(shader->GetUID());
 			shader = nullptr;
 		}
 
-		App->resources->ReleaseResource(_resourceUID);
+		if (_resource->diffuseMap != nullptr)
+		{
+			App->resources->ReleaseResource(_resource->diffuseMap->GetUID());
+			//_resource->diffuseMap = nullptr;
+		}
+
+		if (_resource->normalMap != nullptr)
+		{
+			App->resources->ReleaseResource(_resource->normalMap->GetUID());
+			//_resource->normalMap = nullptr;
+		}
+
+		App->resources->ReleaseResource(_resource->GetUID());
 		_resource = nullptr;
 	}
 
@@ -93,6 +93,12 @@ void Material::SetResourceUID(uint UID)
 	//Assign new material
 	_resourceUID = UID;
 	_resource = dynamic_cast<ResourceMaterial*>(App->resources->RequestResource(UID));
+
+	if (_resource != nullptr)
+	{
+		SetTexture(dynamic_cast<ResourceTexture*>(App->resources->RequestResource(_resource->diffuseMapID)),DIFFUSE_MAP);
+		SetTexture(dynamic_cast<ResourceTexture*>(App->resources->RequestResource(_resource->normalMapID)), NORMAL_MAP);
+	}
 }
 
 void Material::SetShader(ResourceShader* new_shader)
@@ -142,11 +148,19 @@ void Material::UseShader()
 	{
 		if (_resource->diffuseMap != nullptr)
 		{
-			shader->SetInt("diffuseMap", 0);
-			glActiveTexture(GL_TEXTURE0);
-			BindTexture(_resource->diffuseMap);
-			shader->SetVec2("diffuseMapTiling", _resource->tiling[DIFFUSE_MAP][0], _resource->tiling[DIFFUSE_MAP][1]);
-			shader->SetBool("hasDiffuseMap", true);
+			if (!App->resources->Exists(_resource->diffuseMapID))
+			{
+				_resource->diffuseMap = nullptr;
+				_resource->diffuseMapID = 0;
+			}
+			else
+			{
+				shader->SetInt("diffuseMap", 0);
+				glActiveTexture(GL_TEXTURE0);
+				BindTexture(_resource->diffuseMap);
+				shader->SetVec2("diffuseMapTiling", _resource->tiling[DIFFUSE_MAP][0], _resource->tiling[DIFFUSE_MAP][1]);
+				shader->SetBool("hasDiffuseMap", true);
+			}
 		}
 		else {
 			shader->SetBool("hasDiffuseMap", false);}
@@ -159,11 +173,20 @@ void Material::UseShader()
 	//normal map
 	if (_resource->normalMap != nullptr)
 	{
-		shader->SetInt("normalMap", 1);
-		glActiveTexture(GL_TEXTURE1);
-		BindTexture(_resource->normalMap);
-		shader->SetVec2("normalMapTiling", _resource->tiling[NORMAL_MAP][0], _resource->tiling[NORMAL_MAP][1]);
-		shader->SetBool("hasNormalMap", true);
+		if (!App->resources->Exists(_resource->normalMapID))
+		{
+			_resource->normalMap = nullptr;
+			_resource->normalMapID = 0;
+		}
+		else
+		{
+			shader->SetInt("normalMap", 1);
+			glActiveTexture(GL_TEXTURE1);
+			BindTexture(_resource->normalMap);
+			shader->SetVec2("normalMapTiling", _resource->tiling[NORMAL_MAP][0], _resource->tiling[NORMAL_MAP][1]);
+			shader->SetBool("hasNormalMap", true);
+		}
+
 	}
 	else {
 		shader->SetBool("hasNormalMap", false);}
@@ -175,17 +198,15 @@ void Material::Save(GnJSONArray& save_array)
 	GnJSONObj save_object;
 
 	save_object.AddInt("Type", type);
-	save_object.AddInt("MaterialID", _resource->GetUID());
 
 	if (_resource != nullptr)
 	{
-		App->resources->SaveResource(_resource);
+		save_object.AddInt("MaterialID", _resource->GetUID());
 	}
 
 	if (shader != nullptr)
 	{
 		save_object.AddInt("ShaderID", shader->GetUID());
-		App->resources->SaveResource(shader);
 	}
 
 	save_array.AddObject(save_object);
@@ -194,7 +215,7 @@ void Material::Save(GnJSONArray& save_array)
 void Material::Load(GnJSONObj& load_object)
 {
 	_resourceUID = load_object.GetInt("MaterialID", 0);
-	_resource = (ResourceMaterial*)App->resources->RequestResource(_resourceUID);
+	SetResourceUID(_resourceUID);
 	uint shaderUID = load_object.GetInt("ShaderID", 0);
 	SetShader((ResourceShader*)App->resources->RequestResource(shaderUID));
 }
@@ -359,8 +380,11 @@ ResourceTexture* Material::DrawTextureInformation(ResourceTexture* texture, uint
 
 void Material::SetTexture(ResourceTexture* texture, TextureType type)
 {
+
 	if (texture != nullptr)
 	{
+		texture->type = type;
+
 		switch (type)
 		{
 		case TextureType::DIFFUSE_MAP:

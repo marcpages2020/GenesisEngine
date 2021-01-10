@@ -165,6 +165,27 @@ void ModuleResources::OnEditor()
 	}
 }
 
+void ModuleResources::Save()
+{
+	std::vector<Resource*> resources_to_save;
+
+	std::map<uint, Resource*>::iterator it = resources.begin();
+	for (it; it != resources.end(); it++)
+	{
+		ResourceType type = it->second->GetType();
+		if (type == ResourceType::RESOURCE_MATERIAL || type == ResourceType::RESOURCE_SHADER) 
+		{
+			resources_to_save.push_back(it->second);
+		}
+	}
+	
+	for (size_t i = 0; i < resources_to_save.size(); i++)
+	{
+		SaveResource(resources_to_save[i]);
+	}
+
+}
+
 void ModuleResources::LoadEngineAssets(AssetsIcons& icons)
 {
 	icons.folder = dynamic_cast<ResourceTexture*>(RequestResource(Find("Assets/EngineAssets/folder.png")));
@@ -840,6 +861,7 @@ GameObject* ModuleResources::RequestGameObject(const char* assets_file)
 void ModuleResources::ReleaseResource(uint UID)
 {
 	std::map<uint, Resource*>::iterator it = resources.find(UID);
+
 	if (it != resources.end())
 	{
 		it->second->referenceCount--;

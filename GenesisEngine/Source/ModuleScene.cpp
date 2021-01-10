@@ -230,6 +230,8 @@ bool ModuleScene::Save(const char* file_path)
 
 	FileSystem::DuplicateFile(file_path, assets_path.c_str());
 
+	App->resources->Save();
+
 	save_file.Release();
 	RELEASE_ARRAY(buffer);
 

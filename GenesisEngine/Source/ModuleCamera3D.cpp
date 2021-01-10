@@ -73,8 +73,8 @@ void ModuleCamera3D::OnResize(int width, int height)
 // -----------------------------------------------------------------
 update_status ModuleCamera3D::Update(float dt)
 {
-	if (!App->editor->IsWindowFocused(WindowType::WINDOW_SCENE))
-		return UPDATE_CONTINUE;
+	//if (!App->editor->IsWindowFocused(WindowType::WINDOW_SCENE))
+		//return UPDATE_CONTINUE;
 
 	float3 newPos = float3::zero;
 	int speed_multiplier = 1;
@@ -126,7 +126,7 @@ update_status ModuleCamera3D::Update(float dt)
 		((App->input->GetKey(SDL_SCANCODE_LALT) == KEY_REPEAT) && (App->input->GetMouseButton(SDL_BUTTON_LEFT) == KEY_REPEAT)))
 		Orbit(dt);
 
-	if (App->input->GetMouseButton(SDL_BUTTON_LEFT) == KEY_DOWN && !ImGuizmo::IsOver() && App->editor->MouseOnScene())
+	if (App->input->GetMouseButton(SDL_BUTTON_LEFT) == KEY_DOWN && !ImGuizmo::IsUsing() && App->editor->MouseOnScene())
 	{
 		GameObject* pickedGameObject = PickGameObject();
 		App->scene->selectedGameObject = pickedGameObject;
