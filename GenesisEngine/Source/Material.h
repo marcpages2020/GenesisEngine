@@ -25,7 +25,7 @@ public:
 	void Load(GnJSONObj& load_object) override;
 
 	void OnEditor() override;
-	ResourceTexture* DrawTextureInformation(ResourceTexture* texture, TextureType type);
+	ResourceTexture* DrawTextureInformation(ResourceTexture* texture, uint& textureUID,TextureType type);
 
 	void SetTexture(ResourceTexture* texture, TextureType type = TextureType::DIFFUSE_MAP);
 	void SetTiling(TextureType type, float x, float y);

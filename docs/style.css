@@ -35,7 +35,6 @@ li{
     content: "";
     clear: both;
     display: table;
-    border: 1px solid blue;
 }
 
 [class*="col-"] {
@@ -139,6 +138,8 @@ a:visited{
     transform: translate(-50%, -50%);
     text-align: center;
   }
+
+
 
 .content{
     padding: 16px;

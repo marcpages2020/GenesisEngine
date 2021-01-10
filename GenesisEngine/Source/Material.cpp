@@ -53,7 +53,6 @@ Material::Material(GameObject* gameObject) : Component(gameObject), checkers_ima
 		shader = App->renderer3D->GetDefaultShader();
 
 	shaderID = shader->GetUID();
-	//shader = dynamic_cast<ResourceShader*>(App->resources->RequestResource(App->resources->Find("Assets/Shaders/water_shader.vert")));
 }
 
 Material::~Material()
@@ -70,6 +69,12 @@ Material::~Material()
 		{
 			App->resources->ReleaseResource(_resource->normalMap->GetUID());
 			_resource->normalMap = nullptr;
+		}
+
+		if (shader != nullptr)
+		{
+			App->resources->ReleaseResource(shader->GetUID());
+			shader = nullptr;
 		}
 
 		App->resources->ReleaseResource(_resourceUID);
@@ -154,23 +159,15 @@ void Material::UseShader()
 	//normal map
 	if (_resource->normalMap != nullptr)
 	{
-		if (_resource->normalMap != nullptr)
-		{
-			shader->SetInt("normalMap", 1);
-			glActiveTexture(GL_TEXTURE1);
-			BindTexture(_resource->normalMap);
-			shader->SetVec2("normalMapTiling", _resource->tiling[NORMAL_MAP][0], _resource->tiling[NORMAL_MAP][1]);
-			shader->SetBool("hasNormalMap", true);
-		}
-		else {
-			shader->SetBool("hasNormalMap", false);}
+		shader->SetInt("normalMap", 1);
+		glActiveTexture(GL_TEXTURE1);
+		BindTexture(_resource->normalMap);
+		shader->SetVec2("normalMapTiling", _resource->tiling[NORMAL_MAP][0], _resource->tiling[NORMAL_MAP][1]);
+		shader->SetBool("hasNormalMap", true);
 	}
-
-	
-	shader->SetInt("depthMap", 2);
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, App->renderer3D->depthTexture);
-	
+	else {
+		shader->SetBool("hasNormalMap", false);}
+		
 }
 
 void Material::Save(GnJSONArray& save_array)
@@ -179,8 +176,17 @@ void Material::Save(GnJSONArray& save_array)
 
 	save_object.AddInt("Type", type);
 	save_object.AddInt("MaterialID", _resource->GetUID());
+
+	if (_resource != nullptr)
+	{
+		App->resources->SaveResource(_resource);
+	}
+
 	if (shader != nullptr)
+	{
 		save_object.AddInt("ShaderID", shader->GetUID());
+		App->resources->SaveResource(shader);
+	}
 
 	save_array.AddObject(save_object);
 }
@@ -212,11 +218,11 @@ void Material::OnEditor()
 
 		ImGui::Separator();
 
-		_resource->diffuseMap = DrawTextureInformation(_resource->diffuseMap, TextureType::DIFFUSE_MAP);
+		_resource->diffuseMap = DrawTextureInformation(_resource->diffuseMap,  _resource->diffuseMapID, TextureType::DIFFUSE_MAP);
 
 		ImGui::Separator();
 
-		_resource->normalMap = DrawTextureInformation(_resource->normalMap, TextureType::NORMAL_MAP);
+		_resource->normalMap = DrawTextureInformation(_resource->normalMap, _resource->normalMapID, TextureType::NORMAL_MAP);
 
 		ImGui::Spacing();
 		ImGui::Separator();
@@ -262,7 +268,7 @@ void Material::OnEditor()
 	}
 }
 
-ResourceTexture* Material::DrawTextureInformation(ResourceTexture* texture, TextureType type)
+ResourceTexture* Material::DrawTextureInformation(ResourceTexture* texture, uint& textureUID, TextureType type)
 {
 	if (texture != nullptr)
 	{
@@ -299,6 +305,7 @@ ResourceTexture* Material::DrawTextureInformation(ResourceTexture* texture, Text
 			if (possible_texture->GetType() == ResourceType::RESOURCE_TEXTURE) {
 				texture = dynamic_cast<ResourceTexture*>(possible_texture);
 				texture->type = type;
+				textureUID = texture->GetUID();
 			}
 		}
 		ImGui::EndDragDropTarget();
@@ -319,6 +326,7 @@ ResourceTexture* Material::DrawTextureInformation(ResourceTexture* texture, Text
 		{
 			App->resources->ReleaseResource(texture->GetUID());
 			texture = nullptr;
+			textureUID = 0;
 		}
 		else
 		{
@@ -357,11 +365,11 @@ void Material::SetTexture(ResourceTexture* texture, TextureType type)
 		{
 		case TextureType::DIFFUSE_MAP:
 			_resource->diffuseMap = texture;
-			_resource->diffuseMapID = texture->GetID();
+			_resource->diffuseMapID = texture->GetUID();
 			break;
 		case TextureType::NORMAL_MAP:
 			_resource->normalMap = texture;
-			_resource->normalMapID = texture->GetID();
+			_resource->normalMapID = texture->GetUID();
 			break;
 		case TextureType::UNKNOWN_MAP:
 			LOG_ERROR("Trying to apply unwnown texture type: %s", texture->name);

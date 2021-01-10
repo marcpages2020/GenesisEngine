@@ -15,8 +15,8 @@
     },
     {
       "name": "window",
-      "width": 1600,
-      "height": 900,
+      "width": 1024,
+      "height": 768,
       "fullscreen": false,
       "fullscreen_desktop": false,
       "resizable": true,

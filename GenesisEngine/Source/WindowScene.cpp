@@ -78,16 +78,7 @@ void WindowScene::Draw()
 		if (App->editor->image_size.x != window_size.x || App->editor->image_size.y != window_size.y)
 			App->editor->OnResize(window_size);
 
-		//if (shader != nullptr)
-			//shader->Use();
-
 		ImGui::Image((ImTextureID)App->renderer3D->colorTexture, App->editor->image_size, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
-		//ImGui::Image((ImTextureID)App->renderer3D->depthTexture, App->editor->image_size, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
-		
-		//glBindTexture(GL_TEXTURE_2D, 0);
-
-		//if (shader != nullptr)
-			//glUseProgram(0);
 
 		ImGui::PushID(WINDOW_SCENE);
 		if (ImGui::BeginDragDropTarget())
