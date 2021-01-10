@@ -141,6 +141,8 @@ void Material::UseShader()
 	else
 	{
 		shader = App->renderer3D->GetDefaultShader();
+		shader->Use();
+		shader->UpdateUniforms(this, _resource);
 	}
 
 	//diffuse map

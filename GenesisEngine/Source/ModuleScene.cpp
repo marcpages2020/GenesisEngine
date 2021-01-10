@@ -60,22 +60,25 @@ void ModuleScene::SetDemo()
 	ResourceShader* water_shader = (ResourceShader*)App->resources->RequestResource(App->resources->Find("Assets/Shaders/water_shader.vert"));
 	material->SetShader(water_shader);
 
-	Uniform color("color", UniformType::VEC_3, true);
-	color.vec3 = float3(0.150f, 0.7f, 0.8f);
-	water_shader->AddUniform(color);
+	if (water_shader != nullptr)
+	{
+		Uniform color("color", UniformType::VEC_3, true);
+		color.vec3 = float3(0.150f, 0.7f, 0.8f);
+		water_shader->AddUniform(color);
 
-	Uniform direction_1("direction_1", UniformType::VEC_3, false);
-	direction_1.vec3 = float3(0.8f, 1.0f, 1.0f);
-	water_shader->AddUniform(direction_1);
+		Uniform direction_1("direction_1", UniformType::VEC_3, false);
+		direction_1.vec3 = float3(0.8f, 1.0f, 1.0f);
+		water_shader->AddUniform(direction_1);
 
-	
-	Uniform opacity("opacity", UniformType::NUMBER);
-	opacity.number = 0.65f;
-	water_shader->AddUniform(opacity);
 
-	Uniform wave_length("wave_length", UniformType::NUMBER, true);
-	wave_length.number = 0.4;
-	water_shader->AddUniform(wave_length);
+		Uniform opacity("opacity", UniformType::NUMBER);
+		opacity.number = 0.65f;
+		water_shader->AddUniform(opacity);
+
+		Uniform wave_length("wave_length", UniformType::NUMBER, true);
+		wave_length.number = 0.4;
+		water_shader->AddUniform(wave_length);
+	}
 	
 	AddGameObject(parent_water);
 

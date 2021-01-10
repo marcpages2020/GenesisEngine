@@ -3,6 +3,7 @@
   a Game Development Student in CITM (Terrassa, Catalonia, Spain).
 
   Engine GitHub page: https://github.com/marcpages2020/GenesisEngine
+  Engine Page: https://marcpages2020.github.io/GenesisEngine/
   My personal GitHub profile: https://github.com/marcpages2020
 
 ## Controls: 
@@ -57,6 +58,31 @@ There are plenty of importing options specially for textures. When the file is d
 ### Things to take into account
  - At the end of the inspector window there is a ab called Resources. In this tab it is shown all the resources which are currently loaded into memory. If numbers seem to not match for textures take into account that assets window icon textures and preview textures are included in the list.
 
+### Shaders
+ - To create a new shader right click on an empty space in the assets window and click on Create->Shader, write the name you want for your shader and click on Done.
+ - To apply a shader to an object select the desired object and in the inspector drag the shader onto the button of the current shader. An optional way of applying a shader is selecting an object and dragging the shader onto the scene window. 
+ - To edit a shader select an object which has it applied and click the button "Open shader editor". From here you can swap between the vertex and fragment shader. To save and compile the shader click on the compile button at the bottom of the editor. 
+ - If a new uniform is added it will be added to the shader when the compile button is clicked. Then it will be available for editing, if an object with that shader is selected, in the uniforms section under the uniforms tab from the shader part in the inspector. To save their values click under the "Save uniforms" button at the bottom of the uniforms section.
+- If a vec3 or vec4 uniform wants to be used as a color and wants to be edited more easily click the color checkbox next to the uniform in the inspector. Then on the right if you click the little square with the color a color selector panel will open. 
+- For easer debug if an error is commited when editing the shader such as not writing a semicolon a red line will appear showing the exact line with the error or the following one. To know in which of the two shaders there is an error look that the vertex or fragment shader will turn red. If an error is not caused by a line but for an external reason it will be shown in the console. 
+- For this demo some uniforms have been set in the code itself but if you want to edit the water shader from the inspector just add the word uniform before the variables you want to edit, compile the shader and they will appear in the inspector. 
+- To enable mesh transparency in the inspector next to the enabled button there is a checkbox called blend. If it is ticked the mesh will have transparency enabled and if in the shader the alpha value of the out Fragment shader is under 1.0 the effect will be seen. 
+- Some shaders might need all of their uniforms set in order to work properly.
+- To import a shader dragging it onto the engine first drag the .frag and after the .vert. If you did it the other way round and for any reason the engine crashes delete the shader and the meta and open the engine again.  
+- Unfiorms won't appear in the inspector until they hace a real effect on the code because OpenGL optimizes the code deleting the uniforms which are not used. 
+- Some uniforms are provided by the code so you can use them in your shaders. Just declare them in the shader an they will be available for use.
+	- model_matrix: global transform of the object (mat4).
+	- projection: projection matrix of the camera (mat4).
+	- view: view matrix of the camera (mat4).
+	- time: time in seconds (float).
+	- normalMatrix: matrix that transforms normals to world space (mat3).
+	- cameraPosition: position of the camera in world coordinates (vec3). 
+	- diffuseMap: diffuse texture of the material(sampler2D).
+	- normalMap: normal map of the material(sampler2D).
+	- diffuseMapTiling: tiling of the diffuse texture of the material (vec2).
+	- normalMapTiling: iling of the normal map of the material (vec2).
+	- diffuseColor: albedo color of the diffuse texture of the material (vec4). 
+
  ## Additional functionality
 
  ### First Assignment
@@ -72,3 +98,7 @@ There are plenty of importing options specially for textures. When the file is d
  - Interactive path in assets window which lets the user move easilly bacwards in the file or folder path. 
  - Meshes can be selected individually from inside a model pushing the arrow next to the file in the assets window. 
  - Inside the configuration window there is an option under the resources tab which lets you delete all meta files and library files at shutdown so projects can be cleaned before releases or sending to mates. 
+## Third assignment
+- Debug errors on the shader editor screen.
+- Gerstner waves for the water shader.
+- Color editor in the uniforms editor. 

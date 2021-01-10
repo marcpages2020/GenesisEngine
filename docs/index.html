@@ -35,14 +35,21 @@
     <!--Description-->
     <div id="About" class="section" style="background-color: #EBEBEB;">
         <div class="row" style="padding-bottom: 2.5%;">
-            <div class="col-8">
-                <h1>The Engine</h1>
+            <div class="col-8" style="padding-left: 5%;">
+                <h1 style="color: #333; text-align: start;">The Engine</h1>
                 <p class="paragraph" style="padding-bottom: 5%; margin-top: 2.5%; margin-left: 2.5%;">
-                    Genesis Engine is a game engine developed for the Game Engines subject in CITM (Terrassa). <br>
+                    Genesis Engine is a game engine developed for the Game Engines subject in <a
+                        href="https://www.citm.upc.edu">CITM (Terrassa)</a>.
+                    It has
+                    been created
+                    during the first semester of the third year of the degree. For the development of the engine i've
+                    used
+                    more
+                    than a dozen of libraries, all licensed in the release. <br>
                 </p>
             </div>
             <div class="col-3">
-                <img src="photos/GnEngineIcon.png" style="width: 90%;" alt="Genesis Engine">
+                <img src="photos/GnEngineIcon.png" style="width: 100%; padding-left: 20%;" alt="Genesis Engine">
             </div>
         </div>
 
@@ -55,7 +62,9 @@
                 <h1>About Me</h1>
                 <p style=" font-size: 18px;">
                 My name is Marc Pagès Francesch and I'm a Game Development student from the Game Development Degree in
-                CITM (Terrassa). I developed this engine on my own for the Game engines subject.
+                CITM (Terrassa). I developed this engine on my own for the Game engines subject. You can find me on
+                Twitter, GitHub and LinkedIn
+                in the links below.
                 </p>
                 <div class="row">
                     <div class="col-4">
@@ -96,7 +105,8 @@
                                 Objects can easyly be selected in the scene window by clicking on them. </li>
 
                             <li><b>Extense Configuration: </b>
-                                The user can easily customize the engine settings so the engine can adapt to it's needs.
+                                The user can easily customize the engine settings so the engine can adapt to the user
+                                needs.
                             </li>
                             <li><b>Own File Format: </b> In order to make file management faster Genesis Engine uses
                                 it's own file
@@ -138,33 +148,72 @@
                 <h1 style="text-align: start;">Shaders</h1>
                 <div class="col-6">
                     <h2>Shader editor</h1>
-                        <p>
-                            Easily edit shaders using its shader editor inside the engine itself. Uniforms will be automatically detected and
-                            shown in the inspector
-                            so you can edit them faster than writing them into code.
-                        </p>
+                        <ul>
+                            <li> Easily edit shaders using its shader editor inside the engine itself. </li>
+                            <li> After compiling the shader uniforms
+                                will be automatically detected and shown in the inspector so you can edit them faster
+                                than writing them into code.</li>
+                            <li>
+                                More than ten already integrated uniforms which makes development easier such as time,
+                                acces to
+                                textures, its tiling and camera position and matrices.
+                            </li>
+                            <li> Errors are directly shown in the shader editor in the line which causes them
+                                for faster debug. If an error is not caused by a specific line or for something external
+                                to the shader text it will be shown in the console.
+                            </li>
+                            <li> Shaders can easilly be applied dropping them in the inspector or directly onto the
+                                scene. </li>
+                            <li> Vec3 and vec4 uniforms can be edited with a color selector.</li>
+                            <li> Shaders support transparency if the mesh is set with the blend property.</li>
+                            <li> Materials suport diffuse and normal maps to be applied dropping them onto the Component
+                                and change properties such as albedo and tiling. </li>
+                        </ul>
                 </div>
                 <div class="col-6">
                     <h2 style="color: #EBEBEB;">Water Shader</h1>
-                        <p>
-                            A water shader examble comes included in the engine. It uses normal maps to simulat minor
-                            water movements
-                            and ondulation and Gerstner Waves to simulate the bigger ones.
-                        </p>
+                        <ul>
+                            <li> A water shader example comes included in the engine.</li>
+                            <li>It uses normal maps to simulate minor water movements and ondulation and
+                                Gerstner Waves to simulate bigger ones what makes them more organic and dynamic.</li>
+                            <li>
+                                By default there are three waves but for everly line of code you can add a totally
+                                diferent
+                                wave type using only one function.
+                            </li>
+                            <li> To simulate foam this shader uses cellular noise and fbm noise what makes the foam
+                                texture independent and
+                                makes resolution always look good.</li>
+                            <li>
+                                Depending on the vertex height foam will be more or less intense so it seems more
+                                realistic.
+                            </li>
+                            <li>
+                                Opacity can be changed to make it more or less dense.
+                            </li>
+                        </ul>
                 </div>
+            </div>
+            <div>
+                <row>
+                    <div class="col-6">
+                        <img class="center" src="photos/shader_editor.gif" style="width: 80%;" alt="Genesis Engine">
+                    </div>
+                    <div class="col-6">
+                        <img class="center" src="photos/water_shader.gif" style="width: 80%;" alt="Genesis Engine">
+                    </div>
+                </row>
             </div>
         </div>
     </div>
 
     <div class="section" style="background-color: #EBEBEB;;">
-        <div class="row">
+        <div class="row" style="padding-top: 4vw; padding-bottom: 4vw;">
             <div>
-
+                <iframe width="768" height="432" src="https://www.youtube.com/embed/HGe0NxgczFQ" class="center">
+                </iframe>
             </div>
         </div>
-    </div>
-
-    <div class="section" style="background-color: #333;;">
         <div class="row">
             <div class="col-2">
             </div>
@@ -172,10 +221,44 @@
                 <a class="github-button" href="https://github.com/marcpages2020/GenesisEngine">View on Github</a>
             </div>
             <div class="col-4">
-                <a class="github-button" href="https://github.com/marcpages2020/GenesisEngine/releases">Get Latest Release</a>
+                <a class="github-button" href="https://github.com/marcpages2020/GenesisEngine/releases/tag/0.3">Get
+                    Latest Release</a>
             </div>
             <div class="col-2">
             </div>
+        </div>
+    </div>
+
+    <div class="section" style="background-color: #333;">
+        <div class="row">
+            <div class="col-1"></div>
+            <div class="col-10" style="background-color: #333; color: #EBEBEB;">
+                <p>
+                    MIT License
+
+                    Copyright (c) 2020 Marc Pagès Francesch
+
+                    Permission is hereby granted, free of charge, to any person obtaining a copy
+                    of this software and associated documentation files Genesis Engine, to deal
+                    in the Software without restriction, including without limitation the rights
+                    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+                    copies of the Software, and to permit persons to whom the Software is
+                    furnished to do so, subject to the following conditions:
+
+                    The above copyright notice and this permission notice shall be included in all
+                    copies or substantial portions of the Software.
+
+                    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+                    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+                    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+                    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+                    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+                    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+                    SOFTWARE.
+
+                </p>
+            </div>
+            <div class="col-1"></div>
         </div>
     </div>
 

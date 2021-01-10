@@ -13,7 +13,9 @@ void ShaderImporter::Import(char* fileBuffer, ResourceShader* shader, const char
 	char* buffer;
 
 	std::string pairingShader = FindPairingShader(assets_path);
-	FileSystem::Load(pairingShader.c_str(), &buffer);
+
+	if (FileSystem::Load(pairingShader.c_str(), &buffer) == 0)
+		return;
 
 	GLuint vertexShader = 0;
 	GLuint fragmentShader = 0;
@@ -293,6 +295,8 @@ std::string ShaderImporter::FindPairingShader(const char* current_shader_path)
 		pairingShaderPath.append(".vert");
 		return pairingShaderPath;
 	}
+
+	return std::string("NoPairingShader");
 }
 
 ShaderType ShaderImporter::GetTypeFromPath(const char* path)

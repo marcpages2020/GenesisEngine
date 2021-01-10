@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "ImGui/imgui.h"
 #include "FileSystem.h"
+#include "ShaderImporter.h"
 
 WindowImport::WindowImport() : EditorWindow(), _currentResourceType(ResourceType::RESOURCE_UNKNOWN)
 {
@@ -33,7 +34,11 @@ void WindowImport::Draw()
 			FileSystem::DuplicateFile(_fileToImport, final_path.c_str());
 		}
 
-		App->resources->ImportFile(final_path.c_str());
+		if (final_path.find(".vert") != std::string::npos)
+		{
+			App->resources->ImportFile(final_path.c_str());
+		}
+
 		visible = false;
 	}
 	else

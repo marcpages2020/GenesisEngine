@@ -306,14 +306,6 @@ void ResourceShader::UpdateUniforms(Material* material, ResourceMaterial* resour
 		}
 		//User Uniforms
 		else {
-			/*
-			if (it->first == "diffuseColor") {
-				if (resourceMaterial != nullptr) {
-					it->second.vec4 = float4(resourceMaterial->diffuseColor.r, resourceMaterial->diffuseColor.g, resourceMaterial->diffuseColor.b, resourceMaterial->diffuseColor.a);
-					it->second.color = true;
-				}
-			}
-			*/
 			switch (it->second.uniformType)
 			{
 			case UniformType::BOOLEAN:

@@ -73,8 +73,8 @@ void ModuleCamera3D::OnResize(int width, int height)
 // -----------------------------------------------------------------
 update_status ModuleCamera3D::Update(float dt)
 {
-	//if (!App->editor->IsWindowFocused(WindowType::WINDOW_SCENE))
-		//return UPDATE_CONTINUE;
+	if (!App->editor->IsWindowFocused(WindowType::WINDOW_SCENE))
+		return UPDATE_CONTINUE;
 
 	float3 newPos = float3::zero;
 	int speed_multiplier = 1;
