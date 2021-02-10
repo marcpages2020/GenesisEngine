@@ -1,6 +1,7 @@
 #pragma once
 #include "Globals.h"
 #include "Application.h"
+#include "WindowConsole.h"
 
 void log(int warning_level, const char file[], int line, const char* format, ...)
 {
@@ -15,8 +16,12 @@ void log(int warning_level, const char file[], int line, const char* format, ...
 	sprintf_s(tmp_string2, 4096, "\n%s(%d) : %s", file, line, tmp_string);
 	OutputDebugString(tmp_string2);
 
-	if(App != nullptr)
-		App->editor->AddConsoleLog(tmp_string, warning_level);
+	if (App != nullptr)
+	{
+		WindowConsole* console = (WindowConsole*)App->editor->GetWindow(WINDOW_CONSOLE);
+		if (console != nullptr)
+		{
+			console->AddConsoleLog(tmp_string, warning_level);
+		}
+	}
 }
-
-

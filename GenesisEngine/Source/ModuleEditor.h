@@ -12,16 +12,11 @@
 
 typedef int GLint;
 
-struct log_message {
-	std::string log_text;
-	int warning_level;
-};
-
-class Editor : public Module 
+class ModuleEditor : public Module 
 {
 public:
-	Editor(bool start_enabled = true);
-	~Editor();
+	ModuleEditor(bool start_enabled = true);
+	~ModuleEditor();
 
 	bool Init();
 	bool Start() override;
@@ -32,7 +27,7 @@ public:
 
 	bool IsWindowFocused(WindowType window);
 	bool MouseOnScene();
-	void AddConsoleLog(const char* log, int warning_level);
+	EditorWindow* GetWindow(WindowType type);
 
 	void OnResize(ImVec2 window_size);
 	void LoadFile(const char* filter_extension, const char* from_dir);
@@ -60,7 +55,6 @@ public:
 private:
 
 	bool show_project_window;
-	bool show_console_window;
 
 	//edit subwindows
 	bool show_preferences_window;
@@ -70,8 +64,6 @@ private:
 	bool* open_dockspace;
 
 	int current_theme;
-
-	std::vector<log_message> console_log;
 
 	enum
 	{

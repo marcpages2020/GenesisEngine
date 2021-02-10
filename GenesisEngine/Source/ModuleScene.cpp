@@ -45,6 +45,7 @@ bool ModuleScene::Start()
 
 void ModuleScene::SetDemo()
 {
+	/*
 	GameObject* parent_water = App->resources->RequestGameObject("Assets/Models/complex_plane.fbx");
 	parent_water->GetTransform()->SetPosition(float3(0.0f, 1.5f, 0.0f));
 	parent_water->GetTransform()->SetScale(float3(50.0f, 1.0f, 50.0f));
@@ -81,6 +82,7 @@ void ModuleScene::SetDemo()
 	}
 	
 	AddGameObject(parent_water);
+	*/
 
 	GameObject* street_environment = App->resources->RequestGameObject("Assets/Models/street/Street environment_V01.fbx");
 	AddGameObject(street_environment);

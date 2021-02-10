@@ -22,9 +22,6 @@
     <ClCompile Include="Timer.cpp">
       <Filter>Tools</Filter>
     </ClCompile>
-    <ClCompile Include="Editor.cpp">
-      <Filter>Modules</Filter>
-    </ClCompile>
     <ClCompile Include="log.cpp">
       <Filter>Tools</Filter>
     </ClCompile>
@@ -242,6 +239,12 @@
     <ClCompile Include="Libs\TextEditor\TextEditor.cpp">
       <Filter>Libs\TextEditor</Filter>
     </ClCompile>
+    <ClCompile Include="ModuleEditor.cpp">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowConsole.cpp">
+      <Filter>EditorWindows</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
@@ -264,9 +267,6 @@
     </ClInclude>
     <ClInclude Include="Timer.h">
       <Filter>Tools</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor.h">
-      <Filter>Modules</Filter>
     </ClInclude>
     <ClInclude Include="Module.h">
       <Filter>Modules</Filter>
@@ -598,6 +598,12 @@
     </ClInclude>
     <ClInclude Include="ImportingOptions.h">
       <Filter>FileManagement\Importers</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleEditor.h">
+      <Filter>Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowConsole.h">
+      <Filter>EditorWindows</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

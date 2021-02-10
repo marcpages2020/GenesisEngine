@@ -1,5 +1,5 @@
 #include "Application.h"
-#include "Editor.h"
+#include "ModuleEditor.h"
 #include "GnJSON.h"
 #include "Mesh.h"
 #include "ModuleScene.h"
@@ -27,6 +27,7 @@
 #include "WindowAbout.h"
 #include "WindowImport.h"
 #include "WindowShaderEditor.h"
+#include "WindowConsole.h"
 
 #ifdef _WIN32
 #define IM_NEWLINE  "\r\n"
@@ -34,7 +35,7 @@
 #define IM_NEWLINE  "\n"
 #endif
 
-Editor::Editor(bool start_enabled) : Module(start_enabled)
+ModuleEditor::ModuleEditor(bool start_enabled) : Module(start_enabled)
 {
 	name = "editor";
 
@@ -49,19 +50,20 @@ Editor::Editor(bool start_enabled) : Module(start_enabled)
 	selected_file[0] = '\0';
 	selected_folder[0] = '\0';
 
-	windows[WINDOW_HIERARCHY] = new WindowHierarchy();
-	windows[WINDOW_INSPECTOR] = new WindowInspector();
-	windows[WINDOW_SCENE] = new WindowScene();
+	windows[WINDOW_ABOUT] = new WindowAbout();
 	windows[WINDOW_ASSETS] = new WindowAssets();
 	windows[WINDOW_CONFIGURATION] = new WindowConfiguration();
-	windows[WINDOW_ABOUT] = new WindowAbout();
+	windows[WINDOW_CONSOLE] = new WindowConsole();
+	windows[WINDOW_HIERARCHY] = new WindowHierarchy();
 	windows[WINDOW_IMPORT] = new WindowImport();
+	windows[WINDOW_INSPECTOR] = new WindowInspector();
+	windows[WINDOW_SCENE] = new WindowScene();
 	windows[WINDOW_SHADER_EDITOR] = new WindowShaderEditor();
 }
 
-Editor::~Editor() {}
+ModuleEditor::~ModuleEditor() {}
 
-bool Editor::Init()
+bool ModuleEditor::Init()
 {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -76,7 +78,7 @@ bool Editor::Init()
 	return true;
 }
 
-bool Editor::Start()
+bool ModuleEditor::Start()
 {
 	bool ret = true;
 
@@ -88,14 +90,14 @@ bool Editor::Start()
 	return ret;
 }
 
-update_status Editor::Update(float dt)
+update_status ModuleEditor::Update(float dt)
 {
 	update_status ret = UPDATE_CONTINUE;
 
 	return ret;
 }
 
-update_status Editor::Draw()
+update_status ModuleEditor::Draw()
 {
 	//Update the frames
 	ImGui_ImplOpenGL3_NewFrame();
@@ -111,37 +113,6 @@ update_status Editor::Draw()
 	}
 
 	ShowGameButtons();
-
-	//Console
-	if (show_console_window)
-	{
-		if (ImGui::Begin("Console", &show_console_window, ImGuiWindowFlags_MenuBar)) {
-
-			if (ImGui::BeginMenuBar()) 
-			{
-				if (ImGui::MenuItem("Clear"))
-				{
-					console_log.clear();
-				}
-				ImGui::EndMenuBar();
-			}
-
-			for (int i = 0; i < console_log.size(); i++)
-			{
-				if (console_log[i].warning_level == 0) //Normal log
-				{
-					ImGui::Text(console_log[i].log_text.c_str());
-				}
-				else if (console_log[i].warning_level == 1) //Warning
-				{
-					ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), console_log[i].log_text.c_str());
-				}
-				else //Error
-					ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), console_log[i].log_text.c_str());
-			}
-		}
-		ImGui::End();
-	}
 
 	//Preferences
 	if (show_preferences_window)
@@ -164,13 +135,11 @@ update_status Editor::Draw()
 	return UPDATE_CONTINUE;
 }
 
-bool Editor::CleanUp()
+bool ModuleEditor::CleanUp()
 {
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplSDL2_Shutdown();
 	ImGui::DestroyContext();
-
-	console_log.clear();
 
 	for (size_t i = 0; i < MAX_WINDOWS; i++)
 	{
@@ -181,7 +150,7 @@ bool Editor::CleanUp()
 	return true;
 }
 
-bool Editor::LoadConfig(GnJSONObj& config)
+bool ModuleEditor::LoadConfig(GnJSONObj& config)
 {
 	GnJSONArray jsonWindows(config.GetArray("windows"));
 	
@@ -198,7 +167,7 @@ bool Editor::LoadConfig(GnJSONObj& config)
 	windows[WINDOW_ASSETS]->visible = window.GetBool("visible");
 
 	window = jsonWindows.GetObjectInArray("console");
-	show_console_window = window.GetBool("visible");
+	windows[WINDOW_CONSOLE]->visible = window.GetBool("visible");
 
 	window = jsonWindows.GetObjectInArray("configuration");
 	windows[WINDOW_CONFIGURATION]->visible = window.GetBool("visible");
@@ -212,24 +181,23 @@ bool Editor::LoadConfig(GnJSONObj& config)
 	return true;
 }
 
-bool Editor::IsWindowFocused(WindowType window)
+bool ModuleEditor::IsWindowFocused(WindowType window)
 {
 	return windows[window]->focused;
 }
 
-bool Editor::MouseOnScene()
+bool ModuleEditor::MouseOnScene()
 {
 	return mouseScenePosition.x > 0 && mouseScenePosition.x < image_size.x 
 		   && mouseScenePosition.y > 0 && mouseScenePosition.y < image_size.y;
 }
 
-void Editor::AddConsoleLog(const char* log, int warning_level)
+EditorWindow* ModuleEditor::GetWindow(WindowType type)
 {
-	log_message message = { log, warning_level };
-	console_log.push_back(message);
+	return windows[type];
 }
 
-update_status Editor::ShowDockSpace(bool* p_open) 
+update_status ModuleEditor::ShowDockSpace(bool* p_open) 
 {
 	update_status ret = UPDATE_CONTINUE;
 
@@ -284,7 +252,7 @@ update_status Editor::ShowDockSpace(bool* p_open)
 	return ret;
 }
 
-void Editor::ChangeTheme(std::string theme)
+void ModuleEditor::ChangeTheme(std::string theme)
 {
 	if (theme == "Dark")
 	{
@@ -300,7 +268,7 @@ void Editor::ChangeTheme(std::string theme)
 	}
 }
 
-bool Editor::CreateMainMenuBar() {
+bool ModuleEditor::CreateMainMenuBar() {
 	bool ret = true;
 
 	if (ImGui::BeginMainMenuBar())
@@ -400,9 +368,9 @@ bool Editor::CreateMainMenuBar() {
 			{
 				windows[WINDOW_ASSETS]->visible = !windows[WINDOW_ASSETS]->visible;
 			}
-			else if (ImGui::MenuItem("Console", NULL, show_console_window))
+			else if (ImGui::MenuItem("Console", NULL, windows[WINDOW_CONSOLE]->visible))
 			{
-				show_console_window = !show_console_window;
+				windows[WINDOW_CONSOLE]->visible = !windows[WINDOW_CONSOLE]->visible;
 			}
 			else if (ImGui::MenuItem("Configuration", NULL, windows[WINDOW_CONFIGURATION]->visible))
 			{
@@ -437,15 +405,20 @@ bool Editor::CreateMainMenuBar() {
 	return ret;
 }
 
-void Editor::ShowGameButtons()
+void ModuleEditor::ShowGameButtons()
 {
 	ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration;
 
 	ImGui::SetNextWindowSize(ImVec2(130, 40));
 	if (ImGui::Begin("Game Buttons", &show_game_buttons, flags))
 	{
-		ImGui::Columns(2);
+		ImGui::Columns(3);
 
+		ImGui::RadioButton("Global", true);
+		ImGui::SameLine();
+		ImGui::RadioButton("Local", true);
+
+		ImGui::NextColumn();
 		if (App->in_game == false)
 		{
 			if (ImGui::Button("Play", ImVec2(40, 20)))
@@ -456,7 +429,9 @@ void Editor::ShowGameButtons()
 				App->StopGame();
 		}
 
-		ImGui::NextColumn();
+		ImGui::SameLine();
+
+		//ImGui::NextColumn();
 		if (Time::gameClock.paused) 
 		{
 			if (ImGui::Button("Resume", ImVec2(45, 20)))
@@ -467,12 +442,13 @@ void Editor::ShowGameButtons()
 			if (ImGui::Button("Pause", ImVec2(45, 20))) 
 				Time::gameClock.Pause();
 		}
+		ImGui::NextColumn();
 
 	}
 	ImGui::End();
 }
 
-void Editor::LoadFile(const char* filter_extension, const char* from_dir)
+void ModuleEditor::LoadFile(const char* filter_extension, const char* from_dir)
 {
 	ImGui::OpenPopup("Load File");
 	if (ImGui::BeginPopupModal("Load File", nullptr))
@@ -510,7 +486,7 @@ void Editor::LoadFile(const char* filter_extension, const char* from_dir)
 	}
 }
 
-void Editor::SaveFile(const char* filter_extension, const char* from_dir)
+void ModuleEditor::SaveFile(const char* filter_extension, const char* from_dir)
 {
 	ImGui::OpenPopup("Save File");
 	if (ImGui::BeginPopupModal("Save File", nullptr))
@@ -565,7 +541,7 @@ void Editor::SaveFile(const char* filter_extension, const char* from_dir)
 	}
 }
 
-void Editor::DrawDirectoryRecursive(const char* directory, const char* filter_extension)
+void ModuleEditor::DrawDirectoryRecursive(const char* directory, const char* filter_extension)
 {
 	std::vector<std::string> files;
 	std::vector<std::string> dirs;
@@ -634,7 +610,7 @@ void Editor::DrawDirectoryRecursive(const char* directory, const char* filter_ex
 	}
 }
 
-void Editor::OnResize(ImVec2 window_size)
+void ModuleEditor::OnResize(ImVec2 window_size)
 {
 	image_size = window_size;
 

@@ -321,7 +321,7 @@ void WindowConfiguration::GetMemoryStatistics(const char* gpu_brand, GLint& vram
 	}
 }
 
-void Editor::ShowPreferencesWindow()
+void ModuleEditor::ShowPreferencesWindow()
 {
 	if (ImGui::Begin("Preferences", &show_preferences_window)) {
 		//Style
