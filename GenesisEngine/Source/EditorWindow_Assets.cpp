@@ -3,12 +3,13 @@
 
 EditorWindow_Assets::EditorWindow_Assets() : EditorWindow()
 {
-	isOpen = true;
 	name = "Assets";
+	isOpen = true;
 }
 
 void EditorWindow_Assets::Draw()
 {
-	ImGui::Begin(name, &isOpen);
+	if (ImGui::Begin(name, &isOpen)) {
+	}
 	ImGui::End();
 }

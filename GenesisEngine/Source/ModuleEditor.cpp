@@ -6,9 +6,11 @@
 #include "ImGui/imgui_impl_opengl3.h"
 
 #include "EditorWindow.h"
+#include "EditorWindow_Scene.h"
 #include "EditorWindow_Assets.h"
 #include "EditorWindow_Console.h"
 #include "EditorWindow_Inspector.h"
+#include "EditorWindow_Configuration.h"
 
 #include "ModuleEditor.h"
 
@@ -32,9 +34,11 @@ bool ModuleEditor::Init()
 	ImGui_ImplSDL2_InitForOpenGL(Engine->window->window, Engine->renderer3D->context);
 	ImGui_ImplOpenGL3_Init();
 
+	windows.push_back(new EditorWindow_Scene());
 	windows.push_back(new EditorWindow_Assets());
 	windows.push_back(new EditorWindow_Console());
 	windows.push_back(new EditorWindow_Inspector());
+	windows.push_back(new EditorWindow_Configuration());
 
 	return true;
 }
@@ -190,7 +194,7 @@ update_status ModuleEditor::ShowDockSpace(bool* p_open) {
 		{
 			for (size_t i = 0; i < windows.size(); ++i)
 			{
-				if (ImGui::MenuItem(windows[i]->GetName()))
+				if (ImGui::MenuItem(windows[i]->GetName(), NULL, windows[i]->IsOpen()))
 				{
 					windows[i]->SetOpen(true);
 				}

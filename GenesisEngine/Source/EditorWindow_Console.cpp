@@ -9,6 +9,8 @@ EditorWindow_Console::EditorWindow_Console()
 
 void EditorWindow_Console::Draw()
 {
-	ImGui::Begin(name, &isOpen);
+	if (ImGui::Begin(name, &isOpen)) {
+
+	}
 	ImGui::End();
 }
