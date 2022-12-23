@@ -1,24 +1,18 @@
 #pragma once
 
-enum class EditorWindowType
-{
-	NONE,
-	ASSETS,
-	SCENE,
-	CONFIGURATION,
-	MAX,
-};
-
 class EditorWindow
 {
 public: 
 	EditorWindow();
 
-	virtual void Draw();
+	virtual void Draw() = 0;
 
-	bool IsOpen();
+	void SetOpen(bool open);
+	bool IsOpen() const;
+	char* GetName() const;
 
 protected: 
+	char* name;
+
 	bool isOpen;
-	EditorWindowType windowType;
 };

@@ -4,11 +4,11 @@
 EditorWindow_Assets::EditorWindow_Assets() : EditorWindow()
 {
 	isOpen = true;
-	windowType = EditorWindowType::ASSETS;
+	name = "Assets";
 }
 
 void EditorWindow_Assets::Draw()
 {
-	ImGui::Begin("Assets", &isOpen);
+	ImGui::Begin(name, &isOpen);
 	ImGui::End();
 }

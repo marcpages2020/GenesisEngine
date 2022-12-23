@@ -61,6 +61,12 @@
     <ClCompile Include="EditorWindow_Assets.cpp">
       <Filter>EditorWindows</Filter>
     </ClCompile>
+    <ClCompile Include="EditorWindow_Console.cpp">
+      <Filter>EditorWindows</Filter>
+    </ClCompile>
+    <ClCompile Include="EditorWindow_Inspector.cpp">
+      <Filter>EditorWindows</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine.h" />
@@ -140,6 +146,12 @@
       <Filter>EditorWindows</Filter>
     </ClInclude>
     <ClInclude Include="EditorWindow_Assets.h">
+      <Filter>EditorWindows</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorWindow_Console.h">
+      <Filter>EditorWindows</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorWindow_Inspector.h">
       <Filter>EditorWindows</Filter>
     </ClInclude>
   </ItemGroup>

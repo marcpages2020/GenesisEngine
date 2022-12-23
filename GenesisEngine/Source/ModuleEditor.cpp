@@ -7,18 +7,14 @@
 
 #include "EditorWindow.h"
 #include "EditorWindow_Assets.h"
+#include "EditorWindow_Console.h"
+#include "EditorWindow_Inspector.h"
 
 #include "ModuleEditor.h"
 
-ModuleEditor::ModuleEditor(GnEngine* app, bool start_enabled) : Module(app, start_enabled)
+ModuleEditor::ModuleEditor(GnEngine* app, bool start_enabled) : Module(app, start_enabled), isDockspaceOpen(true)
 {
-	show_inspector_window = true;
-	show_project_window = true;
-	show_console_window = false;
-
-	show_preferences_window = false;
-
-	current_theme = 1;
+	currentTheme = 1;
 }
 
 ModuleEditor::~ModuleEditor() 
@@ -37,6 +33,8 @@ bool ModuleEditor::Init()
 	ImGui_ImplOpenGL3_Init();
 
 	windows.push_back(new EditorWindow_Assets());
+	windows.push_back(new EditorWindow_Console());
+	windows.push_back(new EditorWindow_Inspector());
 
 	return true;
 }
@@ -49,27 +47,18 @@ update_status ModuleEditor::Update(float dt)
 	ImGui_ImplSDL2_NewFrame(Engine->window->window);
 	ImGui::NewFrame();
 
-	ret = ShowDockSpace(open_dockspace);
-
-	//inspector window
-	{
-		ImGui::Begin("Inspector");                      
-		ImGui::End();
-	}
+	ret = ShowDockSpace(&isDockspaceOpen);
 	
 	for (size_t i = 0; i < windows.size(); ++i)
 	{
-		windows[i]->Draw();
-	}
-
-	//project window
-	if (show_console_window)
-	{
-		ImGui::Begin("Console", &show_console_window);
-		ImGui::End();
+		if (windows[i]->IsOpen())
+		{
+			windows[i]->Draw();
+		}
 	}
 
 	//preferences
+	/*
 	if (show_preferences_window)
 	{
 		ImGui::Begin("Preferences", &show_preferences_window);
@@ -88,6 +77,7 @@ update_status ModuleEditor::Update(float dt)
 
 		ImGui::End();
 	}
+	*/
 
 	return ret;
 }
@@ -171,40 +161,44 @@ update_status ModuleEditor::ShowDockSpace(bool* p_open) {
 	//main bar
 	if (ImGui::BeginMainMenuBar())
 	{
+		//FILE
 		if (ImGui::BeginMenu("File"))
 		{
-			if (ImGui::MenuItem("Save"))
-			{
-				
-			}
-			else if (ImGui::MenuItem("Exit"))
+			if (ImGui::MenuItem("Exit"))
 			{
 				ret = UPDATE_STOP;
 			}
 			ImGui::EndMenu();
 		}
 
-
+		//EDIT
 		if (ImGui::BeginMenu("Edit"))
 		{
+			/*
 			if (ImGui::MenuItem("Undo   Ctrl+Z")) {	}
 			else if (ImGui::MenuItem("Redo   Ctrl+Y")) { }
 			else if (ImGui::MenuItem("Preferences"))
 			{
 				show_preferences_window = true;
 			}
+			*/
 			ImGui::EndMenu();
 		}
 
+		//WINDOWS
 		if (ImGui::BeginMenu("Window"))
 		{
-			if (ImGui::MenuItem("Console"))
+			for (size_t i = 0; i < windows.size(); ++i)
 			{
-				show_console_window = true;
+				if (ImGui::MenuItem(windows[i]->GetName()))
+				{
+					windows[i]->SetOpen(true);
+				}
 			}
 			ImGui::EndMenu();
 		}
 
+		//HELP
 		if (ImGui::BeginMenu("Help"))
 		{
 			if (ImGui::MenuItem("View on GitHub"))

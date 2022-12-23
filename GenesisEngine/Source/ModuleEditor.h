@@ -28,17 +28,10 @@ private:
 private:
 	std::vector<EditorWindow*> windows;
 
-	bool show_inspector_window;
-	bool show_project_window;
-	bool show_console_window;
-
-	//edit subwindows
-	bool show_preferences_window;
-
 	//menus
-	bool* open_dockspace;
+	bool isDockspaceOpen;
 
-	int current_theme;
+	int currentTheme;
 };
 
 #endif // !_EDITOR_H_

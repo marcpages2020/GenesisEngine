@@ -1,16 +1,21 @@
 #include "EditorWindow.h"
 
-EditorWindow::EditorWindow() : isOpen(false), windowType(EditorWindowType::NONE)
-{
-	
+EditorWindow::EditorWindow() : isOpen(false), name("Unnamed  Window")
+{}
+
+void EditorWindow::SetOpen(bool open)
+{ 
+	isOpen = open;
 }
 
-void EditorWindow::Draw()
-{
-
-}
-
-bool EditorWindow::IsOpen()
+bool EditorWindow::IsOpen() const
 {
 	return isOpen;
 }
+
+char* EditorWindow::GetName() const
+{
+	return name;
+}
+
+
