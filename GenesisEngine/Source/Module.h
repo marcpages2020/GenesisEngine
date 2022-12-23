@@ -1,20 +1,16 @@
 #pragma once
 
-class Application;
-
-class GnJSONObj;
+class GnEngine;
 
 class Module
 {
 private :
 	bool enabled;
 
-public: 
-	const char* name = "No Name Module";
-
 public:
+	GnEngine* Engine;
 
-	Module(bool start_enabled = true) 
+	Module(GnEngine* parent, bool start_enabled = true) : Engine(parent)
 	{
 		enabled = true;
 	}
@@ -25,11 +21,6 @@ public:
 	virtual bool Init() 
 	{
 		return true; 
-	}
-
-	virtual bool LoadConfig(GnJSONObj& object)
-	{
-		return true;
 	}
 
 	virtual bool Start()
@@ -51,8 +42,6 @@ public:
 	{
 		return UPDATE_CONTINUE;
 	}
-
-	virtual void OnFrameEnd() {}
 
 	virtual bool CleanUp() 
 	{ 

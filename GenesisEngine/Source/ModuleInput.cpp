@@ -1,16 +1,11 @@
 #include "Globals.h"
-#include "Application.h"
+#include "Engine.h"
 #include "ModuleInput.h"
-#include "FileSystem.h"
-
-#include "ImGui/imgui_internal.h"
-#include "ImGui/imgui_impl_sdl.h"
 
 #define MAX_KEYS 300
 
-ModuleInput::ModuleInput(bool start_enabled) : Module(start_enabled)
+ModuleInput::ModuleInput(GnEngine* app, bool start_enabled) : Module(app, start_enabled)
 {
-	name = "input";
 	keyboard = new KEY_STATE[MAX_KEYS];
 	memset(keyboard, KEY_IDLE, sizeof(KEY_STATE) * MAX_KEYS);
 }
@@ -27,8 +22,6 @@ bool ModuleInput::Init()
 	LOG("Init SDL input event system");
 	bool ret = true;
 	SDL_Init(0);
-
-	SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
 
 	if(SDL_InitSubSystem(SDL_INIT_EVENTS) < 0)
 	{
@@ -92,12 +85,8 @@ update_status ModuleInput::PreUpdate(float dt)
 
 	bool quit = false;
 	SDL_Event e;
-	char* dropped_filedir;
-
 	while(SDL_PollEvent(&e))
 	{
-		ImGui_ImplSDL2_ProcessEvent(&e);
-
 		switch(e.type)
 		{
 			case SDL_MOUSEWHEEL:
@@ -116,25 +105,15 @@ update_status ModuleInput::PreUpdate(float dt)
 			quit = true;
 			break;
 
-			case SDL_DROPFILE:
-				dropped_filedir = e.drop.file;
-				App->resources->DragDropFile(dropped_filedir);
-				SDL_free(dropped_filedir);
-				break;
-
 			case SDL_WINDOWEVENT:
 			{
-				if (e.window.event == SDL_WINDOWEVENT_RESIZED)
-				{
-					App->window->OnResize(e.window.data1, e.window.data2);
-				}
+				if(e.window.event == SDL_WINDOWEVENT_RESIZED)
+					Engine->renderer3D->OnResize(e.window.data1, e.window.data2);
 			}
 		}
 	}
 
-	
-	//if(quit == true || keyboard[SDL_SCANCODE_ESCAPE] == KEY_UP)
-	if (quit == true)
+	if(quit == true || keyboard[SDL_SCANCODE_ESCAPE] == KEY_UP)
 		return UPDATE_STOP;
 
 	return UPDATE_CONTINUE;

@@ -1,13 +1,12 @@
 #include "Globals.h"
-#include "Application.h"
+#include "Engine.h"
 #include "ModuleWindow.h"
-#include "GnJSON.h"
 
+#include <string>
 #include "SDL/include/SDL_video.h"
 
-ModuleWindow::ModuleWindow(bool start_enabled) : Module(start_enabled)
+ModuleWindow::ModuleWindow(GnEngine* app, bool start_enabled) : Module(app, start_enabled)
 {
-	name = "window";
 	window = NULL;
 	screen_surface = NULL;
 
@@ -16,11 +15,7 @@ ModuleWindow::ModuleWindow(bool start_enabled) : Module(start_enabled)
 
 // Destructor
 ModuleWindow::~ModuleWindow()
-{
-	window = NULL;
-	screen_surface = nullptr;
-	context = nullptr;
-}
+{}
 
 // Called before render is available
 bool ModuleWindow::Init()
@@ -28,7 +23,7 @@ bool ModuleWindow::Init()
 	LOG("Init SDL window & surface");
 	bool ret = true;
 
-	if (SDL_Init(SDL_INIT_VIDEO) < 0)
+	if(SDL_Init(SDL_INIT_VIDEO) < 0)
 	{
 		LOG("SDL_VIDEO could not initialize! SDL_Error: %s\n", SDL_GetError());
 		ret = false;
@@ -36,43 +31,39 @@ bool ModuleWindow::Init()
 	else
 	{
 		//Create window
+		int width = SCREEN_WIDTH * SCREEN_SIZE;
+		int height = SCREEN_HEIGHT * SCREEN_SIZE;
 		Uint32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
 
 		//Use OpenGL 2.1
-		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-		SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-		SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
-		if (fullscreen == true)
+		if(WIN_FULLSCREEN == true)
 		{
 			flags |= SDL_WINDOW_FULLSCREEN;
 		}
 
-		if (resizable == true)
+		if(WIN_RESIZABLE == true)
 		{
 			flags |= SDL_WINDOW_RESIZABLE;
 		}
 
-		if (borderless == true)
+		if(WIN_BORDERLESS == true)
 		{
 			flags |= SDL_WINDOW_BORDERLESS;
 		}
 
-		if (fullscreen_desktop == true)
+		if(WIN_FULLSCREEN_DESKTOP == true)
 		{
 			flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 		}
 
-		static char title[2048] = { 0 };
-		memset(title, 0, sizeof(title));
-		sprintf_s(title, "%s v%s", App->engine_name, App->engine_version);
+		char windowTitle[64];
+		sprintf(windowTitle, "Genesis Engine %d.%d", Engine->versionMajor, Engine->versionMinor);
+		window = SDL_CreateWindow(windowTitle, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, flags);
 
-		window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, flags);
-
-		if (window == NULL)
+		if(window == NULL)
 		{
 			LOG("Window could not be created! SDL_Error: %s\n", SDL_GetError());
 			ret = false;
@@ -84,26 +75,9 @@ bool ModuleWindow::Init()
 
 			context = SDL_GL_CreateContext(window);
 		}
-
-		brightness = SDL_GetWindowBrightness(window);
 	}
 
 	return ret;
-}
-
-bool ModuleWindow::LoadConfig(GnJSONObj& config)
-{
-	//Get Json attributes
-	width = config.GetInt("width");
-	
-	height = config.GetInt("height");
-
-	fullscreen = config.GetBool("fullscreen");
-	fullscreen_desktop = config.GetBool("fullscreen_desktop");
-	resizable = config.GetBool("resizable");
-	borderless = config.GetBool("borderless");
-
-	return true;
 }
 
 // Called before quitting
@@ -114,7 +88,7 @@ bool ModuleWindow::CleanUp()
 	SDL_GL_DeleteContext(context);
 
 	//Destroy window
-	if (window != NULL)
+	if(window != NULL)
 	{
 		SDL_DestroyWindow(window);
 	}
@@ -124,67 +98,7 @@ bool ModuleWindow::CleanUp()
 	return true;
 }
 
-void ModuleWindow::GetSize(int& g_width, int& g_height)
-{
-	SDL_GetWindowSize(window, &g_width, &g_height);
-}
-
-void ModuleWindow::SetSize(int g_width, int g_height)
-{
-	SDL_SetWindowSize(window, g_width, g_height);
-}
-
-float ModuleWindow::GetBrightness()
-{
-	return brightness;
-}
-
-void ModuleWindow::SetBrightness(float g_brightness)
-{
-	brightness = g_brightness;
-	if (SDL_SetWindowBrightness(window, brightness) != 0)
-		LOG("Error changing window brightness %s", SDL_GetError());
-}
-
 void ModuleWindow::SetTitle(const char* title)
 {
 	SDL_SetWindowTitle(window, title);
-}
-
-void ModuleWindow::SetFullscreen(bool setFullscreen)
-{
-	if (setFullscreen)
-		SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
-	else
-		SDL_SetWindowFullscreen(window, 0);
-}
-
-void ModuleWindow::SetFullscreenDesktop(bool setFullscreenDesktop)
-{
-	if (setFullscreenDesktop)
-		SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
-	else
-		SDL_SetWindowFullscreen(window, 0);
-}
-
-void ModuleWindow::SetResizable(bool setResizable)
-{
-	if (setResizable)
-		SDL_SetWindowResizable(window, SDL_TRUE);
-	else
-		SDL_SetWindowResizable(window, SDL_FALSE);
-}
-
-void ModuleWindow::SetBorderless(bool setBorderless)
-{
-	if (setBorderless)
-		SDL_SetWindowBordered(window, SDL_FALSE);
-	else
-		SDL_SetWindowBordered(window, SDL_TRUE);
-}
-
-void ModuleWindow::OnResize(int g_width, int g_height)
-{
-	width = g_width;
-	height = g_height;
 }

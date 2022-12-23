@@ -16,7 +16,7 @@ class ModuleInput : public Module
 {
 public:
 	
-	ModuleInput(bool start_enabled = true);
+	ModuleInput(GnEngine* app, bool start_enabled = true);
 	~ModuleInput();
 
 	bool Init();

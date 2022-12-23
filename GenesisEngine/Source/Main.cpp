@@ -1,12 +1,11 @@
 #include <stdlib.h>
-#include "Application.h"
+#include "Engine.h"
 #include "Globals.h"
 
-//SDL
 #include "SDL/include/SDL.h"
 #pragma comment( lib, "SDL/libx86/SDL2.lib" )
 #pragma comment( lib, "SDL/libx86/SDL2main.lib" )
- 
+
 enum main_states
 {
 	MAIN_CREATION,
@@ -16,14 +15,13 @@ enum main_states
 	MAIN_EXIT
 };
 
-Application* App = NULL;
-
-int main(int argc, char* argv[])
+int main(int argc, char ** argv)
 {
-	LOG("Starting Genesis Engine...");
+	LOG("Starting engine '%s'...", TITLE);
 
 	int main_return = EXIT_FAILURE;
 	main_states state = MAIN_CREATION;
+	GnEngine* Engine = NULL;
 
 	while (state != MAIN_EXIT)
 	{
@@ -32,14 +30,14 @@ int main(int argc, char* argv[])
 		case MAIN_CREATION:
 
 			LOG("-------------- Application Creation --------------");
-			App = new Application(argc, argv);
+			Engine = new GnEngine();
 			state = MAIN_START;
 			break;
 
 		case MAIN_START:
 
 			LOG("-------------- Application Init --------------");
-			if (App->Init() == false)
+			if (Engine->Init() == false)
 			{
 				LOG("Application Init exits with ERROR");
 				state = MAIN_EXIT;
@@ -54,7 +52,7 @@ int main(int argc, char* argv[])
 
 		case MAIN_UPDATE:
 		{
-			int update_return = App->Update();
+			int update_return = Engine->Update();
 
 			if (update_return == UPDATE_ERROR)
 			{
@@ -70,7 +68,7 @@ int main(int argc, char* argv[])
 		case MAIN_FINISH:
 
 			LOG("-------------- Application CleanUp --------------");
-			if (App->CleanUp() == false)
+			if (Engine->CleanUp() == false)
 			{
 				LOG("Application CleanUp exits with ERROR");
 			}
@@ -84,8 +82,7 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	delete App;
-	App = nullptr;
-	LOG("Exiting Genesis Engine...\n");
+	delete Engine;
+	LOG("Exiting engine '%s'...\n", TITLE);
 	return main_return;
 }

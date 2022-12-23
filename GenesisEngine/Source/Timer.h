@@ -13,10 +13,8 @@ public:
 
 	void Start();
 	void Stop();
-	void Resume();
 
 	Uint32 Read();
-	float  ReadSec() const;
 
 private:
 
