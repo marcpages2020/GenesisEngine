@@ -1,7 +1,7 @@
 #include "EditorWindow_Inspector.h"
 #include <ImGui/imgui.h>
 
-EditorWindow_Inspector::EditorWindow_Inspector() : EditorWindow()
+EditorWindow_Inspector::EditorWindow_Inspector(ModuleEditor* moduleEditor) : EditorWindow(moduleEditor)
 {
 	name = "Inspector";
 	isOpen = true;
@@ -9,7 +9,9 @@ EditorWindow_Inspector::EditorWindow_Inspector() : EditorWindow()
 
 void EditorWindow_Inspector::Draw()
 {
-	if (ImGui::Begin(name, &isOpen)) {
+	if (ImGui::Begin(name, &isOpen)) 
+	{
+
 	}
 	ImGui::End();
 }

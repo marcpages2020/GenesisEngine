@@ -1,7 +1,11 @@
 #include "Engine.h"
+#include "Time.h"
 
-GnEngine::GnEngine() : versionMajor(0), versionMinor(1)
+GnEngine::GnEngine() : versionMajor(0), versionMinor(1), maxFPS(120)
 {
+	SetMaxFPS(maxFPS);
+
+	hardware = new ModuleHardware(this);
 	window = new ModuleWindow(this);
 	input = new ModuleInput(this);
 	audio = new ModuleAudio(this, true);
@@ -14,6 +18,7 @@ GnEngine::GnEngine() : versionMajor(0), versionMinor(1)
 	// They will CleanUp() in reverse order
 
 	// Main Modules
+	AddModule(hardware);
 	AddModule(window);
 	AddModule(camera);
 	AddModule(input);
@@ -26,9 +31,9 @@ GnEngine::GnEngine() : versionMajor(0), versionMinor(1)
 
 GnEngine::~GnEngine()
 {
-	std::vector<Module*>::reverse_iterator item = modules_vector.rbegin();
+	std::vector<Module*>::reverse_iterator item = modulesVector.rbegin();
 
-	while(item != modules_vector.rend())
+	while(item != modulesVector.rend())
 	{
 		delete *item;
 		++item ;
@@ -38,35 +43,42 @@ GnEngine::~GnEngine()
 bool GnEngine::Init()
 {
 	bool ret = true;
+	Time::Init();
+	Time::realClock.deltaTimer.Start();
 
 	// Call Init() in all modules
-	for (int i = 0; i < modules_vector.size() && ret == true; i++)
+	for (int i = 0; i < modulesVector.size() && ret == true; i++)
 	{
-		ret = modules_vector[i]->Init();
+		ret = modulesVector[i]->Init();
 	}
 
 	// After all Init calls we call Start() in all modules
 	LOG("Application Start --------------");
-	for (int i = 0; i < modules_vector.size() && ret == true; i++)
+	for (int i = 0; i < modulesVector.size() && ret == true; i++)
 	{
-		ret = modules_vector[i]->Start();
+		ret = modulesVector[i]->Start();
 	}
 	
-	ms_timer.Start();
 	return ret;
 }
 
 // ---------------------------------------------
 void GnEngine::PrepareUpdate()
 {
-	dt = (float)ms_timer.Read() / 1000.0f;
-	ms_timer.Start();
+	deltaTime = (float)Time::realClock.deltaTimer.Read() / 1000;
+
+	Time::realClock.Step();
+	Time::gameClock.Step();
 }
 
 // ---------------------------------------------
 void GnEngine::FinishUpdate()
 {
-
+	Uint32 last_frame_ms = Time::realClock.deltaTimer.Read();
+	if (last_frame_ms < minFrameMS)
+	{
+		SDL_Delay(minFrameMS - last_frame_ms);
+	}
 }
 
 // Call PreUpdate, Update and PostUpdate on all modules
@@ -75,19 +87,19 @@ update_status GnEngine::Update()
 	update_status ret = UPDATE_CONTINUE;
 	PrepareUpdate();
 	
-	for (int i = 0; i < modules_vector.size() && ret == UPDATE_CONTINUE; i++)
+	for (int i = 0; i < modulesVector.size() && ret == UPDATE_CONTINUE; i++)
 	{
-		ret = modules_vector[i]->PreUpdate(dt);
+		ret = modulesVector[i]->PreUpdate(deltaTime);
 	}
 
-	for (int i = 0; i < modules_vector.size() && ret == UPDATE_CONTINUE; i++)
+	for (int i = 0; i < modulesVector.size() && ret == UPDATE_CONTINUE; i++)
 	{
-		ret = modules_vector[i]->Update(dt);
+		ret = modulesVector[i]->Update(deltaTime);
 	}
 
-	for (int i = 0; i < modules_vector.size() && ret == UPDATE_CONTINUE; i++)
+	for (int i = 0; i < modulesVector.size() && ret == UPDATE_CONTINUE; i++)
 	{
-		ret = modules_vector[i]->PostUpdate(dt);
+		ret = modulesVector[i]->PostUpdate(deltaTime);
 	}
 
 	FinishUpdate();
@@ -97,9 +109,9 @@ update_status GnEngine::Update()
 bool GnEngine::CleanUp()
 {
 	bool ret = true;
-	for (int i = modules_vector.size() -1; i > 0; i--)
+	for (int i = modulesVector.size() -1; i > 0; i--)
 	{
-		modules_vector[i]->CleanUp();
+		modulesVector[i]->CleanUp();
 	}
 
 	return ret;
@@ -107,5 +119,26 @@ bool GnEngine::CleanUp()
 
 void GnEngine::AddModule(Module* mod)
 {
-	modules_vector.push_back(mod);
+	modulesVector.push_back(mod);
+}
+
+int GnEngine::GetMaxFPS() const
+{
+	return maxFPS;
+}
+
+void GnEngine::SetMaxFPS(int newMaxFPS)
+{
+	maxFPS = newMaxFPS;
+	minFrameMS = 1000.0f / maxFPS;
+}
+
+float GnEngine::GetLastDeltaTime() const
+{
+	return deltaTime;
+}
+
+float GnEngine::GetCurrentFPS() const
+{
+	return 1.0f / deltaTime;
 }

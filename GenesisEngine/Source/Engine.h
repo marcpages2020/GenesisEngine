@@ -4,6 +4,7 @@
 #include <vector>
 #include "Timer.h"
 #include "Module.h"
+#include "ModuleHardware.h"
 #include "ModuleWindow.h"
 #include "ModuleInput.h"
 #include "ModuleAudio.h"
@@ -14,6 +15,7 @@
 class GnEngine
 {
 public:
+	ModuleHardware* hardware;
 	ModuleWindow* window;
 	ModuleInput* input;
 	ModuleAudio* audio;
@@ -22,10 +24,11 @@ public:
 	ModuleEditor* editor;
 
 private:
+	float deltaTime;
+	int maxFPS;
+	float minFrameMS;
 
-	Timer	ms_timer;
-	float	dt;
-	std::vector<Module*> modules_vector;
+	std::vector<Module*> modulesVector;
 
 public:
 
@@ -39,8 +42,12 @@ public:
 	int versionMajor;
 	int versionMinor;
 
-private:
+	int GetMaxFPS() const;
+	void SetMaxFPS(int newMaxFPS);
+	float GetLastDeltaTime() const;
+	float GetCurrentFPS() const;
 
+private:
 	void AddModule(Module* mod);
 	void PrepareUpdate();
 	void FinishUpdate();

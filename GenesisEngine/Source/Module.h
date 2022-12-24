@@ -18,7 +18,7 @@ public:
 	virtual ~Module()
 	{}
 
-	virtual bool Init() 
+	virtual bool Init()
 	{
 		return true; 
 	}
@@ -28,17 +28,17 @@ public:
 		return true;
 	}
 
-	virtual update_status PreUpdate(float dt)
+	virtual update_status PreUpdate(float deltaTime)
 	{
 		return UPDATE_CONTINUE;
 	}
 
-	virtual update_status Update(float dt)
+	virtual update_status Update(float deltaTime)
 	{
 		return UPDATE_CONTINUE;
 	}
 
-	virtual update_status PostUpdate(float dt)
+	virtual update_status PostUpdate(float deltaTime)
 	{
 		return UPDATE_CONTINUE;
 	}

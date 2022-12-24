@@ -17,8 +17,8 @@ public:
 	~ModuleEditor();
 
 	bool Init();
-	update_status Update(float dt);
-	update_status PostUpdate(float dt);
+	update_status Update(float deltaTime);
+	update_status PostUpdate(float deltaTime);
 	bool CleanUp();
 
 private:
@@ -30,8 +30,7 @@ private:
 
 	//menus
 	bool isDockspaceOpen;
-
-	int currentTheme;
+	bool showImGuiDemo;
 };
 
 #endif // !_EDITOR_H_

@@ -1,7 +1,8 @@
 #include "EditorWindow_Scene.h"
+#include "EditorWindow.h"
 #include <ImGui/imgui.h>
 
-EditorWindow_Scene::EditorWindow_Scene()
+EditorWindow_Scene::EditorWindow_Scene(ModuleEditor* moduleEditor) : EditorWindow(moduleEditor)
 {
 	name = "Scene";
 	isOpen = true;

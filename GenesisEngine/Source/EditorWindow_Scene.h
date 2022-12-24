@@ -4,7 +4,7 @@
 class EditorWindow_Scene : public EditorWindow
 {
 public:
-	EditorWindow_Scene();
+	EditorWindow_Scene(ModuleEditor* moduleEditor);
 
 	void Draw() override;
 };

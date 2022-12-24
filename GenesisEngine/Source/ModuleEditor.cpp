@@ -14,10 +14,8 @@
 
 #include "ModuleEditor.h"
 
-ModuleEditor::ModuleEditor(GnEngine* app, bool start_enabled) : Module(app, start_enabled), isDockspaceOpen(true)
-{
-	currentTheme = 1;
-}
+ModuleEditor::ModuleEditor(GnEngine* app, bool start_enabled) : Module(app, start_enabled), isDockspaceOpen(true), showImGuiDemo(false)
+{}
 
 ModuleEditor::~ModuleEditor() 
 {}
@@ -34,25 +32,32 @@ bool ModuleEditor::Init()
 	ImGui_ImplSDL2_InitForOpenGL(Engine->window->window, Engine->renderer3D->context);
 	ImGui_ImplOpenGL3_Init();
 
-	windows.push_back(new EditorWindow_Scene());
-	windows.push_back(new EditorWindow_Assets());
-	windows.push_back(new EditorWindow_Console());
-	windows.push_back(new EditorWindow_Inspector());
-	windows.push_back(new EditorWindow_Configuration());
+	windows.push_back(new EditorWindow_Scene(this));
+	windows.push_back(new EditorWindow_Assets(this));
+	windows.push_back(new EditorWindow_Console(this));
+	windows.push_back(new EditorWindow_Inspector(this));
+	windows.push_back(new EditorWindow_Configuration(this));
 
 	return true;
 }
 
-update_status ModuleEditor::Update(float dt) 
+update_status ModuleEditor::Update(float deltaTime) 
 {
 	update_status ret = UPDATE_CONTINUE;
+	return ret;
+}
+
+update_status ModuleEditor::PostUpdate(float deltaTime)
+{
+	update_status ret = UPDATE_CONTINUE;
+
 	//Update the frames
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplSDL2_NewFrame(Engine->window->window);
 	ImGui::NewFrame();
 
 	ret = ShowDockSpace(&isDockspaceOpen);
-	
+
 	for (size_t i = 0; i < windows.size(); ++i)
 	{
 		if (windows[i]->IsOpen())
@@ -72,7 +77,7 @@ update_status ModuleEditor::Update(float dt)
 			// Using the _simplified_ one-liner Combo() api here
 			// See "Combo" section for examples of how to use the more complete BeginCombo()/EndCombo() api.
 			const char* items[] = { "Classic", "Dark", "Light"};
-			if (ImGui::Combo("Interface Style", &current_theme, items, IM_ARRAYSIZE(items))) 
+			if (ImGui::Combo("Interface Style", &current_theme, items, IM_ARRAYSIZE(items)))
 			{
 				ChangeTheme(std::string(items[current_theme]));
 			}
@@ -83,15 +88,10 @@ update_status ModuleEditor::Update(float dt)
 	}
 	*/
 
-	return ret;
-}
-
-update_status ModuleEditor::PostUpdate(float dt)
-{
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-	return UPDATE_CONTINUE;
+	return ret;
 }
 
 bool ModuleEditor::CleanUp()
@@ -205,10 +205,22 @@ update_status ModuleEditor::ShowDockSpace(bool* p_open) {
 		//HELP
 		if (ImGui::BeginMenu("Help"))
 		{
-			if (ImGui::MenuItem("View on GitHub"))
-			{
+			if(ImGui::MenuItem("ImGui Demo", NULL, &showImGuiDemo)){
+				ImGui::ShowDemoWindow(&showImGuiDemo);
+			}
+
+			if (ImGui::MenuItem("Download latest version")) {
+				ShellExecuteA(NULL, "open", "https://github.com/marcpages2020/GenesisEngine/releases", NULL, NULL, SW_SHOWNORMAL);
+			}
+
+			if (ImGui::MenuItem("Report a bug")) {
+				ShellExecuteA(NULL, "open", "https://github.com/marcpages2020/GenesisEngine/issues", NULL, NULL, SW_SHOWNORMAL);
+			}
+
+			if (ImGui::MenuItem("View on GitHub")) {
 				ShellExecuteA(NULL, "open", "https://github.com/marcpages2020/GenesisEngine", NULL, NULL, SW_SHOWNORMAL);
 			}
+
 			ImGui::EndMenu();
 		}
 
@@ -219,7 +231,8 @@ update_status ModuleEditor::ShowDockSpace(bool* p_open) {
 	return ret;
 }
 
-void ModuleEditor::ChangeTheme(std::string theme) {
+void ModuleEditor::ChangeTheme(std::string theme) 
+{
 	if (theme == "Dark")
 	{
 		ImGui::StyleColorsDark();

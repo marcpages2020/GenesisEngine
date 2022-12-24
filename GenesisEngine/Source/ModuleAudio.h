@@ -14,7 +14,7 @@ public:
 	ModuleAudio(GnEngine* app, bool start_enabled = true);
 	~ModuleAudio();
 
-	bool Init();
+	bool Init() override;
 	bool CleanUp();
 
 	// Play a music file

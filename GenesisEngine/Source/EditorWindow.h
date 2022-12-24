@@ -1,9 +1,12 @@
 #pragma once
 
+class ModuleEditor;
+
 class EditorWindow
 {
 public: 
-	EditorWindow();
+	EditorWindow(ModuleEditor* moduleEditor);
+	~EditorWindow();
 
 	virtual void Draw() = 0;
 
@@ -13,6 +16,7 @@ public:
 
 protected: 
 	char* name;
-
 	bool isOpen;
+
+	ModuleEditor* editor;
 };

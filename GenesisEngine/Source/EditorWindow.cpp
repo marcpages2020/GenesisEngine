@@ -1,7 +1,12 @@
 #include "EditorWindow.h"
 
-EditorWindow::EditorWindow() : isOpen(false), name("Unnamed  Window")
+EditorWindow::EditorWindow(ModuleEditor* moduleEditor) : editor(moduleEditor), isOpen(false), name("Unnamed  Window")
 {}
+
+EditorWindow::~EditorWindow()
+{
+	delete name;
+}
 
 void EditorWindow::SetOpen(bool open)
 { 

@@ -1,7 +1,7 @@
 #include "EditorWindow_Assets.h"
 #include <ImGui/imgui.h>
 
-EditorWindow_Assets::EditorWindow_Assets() : EditorWindow()
+EditorWindow_Assets::EditorWindow_Assets(ModuleEditor* moduleEditor) : EditorWindow(moduleEditor)
 {
 	name = "Assets";
 	isOpen = true;

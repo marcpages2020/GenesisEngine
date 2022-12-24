@@ -5,7 +5,9 @@
 #include <string>
 #include "SDL/include/SDL_video.h"
 
-ModuleWindow::ModuleWindow(GnEngine* app, bool start_enabled) : Module(app, start_enabled)
+ModuleWindow::ModuleWindow(GnEngine* app, bool start_enabled) : Module(app, start_enabled),
+	width(1280), height(1024), brightness(1.0f),
+	fullscreen(false), resizable(true), borderless(false), fullscreenDesktop(false)
 {
 	window = NULL;
 	screen_surface = NULL;
@@ -30,34 +32,23 @@ bool ModuleWindow::Init()
 	}
 	else
 	{
-		//Create window
-		int width = SCREEN_WIDTH * SCREEN_SIZE;
-		int height = SCREEN_HEIGHT * SCREEN_SIZE;
 		Uint32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
 
 		//Use OpenGL 2.1
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 
-		if(WIN_FULLSCREEN == true)
-		{
-			flags |= SDL_WINDOW_FULLSCREEN;
-		}
+		if (fullscreen) {
+			flags |= SDL_WINDOW_FULLSCREEN;}
 
-		if(WIN_RESIZABLE == true)
-		{
-			flags |= SDL_WINDOW_RESIZABLE;
-		}
+		if(resizable) {
+			flags |= SDL_WINDOW_RESIZABLE;}
 
-		if(WIN_BORDERLESS == true)
-		{
-			flags |= SDL_WINDOW_BORDERLESS;
-		}
+		if(borderless == true) {
+			flags |= SDL_WINDOW_BORDERLESS;}
 
-		if(WIN_FULLSCREEN_DESKTOP == true)
-		{
-			flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
-		}
+		if(fullscreenDesktop == true) {
+			flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;}
 
 		char windowTitle[64];
 		sprintf(windowTitle, "Genesis Engine %d.%d", Engine->versionMajor, Engine->versionMinor);
@@ -65,15 +56,16 @@ bool ModuleWindow::Init()
 
 		if(window == NULL)
 		{
-			LOG("Window could not be created! SDL_Error: %s\n", SDL_GetError());
+			LOG_ERROR("Window could not be created! SDL_Error: %s\n", SDL_GetError());
 			ret = false;
 		}
 		else
 		{
 			//Get window surface
 			screen_surface = SDL_GetWindowSurface(window);
-
 			context = SDL_GL_CreateContext(window);
+
+			brightness = SDL_GetWindowBrightness(window);
 		}
 	}
 
@@ -101,4 +93,83 @@ bool ModuleWindow::CleanUp()
 void ModuleWindow::SetTitle(const char* title)
 {
 	SDL_SetWindowTitle(window, title);
+}
+
+float ModuleWindow::GetBrightness() const
+{
+	return brightness;
+}
+
+void ModuleWindow::SetBrightness(float newBrightness)
+{
+	brightness = newBrightness;
+	if (SDL_SetWindowBrightness(window, brightness) != 0)
+		LOG_ERROR("Error changing window brightness %s", SDL_GetError());
+}
+
+int ModuleWindow::GetWidht() const { return width; }
+
+int ModuleWindow::GetHeight() const { return height; }
+
+void ModuleWindow::GetSize(int& windowWidth, int& windowHeight)
+{
+	SDL_GetWindowSize(window, &width, &height);
+
+	windowWidth = width;
+	windowHeight = height;
+}
+
+void ModuleWindow::SetSize(int newWidth, int newHeight)
+{
+	width = newWidth;
+	height = newHeight;
+
+	SDL_SetWindowSize(window, width, height);
+}
+
+bool ModuleWindow::IsFullscreen() const { return fullscreen; }
+
+void ModuleWindow::SetFullscreen(bool newFullscreen)
+{
+	fullscreen = newFullscreen;
+
+	if (fullscreen) { 
+		SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN); }
+	else {
+		SDL_SetWindowFullscreen(window, 0); }
+}
+
+bool ModuleWindow::IsFullscreenDesktop() const { return fullscreenDesktop; }
+
+void ModuleWindow::SetFullscreenDesktop(bool newFullscreenDesktop)
+{
+	fullscreenDesktop = newFullscreenDesktop;
+
+	if (fullscreenDesktop) {
+		SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);}
+	else {
+		SDL_SetWindowFullscreen(window, 0);}
+}
+
+bool ModuleWindow::IsResizable() const { return resizable; }
+
+void ModuleWindow::SetResizable(bool newResizable)
+{
+	resizable = newResizable;
+
+	if (resizable) {
+		SDL_SetWindowResizable(window, SDL_TRUE);}
+	else {
+		SDL_SetWindowResizable(window, SDL_FALSE);}
+}
+
+bool ModuleWindow::IsBorderless() const { return borderless; }
+
+void ModuleWindow::SetBorderless(bool newBorderless)
+{
+	borderless = newBorderless;
+	if (borderless){
+		SDL_SetWindowBordered(window, SDL_FALSE);}
+	else { 
+		SDL_SetWindowBordered(window, SDL_TRUE);}
 }

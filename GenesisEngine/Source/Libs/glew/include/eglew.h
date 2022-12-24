@@ -248,7 +248,7 @@ typedef EGLBoolean  ( * PFNEGLQUERYSURFACEPROC) (EGLDisplay  dpy, EGLSurface  su
 typedef EGLBoolean  ( * PFNEGLSWAPBUFFERSPROC) (EGLDisplay  dpy, EGLSurface  surface);
 typedef EGLBoolean  ( * PFNEGLTERMINATEPROC) (EGLDisplay  dpy);
 typedef EGLBoolean  ( * PFNEGLWAITGLPROC) ( void );
-typedef EGLBoolean  ( * PFNEGLWAITNATIVEPROC) (EGLint  engine);
+typedef EGLBoolean  ( * PFNEGLWAITNATIVEPROC) (EGLint  Engine);
 
 #define eglChooseConfig EGLEW_GET_FUN(__eglewChooseConfig)
 #define eglCopyBuffers EGLEW_GET_FUN(__eglewCopyBuffers)

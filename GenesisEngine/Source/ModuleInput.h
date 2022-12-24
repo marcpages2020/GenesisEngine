@@ -19,8 +19,8 @@ public:
 	ModuleInput(GnEngine* app, bool start_enabled = true);
 	~ModuleInput();
 
-	bool Init();
-	update_status PreUpdate(float dt);
+	bool Init() override;
+	update_status PreUpdate(float deltaTime);
 	bool CleanUp();
 
 	KEY_STATE GetKey(int id) const

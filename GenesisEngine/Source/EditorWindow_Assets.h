@@ -3,7 +3,7 @@
 class EditorWindow_Assets : public EditorWindow
 {
 public:
-	EditorWindow_Assets();
+	EditorWindow_Assets(ModuleEditor* moduleEditor);
 
 	void Draw() override;
 };
