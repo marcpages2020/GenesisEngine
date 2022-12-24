@@ -2,6 +2,8 @@
 #include "Engine.h"
 #include "ModuleWindow.h"
 
+#include "HelperClasses/GnJSON.h"
+
 #include <string>
 #include "SDL/include/SDL_video.h"
 
@@ -9,6 +11,8 @@ ModuleWindow::ModuleWindow(GnEngine* app, bool start_enabled) : Module(app, star
 	width(1280), height(1024), brightness(1.0f),
 	fullscreen(false), resizable(true), borderless(false), fullscreenDesktop(false)
 {
+	name = "window";
+
 	window = NULL;
 	screen_surface = NULL;
 
@@ -70,6 +74,20 @@ bool ModuleWindow::Init()
 	}
 
 	return ret;
+}
+
+bool ModuleWindow::LoadEditorConfig(GnJSONObj& config)
+{
+	width = config.GetInt("width", width);
+
+	height = config.GetInt("height", height);
+
+	fullscreen = config.GetBool("fullscreen", fullscreen);
+	fullscreenDesktop = config.GetBool("fullscreen_desktop", fullscreenDesktop);
+	resizable = config.GetBool("resizable", resizable);
+	borderless = config.GetBool("borderless", borderless);
+
+	return true;
 }
 
 // Called before quitting

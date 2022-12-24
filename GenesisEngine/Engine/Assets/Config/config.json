@@ -1,0 +1,75 @@
+{
+  "modules": [
+    {
+      "name": "app",
+      "engine name": "Genesis Engine",
+      "version": "0.1"
+    },
+    {
+      "name": "camera",
+      "move_speed": 5,
+      "drag_speed": 0.75,
+      "zoom_speed": 20,
+      "sensitivity": 12.5
+    },
+    {
+      "name": "window",
+      "width": 1600,
+      "height": 900,
+      "fullscreen": false,
+      "fullscreen_desktop": false,
+      "resizable": true,
+      "borderless": false
+    },
+    {
+      "name": "scene",
+      "show_grid": true
+    },
+    { "name": "input" },
+    { "name": "audio" },
+    {
+      "name": "editor",
+      "windows": [
+        {
+          "name": "scene",
+          "visible": true
+        },
+        {
+          "name": "inspector",
+          "visible": true
+        },
+        {
+          "name": "hierarchy",
+          "visible": true
+        },
+        {
+          "name": "project",
+          "visible": true
+        },
+        {
+          "name": "console",
+          "visible": true
+        },
+        {
+          "name": "configuration",
+          "visible": false
+        },
+        {
+          "name": "preferences",
+          "visible": false
+        },
+        {
+          "name": "about",
+          "visible": false
+        }
+      ]
+    },
+    {
+      "name": "renderer",
+      "debug": false,
+      "vsync": false,
+      "draw_vertex_normals": false,
+      "draw_face_normals" :  false
+    }
+  ]
+}

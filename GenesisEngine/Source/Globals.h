@@ -28,6 +28,7 @@ void log(LogType logType, const char file[], int line, const char* format, ...);
 
 
 typedef unsigned int uint;
+typedef unsigned __int64 uint64;
 
 enum update_status
 {
@@ -39,3 +40,22 @@ enum update_status
 // Configuration -----------
 #define VSYNC true
 #define TITLE "Genesis Engine"
+
+#define RELEASE( x )\
+    {\
+       if( x != nullptr )\
+       {\
+         delete x;\
+	     x = nullptr;\
+       }\
+    }
+
+// Deletes an array of buffers
+#define RELEASE_ARRAY( x )\
+	{\
+       if( x != nullptr )\
+       {\
+           delete[] x;\
+	       x = nullptr;\
+		 }\
+	 }

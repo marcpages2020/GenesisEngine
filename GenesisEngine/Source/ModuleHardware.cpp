@@ -5,11 +5,13 @@
 #include "glew/include/glew.h"
 
 ModuleHardware::ModuleHardware(GnEngine* app, bool start_enabled) : Module(app, start_enabled),
-CPUCount(-1), CPUCache(-1), RAM(0),
+CPUCount(-1), CPUCache(-1), RAM(0), GPU(""), GPUBrand(""),
 VRAMBudget(-1), VRAMUsage(-1), VRAMAvailable(-1), VRAMReserved(-1),
 RDTSC(false), MMX(false), SSE(false), SSE2(false), SSE3(false), SSE41(false), SSE42(false), 
 AVX(false), AVX2(false), AltiVec(false)
-{}
+{
+    name = "hardware";
+}
 
 bool ModuleHardware::Start()
 {

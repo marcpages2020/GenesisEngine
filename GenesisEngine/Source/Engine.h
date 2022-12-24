@@ -48,6 +48,7 @@ public:
 	float GetCurrentFPS() const;
 
 private:
+	bool LoadModulesEditorConfig();
 	void AddModule(Module* mod);
 	void PrepareUpdate();
 	void FinishUpdate();

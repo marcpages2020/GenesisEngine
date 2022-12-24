@@ -1,5 +1,7 @@
 #include "Engine.h"
 #include "Time.h"
+#include "FileSystem.h"
+#include "HelperClasses/GnJSON.h"
 
 GnEngine::GnEngine() : versionMajor(0), versionMinor(1), maxFPS(120)
 {
@@ -46,15 +48,18 @@ bool GnEngine::Init()
 	Time::Init();
 	Time::realClock.deltaTimer.Start();
 
+	FileSystem::Init();
+	ret = LoadModulesEditorConfig();
+
 	// Call Init() in all modules
-	for (int i = 0; i < modulesVector.size() && ret == true; i++)
+	for (int i = 0; i < modulesVector.size() && ret == true; ++i)
 	{
 		ret = modulesVector[i]->Init();
 	}
 
 	// After all Init calls we call Start() in all modules
 	LOG("Application Start --------------");
-	for (int i = 0; i < modulesVector.size() && ret == true; i++)
+	for (int i = 0; i < modulesVector.size() && ret == true; ++i)
 	{
 		ret = modulesVector[i]->Start();
 	}
@@ -115,6 +120,29 @@ bool GnEngine::CleanUp()
 	}
 
 	return ret;
+}
+
+bool GnEngine::LoadModulesEditorConfig()
+{
+	char* buffer = nullptr;
+
+	const char* path = "Assets/Config/config.json";
+	int size = FileSystem::Load(path, &buffer);
+	if(size == -1)
+	{
+		LOG_ERROR("Could not load editor config file: %s", path);
+	}
+
+	GnJSONObj config(buffer);
+	GnJSONArray modulesArray(config.GetArray("modules"));
+
+	for (size_t i = 0; i < modulesVector.size(); ++i)
+	{
+		GnJSONObj moduleConfig = GnJSONObj(modulesArray.GetObjectInArray(modulesVector[i]->GetName()));
+		modulesVector[i]->LoadEditorConfig(moduleConfig);
+	}
+
+	return true;
 }
 
 void GnEngine::AddModule(Module* mod)

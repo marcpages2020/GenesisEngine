@@ -16,6 +16,7 @@ public:
 	virtual ~ModuleWindow();
 
 	bool Init() override;
+	bool LoadEditorConfig(GnJSONObj& config) override;
 	bool CleanUp();
 
 	void SetTitle(const char* title);

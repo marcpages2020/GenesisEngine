@@ -1,13 +1,18 @@
 #pragma once
 
 class GnEngine;
+class GnJSONObj;
 
 class Module
 {
 private :
 	bool enabled;
 
+protected:
+	const char* name = "None";
+
 public:
+
 	GnEngine* Engine;
 
 	Module(GnEngine* parent, bool start_enabled = true) : Engine(parent)
@@ -22,6 +27,8 @@ public:
 	{
 		return true; 
 	}
+
+	virtual bool LoadEditorConfig(GnJSONObj& object) { return true; }
 
 	virtual bool Start()
 	{
@@ -47,4 +54,6 @@ public:
 	{ 
 		return true; 
 	}
+
+	const char* GetName() const { return name; }
 };

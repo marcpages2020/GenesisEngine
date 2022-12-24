@@ -13,6 +13,7 @@
 
 ModuleRenderer3D::ModuleRenderer3D(GnEngine* app, bool start_enabled) : Module(app, start_enabled)
 {
+	name = "renderer";
 	context = nullptr;
 }
 

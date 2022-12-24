@@ -177,6 +177,13 @@
     <ClCompile Include="ModuleHardware.cpp">
       <Filter>Modules</Filter>
     </ClCompile>
+    <ClCompile Include="Libs\parson\parson.c">
+      <Filter>Libs\parson</Filter>
+    </ClCompile>
+    <ClCompile Include="HelperClasses\GnJSON.cpp">
+      <Filter>HelperClasses\FileManagement</Filter>
+    </ClCompile>
+    <ClCompile Include="FileSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine.h" />
@@ -457,6 +464,16 @@
     <ClInclude Include="ModuleHardware.h">
       <Filter>Modules</Filter>
     </ClInclude>
+    <ClInclude Include="Libs\parson\parson.h">
+      <Filter>Libs\parson</Filter>
+    </ClInclude>
+    <ClInclude Include="HelperClasses\GnJSON.h">
+      <Filter>HelperClasses\FileManagement</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\PhysFS\include\physfs.h">
+      <Filter>Libs\PhysFS</Filter>
+    </ClInclude>
+    <ClInclude Include="FileSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Modules">
@@ -500,6 +517,15 @@
     </Filter>
     <Filter Include="Libs\OpenGL\GLMath">
       <UniqueIdentifier>{522731cb-f4f0-4dc5-8f32-dd0f8246068d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libs\parson">
+      <UniqueIdentifier>{fd91813c-ecd2-4f1d-b123-50e0d3594b91}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HelperClasses\FileManagement">
+      <UniqueIdentifier>{4b4900b6-b7e8-4491-b6c0-cc7ca405ec02}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libs\PhysFS">
+      <UniqueIdentifier>{fd1ae388-cc09-4226-81d8-b7ae0d8425c7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
