@@ -24,6 +24,11 @@ ModuleEditor::~ModuleEditor()
 
 bool ModuleEditor::Init() 
 {
+	return true;
+}
+
+bool ModuleEditor::Start()
+{
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
