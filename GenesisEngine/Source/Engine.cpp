@@ -3,17 +3,23 @@
 #include "FileSystem.h"
 #include "HelperClasses/GnJSON.h"
 
+GnEngine* GnEngine::instance = nullptr;
+
 GnEngine::GnEngine() : versionMajor(0), versionMinor(1), maxFPS(120)
 {
+	instance = this;
+
 	SetMaxFPS(maxFPS);
 
 	hardware = new ModuleHardware(this);
 	window = new ModuleWindow(this);
+	resources = new ModuleResources(this);
 	input = new ModuleInput(this);
+	scene = new ModuleScene(this);
 	audio = new ModuleAudio(this, true);
-	renderer3D = new ModuleRenderer3D(this);
 	camera = new ModuleCamera3D(this);
 	editor = new ModuleEditor(this);
+	renderer3D = new ModuleRenderer3D(this);
 
 	// The order of calls is very important!
 	// Modules will Init() Start() and Update in this order
@@ -22,12 +28,12 @@ GnEngine::GnEngine() : versionMajor(0), versionMinor(1), maxFPS(120)
 	// Main Modules
 	AddModule(hardware);
 	AddModule(window);
-	AddModule(camera);
+	AddModule(resources);
 	AddModule(input);
+	AddModule(scene);
 	AddModule(audio);
+	AddModule(camera);
 	AddModule(editor);
-
-	// Renderer last!
 	AddModule(renderer3D);
 }
 
@@ -40,6 +46,13 @@ GnEngine::~GnEngine()
 		delete *item;
 		++item ;
 	}
+
+	instance = nullptr;
+}
+
+GnEngine* GnEngine::Instance()
+{
+	return instance;
 }
 
 bool GnEngine::Init()
@@ -117,6 +130,7 @@ bool GnEngine::CleanUp()
 	for (int i = modulesVector.size() -1; i > 0; i--)
 	{
 		modulesVector[i]->CleanUp();
+		modulesVector[i] = nullptr;
 	}
 
 	return ret;

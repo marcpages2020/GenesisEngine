@@ -104,6 +104,39 @@
     <ClInclude Include="Color.h" />
     <ClInclude Include="FileSystem.h" />
     <ClInclude Include="HelperClasses\GnJSON.h" />
+    <ClInclude Include="Libs\Assimp\include\ai_assert.h" />
+    <ClInclude Include="Libs\Assimp\include\anim.h" />
+    <ClInclude Include="Libs\Assimp\include\camera.h" />
+    <ClInclude Include="Libs\Assimp\include\cexport.h" />
+    <ClInclude Include="Libs\Assimp\include\cfileio.h" />
+    <ClInclude Include="Libs\Assimp\include\cimport.h" />
+    <ClInclude Include="Libs\Assimp\include\color4.h" />
+    <ClInclude Include="Libs\Assimp\include\config.h" />
+    <ClInclude Include="Libs\Assimp\include\DefaultLogger.hpp" />
+    <ClInclude Include="Libs\Assimp\include\defs.h" />
+    <ClInclude Include="Libs\Assimp\include\Exporter.hpp" />
+    <ClInclude Include="Libs\Assimp\include\Importer.hpp" />
+    <ClInclude Include="Libs\Assimp\include\importerdesc.h" />
+    <ClInclude Include="Libs\Assimp\include\IOStream.hpp" />
+    <ClInclude Include="Libs\Assimp\include\IOSystem.hpp" />
+    <ClInclude Include="Libs\Assimp\include\light.h" />
+    <ClInclude Include="Libs\Assimp\include\Logger.hpp" />
+    <ClInclude Include="Libs\Assimp\include\LogStream.hpp" />
+    <ClInclude Include="Libs\Assimp\include\material.h" />
+    <ClInclude Include="Libs\Assimp\include\matrix3x3.h" />
+    <ClInclude Include="Libs\Assimp\include\matrix4x4.h" />
+    <ClInclude Include="Libs\Assimp\include\mesh.h" />
+    <ClInclude Include="Libs\Assimp\include\metadata.h" />
+    <ClInclude Include="Libs\Assimp\include\NullLogger.hpp" />
+    <ClInclude Include="Libs\Assimp\include\postprocess.h" />
+    <ClInclude Include="Libs\Assimp\include\ProgressHandler.hpp" />
+    <ClInclude Include="Libs\Assimp\include\quaternion.h" />
+    <ClInclude Include="Libs\Assimp\include\scene.h" />
+    <ClInclude Include="Libs\Assimp\include\texture.h" />
+    <ClInclude Include="Libs\Assimp\include\types.h" />
+    <ClInclude Include="Libs\Assimp\include\vector2.h" />
+    <ClInclude Include="Libs\Assimp\include\vector3.h" />
+    <ClInclude Include="Libs\Assimp\include\version.h" />
     <ClInclude Include="Libs\glad\include\glad\glad.h" />
     <ClInclude Include="Libs\glad\include\glad\khrplatform.h" />
     <ClInclude Include="Libs\glfw\include\GLFW\glfw3.h" />
@@ -219,6 +252,7 @@
     <ClInclude Include="Libs\MathGeoLib\include\Time\Clock.h" />
     <ClInclude Include="Libs\parson\parson.h" />
     <ClInclude Include="Libs\PhysFS\include\physfs.h" />
+    <ClInclude Include="Importer.h" />
     <ClInclude Include="ModuleEditor.h" />
     <ClInclude Include="glmath.h" />
     <ClInclude Include="Globals.h" />
@@ -241,8 +275,13 @@
     <ClInclude Include="Module.h" />
     <ClInclude Include="ModuleAudio.h" />
     <ClInclude Include="ModuleInput.h" />
+    <ClInclude Include="ModuleResources.h" />
+    <ClInclude Include="ModuleScene.h" />
     <ClInclude Include="ModuleWindow.h" />
     <ClInclude Include="Primitive.h" />
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="ResourceMesh.h" />
+    <ClInclude Include="ResourceModel.h" />
     <ClInclude Include="Time.h" />
     <ClInclude Include="Timer.h" />
   </ItemGroup>
@@ -292,6 +331,7 @@
     <ClCompile Include="Libs\MathGeoLib\include\Math\TransformOps.cpp" />
     <ClCompile Include="Libs\MathGeoLib\include\Time\Clock.cpp" />
     <ClCompile Include="Libs\parson\parson.c" />
+    <ClCompile Include="Importer.cpp" />
     <ClCompile Include="ModuleEditor.cpp" />
     <ClCompile Include="glmath.cpp" />
     <ClCompile Include="Libs\ImGui\imgui.cpp" />
@@ -308,12 +348,24 @@
     <ClCompile Include="ModuleHardware.cpp" />
     <ClCompile Include="ModuleInput.cpp" />
     <ClCompile Include="ModuleRenderer3D.cpp" />
+    <ClCompile Include="ModuleResources.cpp" />
+    <ClCompile Include="ModuleScene.cpp" />
     <ClCompile Include="ModuleWindow.cpp" />
     <ClCompile Include="Primitive.cpp" />
+    <ClCompile Include="Resource.cpp" />
+    <ClCompile Include="ResourceMesh.cpp" />
+    <ClCompile Include="ResourceModel.cpp" />
     <ClCompile Include="Time.cpp" />
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Libs\Assimp\include\color4.inl" />
+    <None Include="Libs\Assimp\include\material.inl" />
+    <None Include="Libs\Assimp\include\matrix3x3.inl" />
+    <None Include="Libs\Assimp\include\matrix4x4.inl" />
+    <None Include="Libs\Assimp\include\quaternion.inl" />
+    <None Include="Libs\Assimp\include\vector2.inl" />
+    <None Include="Libs\Assimp\include\vector3.inl" />
     <None Include="Libs\glm\include\glm\detail\func_common.inl" />
     <None Include="Libs\glm\include\glm\detail\func_common_simd.inl" />
     <None Include="Libs\glm\include\glm\detail\func_exponential.inl" />
@@ -354,6 +406,9 @@
     <None Include="Libs\MathGeoLib\include\Geometry\TriangleMesh_IntersectRay_CPP.inl" />
     <None Include="Libs\MathGeoLib\include\Geometry\TriangleMesh_IntersectRay_SSE.inl" />
     <None Include="Libs\MathGeoLib\include\Math\Matrix.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="GenesisEngine.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

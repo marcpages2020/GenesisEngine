@@ -56,7 +56,7 @@ bool ModuleWindow::Init()
 			flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;}
 
 		char windowTitle[64];
-		sprintf(windowTitle, "Genesis Engine %d.%d", Engine->versionMajor, Engine->versionMinor);
+		sprintf(windowTitle, "Genesis Engine %d.%d", engine->versionMajor, engine->versionMinor);
 		window = SDL_CreateWindow(windowTitle, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, flags);
 
 		if(window == NULL)

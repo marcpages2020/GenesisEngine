@@ -22,6 +22,8 @@ public:
 	update_status PostUpdate(float deltaTime);
 	bool CleanUp();
 
+	EditorWindow* GetWindowByName(const char* windowName);
+
 private:
 	update_status ShowDockSpace(bool* p_open);
 	void ChangeTheme(std::string theme);

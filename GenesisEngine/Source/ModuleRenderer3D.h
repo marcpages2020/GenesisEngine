@@ -35,6 +35,13 @@ public:
 
 	void OnResize(int width, int height);
 
+	GLint GetAlbedoAttachmentHandle() const;
+	GLint GetNormalsAttachmentHandle() const;
+	GLint GetPositionAttachmentHandle() const;
+	GLint GetDepthAttachmentHandle() const;
+	GLint GetMetallicAttachmentHandle() const;
+	GLint GetFinalRenderAttachmentHandle() const;
+
 public:
 
 	Light lights[MAX_LIGHTS];

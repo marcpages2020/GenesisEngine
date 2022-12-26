@@ -24,6 +24,12 @@ ModuleEditor::~ModuleEditor()
 
 bool ModuleEditor::Init() 
 {
+	windows.push_back(new EditorWindow_Scene(this));
+	windows.push_back(new EditorWindow_Assets(this));
+	windows.push_back(new EditorWindow_Console(this));
+	windows.push_back(new EditorWindow_Inspector(this));
+	windows.push_back(new EditorWindow_Configuration(this));
+
 	return true;
 }
 
@@ -36,14 +42,8 @@ bool ModuleEditor::Start()
 
 	ImGui::StyleColorsDark();
 
-	ImGui_ImplSDL2_InitForOpenGL(Engine->window->window, Engine->renderer3D->context);
+	ImGui_ImplSDL2_InitForOpenGL(engine->window->window, engine->renderer3D->context);
 	ImGui_ImplOpenGL3_Init();
-
-	windows.push_back(new EditorWindow_Scene(this));
-	windows.push_back(new EditorWindow_Assets(this));
-	windows.push_back(new EditorWindow_Console(this));
-	windows.push_back(new EditorWindow_Inspector(this));
-	windows.push_back(new EditorWindow_Configuration(this));
 
 	return true;
 }
@@ -60,7 +60,7 @@ update_status ModuleEditor::PostUpdate(float deltaTime)
 
 	//Update the frames
 	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplSDL2_NewFrame(Engine->window->window);
+	ImGui_ImplSDL2_NewFrame(engine->window->window);
 	ImGui::NewFrame();
 
 	ret = ShowDockSpace(&isDockspaceOpen);
@@ -108,6 +108,19 @@ bool ModuleEditor::CleanUp()
 	ImGui::DestroyContext();
 
 	return true;
+}
+
+EditorWindow* ModuleEditor::GetWindowByName(const char* windowName)
+{
+	for (size_t i = 0; i < windows.size(); ++i)
+	{
+		if (windowName == windows[i]->GetName())
+		{
+			return windows[i];
+		}
+	}
+
+	return nullptr;
 }
 
 update_status ModuleEditor::ShowDockSpace(bool* p_open) {

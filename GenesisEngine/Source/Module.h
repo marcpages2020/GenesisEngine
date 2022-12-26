@@ -3,6 +3,8 @@
 class GnEngine;
 class GnJSONObj;
 
+#include "Globals.h"
+
 class Module
 {
 private :
@@ -13,9 +15,9 @@ protected:
 
 public:
 
-	GnEngine* Engine;
+	GnEngine* engine;
 
-	Module(GnEngine* parent, bool start_enabled = true) : Engine(parent)
+	Module(GnEngine* parent, bool start_enabled = true) : engine(parent)
 	{
 		enabled = true;
 	}

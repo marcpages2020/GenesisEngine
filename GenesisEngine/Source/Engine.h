@@ -7,23 +7,29 @@
 #include "ModuleHardware.h"
 #include "ModuleWindow.h"
 #include "ModuleInput.h"
+#include "ModuleResources.h"
+#include "ModuleScene.h"
 #include "ModuleAudio.h"
-#include "ModuleRenderer3D.h"
 #include "ModuleCamera3D.h"
 #include "ModuleEditor.h"
+#include "ModuleRenderer3D.h"
 
 class GnEngine
 {
 public:
 	ModuleHardware* hardware;
 	ModuleWindow* window;
+	ModuleResources* resources;
 	ModuleInput* input;
+	ModuleScene* scene;
 	ModuleAudio* audio;
-	ModuleRenderer3D* renderer3D;
 	ModuleCamera3D* camera;
 	ModuleEditor* editor;
+	ModuleRenderer3D* renderer3D;
 
 private:
+	static GnEngine* instance;
+
 	float deltaTime;
 	int maxFPS;
 	float minFrameMS;
@@ -31,9 +37,10 @@ private:
 	std::vector<Module*> modulesVector;
 
 public:
-
 	GnEngine();
 	~GnEngine();
+
+	static GnEngine* Instance();
 
 	bool Init();
 	update_status Update();

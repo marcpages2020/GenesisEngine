@@ -44,28 +44,28 @@ update_status ModuleCamera3D::Update(float deltaTime)
 
 	vec3 newPos(0,0,0);
 	float speed = 3.0f * deltaTime;
-	if(Engine->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT)
+	if(engine->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT)
 		speed = 8.0f * deltaTime;
 
-	if(Engine->input->GetKey(SDL_SCANCODE_R) == KEY_REPEAT) newPos.y += speed;
-	if(Engine->input->GetKey(SDL_SCANCODE_F) == KEY_REPEAT) newPos.y -= speed;
+	if(engine->input->GetKey(SDL_SCANCODE_R) == KEY_REPEAT) newPos.y += speed;
+	if(engine->input->GetKey(SDL_SCANCODE_F) == KEY_REPEAT) newPos.y -= speed;
 
-	if(Engine->input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT) newPos -= Z * speed;
-	if(Engine->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT) newPos += Z * speed;
+	if(engine->input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT) newPos -= Z * speed;
+	if(engine->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT) newPos += Z * speed;
 
 
-	if(Engine->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT) newPos -= X * speed;
-	if(Engine->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT) newPos += X * speed;
+	if(engine->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT) newPos -= X * speed;
+	if(engine->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT) newPos += X * speed;
 
 	Position += newPos;
 	Reference += newPos;
 
 	// Mouse motion ----------------
 
-	if(Engine->input->GetMouseButton(SDL_BUTTON_RIGHT) == KEY_REPEAT)
+	if(engine->input->GetMouseButton(SDL_BUTTON_RIGHT) == KEY_REPEAT)
 	{
-		int dx = -Engine->input->GetMouseXMotion();
-		int dy = -Engine->input->GetMouseYMotion();
+		int dx = -engine->input->GetMouseXMotion();
+		int dy = -engine->input->GetMouseYMotion();
 
 		float Sensitivity = 0.25f;
 

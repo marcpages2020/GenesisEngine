@@ -190,6 +190,20 @@
     <ClCompile Include="Libs\glad\include\glad\glad.c">
       <Filter>Libs\glad</Filter>
     </ClCompile>
+    <ClCompile Include="Resource.cpp">
+      <Filter>Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="Importer.cpp">
+      <Filter>Resources\Importers</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceMesh.cpp">
+      <Filter>Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceModel.cpp">
+      <Filter>Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="ModuleScene.cpp" />
+    <ClCompile Include="ModuleResources.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine.h" />
@@ -639,6 +653,119 @@
     <ClInclude Include="Libs\glfw\include\GLFW\glfw3native.h">
       <Filter>Libs\glfw</Filter>
     </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Importer.h">
+      <Filter>Resources\Importers</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\Assimp\include\ai_assert.h">
+      <Filter>Libs\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\Assimp\include\anim.h">
+      <Filter>Libs\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\Assimp\include\camera.h">
+      <Filter>Libs\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\Assimp\include\cexport.h">
+      <Filter>Libs\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\Assimp\include\cfileio.h">
+      <Filter>Libs\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\Assimp\include\cimport.h">
+      <Filter>Libs\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\Assimp\include\color4.h">
+      <Filter>Libs\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\Assimp\include\config.h">
+      <Filter>Libs\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\Assimp\include\DefaultLogger.hpp">
+      <Filter>Libs\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\Assimp\include\defs.h">
+      <Filter>Libs\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\Assimp\include\Exporter.hpp">
+      <Filter>Libs\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\Assimp\include\Importer.hpp">
+      <Filter>Libs\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\Assimp\include\importerdesc.h">
+      <Filter>Libs\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\Assimp\include\IOStream.hpp">
+      <Filter>Libs\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\Assimp\include\IOSystem.hpp">
+      <Filter>Libs\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\Assimp\include\light.h">
+      <Filter>Libs\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\Assimp\include\Logger.hpp">
+      <Filter>Libs\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\Assimp\include\LogStream.hpp">
+      <Filter>Libs\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\Assimp\include\material.h">
+      <Filter>Libs\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\Assimp\include\matrix3x3.h">
+      <Filter>Libs\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\Assimp\include\matrix4x4.h">
+      <Filter>Libs\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\Assimp\include\mesh.h">
+      <Filter>Libs\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\Assimp\include\metadata.h">
+      <Filter>Libs\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\Assimp\include\NullLogger.hpp">
+      <Filter>Libs\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\Assimp\include\postprocess.h">
+      <Filter>Libs\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\Assimp\include\ProgressHandler.hpp">
+      <Filter>Libs\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\Assimp\include\quaternion.h">
+      <Filter>Libs\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\Assimp\include\scene.h">
+      <Filter>Libs\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\Assimp\include\texture.h">
+      <Filter>Libs\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\Assimp\include\types.h">
+      <Filter>Libs\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\Assimp\include\vector2.h">
+      <Filter>Libs\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\Assimp\include\vector3.h">
+      <Filter>Libs\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\Assimp\include\version.h">
+      <Filter>Libs\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceMesh.h">
+      <Filter>Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceModel.h">
+      <Filter>Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleScene.h" />
+    <ClInclude Include="ModuleResources.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Modules">
@@ -703,6 +830,15 @@
     </Filter>
     <Filter Include="Libs\glfw">
       <UniqueIdentifier>{15dcad07-0c70-4eb3-a2a8-039354892570}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{5e81fb41-69aa-448b-be21-1fd7228fefdd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Importers">
+      <UniqueIdentifier>{c811c12f-daf2-4eda-a81f-2ba79f7338c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libs\Assimp">
+      <UniqueIdentifier>{6c9d58a9-5e63-46d2-845e-82b17f798fb0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -826,5 +962,29 @@
     <None Include="Libs\glm\include\glm\detail\type_vec4_simd.inl">
       <Filter>Libs\glm\detail</Filter>
     </None>
+    <None Include="Libs\Assimp\include\color4.inl">
+      <Filter>Libs\Assimp</Filter>
+    </None>
+    <None Include="Libs\Assimp\include\material.inl">
+      <Filter>Libs\Assimp</Filter>
+    </None>
+    <None Include="Libs\Assimp\include\matrix3x3.inl">
+      <Filter>Libs\Assimp</Filter>
+    </None>
+    <None Include="Libs\Assimp\include\matrix4x4.inl">
+      <Filter>Libs\Assimp</Filter>
+    </None>
+    <None Include="Libs\Assimp\include\quaternion.inl">
+      <Filter>Libs\Assimp</Filter>
+    </None>
+    <None Include="Libs\Assimp\include\vector2.inl">
+      <Filter>Libs\Assimp</Filter>
+    </None>
+    <None Include="Libs\Assimp\include\vector3.inl">
+      <Filter>Libs\Assimp</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="GenesisEngine.rc" />
   </ItemGroup>
 </Project>

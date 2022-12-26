@@ -1,5 +1,6 @@
 #include "EditorWindow_Scene.h"
-#include "EditorWindow.h"
+#include "ModuleEditor.h"
+#include "Engine.h"
 #include <ImGui/imgui.h>
 
 EditorWindow_Scene::EditorWindow_Scene(ModuleEditor* moduleEditor) : EditorWindow(moduleEditor)
@@ -12,7 +13,7 @@ void EditorWindow_Scene::Draw()
 {
 	if (ImGui::Begin(name, &isOpen))
 	{
-		ImGui::Image(ImTextureID(), ImGui::GetContentRegionAvail());
+		ImGui::Image((ImTextureID)editor->engine->renderer3D->GetFinalRenderAttachmentHandle(), ImGui::GetContentRegionAvail());
 	}
 	ImGui::End();
 }

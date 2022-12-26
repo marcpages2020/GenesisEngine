@@ -1,5 +1,7 @@
 #pragma once
 #include "Globals.h"
+#include "Engine.h"
+#include "EditorWindow_Console.h"
 
 void log(LogType logType, const char file[], int line, const char* format, ...)
 {
@@ -13,4 +15,14 @@ void log(LogType logType, const char file[], int line, const char* format, ...)
 	va_end(ap);
 	sprintf_s(tmp_string2, 4096, "\n%s(%d) : %s", file, line, tmp_string);
 	OutputDebugString(tmp_string2);
+
+	GnEngine* engine = GnEngine::Instance();
+	if (engine && engine->editor)
+	{
+		EditorWindow_Console* console = (EditorWindow_Console*)engine->editor->GetWindowByName("Console");
+		if (console)
+		{
+			console->AddConsoleLog(logType, tmp_string2);
+		}
+	}
 }

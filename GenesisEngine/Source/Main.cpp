@@ -21,7 +21,7 @@ int main(int argc, char ** argv)
 
 	int main_return = EXIT_FAILURE;
 	main_states state = MAIN_CREATION;
-	GnEngine* Engine = NULL;
+	GnEngine* engine = NULL;
 
 	while (state != MAIN_EXIT)
 	{
@@ -30,14 +30,14 @@ int main(int argc, char ** argv)
 		case MAIN_CREATION:
 
 			LOG("-------------- Application Creation --------------");
-			Engine = new GnEngine();
+			engine = new GnEngine();
 			state = MAIN_START;
 			break;
 
 		case MAIN_START:
 
 			LOG("-------------- Application Init --------------");
-			if (Engine->Init() == false)
+			if (engine->Init() == false)
 			{
 				LOG("Application Init exits with ERROR");
 				state = MAIN_EXIT;
@@ -52,7 +52,7 @@ int main(int argc, char ** argv)
 
 		case MAIN_UPDATE:
 		{
-			int update_return = Engine->Update();
+			int update_return = engine->Update();
 
 			if (update_return == UPDATE_ERROR)
 			{
@@ -68,7 +68,7 @@ int main(int argc, char ** argv)
 		case MAIN_FINISH:
 
 			LOG("-------------- Application CleanUp --------------");
-			if (Engine->CleanUp() == false)
+			if (engine->CleanUp() == false)
 			{
 				LOG("Application CleanUp exits with ERROR");
 			}
@@ -82,7 +82,7 @@ int main(int argc, char ** argv)
 		}
 	}
 
-	delete Engine;
+	delete engine;
 	LOG("Exiting engine '%s'...\n", TITLE);
 	return main_return;
 }

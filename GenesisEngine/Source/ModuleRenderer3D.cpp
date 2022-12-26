@@ -87,13 +87,13 @@ bool ModuleRenderer3D::Init()
 	bool ret = true;
 
 	//Create context
-	context = SDL_GL_CreateContext(Engine->window->window);
+	context = SDL_GL_CreateContext(engine->window->window);
 	if (context == NULL) {
 		LOG_ERROR("OpenGL context could not be created! SDL_Error: %s\n", SDL_GetError());
 		ret = false;
 	}
 
-	if (SDL_GL_MakeCurrent(Engine->window->window, context) != 0)
+	if (SDL_GL_MakeCurrent(engine->window->window, context) != 0)
 	{
 		LOG_ERROR("Failed to make OpenGL context current: %s", SDL_GetError());
 		SDL_GL_DeleteContext(context);
@@ -105,7 +105,7 @@ bool ModuleRenderer3D::Init()
 
 	if (ret)
 	{
-		OnResize(Engine->window->GetWidht(), Engine->window->GetHeight());
+		OnResize(engine->window->GetWidht(), engine->window->GetHeight());
 	}
 
 	return ret;
@@ -236,10 +236,10 @@ update_status ModuleRenderer3D::PreUpdate(float deltaTime)
 	glLoadIdentity();
 
 	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf(Engine->camera->GetViewMatrix());
+	glLoadMatrixf(engine->camera->GetViewMatrix());
 
 	// light 0 on cam pos
-	lights[0].SetPos(Engine->camera->Position.x, Engine->camera->Position.y, Engine->camera->Position.z);
+	lights[0].SetPos(engine->camera->Position.x, engine->camera->Position.y, engine->camera->Position.z);
 
 	for (uint i = 0; i < MAX_LIGHTS; ++i)
 		lights[i].Render();
@@ -253,7 +253,7 @@ update_status ModuleRenderer3D::PostUpdate(float deltaTime)
 	//Render on this framebuffer render targets
 	glBindFramebuffer(GL_FRAMEBUFFER, framebufferHandle);
 
-	SDL_GL_SwapWindow(Engine->window->window);
+	SDL_GL_SwapWindow(engine->window->window);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -335,6 +335,18 @@ void ModuleRenderer3D::OnResize(int width, int height)
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }
+
+GLint ModuleRenderer3D::GetAlbedoAttachmentHandle() const {	return albedoAttachmentHandle; }
+
+GLint ModuleRenderer3D::GetNormalsAttachmentHandle() const { return normalsAttachmentHandle; }
+
+GLint ModuleRenderer3D::GetPositionAttachmentHandle() const { return positionAttachmentHandle; }
+
+GLint ModuleRenderer3D::GetDepthAttachmentHandle() const { return depthAttachmentHandle; }
+
+GLint ModuleRenderer3D::GetMetallicAttachmentHandle() const { return metallicAttachmentHandle; }
+
+GLint ModuleRenderer3D::GetFinalRenderAttachmentHandle() const { return finalRenderAttachmentHandle; }
 
 void ModuleRenderer3D::GenerateColorTexture(GLuint& colorAttachmentHandle, vec2 displaySize, GLint internalFormat)
 {
