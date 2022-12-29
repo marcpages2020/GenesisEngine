@@ -42,6 +42,8 @@ enum update_status
 #define VSYNC true
 #define TITLE "Genesis Engine"
 
+#define ARRAY_COUNT(array) (sizeof(array)/sizeof(array[0]))
+
 #define RELEASE( x )\
     {\
        if( x != nullptr )\

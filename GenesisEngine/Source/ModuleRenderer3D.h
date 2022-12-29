@@ -12,6 +12,8 @@ typedef unsigned int GLenum;
 typedef int GLsizei;
 typedef char GLchar;
 
+class ResourceMesh;
+
 struct Buffer
 {
 	GLuint handle;
@@ -42,6 +44,8 @@ public:
 	GLint GetMetallicAttachmentHandle() const;
 	GLint GetFinalRenderAttachmentHandle() const;
 
+	void AddMeshToRender(ResourceMesh* meshToRender);
+
 public:
 
 	Light lights[MAX_LIGHTS];
@@ -67,4 +71,6 @@ private:
 	GLuint metallicAttachmentHandle = -1;
 	GLuint roughnessAttachmentHandle = -1;
 	GLuint finalRenderAttachmentHandle = -1;
+
+	std::vector<ResourceMesh*> meshesToRender;
 };

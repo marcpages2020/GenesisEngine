@@ -23,5 +23,9 @@ public:
 
 private:
 	std::vector<LogMessage> logMessages;
+
+	bool showNormalLog;
+	bool showWarningLog;
+	bool showErrorLog;
 };
 

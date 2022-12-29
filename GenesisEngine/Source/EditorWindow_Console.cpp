@@ -8,7 +8,8 @@ LogMessage::LogMessage(LogType newType, char* newMessage)
 	message = newMessage;
 }
 
-EditorWindow_Console::EditorWindow_Console(ModuleEditor* moduleEditor) : EditorWindow(moduleEditor)
+EditorWindow_Console::EditorWindow_Console(ModuleEditor* moduleEditor) : EditorWindow(moduleEditor),
+showNormalLog(true), showWarningLog(true), showErrorLog(true)
 {
 	isOpen = true;
 	name = "Console";
@@ -16,15 +17,41 @@ EditorWindow_Console::EditorWindow_Console(ModuleEditor* moduleEditor) : EditorW
 
 void EditorWindow_Console::Draw()
 {
-	if (ImGui::Begin(name, &isOpen)) 
+	if (ImGui::Begin(name, &isOpen, ImGuiWindowFlags_MenuBar))
 	{
+		if (ImGui::BeginMenuBar())
+		{
+			if (ImGui::MenuItem("Clear")) {
+				logMessages.clear();
+			}
+
+			ImGui::Checkbox("Log", &showNormalLog);
+			ImGui::Checkbox("Warnings", &showWarningLog);
+			ImGui::Checkbox("Errors", &showErrorLog);
+
+			ImGui::EndMenuBar();
+		}
+
 		for (size_t i = 0; i < logMessages.size(); i++)
 		{
 			switch (logMessages[i].logType)
 			{
-			case LogType::LOG_NORMAL:	ImGui::Text(logMessages[i].message); break;
-			case LogType::LOG_WARNING:	ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), logMessages[i].message); break;
-			case LogType::LOG_ERROR:	ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), logMessages[i].message); break;
+			case LogType::LOG_NORMAL:
+				if (showNormalLog) {
+					ImGui::Text(logMessages[i].message);
+				}
+				break;
+			case LogType::LOG_WARNING:
+				if (showWarningLog) {
+					ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), logMessages[i].message);
+				}
+				break;
+			case LogType::LOG_ERROR:
+				if (showErrorLog) {
+					ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), logMessages[i].message);
+				}
+				break;
+
 			default: break;
 			}
 		}

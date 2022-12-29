@@ -10,19 +10,18 @@
 
 #pragma comment (lib, "Assimp/libx86/assimp.lib")
 
-int Importer::ImportModel(char* filePath, ResourceModel* model)
+int Importer::ImportModel(char* fileBuffer, uint fileSize, ResourceModel* model)
 {
-	const aiScene* scene = nullptr;
-	scene = aiImportFile(filePath, aiProcessPreset_TargetRealtime_MaxQuality);
+	const aiScene* scene = aiImportFileFromMemory(fileBuffer, fileSize, aiProcessPreset_TargetRealtime_MaxQuality, NULL);
 
 	if (!scene) {
-		LOG_ERROR("Error loading in assimp. Conflicting file: %s", filePath);
+		LOG_ERROR("Error loading in assimp.");
 		aiReleaseImport(scene);
 		return -1;
 	}
 
 	if (!scene->HasMeshes()) {
-		LOG_ERROR("File %s has no meshes, it cannot be imported", filePath);
+		LOG_ERROR("File has no meshes, it cannot be imported");
 		aiReleaseImport(scene);
 		return -1;
 	}
@@ -31,7 +30,10 @@ int Importer::ImportModel(char* filePath, ResourceModel* model)
 	for (size_t i = 0; i < scene->mNumMeshes; ++i)
 	{
 		aiMesh* mesh = scene->mMeshes[i];
-		model->AddMesh(ImportMesh(scene->mMeshes[i], new ResourceMesh(i)));
+
+		ResourceMesh* myMesh = new ResourceMesh(i);
+		model->AddMesh(ImportMesh(scene->mMeshes[i], myMesh));
+		model->meshesResources.push_back(myMesh);
 	}
 
 	//Import materials
@@ -44,6 +46,34 @@ int Importer::ImportModel(char* filePath, ResourceModel* model)
 	aiReleaseImport(scene);
 
 	return model->GetUID();
+}
+
+int Importer::ProcessAssimpNode(const aiScene* scene, aiNode* ainode, aiNode* parentAiNode, ModelNode* parentNode, ResourceModel* model)
+{
+	int ret = 0;
+
+	ModelNode modelNode;;
+
+	//Assign node name
+	modelNode.name = ainode->mName.C_Str();
+
+	//Assign node mesh and material
+	if (ainode->mMeshes != nullptr)
+	{
+		//Mesh --------------------------------------------------------------
+		modelNode.meshID = model->GetMeshAt(*ainode->mMeshes);
+
+		//Materials ----------------------------------------------------------
+		//aiMesh* aimesh = scene->mMeshes[*ainode->mMeshes];
+		//modelNode.materialID = model->materials[aimesh->mMaterialIndex];
+	}
+
+	for (size_t i = 0; i < ainode->mNumChildren; i++)
+	{
+		ret = ProcessAssimpNode(scene, ainode->mChildren[i], ainode, &modelNode, model);
+	}
+
+	return ret;
 }
 
 int Importer::ImportMesh(aiMesh* aimesh, ResourceMesh* mesh)
@@ -129,11 +159,13 @@ int Importer::ImportMesh(aiMesh* aimesh, ResourceMesh* mesh)
 		for (size_t f = 0; f < aimesh->mNumFaces; f++)
 		{
 			if (aimesh->mFaces[f].mNumIndices != 3) {
-				LOG_WARNING("WARNING, geometry face with != 3 indices!"); }
+				LOG_WARNING("Geometry face with != 3 indices!"); }
 			else {
 				memcpy(&mesh->indices[f * 3], aimesh->mFaces[f].mIndices, 3 * sizeof(uint)); }
 		}
 	}
+
+	mesh->GenerateBuffers();
 
 	LOG("New mesh %s with %d vertices", mesh->name, mesh->numVertices);
 

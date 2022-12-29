@@ -314,7 +314,7 @@ uint FileSystem::Load(const char* file, char** buffer)
 	if (!PHYSFS_exists(file)) 
 	{
 		LOG_ERROR("Can't load file: %s, the file does not exist", file);
-		return -1; 
+		return 0; 
 	}
 
 	PHYSFS_file* fs_file = PHYSFS_openRead(file);

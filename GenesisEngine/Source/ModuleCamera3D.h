@@ -3,6 +3,8 @@
 #include "Globals.h"
 #include "glmath.h"
 
+#include "Color.h"
+
 class ModuleCamera3D : public Module
 {
 public:
@@ -18,15 +20,17 @@ public:
 	void Move(const vec3 &Movement);
 	float* GetViewMatrix();
 
+	Color GetBackgroundColor() const;
+	void SetBackgroundColor(Color newBackgroundColor);
+
 private:
 
 	void CalculateViewMatrix();
 
 public:
-	
 	vec3 X, Y, Z, Position, Reference;
 
 private:
-
 	mat4x4 ViewMatrix, ViewMatrixInverse;
+	Color backgroundColor;
 };

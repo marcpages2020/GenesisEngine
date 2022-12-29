@@ -202,8 +202,12 @@
     <ClCompile Include="ResourceModel.cpp">
       <Filter>Resources</Filter>
     </ClCompile>
-    <ClCompile Include="ModuleScene.cpp" />
-    <ClCompile Include="ModuleResources.cpp" />
+    <ClCompile Include="ModuleResources.cpp">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="ModuleScene.cpp">
+      <Filter>Modules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine.h" />
@@ -764,8 +768,12 @@
     <ClInclude Include="ResourceModel.h">
       <Filter>Resources</Filter>
     </ClInclude>
-    <ClInclude Include="ModuleScene.h" />
-    <ClInclude Include="ModuleResources.h" />
+    <ClInclude Include="ModuleResources.h">
+      <Filter>Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleScene.h">
+      <Filter>Modules</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Modules">

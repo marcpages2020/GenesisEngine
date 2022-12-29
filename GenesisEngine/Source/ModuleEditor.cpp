@@ -57,6 +57,12 @@ update_status ModuleEditor::Update(float deltaTime)
 update_status ModuleEditor::PostUpdate(float deltaTime)
 {
 	update_status ret = UPDATE_CONTINUE;
+	return ret;
+}
+
+bool ModuleEditor::Draw()
+{
+	bool ret = true;
 
 	//Update the frames
 	ImGui_ImplOpenGL3_NewFrame();
@@ -123,8 +129,8 @@ EditorWindow* ModuleEditor::GetWindowByName(const char* windowName)
 	return nullptr;
 }
 
-update_status ModuleEditor::ShowDockSpace(bool* p_open) {
-	update_status ret = UPDATE_CONTINUE;
+bool ModuleEditor::ShowDockSpace(bool* p_open) {
+	bool ret = true;
 
 	static bool opt_fullscreen = true;
 	static bool opt_padding = false;
@@ -190,7 +196,7 @@ update_status ModuleEditor::ShowDockSpace(bool* p_open) {
 		{
 			if (ImGui::MenuItem("Exit"))
 			{
-				ret = UPDATE_STOP;
+				ret = false;
 			}
 			ImGui::EndMenu();
 		}
