@@ -13,6 +13,7 @@ typedef int GLsizei;
 typedef char GLchar;
 
 class ResourceMesh;
+class ResourceShader;
 
 struct Buffer
 {
@@ -63,6 +64,7 @@ private:
 	uint32 bufferHandle;
 	GLint uniformBufferAlignment = -1;
 	GLuint framebufferHandle = -1;
+	GLuint renderbufferHandle = -1;
 
 	GLuint albedoAttachmentHandle = -1;
 	GLuint normalsAttachmentHandle = -1;
@@ -73,4 +75,5 @@ private:
 	GLuint finalRenderAttachmentHandle = -1;
 
 	std::vector<ResourceMesh*> meshesToRender;
+	ResourceShader* defaultShader;
 };

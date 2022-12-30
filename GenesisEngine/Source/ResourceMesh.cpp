@@ -22,38 +22,42 @@ ResourceMesh::~ResourceMesh()
 
 void ResourceMesh::GenerateBuffers()
 {
+	//generate vertices array
 	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, (GLuint*)&(VBO));
-	glGenBuffers(1, (GLuint*)&(EBO));
-
+	
+	//generate buffers
+	glGenBuffers(1, &VBO); //vertices buffer
+	glGenBuffers(1, &EBO); //indices buffer
+	
 	glBindVertexArray(VAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * VERTEX_ATTRIBUTES * numVertices, vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); //send vertices array to the VRAM
 
-	//indices
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * numIndices, indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW); //send indices to the VRAM
 
 	//position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_ATTRIBUTES * sizeof(float), (GLvoid*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_ATTRIBUTES * sizeof(float), (GLvoid*)VERTEX_POSITION_OFFSET);
 	glEnableVertexAttribArray(0);
 
-	//color attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VERTEX_ATTRIBUTES * sizeof(float), (GLvoid*)(3 * sizeof(GLfloat)));
+	//normals attribute
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VERTEX_ATTRIBUTES * sizeof(float), (GLvoid*)(VERTEX_NORMALS_OFFSET * sizeof(GLfloat)));
 	glEnableVertexAttribArray(1);
 
 	//texcoords attribute
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, VERTEX_ATTRIBUTES * sizeof(float), (GLvoid*)(6 * sizeof(GLfloat)));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, VERTEX_ATTRIBUTES * sizeof(float), (GLvoid*)(VERTEX_TEXCOORDS_OFFSET * sizeof(GLfloat)));
 	glEnableVertexAttribArray(2);
 
-	//normals attribute
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, VERTEX_ATTRIBUTES * sizeof(float), (GLvoid*)(8 * sizeof(GLfloat)));
+	//color attribute
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, VERTEX_ATTRIBUTES * sizeof(float), (GLvoid*)(VERTEX_COLOR_OFFSET * sizeof(GLfloat)));
 	glEnableVertexAttribArray(3);
 
 	//tangents attribute
-	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, VERTEX_ATTRIBUTES * sizeof(float), (GLvoid*)(11 * sizeof(GLfloat)));
+	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, VERTEX_ATTRIBUTES * sizeof(float), (GLvoid*)(VERTEX_TANGENTS_OFFSET * sizeof(GLfloat)));
 	glEnableVertexAttribArray(4);
+
+	glBindVertexArray(0);
 }
 
 void ResourceMesh::DeleteBuffers()

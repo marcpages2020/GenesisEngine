@@ -12,7 +12,7 @@ ModuleCamera3D::ModuleCamera3D(GnEngine* app, bool start_enabled) : Module(app, 
 	Y = vec3(0.0f, 1.0f, 0.0f);
 	Z = vec3(0.0f, 0.0f, 1.0f);
 
-	Position = vec3(0.0f, 5.0f, 5.0f);
+	Position = vec3(0.0f, 0.0f, 5.0f);
 	Reference = vec3(0.0f, 0.0f, 0.0f);
 }
 

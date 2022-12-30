@@ -23,7 +23,6 @@ bool ModuleScene::Start()
 
 update_status ModuleScene::Update(float deltaTime)
 {
-	
 	for (size_t i = 0; i < resourceModel->meshesResources.size(); i++)
 	{
 		engine->renderer3D->AddMeshToRender(resourceModel->meshesResources[i]);

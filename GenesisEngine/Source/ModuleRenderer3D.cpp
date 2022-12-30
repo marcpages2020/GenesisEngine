@@ -14,10 +14,13 @@
 #include <SDL/include/SDL_opengl.h>
 
 #include "ResourceMesh.h"
+#include "ResourceShader.h"
 
 #ifndef _DEBUG
 //#include "/Libs/glfw/include/GLFW/glfw3.h"
 #endif // !_DEBUG
+#include "FileSystem.h"
+#include "Importer.h"
 
 #pragma comment (lib, "glu32.lib")      /* link OpenGL Utility lib     */
 #pragma comment (lib, "opengl32.lib")    /* link Microsoft OpenGL lib   */
@@ -69,7 +72,7 @@ void OnGlError(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei l
 }
 
 ModuleRenderer3D::ModuleRenderer3D(GnEngine* app, bool start_enabled) : Module(app, start_enabled),
-framebufferHandle(-1), bufferHandle(-1), uniformBufferAlignment(-1),
+framebufferHandle(-1), renderbufferHandle(-1), bufferHandle(-1), uniformBufferAlignment(-1), defaultShader(nullptr),
 albedoAttachmentHandle(-1), normalsAttachmentHandle(-1), positionAttachmentHandle(-1), depthAttachmentHandle(-1),
 metallicAttachmentHandle(-1), roughnessAttachmentHandle(-1), finalRenderAttachmentHandle(-1)
 {
@@ -110,6 +113,13 @@ bool ModuleRenderer3D::Init()
 		OnResize(engine->window->GetWidht(), engine->window->GetHeight());
 	}
 
+	//Default Shader
+	char* buffer;
+	uint fileSize = FileSystem::Load("Assets/Shaders/default_shader.glsl", &buffer);
+
+	defaultShader = new ResourceShader(0);
+	Importer::ImportShader(buffer, defaultShader);
+
 	return ret;
 }
 
@@ -130,17 +140,6 @@ bool ModuleRenderer3D::InitOpenGL()
 			LOG_WARNING("Warning: Unable to set VSync! SDL Error: %s\n", SDL_GetError());
 		}
 
-		//Initialize Projection Matrix
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		//TODO: Get camera projection matrix
-
-		//Initialize Modelview Matrix
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-		//TODO: Get camera view matrix
-
-
 		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 		glClearDepth(1.0f);
 
@@ -148,7 +147,7 @@ bool ModuleRenderer3D::InitOpenGL()
 		glClearColor(0.0f, 0.0f, 0.0f, 1.f);
 
 		GLfloat LightModelAmbient[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-		glLightModelfv(GL_LIGHT_MODEL_AMBIENT, LightModelAmbient);
+		//glLightModelfv(GL_LIGHT_MODEL_AMBIENT, LightModelAmbient);
 
 		lights[0].ref = GL_LIGHT0;
 		lights[0].ambient.Set(0.25f, 0.25f, 0.25f, 1.0f);
@@ -157,10 +156,10 @@ bool ModuleRenderer3D::InitOpenGL()
 		lights[0].Init();
 
 		GLfloat MaterialAmbient[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, MaterialAmbient);
+		//glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, MaterialAmbient);
 
 		GLfloat MaterialDiffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, MaterialDiffuse);
+		//glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, MaterialDiffuse);
 
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -185,10 +184,23 @@ bool ModuleRenderer3D::InitOpenGL()
 		glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &maxUniformBufferSize);
 		glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &uniformBufferAlignment);
 
+		//Buffer
 		glGenBuffers(1, &bufferHandle);
 		glBindBuffer(GL_UNIFORM_BUFFER, bufferHandle);
 		glBufferData(GL_UNIFORM_BUFFER, maxUniformBufferSize, NULL, GL_STREAM_DRAW);
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+		//Renderbuffer
+		glGenRenderbuffers(1, &renderbufferHandle);
+		glBindRenderbuffer(GL_RENDERBUFFER, renderbufferHandle);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, engine->window->GetWidht(), engine->window->GetHeight());
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderbufferHandle);
+
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+			LOG_ERROR("Famebuffer is not complete");
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 	return ret;
@@ -211,9 +223,8 @@ update_status ModuleRenderer3D::PreUpdate(float deltaTime)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//glLoadIdentity();
-	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf(engine->camera->GetViewMatrix());
-
+	//glMatrixMode(GL_MODELVIEW);
+	//glLoadMatrixf(engine->camera->GetViewMatrix());
 
 	// light 0 on cam pos
 	lights[0].SetPos(engine->camera->Position.x, engine->camera->Position.y, engine->camera->Position.z);
@@ -227,22 +238,27 @@ update_status ModuleRenderer3D::PreUpdate(float deltaTime)
 // PostUpdate present buffer to screen
 update_status ModuleRenderer3D::PostUpdate(float deltaTime)
 {
-	//Render on this framebuffer render targets
+	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Level Draw");
 
 	//Level Draw
-	glBegin(GL_LINES);
-
+	glUseProgram(defaultShader->GetHandle());
 	for (size_t i = 0; i < meshesToRender.size(); i++)
 	{
-		meshesToRender[i]->VAO;
+		glBindVertexArray(meshesToRender[i]->VAO);
 		glDrawElements(GL_TRIANGLES, meshesToRender[i]->numIndices, GL_UNSIGNED_INT, NULL);
+		glBindVertexArray(0);
 	}
+	glUseProgram(0);
+
+	glPopDebugGroup();
 
 	//Debug Draw
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Editor Draw");
 	engine->editor->Draw();
+	glPopDebugGroup();
 
 	SDL_GL_SwapWindow(engine->window->window);
 
@@ -263,7 +279,12 @@ bool ModuleRenderer3D::CleanUp()
 
 void ModuleRenderer3D::OnResize(int width, int height)
 {
-	//glViewport(0, 0, width, height);
+	glViewport(0, 0, width, height);
+
+	//glMatrixMode(GL_PROJECTION);
+	//glLoadIdentity();
+	ProjectionMatrix = perspective(60.0f, (float)width / (float)height, 0.125f, 512.0f);
+	//glLoadMatrixf(&ProjectionMatrix);
 
 	vec2 displaySize(width, height);
 
@@ -279,6 +300,7 @@ void ModuleRenderer3D::OnResize(int width, int height)
 
 	glGenFramebuffers(1, &framebufferHandle);
 	glBindFramebuffer(GL_FRAMEBUFFER, framebufferHandle);
+
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, albedoAttachmentHandle, 0);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, normalsAttachmentHandle, 0);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, positionAttachmentHandle, 0);
@@ -309,43 +331,36 @@ void ModuleRenderer3D::OnResize(int width, int height)
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	/*CreateIrradianceMap(app);
-	CreatePrefilterMap(app);
-	CreateBRDF(app)*/;
-
-	ProjectionMatrix = perspective(60.0f, (float)width / (float)height, 0.125f, 512.0f);
-	glLoadMatrixf(&ProjectionMatrix);
 }
 
-GLint ModuleRenderer3D::GetAlbedoAttachmentHandle() const 
+GLint ModuleRenderer3D::GetAlbedoAttachmentHandle() const
 {
-	return albedoAttachmentHandle; 
+	return albedoAttachmentHandle;
 }
 
 GLint ModuleRenderer3D::GetNormalsAttachmentHandle() const
 {
-	return normalsAttachmentHandle; 
+	return normalsAttachmentHandle;
 }
 
-GLint ModuleRenderer3D::GetPositionAttachmentHandle() const 
-{ 
-	return positionAttachmentHandle; 
-}
-
-GLint ModuleRenderer3D::GetDepthAttachmentHandle() const 
-{ 
-	return depthAttachmentHandle; 
-}
-
-GLint ModuleRenderer3D::GetMetallicAttachmentHandle() const 
+GLint ModuleRenderer3D::GetPositionAttachmentHandle() const
 {
-	return metallicAttachmentHandle; 
+	return positionAttachmentHandle;
 }
 
-GLint ModuleRenderer3D::GetFinalRenderAttachmentHandle() const 
-{ 
-	return finalRenderAttachmentHandle; 
+GLint ModuleRenderer3D::GetDepthAttachmentHandle() const
+{
+	return depthAttachmentHandle;
+}
+
+GLint ModuleRenderer3D::GetMetallicAttachmentHandle() const
+{
+	return metallicAttachmentHandle;
+}
+
+GLint ModuleRenderer3D::GetFinalRenderAttachmentHandle() const
+{
+	return finalRenderAttachmentHandle;
 }
 
 void ModuleRenderer3D::GenerateColorTexture(GLuint& colorAttachmentHandle, vec2 displaySize, GLint internalFormat)

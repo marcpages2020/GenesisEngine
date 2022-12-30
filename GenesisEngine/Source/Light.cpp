@@ -8,8 +8,8 @@ Light::Light() : ref(-1), on(false), position(0.0f, 0.0f, 0.0f)
 
 void Light::Init()
 {
-	glLightfv(ref, GL_AMBIENT, &ambient);
-	glLightfv(ref, GL_DIFFUSE, &diffuse);
+	//glLightfv(ref, GL_AMBIENT, &ambient);
+	//glLightfv(ref, GL_DIFFUSE, &diffuse);
 }
 
 void Light::SetPos(float x, float y, float z)
@@ -24,7 +24,7 @@ void Light::Render()
 	if(on)
 	{
 		float pos[] = {position.x, position.y, position.z, 1.0f};
-		glLightfv(ref, GL_POSITION, pos);
+		//glLightfv(ref, GL_POSITION, pos);
 	}
 }
 
