@@ -367,6 +367,20 @@ void GameObject::UpdateChildrenTransforms()
 	}
 }
 
+void GameObject::GetMaxExtension(float& maxExtension)
+{
+	float myMaxExtension = _AABB.maxPoint.Length();
+	if (myMaxExtension > maxExtension) 
+	{
+		maxExtension = myMaxExtension;
+	}
+
+	for (size_t i = 0; i < children.size(); ++i)
+	{
+		children[i]->GetMaxExtension(maxExtension);
+	}
+}
+
 void GameObject::GenerateAABB(GnMesh* mesh)
 {
 	if (mesh->GetResource(ResourceType::RESOURCE_MESH) == nullptr)

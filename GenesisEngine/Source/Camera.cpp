@@ -215,6 +215,8 @@ void Camera::LookAt(float3 spot)
 
 	_frustum.front = matrix.MulDir(_frustum.front).Normalized();
 	_frustum.up = matrix.MulDir(_frustum.up).Normalized();
+
+	_reference = spot;
 }
 
 Frustum Camera::GetFrustum()
@@ -270,4 +272,19 @@ bool Camera::ContainsAABB(AABB& aabb)
 
 	//Partially inside camera view
 	return true;
+}
+
+float3 Camera::GetUp()
+{
+	return _frustum.up;
+}
+
+float3 Camera::GetRight()
+{
+	return _frustum.up.Cross(_frustum.front);
+}
+
+float3 Camera::GetForward()
+{
+	return _frustum.front;
 }

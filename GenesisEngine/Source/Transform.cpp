@@ -189,7 +189,6 @@ float3 Transform::GetPosition()
 	return _position;
 }
 
-
 //Set rotation from Euler angles
 void Transform::SetRotation(float x, float y, float z)
 {

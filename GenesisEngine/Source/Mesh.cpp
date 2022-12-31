@@ -15,7 +15,10 @@
 
 // GnMesh =========================================================================================================================
 
-GnMesh::GnMesh() : Component(), draw_face_normals(false), draw_vertex_normals(false), name("No name"), _resource(nullptr), blend(false)
+GnMesh::GnMesh() : Component(), 
+name("No name"), path("No path"),
+draw_face_normals(false), draw_vertex_normals(false), 
+_resource(nullptr), blend(false)
 {
 	type = ComponentType::MESH;
 }

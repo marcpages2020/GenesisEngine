@@ -1,7 +1,7 @@
 {
     "Game Objects": [
         {
-            "UUID": 1976481154,
+            "UUID": 848057667,
             "Parent UUID": 0,
             "Name": "Root",
             "Components": [
@@ -27,8 +27,8 @@
             ]
         },
         {
-            "UUID": 775398913,
-            "Parent UUID": 1976481154,
+            "UUID": 1658061441,
+            "Parent UUID": 848057667,
             "Name": "street environment_v01",
             "Components": [
                 {
@@ -53,8 +53,8 @@
             ]
         },
         {
-            "UUID": 791550985,
-            "Parent UUID": 775398913,
+            "UUID": 1672542609,
+            "Parent UUID": 1658061441,
             "Name": "Sky001",
             "Components": [
                 {
@@ -98,8 +98,8 @@
             ]
         },
         {
-            "UUID": 805753669,
-            "Parent UUID": 775398913,
+            "UUID": 1684308558,
+            "Parent UUID": 1658061441,
             "Name": "Dummy001",
             "Components": [
                 {
@@ -124,8 +124,8 @@
             ]
         },
         {
-            "UUID": 814456294,
-            "Parent UUID": 805753669,
+            "UUID": 1690365585,
+            "Parent UUID": 1684308558,
             "Name": "City_building_004",
             "Components": [
                 {
@@ -149,19 +149,19 @@
                 },
                 {
                     "Type": 1,
-                    "MeshID": 223686301,
+                    "MeshID": 1751617648,
                     "blend": false
                 },
                 {
                     "Type": 2,
-                    "MaterialID": 176839557,
-                    "ShaderID": 1766692415
+                    "MaterialID": 1259014444,
+                    "ShaderID": 1847299204
                 }
             ]
         },
         {
-            "UUID": 825038686,
-            "Parent UUID": 805753669,
+            "UUID": 1698720105,
+            "Parent UUID": 1684308558,
             "Name": "City_building_001",
             "Components": [
                 {
@@ -185,19 +185,19 @@
                 },
                 {
                     "Type": 1,
-                    "MeshID": 1101535405,
+                    "MeshID": 112639530,
                     "blend": false
                 },
                 {
                     "Type": 2,
-                    "MaterialID": 2135320803,
-                    "ShaderID": 1766692415
+                    "MaterialID": 1525382154,
+                    "ShaderID": 1847299204
                 }
             ]
         },
         {
-            "UUID": 836943877,
-            "Parent UUID": 805753669,
+            "UUID": 1707840456,
+            "Parent UUID": 1684308558,
             "Name": "City_building_007",
             "Components": [
                 {
@@ -221,25 +221,25 @@
                 },
                 {
                     "Type": 1,
-                    "MeshID": 1133698222,
+                    "MeshID": 413280655,
                     "blend": false
                 },
                 {
                     "Type": 2,
-                    "MaterialID": 1218247004,
-                    "ShaderID": 1766692415
+                    "MaterialID": 1735446358,
+                    "ShaderID": 1847299204
                 }
             ]
         },
         {
-            "UUID": 841956589,
-            "Parent UUID": 805753669,
+            "UUID": 1711808853,
+            "Parent UUID": 1684308558,
             "Name": "City_building_008",
             "Components": [
                 {
                     "Type": 0,
                     "Position": [
-                        40.979995727539063,
+                        40.979995727539062,
                         18.270824432373047,
                         -2.0522466002148576e-06
                     ],
@@ -257,19 +257,19 @@
                 },
                 {
                     "Type": 1,
-                    "MeshID": 536904925,
+                    "MeshID": 572058084,
                     "blend": false
                 },
                 {
                     "Type": 2,
-                    "MaterialID": 1080761091,
-                    "ShaderID": 1766692415
+                    "MaterialID": 1779636928,
+                    "ShaderID": 1847299204
                 }
             ]
         },
         {
-            "UUID": 856159273,
-            "Parent UUID": 805753669,
+            "UUID": 1721903898,
+            "Parent UUID": 1684308558,
             "Name": "Line002",
             "Components": [
                 {
@@ -293,19 +293,19 @@
                 },
                 {
                     "Type": 1,
-                    "MeshID": 1149837784,
+                    "MeshID": 232556898,
                     "blend": false
                 },
                 {
                     "Type": 2,
-                    "MaterialID": 443094012,
-                    "ShaderID": 1766692415
+                    "MaterialID": 1751282416,
+                    "ShaderID": 1847299204
                 }
             ]
         },
         {
-            "UUID": 859779565,
-            "Parent UUID": 805753669,
+            "UUID": 1724549496,
+            "Parent UUID": 1684308558,
             "Name": "Plane001",
             "Components": [
                 {
@@ -329,19 +329,19 @@
                 },
                 {
                     "Type": 1,
-                    "MeshID": 117425890,
+                    "MeshID": 1027528940,
                     "blend": false
                 },
                 {
                     "Type": 2,
-                    "MaterialID": 1317322824,
-                    "ShaderID": 1766692415
+                    "MaterialID": 2121196436,
+                    "ShaderID": 1847299204
                 }
             ]
         },
         {
-            "UUID": 864026446,
-            "Parent UUID": 805753669,
+            "UUID": 1727612820,
+            "Parent UUID": 1684308558,
             "Name": "City_building_010",
             "Components": [
                 {
@@ -365,19 +365,19 @@
                 },
                 {
                     "Type": 1,
-                    "MeshID": 1378435769,
+                    "MeshID": 854016879,
                     "blend": false
                 },
                 {
                     "Type": 2,
-                    "MaterialID": 38916035,
-                    "ShaderID": 1766692415
+                    "MaterialID": 1872891538,
+                    "ShaderID": 1847299204
                 }
             ]
         },
         {
-            "UUID": 881919043,
-            "Parent UUID": 805753669,
+            "UUID": 1740980052,
+            "Parent UUID": 1684308558,
             "Name": "City_building_011",
             "Components": [
                 {
@@ -401,19 +401,19 @@
                 },
                 {
                     "Type": 1,
-                    "MeshID": 1133698222,
+                    "MeshID": 413280655,
                     "blend": false
                 },
                 {
                     "Type": 2,
-                    "MaterialID": 1218247004,
-                    "ShaderID": 1766692415
+                    "MaterialID": 1735446358,
+                    "ShaderID": 1847299204
                 }
             ]
         },
         {
-            "UUID": 886722892,
-            "Parent UUID": 805753669,
+            "UUID": 1744600344,
+            "Parent UUID": 1684308558,
             "Name": "City_building_013",
             "Components": [
                 {
@@ -437,19 +437,19 @@
                 },
                 {
                     "Type": 1,
-                    "MeshID": 1893626999,
+                    "MeshID": 140019197,
                     "blend": false
                 },
                 {
                     "Type": 2,
-                    "MaterialID": 915789327,
-                    "ShaderID": 1766692415
+                    "MaterialID": 243455516,
+                    "ShaderID": 1847299204
                 }
             ]
         },
         {
-            "UUID": 891596362,
-            "Parent UUID": 805753669,
+            "UUID": 1748290257,
+            "Parent UUID": 1684308558,
             "Name": "City_building_014",
             "Components": [
                 {
@@ -473,19 +473,19 @@
                 },
                 {
                     "Type": 1,
-                    "MeshID": 1258535897,
+                    "MeshID": 927127118,
                     "blend": false
                 },
                 {
                     "Type": 2,
-                    "MaterialID": 176839557,
-                    "ShaderID": 1766692415
+                    "MaterialID": 1259014444,
+                    "ShaderID": 1847299204
                 }
             ]
         },
         {
-            "UUID": 896609074,
-            "Parent UUID": 805753669,
+            "UUID": 1751840928,
+            "Parent UUID": 1684308558,
             "Name": "City_building_016",
             "Components": [
                 {
@@ -509,19 +509,19 @@
                 },
                 {
                     "Type": 1,
-                    "MeshID": 1378435769,
+                    "MeshID": 854016879,
                     "blend": false
                 },
                 {
                     "Type": 2,
-                    "MaterialID": 38916035,
-                    "ShaderID": 1766692415
+                    "MaterialID": 1872891538,
+                    "ShaderID": 1847299204
                 }
             ]
         },
         {
-            "UUID": 920001730,
-            "Parent UUID": 805753669,
+            "UUID": 1768689210,
+            "Parent UUID": 1684308558,
             "Name": "City_building_017",
             "Components": [
                 {
@@ -545,19 +545,19 @@
                 },
                 {
                     "Type": 1,
-                    "MeshID": 1378435769,
+                    "MeshID": 854016879,
                     "blend": false
                 },
                 {
                     "Type": 2,
-                    "MaterialID": 38916035,
-                    "ShaderID": 1766692415
+                    "MaterialID": 1872891538,
+                    "ShaderID": 1847299204
                 }
             ]
         },
         {
-            "UUID": 924875200,
-            "Parent UUID": 805753669,
+            "UUID": 1772170260,
+            "Parent UUID": 1684308558,
             "Name": "City_building_022",
             "Components": [
                 {
@@ -581,19 +581,19 @@
                 },
                 {
                     "Type": 1,
-                    "MeshID": 1734950315,
+                    "MeshID": 1408108450,
                     "blend": false
                 },
                 {
                     "Type": 2,
-                    "MaterialID": 90522692,
-                    "ShaderID": 1766692415
+                    "MaterialID": 1977053559,
+                    "ShaderID": 1847299204
                 }
             ]
         },
         {
-            "UUID": 929818291,
-            "Parent UUID": 805753669,
+            "UUID": 1775790552,
+            "Parent UUID": 1684308558,
             "Name": "City_building_023",
             "Components": [
                 {
@@ -617,19 +617,19 @@
                 },
                 {
                     "Type": 1,
-                    "MeshID": 1133698222,
+                    "MeshID": 413280655,
                     "blend": false
                 },
                 {
                     "Type": 2,
-                    "MaterialID": 1218247004,
-                    "ShaderID": 1766692415
+                    "MaterialID": 1735446358,
+                    "ShaderID": 1847299204
                 }
             ]
         },
         {
-            "UUID": 934622140,
-            "Parent UUID": 805753669,
+            "UUID": 1779271602,
+            "Parent UUID": 1684308558,
             "Name": "City_building_024",
             "Components": [
                 {
@@ -653,19 +653,19 @@
                 },
                 {
                     "Type": 1,
-                    "MeshID": 536904925,
+                    "MeshID": 572058084,
                     "blend": false
                 },
                 {
                     "Type": 2,
-                    "MaterialID": 1080761091,
-                    "ShaderID": 1766692415
+                    "MaterialID": 1779636928,
+                    "ShaderID": 1847299204
                 }
             ]
         },
         {
-            "UUID": 939425989,
-            "Parent UUID": 805753669,
+            "UUID": 1782752652,
+            "Parent UUID": 1684308558,
             "Name": "City_building_026",
             "Components": [
                 {
@@ -689,19 +689,19 @@
                 },
                 {
                     "Type": 1,
-                    "MeshID": 2017191764,
+                    "MeshID": 26007920,
                     "blend": false
                 },
                 {
                     "Type": 2,
-                    "MaterialID": 90522692,
-                    "ShaderID": 1766692415
+                    "MaterialID": 1977053559,
+                    "ShaderID": 1847299204
                 }
             ]
         },
         {
-            "UUID": 944369080,
-            "Parent UUID": 805753669,
+            "UUID": 1786303323,
+            "Parent UUID": 1684308558,
             "Name": "City_building_028",
             "Components": [
                 {
@@ -725,19 +725,19 @@
                 },
                 {
                     "Type": 1,
-                    "MeshID": 627334264,
+                    "MeshID": 2051413863,
                     "blend": false
                 },
                 {
                     "Type": 2,
-                    "MaterialID": 999908991,
-                    "ShaderID": 1766692415
+                    "MaterialID": 619592457,
+                    "ShaderID": 1847299204
                 }
             ]
         },
         {
-            "UUID": 975002320,
-            "Parent UUID": 805753669,
+            "UUID": 1807816212,
+            "Parent UUID": 1684308558,
             "Name": "Object010",
             "Components": [
                 {
@@ -761,19 +761,19 @@
                 },
                 {
                     "Type": 1,
-                    "MeshID": 224981995,
+                    "MeshID": 1463955884,
                     "blend": false
                 },
                 {
                     "Type": 2,
-                    "MaterialID": 1146783314,
-                    "ShaderID": 1766692415
+                    "MaterialID": 773750998,
+                    "ShaderID": 1847299204
                 }
             ]
         },
         {
-            "UUID": 979179580,
-            "Parent UUID": 805753669,
+            "UUID": 1810949157,
+            "Parent UUID": 1684308558,
             "Name": "City_building_030",
             "Components": [
                 {
@@ -797,19 +797,19 @@
                 },
                 {
                     "Type": 1,
-                    "MeshID": 627334264,
+                    "MeshID": 2051413863,
                     "blend": false
                 },
                 {
                     "Type": 2,
-                    "MaterialID": 999908991,
-                    "ShaderID": 1766692415
+                    "MaterialID": 619592457,
+                    "ShaderID": 1847299204
                 }
             ]
         },
         {
-            "UUID": 983983429,
-            "Parent UUID": 805753669,
+            "UUID": 1814430207,
+            "Parent UUID": 1684308558,
             "Name": "City_building_031",
             "Components": [
                 {
@@ -833,19 +833,19 @@
                 },
                 {
                     "Type": 1,
-                    "MeshID": 627334264,
+                    "MeshID": 2051413863,
                     "blend": false
                 },
                 {
                     "Type": 2,
-                    "MaterialID": 999908991,
-                    "ShaderID": 1766692415
+                    "MaterialID": 619592457,
+                    "ShaderID": 1847299204
                 }
             ]
         },
         {
-            "UUID": 988787278,
-            "Parent UUID": 805753669,
+            "UUID": 1817911257,
+            "Parent UUID": 1684308558,
             "Name": "City_building_032",
             "Components": [
                 {
@@ -869,19 +869,19 @@
                 },
                 {
                     "Type": 1,
-                    "MeshID": 223686301,
+                    "MeshID": 1751617648,
                     "blend": false
                 },
                 {
                     "Type": 2,
-                    "MaterialID": 176839557,
-                    "ShaderID": 1766692415
+                    "MaterialID": 1259014444,
+                    "ShaderID": 1847299204
                 }
             ]
         },
         {
-            "UUID": 993799990,
-            "Parent UUID": 805753669,
+            "UUID": 1821461928,
+            "Parent UUID": 1684308558,
             "Name": "City_building_033",
             "Components": [
                 {
@@ -905,19 +905,19 @@
                 },
                 {
                     "Type": 1,
-                    "MeshID": 1674025685,
+                    "MeshID": 1123411501,
                     "blend": false
                 },
                 {
                     "Type": 2,
-                    "MaterialID": 915789327,
-                    "ShaderID": 1766692415
+                    "MaterialID": 243455516,
+                    "ShaderID": 1847299204
                 }
             ]
         },
         {
-            "UUID": 998673460,
-            "Parent UUID": 805753669,
+            "UUID": 1825012599,
+            "Parent UUID": 1684308558,
             "Name": "City_building_034",
             "Components": [
                 {
@@ -941,19 +941,19 @@
                 },
                 {
                     "Type": 1,
-                    "MeshID": 1740603093,
+                    "MeshID": 1614931591,
                     "blend": false
                 },
                 {
                     "Type": 2,
-                    "MaterialID": 90522692,
-                    "ShaderID": 1766692415
+                    "MaterialID": 1977053559,
+                    "ShaderID": 1847299204
                 }
             ]
         },
         {
-            "UUID": 1004173519,
-            "Parent UUID": 805753669,
+            "UUID": 1828563270,
+            "Parent UUID": 1684308558,
             "Name": "City_building_035",
             "Components": [
                 {
@@ -977,19 +977,19 @@
                 },
                 {
                     "Type": 1,
-                    "MeshID": 627334264,
+                    "MeshID": 2051413863,
                     "blend": false
                 },
                 {
                     "Type": 2,
-                    "MaterialID": 999908991,
-                    "ShaderID": 1766692415
+                    "MaterialID": 619592457,
+                    "ShaderID": 1847299204
                 }
             ]
         },
         {
-            "UUID": 1009255852,
-            "Parent UUID": 805753669,
+            "UUID": 1832113941,
+            "Parent UUID": 1684308558,
             "Name": "City_building_036",
             "Components": [
                 {
@@ -1013,19 +1013,19 @@
                 },
                 {
                     "Type": 1,
-                    "MeshID": 1893626999,
+                    "MeshID": 140019197,
                     "blend": false
                 },
                 {
                     "Type": 2,
-                    "MaterialID": 915789327,
-                    "ShaderID": 1766692415
+                    "MaterialID": 243455516,
+                    "ShaderID": 1847299204
                 }
             ]
         },
         {
-            "UUID": 1016148331,
-            "Parent UUID": 805753669,
+            "UUID": 1835803854,
+            "Parent UUID": 1684308558,
             "Name": "City_building_037",
             "Components": [
                 {
@@ -1049,25 +1049,25 @@
                 },
                 {
                     "Type": 1,
-                    "MeshID": 1296627891,
+                    "MeshID": 116287592,
                     "blend": false
                 },
                 {
                     "Type": 2,
-                    "MaterialID": 90522692,
-                    "ShaderID": 1766692415
+                    "MaterialID": 1977053559,
+                    "ShaderID": 1847299204
                 }
             ]
         },
         {
-            "UUID": 1058408278,
-            "Parent UUID": 805753669,
+            "UUID": 1866576336,
+            "Parent UUID": 1684308558,
             "Name": "City_building_038",
             "Components": [
                 {
                     "Type": 0,
                     "Position": [
-                        -41.649002075195313,
+                        -41.649002075195312,
                         -16.495393753051758,
                         0
                     ],
@@ -1085,19 +1085,19 @@
                 },
                 {
                     "Type": 1,
-                    "MeshID": 590390382,
+                    "MeshID": 1659084782,
                     "blend": false
                 },
                 {
                     "Type": 2,
-                    "MaterialID": 90522692,
-                    "ShaderID": 1766692415
+                    "MaterialID": 1977053559,
+                    "ShaderID": 1847299204
                 }
             ]
         },
         {
-            "UUID": 1063212127,
-            "Parent UUID": 805753669,
+            "UUID": 1870266249,
+            "Parent UUID": 1684308558,
             "Name": "City_building_039",
             "Components": [
                 {
@@ -1121,19 +1121,19 @@
                 },
                 {
                     "Type": 1,
-                    "MeshID": 627334264,
+                    "MeshID": 2051413863,
                     "blend": false
                 },
                 {
                     "Type": 2,
-                    "MaterialID": 999908991,
-                    "ShaderID": 1766692415
+                    "MaterialID": 619592457,
+                    "ShaderID": 1847299204
                 }
             ]
         },
         {
-            "UUID": 1067876734,
-            "Parent UUID": 805753669,
+            "UUID": 1873886541,
+            "Parent UUID": 1684308558,
             "Name": "City_building_040",
             "Components": [
                 {
@@ -1157,19 +1157,19 @@
                 },
                 {
                     "Type": 1,
-                    "MeshID": 627334264,
+                    "MeshID": 2051413863,
                     "blend": false
                 },
                 {
                     "Type": 2,
-                    "MaterialID": 999908991,
-                    "ShaderID": 1766692415
+                    "MaterialID": 619592457,
+                    "ShaderID": 1847299204
                 }
             ]
         },
         {
-            "UUID": 1072680583,
-            "Parent UUID": 805753669,
+            "UUID": 1877297970,
+            "Parent UUID": 1684308558,
             "Name": "City_building_041",
             "Components": [
                 {
@@ -1193,19 +1193,19 @@
                 },
                 {
                     "Type": 1,
-                    "MeshID": 1101535405,
+                    "MeshID": 112639530,
                     "blend": false
                 },
                 {
                     "Type": 2,
-                    "MaterialID": 2135320803,
-                    "ShaderID": 1766692415
+                    "MaterialID": 1525382154,
+                    "ShaderID": 1847299204
                 }
             ]
         },
         {
-            "UUID": 1086883267,
-            "Parent UUID": 775398913,
+            "UUID": 1887949983,
+            "Parent UUID": 1658061441,
             "Name": "Camera001",
             "Components": [
                 {
@@ -1260,14 +1260,14 @@
             ]
         },
         {
-            "UUID": 1126636858,
-            "Parent UUID": 775398913,
+            "UUID": 1932159318,
+            "Parent UUID": 1658061441,
             "Name": "Spot001",
             "Components": [
                 {
                     "Type": 0,
                     "Position": [
-                        -66.721267700195313,
+                        -66.721267700195312,
                         141.93412780761719,
                         6.2041376622801181e-06
                     ],
@@ -1305,8 +1305,8 @@
             ]
         },
         {
-            "UUID": 479128679,
-            "Parent UUID": 1976481154,
+            "UUID": 825748639,
+            "Parent UUID": 848057667,
             "Name": "Main Camera",
             "Components": [
                 {

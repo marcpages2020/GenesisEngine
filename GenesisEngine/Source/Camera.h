@@ -40,6 +40,9 @@ public:
 	float* GetViewMatrix();
 	float* GetProjectionMatrix();
 	bool ContainsAABB(AABB& aabb);
+	float3 GetUp();
+	float3 GetRight();
+	float3 GetForward();
 	//virtual void Enable() override;
 	//virtual void Disable() override;
 

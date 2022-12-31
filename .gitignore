@@ -351,3 +351,4 @@ MigrationBackup/
 
 GenesisEngine/Engine/Library/*
 GenesisEngine/Engine/imgui.ini
+GenesisEngine/Engine/Assets/Scenes/tmp.scene

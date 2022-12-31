@@ -24,10 +24,12 @@ public:
 	void Update();
 	void OnEditor();
 
+	//Save/Load functions
 	void Save(GnJSONArray& save_array);
 	uint Load(GnJSONObj* object);
 	uint LoadNodeData(GnJSONObj* object);
 
+	//Base Component functions
 	Component* GetComponent(ComponentType component);
 	std::vector<Component*> GetComponents();
 	Component* AddComponent(ComponentType type);
@@ -41,16 +43,20 @@ public:
 	AABB GetAABB();
 	bool IsVisible();
 
+	//Parenting functions
 	GameObject* GetParent();
 	void SetParent(GameObject* parent);
 	void Reparent(GameObject* newParent);
 
+	//Child functions
 	void AddChild(GameObject* child);
 	int GetChildrenAmount();
 	GameObject* GetChildAt(int index);
 	bool RemoveChild(GameObject* gameObject);
 	void DeleteChildren();
 	void UpdateChildrenTransforms();
+
+	void GetMaxExtension(float& maxExtension);
 
 public: 
 	bool to_delete;

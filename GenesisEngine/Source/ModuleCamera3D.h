@@ -22,7 +22,10 @@ public:
 
 	bool LoadConfig(GnJSONObj& config) override;
 
-	void Look(float3& position);
+	void SetPosition(float3 newPosition);
+	void SetReference(float3 newReference);
+	float3 GetReference();
+	void FocusOnGameObject(GameObject* gameObjectToFocus);
 	void LookAt(const float3& Spot);
 	Camera* GetCamera();
 	float* GetViewMatrix();
@@ -60,5 +63,5 @@ private:
 	float3 X, Y, Z;
 	Camera* _camera;
 	float3 _position;
-	float3 _reference;
+	//float3 _reference;
 };
