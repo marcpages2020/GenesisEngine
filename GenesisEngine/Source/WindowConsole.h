@@ -6,9 +6,14 @@
 
 #include "EditorWindow.h"
 
-struct log_message {
-	std::string log_text;
-	int warning_level;
+enum class LogType;
+
+struct LogMessage 
+{
+	LogMessage(LogType type, std::string messageText);
+
+	LogType logType;
+	std::string message;
 };
 
 class WindowConsole : public EditorWindow {
@@ -16,14 +21,10 @@ public:
 	WindowConsole();
 	~WindowConsole();
 	void Draw() override;
-	void AddConsoleLog(const char* log, int warning_level);
+	void AddConsoleLog(LogType logType, const char* log);
 
 private:
-	void FilterLog();
-
-private:
-	std::vector<log_message> console_log;
-	std::vector<log_message> visible_log;
+	std::vector<LogMessage> consoleLog;
 	bool show_normal_log;
 	bool show_warnings;
 	bool show_errors;

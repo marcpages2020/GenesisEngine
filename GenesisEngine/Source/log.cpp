@@ -3,7 +3,7 @@
 #include "Application.h"
 #include "WindowConsole.h"
 
-void log(int warning_level, const char file[], int line, const char* format, ...)
+void log(LogType logType, const char file[], int line, const char* format, ...)
 {
 	static char tmp_string[4096];
 	static char tmp_string2[4096];
@@ -21,7 +21,7 @@ void log(int warning_level, const char file[], int line, const char* format, ...
 		WindowConsole* console = (WindowConsole*)App->editor->GetWindow(WINDOW_CONSOLE);
 		if (console != nullptr)
 		{
-			console->AddConsoleLog(tmp_string, warning_level);
+			console->AddConsoleLog(logType, tmp_string);
 		}
 	}
 }
