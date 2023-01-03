@@ -1,5 +1,5 @@
 #include "Globals.h"
-#include "Application.h"
+#include "Engine.h"
 #include "ModuleWindow.h"
 #include "GnJSON.h"
 
@@ -68,7 +68,7 @@ bool ModuleWindow::Init()
 
 		static char title[2048] = { 0 };
 		memset(title, 0, sizeof(title));
-		sprintf_s(title, "%s v%s", App->engine_name, App->engine_version);
+		sprintf_s(title, "%s v%s", engine->engine_name, engine->engine_version);
 
 		window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, flags);
 

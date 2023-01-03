@@ -15,7 +15,7 @@ public:
 
 	bool Init();
 	bool Start();
-	update_status Update(float dt);
+	update_status Update(float deltaTime);
 	bool CleanUp();
 
 	void OnResize(int width, int height);
@@ -47,7 +47,7 @@ public:
 
 private:
 	void Move(const float3& Movement);
-	void Orbit(float dt);
+	void Orbit(float deltaTime);
 
 public:
 	Color background;

@@ -18,7 +18,7 @@ public:
 	bool Start();
 	void SetDemo();
 	bool LoadConfig(GnJSONObj& config) override;
-	update_status Update(float dt);
+	update_status Update(float deltaTime);
 	void HandleInput();
 	bool CleanUp();
 

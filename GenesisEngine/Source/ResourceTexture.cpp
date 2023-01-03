@@ -1,7 +1,7 @@
 #include "ResourceTexture.h"
 #include "GnJSON.h"
 #include "glew/include/glew.h"
-#include "Application.h"
+#include "Engine.h"
 
 ResourceTexture::ResourceTexture(uint UID) : Resource(UID, ResourceType::RESOURCE_TEXTURE),
 _id(0), _width(-1), _height(-1), _data(nullptr) , _gpu_ID(0), type(TextureType::UNKNOWN_MAP)
@@ -51,10 +51,10 @@ uint ResourceTexture::SaveMeta(GnJSONObj& base_object, uint last_modification)
 	TextureWrap textureWrap = TextureWrap::REPEAT;
 	TextureFiltering textureFiltering = TextureFiltering::NEAREST;
 	
-	TextureImportingOptions importingOptions = App->resources->textureImportingOptions;
+	TextureImportingOptions importingOptions = engine->resources->textureImportingOptions;
 
-	base_object.AddInt("texture_wrap", (int)App->resources->textureImportingOptions.textureWrap);
-	base_object.AddInt("texture_filtering", (int)App->resources->textureImportingOptions.textureFiltering);
+	base_object.AddInt("texture_wrap", (int)engine->resources->textureImportingOptions.textureWrap);
+	base_object.AddInt("texture_filtering", (int)engine->resources->textureImportingOptions.textureFiltering);
 	base_object.AddBool("flip", importingOptions.flip);
 	base_object.AddBool("alienify", importingOptions.alienify);
 	base_object.AddBool("blur_average", importingOptions.blur_average);

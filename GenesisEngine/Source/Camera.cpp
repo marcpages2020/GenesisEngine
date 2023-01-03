@@ -1,7 +1,7 @@
 #include "Camera.h"
 #include "GameObject.h"
 #include "Transform.h"
-#include "Application.h"
+#include "Engine.h"
 #include "ModuleRenderer3D.h"
 #include "ImGui/imgui.h"
 #include "GnJSON.h"
@@ -50,7 +50,7 @@ void Camera::Update()
 
 	float3 corner_points[8];
 	_frustum.GetCornerPoints(corner_points);
-	App->renderer3D->DrawAABB(corner_points);
+	engine->renderer3D->DrawAABB(corner_points);
 }
 
 void Camera::OnEditor()
@@ -113,7 +113,7 @@ void Camera::Save(GnJSONArray& save_array)
 
 	save_object.AddString("name", name.c_str());
 	save_object.AddInt("Type", type);
-	bool mainCamera = App->renderer3D->GetMainCamera() == this;
+	bool mainCamera = engine->renderer3D->GetMainCamera() == this;
 	save_object.AddBool("Main Camera", mainCamera);
 	save_object.AddFloat3("position", _frustum.pos);
 	save_object.AddFloat3("up", _frustum.up);
@@ -131,7 +131,7 @@ void Camera::Save(GnJSONArray& save_array)
 void Camera::Load(GnJSONObj& load_object)
 {
 	if (load_object.GetBool("Main Camera", false))
-		App->renderer3D->SetMainCamera(this);
+		engine->renderer3D->SetMainCamera(this);
 
 	name = load_object.GetString("name", "camera");
 	_frustum.pos = load_object.GetFloat3("position");

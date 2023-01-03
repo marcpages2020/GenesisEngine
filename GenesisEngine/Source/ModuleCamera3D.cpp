@@ -1,5 +1,5 @@
 #include "Globals.h"
-#include "Application.h"
+#include "Engine.h"
 #include "ModuleCamera3D.h"
 #include "GnJSON.h"
 #include "Camera.h"
@@ -67,77 +67,77 @@ void ModuleCamera3D::OnResize(int width, int height)
 }
 
 // -----------------------------------------------------------------
-update_status ModuleCamera3D::Update(float dt)
+update_status ModuleCamera3D::Update(float deltaTime)
 {
-	if (!App->editor->IsWindowFocused(WindowType::WINDOW_SCENE))
+	if (!engine->editor->IsWindowFocused(WindowType::WINDOW_SCENE))
 		return UPDATE_CONTINUE;
 
 	float3 newPos = float3::zero;
 	int speed_multiplier = 1;
 
-	if (App->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT)
+	if (engine->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT)
 		speed_multiplier = 2;
 
 	//Up/Down
-	if (App->input->GetKey(SDL_SCANCODE_O) == KEY_REPEAT)
-		newPos.y += move_speed * dt;
-	if (App->input->GetKey(SDL_SCANCODE_L) == KEY_REPEAT)
-		newPos.y -= move_speed * dt;
+	if (engine->input->GetKey(SDL_SCANCODE_O) == KEY_REPEAT)
+		newPos.y += move_speed * deltaTime;
+	if (engine->input->GetKey(SDL_SCANCODE_L) == KEY_REPEAT)
+		newPos.y -= move_speed * deltaTime;
 
-	if (App->input->GetKey(SDL_SCANCODE_F) == KEY_DOWN)
+	if (engine->input->GetKey(SDL_SCANCODE_F) == KEY_DOWN)
 	{
-		if (App->scene->selectedGameObject != nullptr)
+		if (engine->scene->selectedGameObject != nullptr)
 		{
-			FocusOnGameObject(App->scene->selectedGameObject);
-			//LookAt(App->scene->selectedGameObject->GetTransform()->GetPosition());
+			FocusOnGameObject(engine->scene->selectedGameObject);
+			//LookAt(engine->scene->selectedGameObject->GetTransform()->GetPosition());
 		}
 	}
 
 	//Forwards/Backwards
-	if ((App->input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT) || (App->input->GetKey(SDL_SCANCODE_UP) == KEY_REPEAT))
-		newPos += _camera->GetFrustum().front * move_speed * speed_multiplier * dt;
-	if ((App->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT) || (App->input->GetKey(SDL_SCANCODE_DOWN) == KEY_REPEAT))
-		newPos -= _camera->GetFrustum().front * move_speed * speed_multiplier * dt;
+	if ((engine->input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT) || (engine->input->GetKey(SDL_SCANCODE_UP) == KEY_REPEAT))
+		newPos += _camera->GetFrustum().front * move_speed * speed_multiplier * deltaTime;
+	if ((engine->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT) || (engine->input->GetKey(SDL_SCANCODE_DOWN) == KEY_REPEAT))
+		newPos -= _camera->GetFrustum().front * move_speed * speed_multiplier * deltaTime;
 
 	//Left/Right
-	if ((App->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT) || (App->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_REPEAT))
-		newPos += _camera->GetFrustum().WorldRight() * move_speed * speed_multiplier * dt;
-	if ((App->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT) || (App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_REPEAT))
-		newPos -= _camera->GetFrustum().WorldRight() * move_speed * speed_multiplier * dt;
+	if ((engine->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT) || (engine->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_REPEAT))
+		newPos += _camera->GetFrustum().WorldRight() * move_speed * speed_multiplier * deltaTime;
+	if ((engine->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT) || (engine->input->GetKey(SDL_SCANCODE_LEFT) == KEY_REPEAT))
+		newPos -= _camera->GetFrustum().WorldRight() * move_speed * speed_multiplier * deltaTime;
 
 	//Drag
-	if ((App->input->GetMouseButton(SDL_BUTTON_MIDDLE) == KEY_REPEAT))
+	if ((engine->input->GetMouseButton(SDL_BUTTON_MIDDLE) == KEY_REPEAT))
 	{
-		newPos -= _camera->GetFrustum().WorldRight() * App->input->GetMouseXMotion() * drag_speed * dt;
-		newPos += _camera->GetFrustum().up * App->input->GetMouseYMotion() * drag_speed * dt;
+		newPos -= _camera->GetFrustum().WorldRight() * engine->input->GetMouseXMotion() * drag_speed * deltaTime;
+		newPos += _camera->GetFrustum().up * engine->input->GetMouseYMotion() * drag_speed * deltaTime;
 	}
 
 	// Zoom 
-	if (App->input->GetMouseZ() > 0)
-		newPos += _camera->GetFrustum().front * zoom_speed * dt;
-	else if (App->input->GetMouseZ() < 0)
-		newPos -= _camera->GetFrustum().front * zoom_speed * dt;
+	if (engine->input->GetMouseZ() > 0)
+		newPos += _camera->GetFrustum().front * zoom_speed * deltaTime;
+	else if (engine->input->GetMouseZ() < 0)
+		newPos -= _camera->GetFrustum().front * zoom_speed * deltaTime;
 
-	if (App->input->GetKey(SDL_SCANCODE_LALT) == KEY_REPEAT)
+	if (engine->input->GetKey(SDL_SCANCODE_LALT) == KEY_REPEAT)
 	{
-		if (App->input->GetMouseButton(SDL_BUTTON_RIGHT) == KEY_REPEAT)
+		if (engine->input->GetMouseButton(SDL_BUTTON_RIGHT) == KEY_REPEAT)
 		{
-			newPos += _camera->GetFrustum().front * zoom_speed * 2.0 * App->input->GetMouseXMotion() * dt;
+			newPos += _camera->GetFrustum().front * zoom_speed * 2.0 * engine->input->GetMouseXMotion() * deltaTime;
 		}
 
-		if ((App->input->GetMouseButton(SDL_BUTTON_MIDDLE) == KEY_DOWN) && App->scene->selectedGameObject) {
-			LookAt(App->scene->selectedGameObject->GetTransform()->GetPosition());
+		if ((engine->input->GetMouseButton(SDL_BUTTON_MIDDLE) == KEY_DOWN) && engine->scene->selectedGameObject) {
+			LookAt(engine->scene->selectedGameObject->GetTransform()->GetPosition());
 		}
 
-		if (App->input->GetMouseButton(SDL_BUTTON_MIDDLE) == KEY_REPEAT) {
-			Orbit(dt);
+		if (engine->input->GetMouseButton(SDL_BUTTON_MIDDLE) == KEY_REPEAT) {
+			Orbit(deltaTime);
 		}
 	}
 
-	if (App->input->GetMouseButton(SDL_BUTTON_LEFT) == KEY_DOWN && !ImGuizmo::IsUsing() && App->editor->MouseOnScene())
+	if (engine->input->GetMouseButton(SDL_BUTTON_LEFT) == KEY_DOWN && !ImGuizmo::IsUsing() && engine->editor->MouseOnScene())
 	{
 		GameObject* pickedGameObject = PickGameObject();
-		App->scene->selectedGameObject = pickedGameObject;
+		engine->scene->selectedGameObject = pickedGameObject;
 	}
 
 	SetPosition(_position += newPos);
@@ -166,7 +166,7 @@ void ModuleCamera3D::FocusOnGameObject(GameObject* gameObjectToFocus)
 {
 	if (!gameObjectToFocus) { return; }
 
-	float3 objectPosition = App->scene->selectedGameObject->GetTransform()->GetPosition();
+	float3 objectPosition = engine->scene->selectedGameObject->GetTransform()->GetPosition();
 
 	float objectExtension = 0.0f;
 	gameObjectToFocus->GetMaxExtension(objectExtension);
@@ -194,13 +194,13 @@ void ModuleCamera3D::Move(const float3& Movement)
 	//_reference += Movement;
 }
 
-void ModuleCamera3D::Orbit(float dt)
+void ModuleCamera3D::Orbit(float deltaTime)
 {
-	int dx = -App->input->GetMouseXMotion();
-	int dy = App->input->GetMouseYMotion();
+	int dx = -engine->input->GetMouseXMotion();
+	int dy = engine->input->GetMouseYMotion();
 
-	Quat y_rotation(_camera->GetUp(), dx * dt * orbit_speed * 0.1f);
-	Quat x_rotation(_camera->GetRight(), dy * dt * orbit_speed * 0.1f);
+	Quat y_rotation(_camera->GetUp(), dx * deltaTime * orbit_speed * 0.1f);
+	Quat x_rotation(_camera->GetRight(), dy * deltaTime * orbit_speed * 0.1f);
 
 	float3 distance = _position - _camera->GetReference();
 	distance = x_rotation.Transform(distance);
@@ -239,17 +239,17 @@ float3 ModuleCamera3D::GetPosition()
 
 GameObject* ModuleCamera3D::PickGameObject()
 {
-	float normalized_x = App->editor->mouseScenePosition.x / App->editor->image_size.x;
-	float normalized_y = App->editor->mouseScenePosition.y / App->editor->image_size.y;
+	float normalized_x = engine->editor->mouseScenePosition.x / engine->editor->image_size.x;
+	float normalized_y = engine->editor->mouseScenePosition.y / engine->editor->image_size.y;
 
 	normalized_x = (normalized_x - 0.5f) * 2.0f;
 	normalized_y = -(normalized_y - 0.5f) * 2.0f;
 
 	LineSegment my_ray = _camera->GetFrustum().UnProjectLineSegment(normalized_x, normalized_y);
 
-	App->renderer3D->_ray = my_ray;
+	engine->renderer3D->_ray = my_ray;
 
-	std::vector<GameObject*> sceneGameObjects = App->scene->GetAllGameObjects();
+	std::vector<GameObject*> sceneGameObjects = engine->scene->GetAllGameObjects();
 	std::map<float, GameObject*> hitGameObjects;
 
 	//find all hit GameObjects
@@ -332,13 +332,13 @@ float ModuleCamera3D::GetHorizontalFieldOfView()
 void ModuleCamera3D::SetVerticalFieldOfView(float verticalFOV, int screen_width, int screen_height)
 {
 	_camera->SetVerticalFieldOfView(verticalFOV, screen_width, screen_height);
-	App->renderer3D->UpdateProjectionMatrix(_camera->GetProjectionMatrix());
+	engine->renderer3D->UpdateProjectionMatrix(_camera->GetProjectionMatrix());
 }
 
 void ModuleCamera3D::SetHorizontalFieldOfView(float horizontalFOV, int screen_width, int screen_height)
 {
 	_camera->SetHorizontalFieldOfView(horizontalFOV, screen_width, screen_height);
-	App->renderer3D->UpdateProjectionMatrix(_camera->GetProjectionMatrix());
+	engine->renderer3D->UpdateProjectionMatrix(_camera->GetProjectionMatrix());
 }
 
 void ModuleCamera3D::Reset()

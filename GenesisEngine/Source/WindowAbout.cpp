@@ -1,6 +1,6 @@
 #include "WindowAbout.h"
 #include "ImGui/imgui.h"
-#include "Application.h"
+#include "Engine.h"
 #include "glew/include/glew.h"
 #include "Assimp/Assimp/include/version.h"
 #include "FileSystem.h"
@@ -17,7 +17,7 @@ void WindowAbout::Draw()
 	if (ImGui::Begin("About", &visible))
 	{
 		focused = ImGui::IsWindowFocused();
-		ImGui::Text("%s v%s", App->engine_name, App->engine_version);
+		ImGui::Text("%s v%s", engine->engine_name, engine->engine_version);
 		ImGui::Text("The first chapter of your creation");
 		ImGui::Spacing();
 

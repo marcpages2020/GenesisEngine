@@ -3,7 +3,7 @@
 #include "FileSystem.h"
 #include "Importers.h"
 #include "ModuleScene.h"
-#include "Application.h"
+#include "Engine.h"
 
 #include "GnJSON.h"
 
@@ -498,7 +498,7 @@ void ModuleResources::CreateResourceData(uint UID, const char* name, const char*
 
 void ModuleResources::DragDropFile(const char* path)
 {
-	WindowImport* import_window = dynamic_cast<WindowImport*>(App->editor->windows[WindowType::WINDOW_IMPORT]);
+	WindowImport* import_window = dynamic_cast<WindowImport*>(engine->editor->windows[WindowType::WINDOW_IMPORT]);
 	import_window->Enable(path, GetTypeFromPath(path));
 }
 
@@ -508,13 +508,13 @@ void ModuleResources::AddAssetToDelete(const char* asset_path)
 	meta_file.append(".meta");
 	_toDeleteResource = GetUIDFromMeta(meta_file.c_str());
 	_toDeleteAsset = asset_path;
-	App->AddModuleToTaskStack(this);
+	engine->AddModuleToTaskStack(this);
 }
 
 void ModuleResources::AddResourceToDelete(uint UID)
 {
 	_toDeleteResource = UID;
-	App->AddModuleToTaskStack(this);
+	engine->AddModuleToTaskStack(this);
 }
 
 bool ModuleResources::DeleteAsset(const char* assets_path)
@@ -844,7 +844,7 @@ ResourceData ModuleResources::RequestResourceData(uint UID)
 
 GameObject* ModuleResources::RequestGameObject(const char* assets_file)
 {
-	if (App->resources->GetTypeFromPath(assets_file) != ResourceType::RESOURCE_MODEL)
+	if (engine->resources->GetTypeFromPath(assets_file) != ResourceType::RESOURCE_MODEL)
 		return nullptr;
 
 	std::string meta_file = assets_file;

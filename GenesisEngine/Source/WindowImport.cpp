@@ -1,5 +1,5 @@
 #include "WindowImport.h"
-#include "Application.h"
+#include "Engine.h"
 #include "ImGui/imgui.h"
 #include "FileSystem.h"
 #include "ShaderImporter.h"
@@ -30,13 +30,13 @@ void WindowImport::Draw()
 
 		if (!FileSystem::Exists(_fileToImport))
 		{
-			final_path = App->resources->GenerateAssetsPath(_fileToImport);
+			final_path = engine->resources->GenerateAssetsPath(_fileToImport);
 			FileSystem::DuplicateFile(_fileToImport, final_path.c_str());
 		}
 
 		if (final_path.find(".vert") != std::string::npos)
 		{
-			App->resources->ImportFile(final_path.c_str());
+			engine->resources->ImportFile(final_path.c_str());
 		}
 
 		visible = false;
@@ -91,12 +91,12 @@ bool WindowImport::DrawModelImportingWindow()
 
 			if (!FileSystem::Exists(_fileToImport))
 			{
-				final_path = App->resources->GenerateAssetsPath(_fileToImport);
+				final_path = engine->resources->GenerateAssetsPath(_fileToImport);
 				FileSystem::DuplicateFile(_fileToImport, final_path.c_str());
 			}
 
-			App->resources->modelImportingOptions = _modelImportingOptions;
-			App->resources->ImportFile(final_path.c_str());
+			engine->resources->modelImportingOptions = _modelImportingOptions;
+			engine->resources->ImportFile(final_path.c_str());
 			ret = false;
 		}
 		ImGui::SameLine();
@@ -178,12 +178,12 @@ bool WindowImport::DrawTextureImportingWindow()
 
 			if (!FileSystem::Exists(_fileToImport))
 			{
-				final_path = App->resources->GenerateAssetsPath(_fileToImport);
+				final_path = engine->resources->GenerateAssetsPath(_fileToImport);
 				FileSystem::DuplicateFile(_fileToImport, final_path.c_str());
 			}
 
-			App->resources->textureImportingOptions = _textureImportingOptions;
-			App->resources->ImportFile(final_path.c_str());
+			engine->resources->textureImportingOptions = _textureImportingOptions;
+			engine->resources->ImportFile(final_path.c_str());
 			ret = false;
 		}
 		ImGui::SameLine();

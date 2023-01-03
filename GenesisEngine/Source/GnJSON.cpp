@@ -317,7 +317,7 @@ GnJSONArray::~GnJSONArray()
 	_array = nullptr;
 }
 
-int GnJSONArray::Size()
+size_t GnJSONArray::Size()
 {
 	return json_array_get_count(_array);
 }

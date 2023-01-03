@@ -1,4 +1,4 @@
-#include "Application.h"
+#include "Engine.h"
 #include "glew/include/glew.h"
 #include "Globals.h"
 #include "FileSystem.h"
@@ -7,7 +7,7 @@
 
 #include "parson/parson.h"
 
-Application::Application(int argc, char* args[]) : argc(argc), args(args), want_to_save(false), want_to_load(false), in_game(false)
+Engine::Engine(int argc, char* args[]) : argc(argc), args(args), want_to_save(false), want_to_load(false), in_game(false)
 {
 	window = new ModuleWindow(true);
 	input = new ModuleInput(true);
@@ -32,7 +32,7 @@ Application::Application(int argc, char* args[]) : argc(argc), args(args), want_
 	capped_ms = 1000 / cap;
 }
 
-Application::~Application()
+Engine::~Engine()
 {
 	std::vector<Module*>::reverse_iterator item = modules_vector.rbegin();
 
@@ -43,7 +43,7 @@ Application::~Application()
 	}
 }
 
-bool Application::Init()
+bool Engine::Init()
 {
 	bool ret = true;
 
@@ -70,7 +70,7 @@ bool Application::Init()
 	}
 
 	// After all Init calls we call Start() in all modules
-	LOG("Application Start --------------");
+	LOG("Engine Start --------------");
 	for (size_t i = 0; i < modules_vector.size() && ret == true; i++)
 	{
 		ret = modules_vector[i]->Start();
@@ -85,17 +85,17 @@ bool Application::Init()
 }
 
 // ---------------------------------------------
-void Application::PrepareUpdate()
+void Engine::PrepareUpdate()
 {
-	dt = (float)Time::realClock.deltaTimer.Read() / 1000;
-	fps = 1.0f / dt;
+	deltaTime = (float)Time::realClock.deltaTimer.Read() / 1000;
+	fps = 1.0f / deltaTime;
 
 	Time::realClock.Step();
 	Time::gameClock.Step();
 }
 
 // ---------------------------------------------
-void Application::FinishUpdate()
+void Engine::FinishUpdate()
 {
 	Uint32 last_frame_ms = Time::realClock.deltaTimer.Read();
 	if (last_frame_ms < capped_ms)
@@ -107,24 +107,24 @@ void Application::FinishUpdate()
 }
 
 // Call PreUpdate, Update and PostUpdate on all modules
-update_status Application::Update()
+update_status Engine::Update()
 {
 	update_status ret = UPDATE_CONTINUE;
 	PrepareUpdate();
 	
 	for (size_t i = 0; i < modules_vector.size() && ret == UPDATE_CONTINUE; i++)
 	{
-		ret = modules_vector[i]->PreUpdate(dt);
+		ret = modules_vector[i]->PreUpdate(deltaTime);
 	}
 
 	for (size_t i = 0; i < modules_vector.size() && ret == UPDATE_CONTINUE; i++)
 	{
-		ret = modules_vector[i]->Update(dt);
+		ret = modules_vector[i]->Update(deltaTime);
 	}
 
 	for (size_t i = 0; i < modules_vector.size() && ret == UPDATE_CONTINUE; i++)
 	{
-		ret = modules_vector[i]->PostUpdate(dt);
+		ret = modules_vector[i]->PostUpdate(deltaTime);
 	}
 	
 	if (!endFrameTasks.empty()) {
@@ -151,7 +151,7 @@ update_status Application::Update()
 	return ret;
 }
 
-bool Application::CleanUp()
+bool Engine::CleanUp()
 {
 	bool ret = true;
 	for (int i = modules_vector.size() -1; i > 0; i--)
@@ -164,57 +164,57 @@ bool Application::CleanUp()
 	return ret;
 }
 
-void Application::StartGame()
+void Engine::StartGame()
 {
 	in_game = true;
 	Time::gameClock.Start();
 	Save("Library/Scenes/tmp.scene");
 }
 
-void Application::StopGame()
+void Engine::StopGame()
 {
 	in_game = false;
 	Time::gameClock.Stop();
 	Load("Library/Scenes/tmp.scene");
 }
 
-void Application::AddModule(Module* mod)
+void Engine::AddModule(Module* mod)
 {
 	modules_vector.push_back(mod);
 }
 
-float Application::GetFPS() { return fps; }
+float Engine::GetFPS() { return fps; }
 
-float Application::GetLastDt() { return dt; }
+float Engine::GetLastDt() { return deltaTime; }
 
-int Application::GetFPSCap()
+int Engine::GetFPSCap()
 {
 	return 1000 / capped_ms;
 }
 
-void Application::SetFPSCap(int fps_cap)
+void Engine::SetFPSCap(int fps_cap)
 {
 	capped_ms = 1000.0f / (float)fps_cap;
 }
 
-void Application::Save(const char* filePath)
+void Engine::Save(const char* filePath)
 {
 	want_to_save = true;
 	strcpy_s(_file_to_save, filePath);
 }
 
-void Application::Load(const char* filePath)
+void Engine::Load(const char* filePath)
 {
 	want_to_load = true;
 	strcpy_s(_file_to_load, filePath);
 }
 
-void Application::AddModuleToTaskStack(Module* callback)
+void Engine::AddModuleToTaskStack(Module* callback)
 {
 	endFrameTasks.push(callback);
 }
 
-HardwareSpecs Application::GetHardware()
+HardwareSpecs Engine::GetHardware()
 {
 	HardwareSpecs specs;
 

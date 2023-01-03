@@ -42,7 +42,7 @@ struct HardwareSpecs
 	std::string caps;
 };
 
-class Application
+class Engine
 {
 public:
 	ModuleWindow* window;
@@ -59,8 +59,8 @@ public:
 
 public:
 
-	Application(int argc, char* args[]);
-	~Application();
+	Engine(int argc, char* args[]);
+	~Engine();
 
 	bool Init();
 	update_status Update();
@@ -89,7 +89,7 @@ private:
 	int	   argc;
 	char** args;
 
-	float	dt;
+	float	deltaTime;
 	float	fps;
 	float	capped_ms;
 	std::vector<Module*> modules_vector;
@@ -105,6 +105,6 @@ private:
 	std::stack<Module*> endFrameTasks;
 };
 
-extern Application* App;
+extern Engine* engine;
 
 #endif 

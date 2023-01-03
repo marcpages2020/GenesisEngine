@@ -1,5 +1,5 @@
 #include "WindowInspector.h"
-#include "Application.h"
+#include "Engine.h"
 #include "ModuleScene.h"
 #include "GameObject.h"
 
@@ -17,13 +17,13 @@ void WindowInspector::Draw()
 	if (ImGui::Begin("Inspector", &visible))
 	{
 		focused = ImGui::IsWindowFocused();
-		if (App->scene->selectedGameObject != nullptr)
+		if (engine->scene->selectedGameObject != nullptr)
 		{
-			App->scene->selectedGameObject->OnEditor();
+			engine->scene->selectedGameObject->OnEditor();
 		}
 
 		if (ImGui::CollapsingHeader("Resources")) {
-			App->resources->OnEditor();
+			engine->resources->OnEditor();
 		}
 	}
 	ImGui::End();

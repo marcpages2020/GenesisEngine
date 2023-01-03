@@ -1,6 +1,6 @@
 #include "WindowScene.h"
 #include "ImGui/imgui.h"
-#include "Application.h"
+#include "Engine.h"
 #include "glew/include/glew.h"
 #include "WindowAssets.h"
 #include "Time.h"
@@ -33,52 +33,52 @@ void WindowScene::Draw()
 			{
 				if (ImGui::BeginMenu("Shading Mode"))
 				{
-					if (ImGui::MenuItem("Solid", NULL, App->renderer3D->display_mode == DisplayMode::SOLID))
-						App->renderer3D->SetDisplayMode(DisplayMode::SOLID);
-					if (ImGui::MenuItem("Wireframe", NULL, App->renderer3D->display_mode == DisplayMode::WIREFRAME))
-						App->renderer3D->SetDisplayMode(DisplayMode::WIREFRAME);
+					if (ImGui::MenuItem("Solid", NULL, engine->renderer3D->display_mode == DisplayMode::SOLID))
+						engine->renderer3D->SetDisplayMode(DisplayMode::SOLID);
+					if (ImGui::MenuItem("Wireframe", NULL, engine->renderer3D->display_mode == DisplayMode::WIREFRAME))
+						engine->renderer3D->SetDisplayMode(DisplayMode::WIREFRAME);
 					ImGui::EndMenu();
 				}
 
-				ImGui::Checkbox("Draw Mouse Picking Ray", &App->renderer3D->draw_mouse_picking_ray);
+				ImGui::Checkbox("Draw Mouse Picking Ray", &engine->renderer3D->draw_mouse_picking_ray);
 
-				ImGui::Checkbox("Draw AABBs", &App->renderer3D->draw_aabbs);
+				ImGui::Checkbox("Draw AABBs", &engine->renderer3D->draw_aabbs);
 
-				ImGui::Checkbox("Vertex Normals", &App->renderer3D->draw_vertex_normals);
+				ImGui::Checkbox("Vertex Normals", &engine->renderer3D->draw_vertex_normals);
 
-				ImGui::Checkbox("Face Normals", &App->renderer3D->draw_face_normals);
+				ImGui::Checkbox("Face Normals", &engine->renderer3D->draw_face_normals);
 
 				ImGui::EndMenu();
 			}
 
 			static bool lighting = glIsEnabled(GL_LIGHTING);
 			if (ImGui::Checkbox("Lighting", &lighting))
-				App->renderer3D->SetCapActive(GL_LIGHTING, lighting);
+				engine->renderer3D->SetCapActive(GL_LIGHTING, lighting);
 
-			static bool show_grid = App->scene->show_grid;
+			static bool show_grid = engine->scene->show_grid;
 			if (ImGui::Checkbox("Show Grid", &show_grid))
-				App->scene->show_grid = show_grid;
+				engine->scene->show_grid = show_grid;
 
-			ImGui::Checkbox("Cull editor camera", &App->renderer3D->cull_editor_camera);
+			ImGui::Checkbox("Cull editor camera", &engine->renderer3D->cull_editor_camera);
 
 			ImGui::EndMenuBar();
 		}
 
 		ImVec2 window_size = ImGui::GetContentRegionAvail();
-		App->editor->sceneWindowOrigin = ImGui::GetWindowPos();
-		App->editor->sceneWindowOrigin.x += ImGui::GetWindowContentRegionMin().x;
-		App->editor->sceneWindowOrigin.y += ImGui::GetWindowContentRegionMin().y;
+		engine->editor->sceneWindowOrigin = ImGui::GetWindowPos();
+		engine->editor->sceneWindowOrigin.x += ImGui::GetWindowContentRegionMin().x;
+		engine->editor->sceneWindowOrigin.y += ImGui::GetWindowContentRegionMin().y;
 
-		App->editor->mouseScenePosition.x = App->input->GetMouseX() - App->editor->sceneWindowOrigin.x;
-		App->editor->mouseScenePosition.y = App->input->GetMouseY() - App->editor->sceneWindowOrigin.y;
+		engine->editor->mouseScenePosition.x = engine->input->GetMouseX() - engine->editor->sceneWindowOrigin.x;
+		engine->editor->mouseScenePosition.y = engine->input->GetMouseY() - engine->editor->sceneWindowOrigin.y;
 
-		if (App->in_game)
+		if (engine->in_game)
 			DrawGameTimeDataOverlay();
 
-		if (App->editor->image_size.x != window_size.x || App->editor->image_size.y != window_size.y)
-			App->editor->OnResize(window_size);
+		if (engine->editor->image_size.x != window_size.x || engine->editor->image_size.y != window_size.y)
+			engine->editor->OnResize(window_size);
 
-		ImGui::Image((ImTextureID)App->renderer3D->colorTexture, App->editor->image_size, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
+		ImGui::Image((ImTextureID)engine->renderer3D->colorTexture, engine->editor->image_size, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
 
 		ImGui::PushID(WINDOW_SCENE);
 		if (ImGui::BeginDragDropTarget())
@@ -87,15 +87,15 @@ void WindowScene::Draw()
 			{
 				IM_ASSERT(payload->DataSize == sizeof(int));
 				int payload_n = *(const int*)payload->Data;
-				WindowAssets* assets_window = (WindowAssets*)App->editor->windows[WINDOW_ASSETS];
-				std::string file = App->resources->FindAsset(payload_n);
+				WindowAssets* assets_window = (WindowAssets*)engine->editor->windows[WINDOW_ASSETS];
+				std::string file = engine->resources->FindAsset(payload_n);
 				ApplyDroppedFile(file.c_str());
 			}
 			ImGui::EndDragDropTarget();
 		}
 		ImGui::PopID();
 
-		App->scene->EditTransform();
+		engine->scene->EditTransform();
 	}
 	ImGui::End();
 	ImGui::PopStyleVar();
@@ -108,7 +108,7 @@ void WindowScene::DrawGameTimeDataOverlay()
 	window_flags |= ImGuiWindowFlags_NoMove;
 	ImGuiViewport* viewport = ImGui::GetMainViewport();
 
-	ImVec2 window_pos = App->editor->sceneWindowOrigin;
+	ImVec2 window_pos = engine->editor->sceneWindowOrigin;
 	window_pos.x += 10.0f;
 	window_pos.y += 10.0f;
 
@@ -124,7 +124,7 @@ void WindowScene::DrawGameTimeDataOverlay()
 		ImGui::Text("Game Time");
 		ImGui::Separator();
 		ImGui::Spacing();
-		ImGui::Text("Delta time %.3f", Time::gameClock.dt);
+		ImGui::Text("Delta time %.3f", Time::gameClock.deltaTime);
 		ImGui::Text("Time Scale: %.2f", Time::gameClock.timeScale);
 		ImGui::Text("Time since game start: %.2f", Time::gameClock.timeSinceStartup());
 	}
@@ -135,12 +135,12 @@ void WindowScene::DrawGameTimeDataOverlay()
 
 void WindowScene::ApplyDroppedFile(const char* assets_file)
 {
-	ResourceType type = App->resources->GetTypeFromPath(assets_file);
-	GameObject* selected_object = App->scene->selectedGameObject;
+	ResourceType type = engine->resources->GetTypeFromPath(assets_file);
+	GameObject* selected_object = engine->scene->selectedGameObject;
 
 	if (type == ResourceType::RESOURCE_MODEL)
 	{
-		App->scene->AddGameObject(App->resources->RequestGameObject(assets_file));
+		engine->scene->AddGameObject(engine->resources->RequestGameObject(assets_file));
 	}
 	else if (type == ResourceType::RESOURCE_TEXTURE)
 	{
@@ -151,13 +151,13 @@ void WindowScene::ApplyDroppedFile(const char* assets_file)
 		Material* material = (Material*)selected_object->GetComponent(ComponentType::MATERIAL);
 		if (material != nullptr)
 		{
-			material->SetTexture((ResourceTexture*)App->resources->RequestResource(App->resources->Find(assets_file)));}
+			material->SetTexture((ResourceTexture*)engine->resources->RequestResource(engine->resources->Find(assets_file)));}
 	}
 	else if (type == ResourceType::RESOURCE_SHADER)
 	{
 		Material* material = (Material*)selected_object->GetComponent(ComponentType::MATERIAL);
 		if (material != nullptr)
 		{
-			material->SetShader((ResourceShader*)App->resources->RequestResource(App->resources->Find(assets_file)));}
+			material->SetShader((ResourceShader*)engine->resources->RequestResource(engine->resources->Find(assets_file)));}
 	}
 }

@@ -2,7 +2,8 @@
 #define _MATERIAL_IMPORTER_H_
 #include "Globals.h"
 #include <string>
-class aiMaterial;
+
+struct aiMaterial;
 class ResourceMaterial;
 
 namespace MaterialImporter

@@ -1,5 +1,5 @@
 #include "Globals.h"
-#include "Application.h"
+#include "Engine.h"
 #include "ModuleScene.h"
 #include "GnJSON.h"
 #include "Mesh.h"
@@ -36,7 +36,7 @@ bool ModuleScene::Start()
 	camera->SetName("Main Camera");
 	camera->GetTransform()->SetPosition(float3(0.0f, 1.0f, -5.0f));
 	AddGameObject(camera);
-	App->renderer3D->SetMainCamera((Camera*)camera->GetComponent(ComponentType::CAMERA));
+	engine->renderer3D->SetMainCamera((Camera*)camera->GetComponent(ComponentType::CAMERA));
 
 	selectedGameObject = nullptr;
 
@@ -46,7 +46,7 @@ bool ModuleScene::Start()
 void ModuleScene::SetDemo()
 {
 	/*
-	GameObject* parent_water = App->resources->RequestGameObject("Assets/Models/complex_plane.fbx");
+	GameObject* parent_water = engine->resources->RequestGameObject("Assets/Models/complex_plane.fbx");
 	parent_water->GetTransform()->SetPosition(float3(0.0f, 1.5f, 0.0f));
 	parent_water->GetTransform()->SetScale(float3(50.0f, 1.0f, 50.0f));
 	parent_water->UpdateChildrenTransforms();
@@ -54,11 +54,11 @@ void ModuleScene::SetDemo()
 	GameObject* water = parent_water->GetChildAt(0);
 	Material* material = (Material*)water->GetComponent(ComponentType::MATERIAL);
 	material->SetTiling(NORMAL_MAP, 5.0f, 5.0f);
-	material->SetTexture((ResourceTexture*)App->resources->RequestResource(App->resources->Find("Assets/Textures/water_normals.png")), NORMAL_MAP);
+	material->SetTexture((ResourceTexture*)engine->resources->RequestResource(engine->resources->Find("Assets/Textures/water_normals.png")), NORMAL_MAP);
 	GnMesh* mesh = (GnMesh*)water->GetComponent(ComponentType::MESH);
 	mesh->blend = true;
 
-	ResourceShader* water_shader = (ResourceShader*)App->resources->RequestResource(App->resources->Find("Assets/Shaders/water_shader.vert"));
+	ResourceShader* water_shader = (ResourceShader*)engine->resources->RequestResource(engine->resources->Find("Assets/Shaders/water_shader.vert"));
 	material->SetShader(water_shader);
 
 	if (water_shader != nullptr)
@@ -84,12 +84,12 @@ void ModuleScene::SetDemo()
 	AddGameObject(parent_water);
 	*/
 
-	GameObject* street_environment = App->resources->RequestGameObject("Assets/Models/street/Street environment_V01.fbx");
+	GameObject* street_environment = engine->resources->RequestGameObject("Assets/Models/street/Street environment_V01.fbx");
 	AddGameObject(street_environment);
 }
 
 // Update: draw background
-update_status ModuleScene::Update(float dt)
+update_status ModuleScene::Update(float deltaTime)
 {
 	if (show_grid)
 	{
@@ -106,17 +106,17 @@ update_status ModuleScene::Update(float dt)
 
 void ModuleScene::HandleInput()
 {
-	if ((App->input->GetKey(SDL_SCANCODE_DELETE) == KEY_DOWN) && (selectedGameObject != nullptr) && (selectedGameObject != root) 
-		&& (App->editor->IsWindowFocused(WindowType::WINDOW_HIERARCHY) || App->editor->IsWindowFocused(WindowType::WINDOW_SCENE)))
+	if ((engine->input->GetKey(SDL_SCANCODE_DELETE) == KEY_DOWN) && (selectedGameObject != nullptr) && (selectedGameObject != root) 
+		&& (engine->editor->IsWindowFocused(WindowType::WINDOW_HIERARCHY) || engine->editor->IsWindowFocused(WindowType::WINDOW_SCENE)))
 		selectedGameObject->to_delete = true;
 
-	if ((App->input->GetKey(SDL_SCANCODE_W) == KEY_DOWN))
+	if ((engine->input->GetKey(SDL_SCANCODE_W) == KEY_DOWN))
 		mCurrentGizmoOperation = ImGuizmo::OPERATION::TRANSLATE;
 
-	else if((App->input->GetKey(SDL_SCANCODE_E) == KEY_DOWN))
+	else if((engine->input->GetKey(SDL_SCANCODE_E) == KEY_DOWN))
 		mCurrentGizmoOperation = ImGuizmo::OPERATION::ROTATE;
 
-	else if ((App->input->GetKey(SDL_SCANCODE_R) == KEY_DOWN))
+	else if ((engine->input->GetKey(SDL_SCANCODE_R) == KEY_DOWN))
 		mCurrentGizmoOperation = ImGuizmo::OPERATION::SCALE;
 }
 
@@ -184,12 +184,12 @@ void ModuleScene::EditTransform()
 	if (selectedGameObject == nullptr)
 		return;
 
-	float4x4 viewMatrix = App->camera->GetViewMatrixM().Transposed();
-	float4x4 projectionMatrix = App->camera->GetProjectionMatrixM().Transposed();
+	float4x4 viewMatrix = engine->camera->GetViewMatrixM().Transposed();
+	float4x4 projectionMatrix = engine->camera->GetProjectionMatrixM().Transposed();
 	float4x4 objectTransform = selectedGameObject->GetTransform()->GetGlobalTransform().Transposed();
 
 	ImGuizmo::SetDrawlist();
-	ImGuizmo::SetRect(App->editor->sceneWindowOrigin.x, App->editor->sceneWindowOrigin.y, App->editor->image_size.x, App->editor->image_size.y);
+	ImGuizmo::SetRect(engine->editor->sceneWindowOrigin.x, engine->editor->sceneWindowOrigin.y, engine->editor->image_size.x, engine->editor->image_size.y);
 
 	float tempTransform[16];
 	memcpy(tempTransform, objectTransform.ptr(), 16 * sizeof(float));
@@ -235,7 +235,7 @@ bool ModuleScene::Save(const char* file_path)
 
 	FileSystem::DuplicateFile(file_path, assets_path.c_str());
 
-	App->resources->Save();
+	engine->resources->Save();
 
 	save_file.Release();
 	RELEASE_ARRAY(buffer);

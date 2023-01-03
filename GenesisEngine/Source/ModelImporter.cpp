@@ -1,5 +1,5 @@
 #include "ModelImporter.h"
-#include "Application.h"
+#include "Engine.h"
 #include "FileSystem.h"
 #include <unordered_set>
 
@@ -29,16 +29,16 @@ void ModelImporter::Import(char* fileBuffer, ResourceModel* model, uint size)
 		for (size_t i = 0; i < scene->mNumMeshes; i++)
 		{
 			aiMesh* aimesh = scene->mMeshes[i];
-			model->meshes.push_back(App->resources->ImportInternalResource(model->assetsFile.c_str(), aimesh, ResourceType::RESOURCE_MESH));
+			model->meshes.push_back(engine->resources->ImportInternalResource(model->assetsFile.c_str(), aimesh, ResourceType::RESOURCE_MESH));
 		}
 
 		for (size_t i = 0; i < scene->mNumMaterials; i++)
 		{
 			aiMaterial* aimaterial = scene->mMaterials[i];
-			model->materials.push_back(App->resources->ImportInternalResource(model->assetsFile.c_str(), aimaterial, ResourceType::RESOURCE_MATERIAL));
+			model->materials.push_back(engine->resources->ImportInternalResource(model->assetsFile.c_str(), aimaterial, ResourceType::RESOURCE_MATERIAL));
 		}
 
-		if (!App->resources->modelImportingOptions.ignoreLights)
+		if (!engine->resources->modelImportingOptions.ignoreLights)
 		{
 			for (size_t i = 0; i < scene->mNumLights; i++)
 			{
@@ -52,7 +52,7 @@ void ModelImporter::Import(char* fileBuffer, ResourceModel* model, uint size)
 			}
 		}
 
-		if (!App->resources->modelImportingOptions.ignoreCameras)
+		if (!engine->resources->modelImportingOptions.ignoreCameras)
 		{
 			for (size_t i = 0; i < scene->mNumCameras; i++)
 			{
@@ -90,7 +90,7 @@ void ModelImporter::ImportChildren(const aiScene* scene, aiNode* ainode, aiNode*
 		modelNode.name = FileSystem::GetFileName(model->assetsFile.c_str());
 		modelNode.parentUID = 0;
 		ConvertToDesiredAxis(ainode, modelNode);
-		modelNode.scale *= App->resources->modelImportingOptions.globalScale;
+		modelNode.scale *= engine->resources->modelImportingOptions.globalScale;
 	}
 	else
 	{
@@ -98,7 +98,7 @@ void ModelImporter::ImportChildren(const aiScene* scene, aiNode* ainode, aiNode*
 		modelNode.parentUID = parentNode->UID;
 	}
 
-	modelNode.UID = App->resources->GenerateUID();
+	modelNode.UID = engine->resources->GenerateUID();
 
 	if (modelNode.name.find("_$AssimpFbx$_") != std::string::npos && ainode->mNumChildren == 1)
 	{
@@ -167,13 +167,13 @@ uint64 ModelImporter::Save(ResourceModel* model, char** fileBuffer)
 		if (model->nodes[i].meshID != -1)
 		{
 			node_object.AddInt("MeshID", model->nodes[i].meshID);
-			node_object.AddString("mesh_library_path", App->resources->GenerateLibraryPath(model->nodes[i].meshID, ResourceType::RESOURCE_MESH).c_str());
+			node_object.AddString("mesh_library_path", engine->resources->GenerateLibraryPath(model->nodes[i].meshID, ResourceType::RESOURCE_MESH).c_str());
 		}
 
 		if (model->nodes[i].materialID != -1)
 		{
 			node_object.AddInt("MaterialID", model->nodes[i].materialID);
-			node_object.AddString("material_library_path", App->resources->GenerateLibraryPath(model->nodes[i].materialID, ResourceType::RESOURCE_MATERIAL).c_str());
+			node_object.AddString("material_library_path", engine->resources->GenerateLibraryPath(model->nodes[i].materialID, ResourceType::RESOURCE_MATERIAL).c_str());
 		}
 
 		nodes_array.AddObject(node_object);
@@ -211,7 +211,7 @@ void ModelImporter::ReimportFile(char* fileBuffer, ResourceModel* newModel, uint
 	std::string meta_file = newModel->assetsFile;
 	meta_file.append(".meta");
 
-	ResourceModel oldModel(App->resources->GetUIDFromMeta(meta_file.c_str()));
+	ResourceModel oldModel(engine->resources->GetUIDFromMeta(meta_file.c_str()));
 	ExtractInternalResources(meta_file.c_str(), oldModel);
 
 	Import(fileBuffer, newModel, size);
@@ -224,8 +224,8 @@ void ModelImporter::ReimportFile(char* fileBuffer, ResourceModel* newModel, uint
 			{
 				if (oldModel.nodes[o].meshID != -1) 
 				{
-					std::string oldModelPath = App->resources->GenerateLibraryPath(oldModel.nodes[o].meshID, ResourceType::RESOURCE_MESH);
-					std::string newModelPath = App->resources->GenerateLibraryPath(newModel->nodes[n].meshID, ResourceType::RESOURCE_MESH);
+					std::string oldModelPath = engine->resources->GenerateLibraryPath(oldModel.nodes[o].meshID, ResourceType::RESOURCE_MESH);
+					std::string newModelPath = engine->resources->GenerateLibraryPath(newModel->nodes[n].meshID, ResourceType::RESOURCE_MESH);
 					newModel->nodes[n].meshID = oldModel.nodes[o].meshID;
 					
 					if (FileSystem::Exists(newModelPath.c_str()))
@@ -234,8 +234,8 @@ void ModelImporter::ReimportFile(char* fileBuffer, ResourceModel* newModel, uint
 
 				if (oldModel.nodes[o].materialID != -1)
 				{
-					std::string oldModelPath = App->resources->GenerateLibraryPath(oldModel.nodes[o].materialID, ResourceType::RESOURCE_MATERIAL);
-					std::string newModelPath = App->resources->GenerateLibraryPath(newModel->nodes[n].materialID, ResourceType::RESOURCE_MATERIAL);
+					std::string oldModelPath = engine->resources->GenerateLibraryPath(oldModel.nodes[o].materialID, ResourceType::RESOURCE_MATERIAL);
+					std::string newModelPath = engine->resources->GenerateLibraryPath(newModel->nodes[n].materialID, ResourceType::RESOURCE_MATERIAL);
 					newModel->nodes[n].materialID = oldModel.nodes[o].materialID;
 					
 					if(FileSystem::Exists(newModelPath.c_str()))
@@ -258,11 +258,11 @@ void ModelImporter::LoadTransform(aiNode* node, ModelNode& modelNode)
 	node->mTransformation.Decompose(scaling, rotation, position);
 	//eulerRotation = rotation.GetEuler() * RADTODEG;
 
-	if (App->resources->modelImportingOptions.normalizeScales && scaling.x == 100 && scaling.y == 100 && scaling.z == 100) {
+	if (engine->resources->modelImportingOptions.normalizeScales && scaling.x == 100 && scaling.y == 100 && scaling.z == 100) {
 		scaling.x = scaling.y = scaling.z = 1.0f;
 	}
 
-	//scaling *= App->resources->modelImportingOptions.globalScale;
+	//scaling *= engine->resources->modelImportingOptions.globalScale;
 
 	modelNode.position = float3(position.x, position.y, position.z);
 	modelNode.rotation = Quat(rotation.x, rotation.y, rotation.z, rotation.w);
@@ -294,21 +294,21 @@ bool ModelImporter::Load(char* fileBuffer, ResourceModel* model, uint size)
 		modelNode.meshID = nodeObject.GetInt("MeshID");
 		if (modelNode.meshID != -1)
 		{
-			App->resources->CreateResourceData(modelNode.meshID, modelNode.name.c_str(),
+			engine->resources->CreateResourceData(modelNode.meshID, modelNode.name.c_str(),
 				model->assetsFile.c_str(), nodeObject.GetString("mesh_library_path", "No Path"));
 			meshes.emplace(modelNode.meshID);
-			//if (App->resources->LoadResource(modelNode.meshID, ResourceType::RESOURCE_MESH) == nullptr)
+			//if (engine->resources->LoadResource(modelNode.meshID, ResourceType::RESOURCE_MESH) == nullptr)
 				//ret = false;
 		}
 
 		modelNode.materialID = nodeObject.GetInt("MaterialID");
 		if (modelNode.materialID != -1)
 		{
-			App->resources->CreateResourceData(modelNode.materialID, modelNode.name.c_str(),
+			engine->resources->CreateResourceData(modelNode.materialID, modelNode.name.c_str(),
 				model->assetsFile.c_str(), nodeObject.GetString("material_library_path", "No Path"));
 			materials.emplace(modelNode.materialID);
 
-			//if (App->resources->LoadResource(modelNode.materialID, ResourceType::RESOURCE_MATERIAL) == nullptr)
+			//if (engine->resources->LoadResource(modelNode.materialID, ResourceType::RESOURCE_MATERIAL) == nullptr)
 				//ret = false;
 		}
 
@@ -316,12 +316,12 @@ bool ModelImporter::Load(char* fileBuffer, ResourceModel* model, uint size)
 	}
 
 	for (auto it = meshes.begin(); it != meshes.end(); ++it) {
-		if (App->resources->LoadResource(*it, ResourceType::RESOURCE_MESH) == nullptr)
+		if (engine->resources->LoadResource(*it, ResourceType::RESOURCE_MESH) == nullptr)
 			ret = false;
 	}
 
 	for (auto it = materials.begin(); it != materials.end(); ++it) {
-		if (App->resources->LoadResource(*it, ResourceType::RESOURCE_MATERIAL) == nullptr)
+		if (engine->resources->LoadResource(*it, ResourceType::RESOURCE_MATERIAL) == nullptr)
 			ret = false;
 	}
 
@@ -418,7 +418,7 @@ GameObject* ModelImporter::ConvertToGameObject(ResourceModel* model)
 		}
 	}
 
-	App->resources->ReleaseResource(model->GetUID());
+	engine->resources->ReleaseResource(model->GetUID());
 	root->UpdateChildrenTransforms();
 
 	return root;
@@ -505,7 +505,7 @@ bool ModelImporter::InternalResourcesExist(const char* path)
 		int meshID = nodeObject.GetInt("MeshID");
 		if (meshID != -1)
 		{
-			std::string meshLibraryPath = App->resources->GenerateLibraryPath(meshID, ResourceType::RESOURCE_MESH);
+			std::string meshLibraryPath = engine->resources->GenerateLibraryPath(meshID, ResourceType::RESOURCE_MESH);
 
 			if (!FileSystem::Exists(meshLibraryPath.c_str())) {
 				ret = false;
@@ -514,14 +514,14 @@ bool ModelImporter::InternalResourcesExist(const char* path)
 			}
 			else
 			{
-				App->resources->CreateResourceData(meshID, nodeName.c_str(), assets_file.c_str(), meshLibraryPath.c_str());
+				engine->resources->CreateResourceData(meshID, nodeName.c_str(), assets_file.c_str(), meshLibraryPath.c_str());
 			}
 		}
 
 		int materialID = nodeObject.GetInt("MaterialID");
 		if (materialID != -1)
 		{
-			std::string materialLibraryPath = App->resources->GenerateLibraryPath(materialID, ResourceType::RESOURCE_MATERIAL);
+			std::string materialLibraryPath = engine->resources->GenerateLibraryPath(materialID, ResourceType::RESOURCE_MATERIAL);
 
 			if (!FileSystem::Exists(materialLibraryPath.c_str())) {
 				ret = false;
@@ -530,7 +530,7 @@ bool ModelImporter::InternalResourcesExist(const char* path)
 			}
 			else
 			{
-				App->resources->CreateResourceData(materialID, nodeName.c_str(), assets_file.c_str(), materialLibraryPath.c_str());
+				engine->resources->CreateResourceData(materialID, nodeName.c_str(), assets_file.c_str(), materialLibraryPath.c_str());
 			}
 		}
 	}
@@ -542,7 +542,7 @@ bool ModelImporter::InternalResourcesExist(const char* path)
 
 void ModelImporter::ConvertToDesiredAxis(aiNode* node, ModelNode& modelNode)
 {
-	ModelImportingOptions importingOptions = App->resources->modelImportingOptions;
+	ModelImportingOptions importingOptions = engine->resources->modelImportingOptions;
 	Axis upAxisEnum = importingOptions.upAxis;
 	Axis forwardAxisEnum = importingOptions.forwardAxis;
 

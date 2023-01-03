@@ -6,7 +6,7 @@
 #include "Camera.h"
 #include "ImGui/imgui.h"
 #include "GnJSON.h"
-#include "Application.h"
+#include "Engine.h"
 
 #include "MathGeoLib/include/MathGeoLib.h"
 
@@ -66,7 +66,7 @@ void GameObject::Update()
 					GnMesh* mesh = (GnMesh*)components[i];
 					GenerateAABB(mesh);
 
-					if(App->renderer3D->IsInsideCameraView(_AABB))
+					if(engine->renderer3D->IsInsideCameraView(_AABB))
 						mesh->Update();
 				}
 				else
@@ -145,7 +145,7 @@ uint GameObject::Load(GnJSONObj* object)
 
 	GnJSONArray componentsArray = object->GetArray("Components");
 
-	for (size_t i = 0; i < componentsArray.Size(); i++)
+	for (int i = 0; i < componentsArray.Size(); i++)
 	{
 		GnJSONObj componentObject = componentsArray.GetObjectAt(i);
 		Component* component = AddComponent((ComponentType)componentObject.GetInt("Type"));
@@ -394,5 +394,5 @@ void GameObject::GenerateAABB(GnMesh* mesh)
 
 	float3 cornerPoints[8];
 	_AABB.GetCornerPoints(cornerPoints);
-	App->renderer3D->DrawAABB(cornerPoints);
+	engine->renderer3D->DrawAABB(cornerPoints);
 }

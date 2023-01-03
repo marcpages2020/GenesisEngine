@@ -15,7 +15,7 @@ void Time::Init()
 }
 
 
-GnClock::GnClock()
+GnClock::GnClock() : deltaTime(0.0f), started(false)
 {
 	timeScale = 1.0f;
 	paused = false;
@@ -57,7 +57,7 @@ void GnClock::Reset()
 
 void GnClock::Step()
 {
-	dt = (float)deltaTimer.Read() / 1000 * timeScale;
+	deltaTime = (float)deltaTimer.Read() / 1000 * timeScale;
 	deltaTimer.Start();
 }
 
@@ -69,7 +69,7 @@ float GnClock::timeSinceStartup()
 		return 0.0f;
 }
 
-float GnClock::deltaTime()
+float GnClock::DeltaTime()
 {
-	return dt * timeScale;
+	return deltaTime * timeScale;
 }

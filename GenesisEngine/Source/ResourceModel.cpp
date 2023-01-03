@@ -1,5 +1,5 @@
 #include "ResourceModel.h"
-#include "Application.h"
+#include "Engine.h"
 #include "GnJSON.h"
 #include "Importers.h"
 #include "Camera.h"
@@ -35,10 +35,10 @@ uint ResourceModel::Save(GnJSONObj& base_object)
 uint ResourceModel::SaveMeta(GnJSONObj& base_object, uint last_modification)
 {
 	base_object.AddInt("UID", _uid);
-	base_object.AddString("Library path", App->resources->GetLibraryPath(_uid));
+	base_object.AddString("Library path", engine->resources->GetLibraryPath(_uid));
 	base_object.AddInt("lastModified", last_modification);
 
-	ModelImportingOptions importingOptions = App->resources->modelImportingOptions;
+	ModelImportingOptions importingOptions = engine->resources->modelImportingOptions;
 
 	base_object.AddFloat("global scale", (float)importingOptions.globalScale);
 	base_object.AddInt("forward axis", (int)importingOptions.forwardAxis);
@@ -63,13 +63,13 @@ uint ResourceModel::SaveMeta(GnJSONObj& base_object, uint last_modification)
 		if (nodes[i].meshID != -1)
 		{
 			node_object.AddInt("MeshID", nodes[i].meshID);
-			node_object.AddString("mesh_library_path", App->resources->GetLibraryPath(nodes[i].meshID));
+			node_object.AddString("mesh_library_path", engine->resources->GetLibraryPath(nodes[i].meshID));
 		}
 
 		if (nodes[i].materialID != -1)
 		{
 			node_object.AddInt("MaterialID", nodes[i].materialID);
-			node_object.AddString("material_library_path", App->resources->GetLibraryPath(nodes[i].materialID));
+			node_object.AddString("material_library_path", engine->resources->GetLibraryPath(nodes[i].materialID));
 		}
 
 		nodes_array.AddObject(node_object);

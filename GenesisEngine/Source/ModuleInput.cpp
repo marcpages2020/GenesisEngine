@@ -1,5 +1,5 @@
 #include "Globals.h"
-#include "Application.h"
+#include "Engine.h"
 #include "ModuleInput.h"
 #include "FileSystem.h"
 
@@ -40,7 +40,7 @@ bool ModuleInput::Init()
 }
 
 // Called every draw update
-update_status ModuleInput::PreUpdate(float dt)
+update_status ModuleInput::PreUpdate(float deltaTime)
 {
 	SDL_PumpEvents();
 
@@ -118,7 +118,7 @@ update_status ModuleInput::PreUpdate(float dt)
 
 			case SDL_DROPFILE:
 				dropped_filedir = e.drop.file;
-				App->resources->DragDropFile(dropped_filedir);
+				engine->resources->DragDropFile(dropped_filedir);
 				SDL_free(dropped_filedir);
 				break;
 
@@ -126,7 +126,7 @@ update_status ModuleInput::PreUpdate(float dt)
 			{
 				if (e.window.event == SDL_WINDOWEVENT_RESIZED)
 				{
-					App->window->OnResize(e.window.data1, e.window.data2);
+					engine->window->OnResize(e.window.data1, e.window.data2);
 				}
 			}
 		}

@@ -1,5 +1,5 @@
 #include "WindowAssets.h"
-#include "Application.h"
+#include "Engine.h"
 #include "ImGui/imgui.h"
 #include "FileSystem.h"
 #include "Importers.h"
@@ -23,7 +23,7 @@ bool WindowAssets::Init()
 {
 	bool ret = true;
 
-	App->resources->LoadEngineAssets(icons);
+	engine->resources->LoadEngineAssets(icons);
 
 	return ret;
 }
@@ -45,7 +45,7 @@ void WindowAssets::Draw()
 		}
 		ImGui::Spacing();
 		if (ImGui::Button("Reload", ImVec2(50, 16)))
-			App->resources->CheckAssetsRecursive("Assets");
+			engine->resources->CheckAssetsRecursive("Assets");
         ImGui::EndChild();
 
 		//Right window part ------------------------------------------------------------------------------------------------------------------------
@@ -127,7 +127,7 @@ void WindowAssets::DrawDirectoryRecursive(const char* directory, const char* fil
 				{
 					std::string file_to_delete = directory;
 					file_to_delete.append("/" + str);
-					App->resources->AddAssetToDelete(file_to_delete.c_str());
+					engine->resources->AddAssetToDelete(file_to_delete.c_str());
 					ImGui::CloseCurrentPopup();
 				}
 				ImGui::EndPopup();
@@ -150,7 +150,7 @@ void WindowAssets::DrawCurrentFolder()
 	{
 		if (tmp_files[i].find(".meta") == std::string::npos) 
 		{
-			if (App->resources->GetTypeFromPath(tmp_files[i].c_str()) != ResourceType::RESOURCE_UNKNOWN)
+			if (engine->resources->GetTypeFromPath(tmp_files[i].c_str()) != ResourceType::RESOURCE_UNKNOWN)
 				files.push_back(tmp_files[i]);
 		}
 	}
@@ -227,7 +227,7 @@ void WindowAssets::DrawCurrentFolder()
 					{
 						char shader_buf[64];
 						sprintf_s(shader_buf, 64, "%s/%s", current_folder.c_str(), shader_name);
-						App->resources->CreateNewResource(RESOURCE_SHADER, shader_name, shader_buf);
+						engine->resources->CreateNewResource(RESOURCE_SHADER, shader_name, shader_buf);
 						sprintf_s(shader_name, 32, "New Shader");
 						ImGui::CloseCurrentPopup();
 					}
@@ -278,7 +278,7 @@ bool WindowAssets::DrawIcon(const char* path, int id, bool isFolder)
 	}
 	else
 	{
-		std::string meta_file = App->resources->GenerateMetaFile(path);
+		std::string meta_file = engine->resources->GenerateMetaFile(path);
 		uint UID = 0;
 
 		std::string file_path = path;
@@ -289,15 +289,15 @@ bool WindowAssets::DrawIcon(const char* path, int id, bool isFolder)
 		}
 
 		if (FileSystem::Exists(meta_file.c_str()))
-			UID = App->resources->GetUIDFromMeta(meta_file.c_str());
+			UID = engine->resources->GetUIDFromMeta(meta_file.c_str());
 		else
-			UID = App->resources->Find(file_path.c_str());
+			UID = engine->resources->Find(file_path.c_str());
 
 		std::string file = FileSystem::GetFile(path);
 
 		ImGui::PushID(UID);
 
-		ResourceType type = App->resources->GetTypeFromPath(path);
+		ResourceType type = engine->resources->GetTypeFromPath(path);
 		uint imageID = icons.model->GetGpuID();
 
 		if(type == ResourceType::RESOURCE_TEXTURE)
@@ -327,7 +327,7 @@ bool WindowAssets::DrawIcon(const char* path, int id, bool isFolder)
 		if (ImGui::BeginPopupContextItem(path)) {
 			if (ImGui::Button("Delete"))
 			{
-				App->resources->AddAssetToDelete(path);
+				engine->resources->AddAssetToDelete(path);
 				ImGui::CloseCurrentPopup();
 				selectedItem[0] = '\0';
 				UnloadPreviews();
@@ -362,7 +362,7 @@ void WindowAssets::DrawModelInternalResources(const char* file_name)
 	if (ImGui::BeginPopup("Meshes", ImGuiWindowFlags_NoMove))
 	{
 		std::string model = current_folder + "/" + file_name;
-		const char* library_path = App->resources->Find(App->resources->GetUIDFromMeta(model.append(".meta").c_str()));
+		const char* library_path = engine->resources->Find(engine->resources->GetUIDFromMeta(model.append(".meta").c_str()));
 
 		std::vector<uint> meshes;
 		std::vector<uint> materials;
@@ -371,7 +371,7 @@ void WindowAssets::DrawModelInternalResources(const char* file_name)
 		for (size_t m = 0; m < meshes.size(); m++)
 		{
 			ImGui::PushID(meshes[m]);
-			ResourceData meshData = App->resources->RequestResourceData(meshes[m]);
+			ResourceData meshData = engine->resources->RequestResourceData(meshes[m]);
 			ImGui::Text("%s", meshData.name.c_str());
 			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
 			{
@@ -424,11 +424,11 @@ void WindowAssets::LoadPreviews(std::vector<std::string> current_folder_files)
 {
 	for (size_t i = 0; i < current_folder_files.size(); i++)
 	{
-		if (App->resources->GetTypeFromPath(current_folder_files[i].c_str()) == ResourceType::RESOURCE_TEXTURE)
+		if (engine->resources->GetTypeFromPath(current_folder_files[i].c_str()) == ResourceType::RESOURCE_TEXTURE)
 		{
 			std::string path = current_folder;
 			path.append("/" + current_folder_files[i]);
-			ResourceTexture* preview = dynamic_cast<ResourceTexture*>(App->resources->RequestResource(App->resources->Find(path.c_str())));
+			ResourceTexture* preview = dynamic_cast<ResourceTexture*>(engine->resources->RequestResource(engine->resources->Find(path.c_str())));
 			previews[FileSystem::GetFile(current_folder_files[i].c_str())] = preview;
 		}
 	}
@@ -438,7 +438,7 @@ void WindowAssets::UnloadPreviews()
 {
 	for (std::map<std::string, ResourceTexture*>::iterator preview = previews.begin(); preview != previews.end(); preview++)
 	{
-		App->resources->ReleaseResource(preview->second->GetUID());
+		engine->resources->ReleaseResource(preview->second->GetUID());
 	}
 
 	previews.clear();

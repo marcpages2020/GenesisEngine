@@ -15,11 +15,11 @@ struct GnClock
 	//time since startup
 	float timeSinceStartup();
 
-	float deltaTime(); //last frame expressed in seconds time
+	float DeltaTime(); //last frame expressed in seconds time
 	float timeScale; //scale at which time is passing
 	bool paused;
 	bool started;
-	float dt;
+	float deltaTime;
 	Timer timer;
 	Timer deltaTimer;
 };

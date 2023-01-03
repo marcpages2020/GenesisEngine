@@ -1,6 +1,6 @@
 #pragma once
 #include "Globals.h"
-#include "Application.h"
+#include "Engine.h"
 #include "WindowConsole.h"
 
 void log(LogType logType, const char file[], int line, const char* format, ...)
@@ -16,9 +16,9 @@ void log(LogType logType, const char file[], int line, const char* format, ...)
 	sprintf_s(tmp_string2, 4096, "\n%s(%d) : %s", file, line, tmp_string);
 	OutputDebugString(tmp_string2);
 
-	if (App != nullptr)
+	if (engine != nullptr)
 	{
-		WindowConsole* console = (WindowConsole*)App->editor->GetWindow(WINDOW_CONSOLE);
+		WindowConsole* console = (WindowConsole*)engine->editor->GetWindow(WINDOW_CONSOLE);
 		if (console != nullptr)
 		{
 			console->AddConsoleLog(logType, tmp_string);

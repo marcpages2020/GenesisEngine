@@ -1,5 +1,5 @@
 #include "ResourceMaterial.h"
-#include "Application.h"
+#include "Engine.h"
 
 ResourceMaterial::ResourceMaterial(uint UID) : Resource(UID, ResourceType::RESOURCE_MATERIAL), diffuseMapID(0), normalMapID(0), diffuseMap(nullptr), normalMap(nullptr) 
 {

@@ -19,9 +19,9 @@ class Transform;
 class Material;
 
 class aiMesh;
-class aiScene;
+struct aiScene;
 struct aiNode;
-class aiMaterial;
+struct aiMaterial;
 
 #include "MathGeoLib/include/MathGeoLib.h"
 

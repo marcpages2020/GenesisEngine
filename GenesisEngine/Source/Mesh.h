@@ -1,10 +1,10 @@
 #pragma once
 #include "Globals.h"
 #include "Component.h"
-#include <vector>;
 #include "Material.h"
-
 #include "MathGeoLib/include/MathGeoLib.h"
+
+#include <vector>;
 
 class ResourceMesh;
 

@@ -1,6 +1,6 @@
 #pragma once
 
-class Application;
+class Engine;
 
 class GnJSONObj;
 
@@ -37,17 +37,17 @@ public:
 		return true;
 	}
 
-	virtual update_status PreUpdate(float dt)
+	virtual update_status PreUpdate(float deltaTime)
 	{
 		return UPDATE_CONTINUE;
 	}
 
-	virtual update_status Update(float dt)
+	virtual update_status Update(float deltaTime)
 	{
 		return UPDATE_CONTINUE;
 	}
 
-	virtual update_status PostUpdate(float dt)
+	virtual update_status PostUpdate(float deltaTime)
 	{
 		return UPDATE_CONTINUE;
 	}

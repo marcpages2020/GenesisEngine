@@ -4,7 +4,7 @@
 #include "Module.h"
 #include "SDL/include/SDL.h"
 
-class Application;
+class Engine;
 
 class ModuleWindow : public Module
 {

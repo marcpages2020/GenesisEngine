@@ -1,5 +1,5 @@
 #include "FileSystem.h"
-#include "Application.h"
+#include "Engine.h"
 
 #include "SDL/include/SDL.h"
 #include <algorithm>
@@ -240,7 +240,7 @@ std::string FileSystem::ProcessPath(const char* path)
 std::string FileSystem::NormalizePath(const char* full_path)
 {
 	std::string newPath(full_path);
-	for (int i = 0; i < newPath.size(); ++i)
+	for (size_t i = 0; i < newPath.size(); ++i)
 	{
 		if (newPath[i] == '\\')
 			newPath[i] = '/';

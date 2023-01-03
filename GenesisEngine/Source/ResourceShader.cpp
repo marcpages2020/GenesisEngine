@@ -1,6 +1,6 @@
 #include "ResourceShader.h"
 #include "glew/include/glew.h"
-#include "Application.h"
+#include "Engine.h"
 #include "GameObject.h"
 #include "Transform.h"
 #include "Time.h"
@@ -104,7 +104,7 @@ void ResourceShader::OnEditor(Material* material, ResourceMaterial* resourceMate
 
 		ImGui::Spacing();
 		if (ImGui::Button("Save Uniforms"))
-			App->resources->SaveResource(this);
+			engine->resources->SaveResource(this);
 
 		ImGui::Spacing();
 		ImGui::TreePop();
@@ -280,10 +280,10 @@ void ResourceShader::UpdateUniforms(Material* material, ResourceMaterial* resour
 				SetMat4("model_matrix", globalTransform.Transposed().ptr());
 			}
 			else if (it->first == "projection") {
-				SetMat4("projection", App->camera->GetProjectionMatrixM().Transposed().ptr());
+				SetMat4("projection", engine->camera->GetProjectionMatrixM().Transposed().ptr());
 			}
 			else if (it->first == "view") {
-				SetMat4("view", App->camera->GetViewMatrixM().Transposed().ptr());
+				SetMat4("view", engine->camera->GetViewMatrixM().Transposed().ptr());
 			}
 			else if (it->first == "time") {
 				SetFloat("time", Time::realClock.timeSinceStartup());
@@ -295,7 +295,7 @@ void ResourceShader::UpdateUniforms(Material* material, ResourceMaterial* resour
 				SetMat3("normalMatrix", normalMatrix.ptr());
 			}
 			else if (it->first == "cameraPosition") {
-				float3 cameraPosition = App->camera->GetPosition();
+				float3 cameraPosition = engine->camera->GetPosition();
 				SetVec3("cameraPosition", cameraPosition.x, cameraPosition.y, cameraPosition.z);
 			} 
 			else if (it->first == "diffuseColor") {

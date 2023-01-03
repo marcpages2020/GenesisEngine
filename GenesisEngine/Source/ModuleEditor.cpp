@@ -1,4 +1,4 @@
-#include "Application.h"
+#include "Engine.h"
 #include "ModuleEditor.h"
 #include "GnJSON.h"
 #include "Mesh.h"
@@ -72,7 +72,7 @@ bool ModuleEditor::Init()
 
 	ImGui::StyleColorsDark();
 
-	ImGui_ImplSDL2_InitForOpenGL(App->window->window, App->renderer3D->context);
+	ImGui_ImplSDL2_InitForOpenGL(engine->window->window, engine->renderer3D->context);
 	ImGui_ImplOpenGL3_Init("#version 330");
 
 	return true;
@@ -90,7 +90,7 @@ bool ModuleEditor::Start()
 	return ret;
 }
 
-update_status ModuleEditor::Update(float dt)
+update_status ModuleEditor::Update(float deltaTime)
 {
 	update_status ret = UPDATE_CONTINUE;
 
@@ -101,7 +101,7 @@ update_status ModuleEditor::Draw()
 {
 	//Update the frames
 	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplSDL2_NewFrame(App->window->window);
+	ImGui_ImplSDL2_NewFrame(engine->window->window);
 	ImGui::NewFrame();
 
 	ShowDockSpace(open_dockspace);
@@ -309,43 +309,43 @@ bool ModuleEditor::CreateMainMenuBar() {
 		{
 			if (ImGui::MenuItem("Empty Object"))
 			{
-				App->scene->AddGameObject(new GameObject());
+				engine->scene->AddGameObject(new GameObject());
 			}
 			else if (ImGui::MenuItem("Cube"))
 			{
-				App->scene->AddGameObject(App->resources->RequestGameObject("Assets/EngineAssets/Primitives/cube.fbx"));
+				engine->scene->AddGameObject(engine->resources->RequestGameObject("Assets/EngineAssets/Primitives/cube.fbx"));
 			}
 			else if (ImGui::MenuItem("Cylinder"))
 			{
-				App->scene->AddGameObject(App->resources->RequestGameObject("Assets/EngineAssets/Primitives/cylinder.fbx"));
+				engine->scene->AddGameObject(engine->resources->RequestGameObject("Assets/EngineAssets/Primitives/cylinder.fbx"));
 			}
 			else if (ImGui::MenuItem("Sphere"))
 			{
-				App->scene->AddGameObject(App->resources->RequestGameObject("Assets/EngineAssets/Primitives/sphere.fbx"));
+				engine->scene->AddGameObject(engine->resources->RequestGameObject("Assets/EngineAssets/Primitives/sphere.fbx"));
 			}
 			else if (ImGui::MenuItem("Pyramid"))
 			{
-				App->scene->AddGameObject(App->resources->RequestGameObject("Assets/EngineAssets/Primitives/pyramid.fbx"));
+				engine->scene->AddGameObject(engine->resources->RequestGameObject("Assets/EngineAssets/Primitives/pyramid.fbx"));
 			}
 			else if (ImGui::MenuItem("Plane"))
 			{
-				App->scene->AddGameObject(App->resources->RequestGameObject("Assets/EngineAssets/Primitives/plane.fbx"));
+				engine->scene->AddGameObject(engine->resources->RequestGameObject("Assets/EngineAssets/Primitives/plane.fbx"));
 			}
 			else if (ImGui::MenuItem("Cone"))
 			{
-				App->scene->AddGameObject(App->resources->RequestGameObject("Assets/EngineAssets/Primitives/cone.fbx"));
+				engine->scene->AddGameObject(engine->resources->RequestGameObject("Assets/EngineAssets/Primitives/cone.fbx"));
 			}
 			else if (ImGui::MenuItem("Torus"))
 			{
-				App->scene->AddGameObject(App->resources->RequestGameObject("Assets/EngineAssets/Primitives/torus.fbx"));
+				engine->scene->AddGameObject(engine->resources->RequestGameObject("Assets/EngineAssets/Primitives/torus.fbx"));
 			}
 			else if (ImGui::MenuItem("Suzanne"))
 			{
-				App->scene->AddGameObject(App->resources->RequestGameObject("Assets/EngineAssets/Primitives/monkey.fbx"));
+				engine->scene->AddGameObject(engine->resources->RequestGameObject("Assets/EngineAssets/Primitives/monkey.fbx"));
 			}
 			else if (ImGui::MenuItem("Camera"))
 			{
-				App->scene->AddGameObject(new GameObject(ComponentType::CAMERA));
+				engine->scene->AddGameObject(new GameObject(ComponentType::CAMERA));
 			}
 			ImGui::EndMenu();
 		}
@@ -419,14 +419,14 @@ void ModuleEditor::ShowGameButtons()
 		ImGui::RadioButton("Local", true);
 
 		ImGui::NextColumn();
-		if (App->in_game == false)
+		if (engine->in_game == false)
 		{
 			if (ImGui::Button("Play", ImVec2(40, 20)))
-				App->StartGame();
+				engine->StartGame();
 		}
 		else {
 			if (ImGui::Button("Stop", ImVec2(40, 20)))
-				App->StopGame();
+				engine->StopGame();
 		}
 
 		ImGui::SameLine();
@@ -469,7 +469,7 @@ void ModuleEditor::LoadFile(const char* filter_extension, const char* from_dir)
 		ImGui::SameLine();
 		if (ImGui::Button("Ok", ImVec2(50, 20))) {
 			file_dialog = ready_to_close;
-			App->Load(selected_file);
+			engine->Load(selected_file);
 		}
 		ImGui::SameLine();
 
@@ -507,7 +507,7 @@ void ModuleEditor::SaveFile(const char* filter_extension, const char* from_dir)
 				strcpy(scene_name, "untitled");
 
 			sprintf_s(selected_file, 128, "%s/%s.scene", selected_folder, scene_name);
-			App->Save(selected_file);
+			engine->Save(selected_file);
 
 			selected_file[0] = '\0';
 		}
@@ -521,7 +521,7 @@ void ModuleEditor::SaveFile(const char* filter_extension, const char* from_dir)
 				strcpy(scene_name, "untitled");
 
 			sprintf_s(selected_file, 128, "%s/%s.scene", selected_folder, scene_name);
-			App->Save(selected_file);
+			engine->Save(selected_file);
 		}
 		ImGui::SameLine();
 
@@ -598,10 +598,10 @@ void ModuleEditor::DrawDirectoryRecursive(const char* directory, const char* fil
 					file_dialog = ready_to_close;
 					if (scene_operation == SceneOperation::SAVE)
 					{
-						App->Save(selected_file);}
+						engine->Save(selected_file);}
 					else if (scene_operation == SceneOperation::LOAD)
 					{
-						App->Load(selected_file);}
+						engine->Load(selected_file);}
 				}
 			}
 
@@ -614,7 +614,7 @@ void ModuleEditor::OnResize(ImVec2 window_size)
 {
 	image_size = window_size;
 
-	App->camera->OnResize(image_size.x, image_size.y);
-	App->renderer3D->OnResize(image_size.x, image_size.y);
+	engine->camera->OnResize(image_size.x, image_size.y);
+	engine->renderer3D->OnResize(image_size.x, image_size.y);
 }
 

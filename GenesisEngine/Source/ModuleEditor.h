@@ -21,7 +21,7 @@ public:
 	bool Init();
 	bool Start() override;
 	bool LoadConfig(GnJSONObj& config) override;
-	update_status Update(float dt);
+	update_status Update(float deltaTime);
 	update_status Draw();
 	bool CleanUp();
 

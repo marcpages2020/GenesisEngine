@@ -66,7 +66,7 @@ public:
 	GnJSONArray(const char* name);
 	~GnJSONArray();
 
-	int Size();
+	size_t Size();
 	GnJSONObj GetObjectInArray(const char* name);
 	GnJSONObj GetObjectAt(int index);
 

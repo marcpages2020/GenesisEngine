@@ -1,5 +1,5 @@
 #include "Globals.h"
-#include "Application.h"
+#include "Engine.h"
 #include <vector>
 
 #include "GameObject.h"
@@ -45,7 +45,7 @@ bool ModuleRenderer3D::Init()
 	bool ret = true;
 
 	//Create context
-	context = SDL_GL_CreateContext(App->window->window);
+	context = SDL_GL_CreateContext(engine->window->window);
 	if (context == NULL)
 	{
 		LOG_ERROR("OpenGL context could not be created! SDL_Error: %s\n", SDL_GetError());
@@ -73,7 +73,7 @@ bool ModuleRenderer3D::Init()
 		//Initialize Projection Matrix
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
-		glLoadMatrixf(App->camera->GetProjectionMatrix());
+		glLoadMatrixf(engine->camera->GetProjectionMatrix());
 
 		//Check for error
 		GLenum error = glGetError();
@@ -86,7 +86,7 @@ bool ModuleRenderer3D::Init()
 		//Initialize Modelview Matrix
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
-		glLoadMatrixf(App->camera->GetViewMatrix());		
+		glLoadMatrixf(engine->camera->GetViewMatrix());		
 
 		//Check for error
 		error = glGetError();
@@ -164,20 +164,20 @@ bool ModuleRenderer3D::LoadConfig(GnJSONObj& config)
 }
 
 // PreUpdate: clear buffer
-update_status ModuleRenderer3D::PreUpdate(float dt)
+update_status ModuleRenderer3D::PreUpdate(float deltaTime)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 
-	Color c = App->camera->background;
+	Color c = engine->camera->background;
 	glClearColor(c.r, c.g, c.b, c.a);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	glLoadMatrixf(App->camera->GetViewMatrix());
+	glLoadMatrixf(engine->camera->GetViewMatrix());
 
 	//light 0 on cam pos
-	float3 cameraPosition = App->camera->GetPosition();
+	float3 cameraPosition = engine->camera->GetPosition();
 	lights[0].SetPos(cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
 	blendedMeshes.clear();
@@ -188,7 +188,7 @@ update_status ModuleRenderer3D::PreUpdate(float dt)
 	return UPDATE_CONTINUE;
 }
 
-update_status ModuleRenderer3D::Update(float dt)
+update_status ModuleRenderer3D::Update(float deltaTime)
 {
 	update_status ret = UPDATE_CONTINUE;
 
@@ -205,18 +205,18 @@ update_status ModuleRenderer3D::Update(float dt)
 }
 
 // PostUpdate present buffer to screen
-update_status ModuleRenderer3D::PostUpdate(float dt)
+update_status ModuleRenderer3D::PostUpdate(float deltaTime)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	App->editor->Draw();
+	engine->editor->Draw();
 
-	SDL_GL_SwapWindow(App->window->window);
+	SDL_GL_SwapWindow(engine->window->window);
 
-	if (App->scene->selectedGameObject != nullptr && App->scene->selectedGameObject->to_delete)
+	if (engine->scene->selectedGameObject != nullptr && engine->scene->selectedGameObject->to_delete)
 	{
-		App->scene->DeleteGameObject(App->scene->selectedGameObject);
-		App->scene->selectedGameObject = nullptr;
+		engine->scene->DeleteGameObject(engine->scene->selectedGameObject);
+		engine->scene->selectedGameObject = nullptr;
 	}
 
 	return UPDATE_CONTINUE;
@@ -253,18 +253,18 @@ void ModuleRenderer3D::OnResize(int width, int height)
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glLoadMatrixf(App->camera->GetProjectionMatrix());
+	glLoadMatrixf(engine->camera->GetProjectionMatrix());
 }
 
 void ModuleRenderer3D::UpdateProjectionMatrix(float* projectionMatrix)
 {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	glLoadMatrixf(App->camera->GetViewMatrix());
+	glLoadMatrixf(engine->camera->GetViewMatrix());
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glLoadMatrixf(App->camera->GetProjectionMatrix());
+	glLoadMatrixf(engine->camera->GetProjectionMatrix());
 }
 
 void ModuleRenderer3D::DrawAABB(float3* cornerPoints)
@@ -347,25 +347,25 @@ Camera* ModuleRenderer3D::GetMainCamera()
 bool ModuleRenderer3D::IsInsideCameraView(AABB aabb)
 {
 	if (cull_editor_camera)
-		return _mainCamera->ContainsAABB(aabb) || App->camera->GetCamera()->ContainsAABB(aabb);
+		return _mainCamera->ContainsAABB(aabb) || engine->camera->GetCamera()->ContainsAABB(aabb);
 	else
 		return _mainCamera->ContainsAABB(aabb);
 }
 
 void ModuleRenderer3D::AddBlendedMesh(float3 position, GnMesh* mesh)
 {
-	float distance = App->camera->GetPosition().Sub(position).Length();
+	float distance = engine->camera->GetPosition().Sub(position).Length();
 	blendedMeshes[distance] = mesh;
 }
 
 ResourceShader* ModuleRenderer3D::GetDefaultShader()
 {
-	ResourceShader* defaultShader = (ResourceShader*)App->resources->RequestResource(App->resources->Find("Assets/EngineAssets/default_shader.vert"));
+	ResourceShader* defaultShader = (ResourceShader*)engine->resources->RequestResource(engine->resources->Find("Assets/EngineAssets/default_shader.vert"));
 
 	if (defaultShader == nullptr)
 	{
-		uint defaultShaderID = App->resources->CreateNewResource(RESOURCE_SHADER, "default_shader", "Assets/EngineAssets/default_shader");
-		defaultShader = (ResourceShader*)App->resources->RequestResource(App->resources->Find("Assets/EngineAssets/default_shader.vert"));
+		uint defaultShaderID = engine->resources->CreateNewResource(RESOURCE_SHADER, "default_shader", "Assets/EngineAssets/default_shader");
+		defaultShader = (ResourceShader*)engine->resources->RequestResource(engine->resources->Find("Assets/EngineAssets/default_shader.vert"));
 	}
 
 	return defaultShader;
@@ -428,18 +428,18 @@ void ModuleRenderer3D::GenerateBuffers()
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, App->window->width, App->window->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, engine->window->width, engine->window->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
 	//RenderBuffer
 	glGenRenderbuffers(1, &renderBuffer);
 	glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, App->window->width, App->window->height);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, engine->window->width, engine->window->height);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBuffer);
 
 	//Depth RenderBuffer =============================================================================================================
 	//glGenRenderbuffers(1, &depthRenderBuffer);
 	//glBindRenderbuffer(GL_RENDERBUFFER, depthRenderBuffer);
-	//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, App->window->width, App->window->height);
+	//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, engine->window->width, engine->window->height);
 	//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBuffer);
 
 	glGenTextures(1, &depthTexture);
@@ -447,7 +447,7 @@ void ModuleRenderer3D::GenerateBuffers()
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, App->window->width, App->window->height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, engine->window->width, engine->window->height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
 
 	//==================================================================================================================================
 

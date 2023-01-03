@@ -2,7 +2,7 @@
 #include "FileSystem.h"
 #include "ShaderImporter.h"
 #include "ResourceShader.h"
-#include "Application.h"
+#include "Engine.h"
 #include <utility>
 
 #include "ImGui/imgui.h"
@@ -147,14 +147,14 @@ void WindowShaderEditor::Draw()
 				fragmentShaderEditor.SetErrorMarkers(markers);
 				fragment_shader_has_error = false;
 				
-				ResourceShader* shader = dynamic_cast<ResourceShader*>(App->resources->RequestResource(App->resources->Find(vertexShaderPath)));
+				ResourceShader* shader = dynamic_cast<ResourceShader*>(engine->resources->RequestResource(engine->resources->Find(vertexShaderPath)));
 				if (ShaderImporter::RecompileShader(vertexShaderEditor.GetText().c_str(), fragmentShaderEditor.GetText().c_str(), shader))
 				{
 					FileSystem::Save(vertexShaderPath, vertexShaderEditor.GetText().c_str(), strlen(vertexShaderEditor.GetText().c_str()));
 					FileSystem::Save(fragmentShaderPath, fragmentShaderEditor.GetText().c_str(), strlen(fragmentShaderEditor.GetText().c_str()));
 
 					ShaderImporter::Save(shader, vertexShaderEditor.GetText().c_str(), fragmentShaderEditor.GetText().c_str());
-					App->resources->SaveResource(App->resources->GetResource(App->resources->Find(vertexShaderPath)));
+					engine->resources->SaveResource(engine->resources->GetResource(engine->resources->Find(vertexShaderPath)));
 				}
 
 			}
@@ -169,12 +169,12 @@ void WindowShaderEditor::Draw()
 				fragmentShaderEditor.SetErrorMarkers(markers);
 				fragment_shader_has_error = false;
 
-				ResourceShader* shader = dynamic_cast<ResourceShader*>(App->resources->RequestResource(App->resources->Find(vertexShaderPath)));
+				ResourceShader* shader = dynamic_cast<ResourceShader*>(engine->resources->RequestResource(engine->resources->Find(vertexShaderPath)));
 				if (ShaderImporter::RecompileShader(vertexShaderEditor.GetText().c_str(), fragmentShaderEditor.GetText().c_str(), shader))
 				{
 					FileSystem::Save(vertexShaderPath, vertexShaderEditor.GetText().c_str(), strlen(vertexShaderEditor.GetText().c_str()));
 					FileSystem::Save(fragmentShaderPath, fragmentShaderEditor.GetText().c_str(), strlen(fragmentShaderEditor.GetText().c_str()));
-					App->resources->SaveResource(App->resources->GetResource(App->resources->Find(vertexShaderPath)));
+					engine->resources->SaveResource(engine->resources->GetResource(engine->resources->Find(vertexShaderPath)));
 				}
 				visible = false;
 			}

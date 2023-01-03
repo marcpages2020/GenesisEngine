@@ -1,5 +1,5 @@
 #include "MaterialImporter.h"
-#include "Application.h"
+#include "Engine.h"
 #include "Timer.h"
 #include "ResourceMaterial.h"
 #include "ResourceTexture.h"
@@ -30,13 +30,13 @@ void MaterialImporter::Import(const aiMaterial* aimaterial, ResourceMaterial* ma
 
 		if (file_path.size() > 0)
 		{
-			std::string meta_file = App->resources->GenerateMetaFile(file_path.c_str());
+			std::string meta_file = engine->resources->GenerateMetaFile(file_path.c_str());
 			if (!FileSystem::Exists(meta_file.c_str()))
 			{
-				material->diffuseMapID = App->resources->ImportFile(file_path.c_str());}
+				material->diffuseMapID = engine->resources->ImportFile(file_path.c_str());}
 			else 
 			{
-				material->diffuseMapID = App->resources->GetUIDFromMeta(meta_file.c_str());}
+				material->diffuseMapID = engine->resources->GetUIDFromMeta(meta_file.c_str());}
 
 			if (material->diffuseMapID == 0)
 				LOG("Texture %s not found", file_path.c_str());
@@ -81,7 +81,7 @@ bool MaterialImporter::Load(const char* fileBuffer, ResourceMaterial* material, 
 	if (diffuseMapID != 0)
 	{
 		material->diffuseMapID = diffuseMapID;
-		material->diffuseMap = dynamic_cast<ResourceTexture*>(App->resources->RequestResource(diffuseMapID));
+		material->diffuseMap = dynamic_cast<ResourceTexture*>(engine->resources->RequestResource(diffuseMapID));
 		float2 diffuseMapTiling = material_data.GetFloat2("diffuseMapTiling");
 		material->tiling[DIFFUSE_MAP][0] = diffuseMapTiling.x;
 		material->tiling[DIFFUSE_MAP][1] = diffuseMapTiling.y;
@@ -93,7 +93,7 @@ bool MaterialImporter::Load(const char* fileBuffer, ResourceMaterial* material, 
 	if (normalMapID != 0)
 	{
 		material->normalMapID = normalMapID;
-		material->normalMap = dynamic_cast<ResourceTexture*>(App->resources->RequestResource(normalMapID));
+		material->normalMap = dynamic_cast<ResourceTexture*>(engine->resources->RequestResource(normalMapID));
 		float2 normalMapTiling = material_data.GetFloat2("normalMapTiling");
 		material->tiling[NORMAL_MAP][0] = normalMapTiling.x;
 		material->tiling[NORMAL_MAP][1] = normalMapTiling.y;
@@ -147,13 +147,13 @@ bool MaterialImporter::DeleteTexture(const char* material_library_path)
 	GnJSONObj material_data(buffer);
 
 	int diffuseTextureUID = material_data.GetInt("diffuseTexture");
-	const char* texture_library_path = App->resources->Find(diffuseTextureUID);
+	const char* texture_library_path = engine->resources->Find(diffuseTextureUID);
 
 	if (texture_library_path != nullptr)
 	{
 		FileSystem::Delete(texture_library_path);
-		App->resources->ReleaseResource(diffuseTextureUID);
-		App->resources->ReleaseResourceData(diffuseTextureUID);
+		engine->resources->ReleaseResource(diffuseTextureUID);
+		engine->resources->ReleaseResourceData(diffuseTextureUID);
 	}
 	else
 		LOG_WARNING("Texture: %s could not be deleted. Not found", material_library_path);
@@ -172,7 +172,7 @@ const char* MaterialImporter::ExtractTexture(const char* material_library_path)
 	GnJSONObj material_data(buffer);
 
 	int diffuseTextureUID = material_data.GetInt("diffuseTexture");
-	const char* texture_library_path = App->resources->Find(diffuseTextureUID);
+	const char* texture_library_path = engine->resources->Find(diffuseTextureUID);
 
 	material_data.Release();
 	RELEASE_ARRAY(buffer);

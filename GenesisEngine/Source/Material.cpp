@@ -4,7 +4,7 @@
 #include "FileSystem.h"
 #include "GnJSON.h"
 #include "GameObject.h"
-#include "Application.h"
+#include "Engine.h"
 #include "ResourceTexture.h"
 #include "ResourceShader.h"
 #include "glew/include/glew.h"
@@ -47,10 +47,10 @@ Material::Material(GameObject* gameObject) : Component(gameObject), checkers_ima
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	shader = dynamic_cast<ResourceShader*>(App->resources->RequestResource(App->resources->Find("Assets/Shaders/phong.vert")));
+	shader = dynamic_cast<ResourceShader*>(engine->resources->RequestResource(engine->resources->Find("Assets/Shaders/phong.vert")));
 
 	if (shader == nullptr)
-		shader = App->renderer3D->GetDefaultShader();
+		shader = engine->renderer3D->GetDefaultShader();
 
 	shaderID = shader->GetUID();
 }
@@ -61,23 +61,23 @@ Material::~Material()
 	{
 		if (shader != nullptr)
 		{
-			App->resources->ReleaseResource(shader->GetUID());
+			engine->resources->ReleaseResource(shader->GetUID());
 			shader = nullptr;
 		}
 
 		if (_resource->diffuseMap != nullptr)
 		{
-			App->resources->ReleaseResource(_resource->diffuseMap->GetUID());
+			engine->resources->ReleaseResource(_resource->diffuseMap->GetUID());
 			//_resource->diffuseMap = nullptr;
 		}
 
 		if (_resource->normalMap != nullptr)
 		{
-			App->resources->ReleaseResource(_resource->normalMap->GetUID());
+			engine->resources->ReleaseResource(_resource->normalMap->GetUID());
 			//_resource->normalMap = nullptr;
 		}
 
-		App->resources->ReleaseResource(_resource->GetUID());
+		engine->resources->ReleaseResource(_resource->GetUID());
 		_resource = nullptr;
 	}
 
@@ -88,23 +88,23 @@ void Material::SetResourceUID(uint UID)
 {
 	//Release old material
 	if (_resource != nullptr)
-		App->resources->ReleaseResource(_resource->GetUID());
+		engine->resources->ReleaseResource(_resource->GetUID());
 
 	//Assign new material
 	_resourceUID = UID;
-	_resource = dynamic_cast<ResourceMaterial*>(App->resources->RequestResource(UID));
+	_resource = dynamic_cast<ResourceMaterial*>(engine->resources->RequestResource(UID));
 
 	if (_resource != nullptr)
 	{
-		SetTexture(dynamic_cast<ResourceTexture*>(App->resources->RequestResource(_resource->diffuseMapID)),DIFFUSE_MAP);
-		SetTexture(dynamic_cast<ResourceTexture*>(App->resources->RequestResource(_resource->normalMapID)), NORMAL_MAP);
+		SetTexture(dynamic_cast<ResourceTexture*>(engine->resources->RequestResource(_resource->diffuseMapID)),DIFFUSE_MAP);
+		SetTexture(dynamic_cast<ResourceTexture*>(engine->resources->RequestResource(_resource->normalMapID)), NORMAL_MAP);
 	}
 }
 
 void Material::SetShader(ResourceShader* new_shader)
 {
 	if (shader != nullptr)
-		App->resources->ReleaseResource(shader->GetUID());
+		engine->resources->ReleaseResource(shader->GetUID());
 
 	if (new_shader != nullptr)
 	{
@@ -113,12 +113,12 @@ void Material::SetShader(ResourceShader* new_shader)
 	}
 	else
 	{
-		App->renderer3D->GetDefaultShader();}
+		engine->renderer3D->GetDefaultShader();}
 }
 
 void Material::BindTexture(ResourceTexture* texture)
 {
-	if (!App->resources->Exists(_resourceUID)) 
+	if (!engine->resources->Exists(_resourceUID)) 
 	{
 		_resource = nullptr;
 		_resourceUID = 0u;
@@ -133,14 +133,14 @@ void Material::BindTexture(ResourceTexture* texture)
 
 void Material::UseShader()
 {
-	if(App->resources->Exists(shaderID))
+	if(engine->resources->Exists(shaderID))
 	{
 		shader->Use();
 		shader->UpdateUniforms(this, _resource);
 	}
 	else
 	{
-		shader = App->renderer3D->GetDefaultShader();
+		shader = engine->renderer3D->GetDefaultShader();
 		shader->Use();
 		shader->UpdateUniforms(this, _resource);
 	}
@@ -150,7 +150,7 @@ void Material::UseShader()
 	{
 		if (_resource->diffuseMap != nullptr)
 		{
-			if (!App->resources->Exists(_resource->diffuseMapID))
+			if (!engine->resources->Exists(_resource->diffuseMapID))
 			{
 				_resource->diffuseMap = nullptr;
 				_resource->diffuseMapID = 0;
@@ -175,7 +175,7 @@ void Material::UseShader()
 	//normal map
 	if (_resource->normalMap != nullptr)
 	{
-		if (!App->resources->Exists(_resource->normalMapID))
+		if (!engine->resources->Exists(_resource->normalMapID))
 		{
 			_resource->normalMap = nullptr;
 			_resource->normalMapID = 0;
@@ -219,7 +219,7 @@ void Material::Load(GnJSONObj& load_object)
 	_resourceUID = load_object.GetInt("MaterialID", 0);
 	SetResourceUID(_resourceUID);
 	uint shaderUID = load_object.GetInt("ShaderID", 0);
-	SetShader((ResourceShader*)App->resources->RequestResource(shaderUID));
+	SetShader((ResourceShader*)engine->resources->RequestResource(shaderUID));
 }
 
 void Material::OnEditor()
@@ -262,13 +262,13 @@ void Material::OnEditor()
 				IM_ASSERT(payload->DataSize == sizeof(int));
 				int UID = *(const int*)payload->Data;
 
-				Resource* possible_shader = App->resources->RequestResource(UID);
+				Resource* possible_shader = engine->resources->RequestResource(UID);
 
 				if (possible_shader != nullptr && possible_shader->GetType() == ResourceType::RESOURCE_SHADER) {
-					SetShader(dynamic_cast<ResourceShader*>(App->resources->RequestResource(UID)));
+					SetShader(dynamic_cast<ResourceShader*>(engine->resources->RequestResource(UID)));
 
 					//Update shader
-					WindowShaderEditor* shaderEditor = dynamic_cast<WindowShaderEditor*>(App->editor->windows[WINDOW_SHADER_EDITOR]);
+					WindowShaderEditor* shaderEditor = dynamic_cast<WindowShaderEditor*>(engine->editor->windows[WINDOW_SHADER_EDITOR]);
 					if (shaderEditor->visible)
 						shaderEditor->Open(shader->assetsFile.c_str());
 				}
@@ -280,7 +280,7 @@ void Material::OnEditor()
 		ImGui::Spacing();
 
 		if(ImGui::Button("Open Shader editor")) {
-			WindowShaderEditor* shaderEditor = dynamic_cast<WindowShaderEditor*>(App->editor->windows[WINDOW_SHADER_EDITOR]);
+			WindowShaderEditor* shaderEditor = dynamic_cast<WindowShaderEditor*>(engine->editor->windows[WINDOW_SHADER_EDITOR]);
 			shaderEditor->Open(shader->assetsFile.c_str());
 		}
 
@@ -322,8 +322,8 @@ ResourceTexture* Material::DrawTextureInformation(ResourceTexture* texture, uint
 		{
 			IM_ASSERT(payload->DataSize == sizeof(int));
 			int payload_n = *(const int*)payload->Data;
-			WindowAssets* assets_window = (WindowAssets*)App->editor->windows[WINDOW_ASSETS];
-			Resource* possible_texture = App->resources->RequestResource(payload_n);
+			WindowAssets* assets_window = (WindowAssets*)engine->editor->windows[WINDOW_ASSETS];
+			Resource* possible_texture = engine->resources->RequestResource(payload_n);
 
 			if (possible_texture->GetType() == ResourceType::RESOURCE_TEXTURE) {
 				texture = dynamic_cast<ResourceTexture*>(possible_texture);
@@ -347,7 +347,7 @@ ResourceTexture* Material::DrawTextureInformation(ResourceTexture* texture, uint
 
 		if (ImGui::Button(button_text.c_str()))
 		{
-			App->resources->ReleaseResource(texture->GetUID());
+			engine->resources->ReleaseResource(texture->GetUID());
 			texture = nullptr;
 			textureUID = 0;
 		}

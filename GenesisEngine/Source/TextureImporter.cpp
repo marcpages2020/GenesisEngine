@@ -1,5 +1,5 @@
 #include "TextureImporter.h"
-#include "Application.h"
+#include "Engine.h"
 #include "FileSystem.h"
 #include "Timer.h"
 #include "ResourceTexture.h"
@@ -80,8 +80,8 @@ uint TextureImporter::Save(ResourceTexture* texture, char** fileBuffer)
 
 	ilBindImage(texture->GetID());
 
-	TextureImportingOptions importingOptions = App->resources->textureImportingOptions;
-	ApplyImportingOptions(App->resources->textureImportingOptions);
+	TextureImportingOptions importingOptions = engine->resources->textureImportingOptions;
+	ApplyImportingOptions(engine->resources->textureImportingOptions);
 
 	ilSetInteger(IL_DXTC_DATA_FORMAT, IL_DXT5);
 	size = ilSaveL(IL_DDS, nullptr, 0);

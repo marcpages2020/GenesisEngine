@@ -2,7 +2,7 @@
 #include "ImGui/imgui.h"
 #include "GameObject.h"
 #include "ModuleScene.h"
-#include "Application.h"
+#include "Engine.h"
 
 WindowHierarchy::WindowHierarchy() : EditorWindow() 
 {
@@ -16,7 +16,7 @@ void WindowHierarchy::Draw()
 	if (ImGui::Begin("Hierarchy", &visible))
 	{
 		focused = ImGui::IsWindowFocused();
-		GameObject* root = App->scene->GetRoot();
+		GameObject* root = engine->scene->GetRoot();
 		int id = 0;
 		PreorderHierarchy(root, id);
 	}
@@ -27,10 +27,10 @@ void WindowHierarchy::PreorderHierarchy(GameObject* gameObject, int& id)
 {
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 
-	if (gameObject == App->scene->GetRoot())
+	if (gameObject == engine->scene->GetRoot())
 		flags |= ImGuiTreeNodeFlags_DefaultOpen;
 
-	if (App->scene->selectedGameObject == gameObject)
+	if (engine->scene->selectedGameObject == gameObject)
 		flags |= ImGuiTreeNodeFlags_Selected;
 
 	if (gameObject->GetChildrenAmount() == 0)
@@ -40,7 +40,7 @@ void WindowHierarchy::PreorderHierarchy(GameObject* gameObject, int& id)
 	if (ImGui::TreeNodeEx(gameObject->GetName(), flags))
 	{
 		if (ImGui::IsItemClicked())
-			App->scene->selectedGameObject = gameObject;
+			engine->scene->selectedGameObject = gameObject;
 
 		ImGui::PushID(gameObject->UUID);
 		if (ImGui::BeginDragDropSource())
@@ -56,7 +56,7 @@ void WindowHierarchy::PreorderHierarchy(GameObject* gameObject, int& id)
 				IM_ASSERT(payload->DataSize == sizeof(int));
 				int payload_n = *(const int*)payload->Data;
 
-				std::vector<GameObject*> gameObjects = App->scene->GetAllGameObjects();
+				std::vector<GameObject*> gameObjects = engine->scene->GetAllGameObjects();
 				GameObject* target = nullptr;
 
 				for (size_t i = 0; i < gameObjects.size(); i++)

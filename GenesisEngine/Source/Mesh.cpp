@@ -1,5 +1,5 @@
 #include "Mesh.h"
-#include "Application.h"
+#include "Engine.h"
 #include "ModuleRenderer3D.h"
 #include "FileSystem.h"
 #include "Material.h"
@@ -27,7 +27,7 @@ GnMesh::~GnMesh()
 {
 	if (_resource != nullptr) 
 	{
-		App->resources->ReleaseResource(_resource->GetUID());
+		engine->resources->ReleaseResource(_resource->GetUID());
 		_resource = nullptr;
 	}
 }
@@ -53,10 +53,10 @@ void GnMesh::Load(GnJSONObj& load_object)
 void GnMesh::SetResourceUID(uint UID)
 {
 	if (_resource != nullptr)
-		App->resources->ReleaseResource(_resourceUID);
+		engine->resources->ReleaseResource(_resourceUID);
 
 	_resourceUID = UID;
-	_resource = (ResourceMesh*)App->resources->RequestResource(_resourceUID);
+	_resource = (ResourceMesh*)engine->resources->RequestResource(_resourceUID);
 
 	if(_resource != nullptr)
 		GenerateAABB();
@@ -96,13 +96,13 @@ void GnMesh::Update()
  		Render();
 	}
 	else {
-		App->renderer3D->AddBlendedMesh(_gameObject->GetTransform()->GetPosition(), this);
+		engine->renderer3D->AddBlendedMesh(_gameObject->GetTransform()->GetPosition(), this);
 	}
 }
 
 void GnMesh::Render()
 {
-	if (!App->resources->Exists(_resourceUID)) {
+	if (!engine->resources->Exists(_resourceUID)) {
 		_resource = nullptr;
 		_resourceUID = 0u;
 		_AABB.SetNegativeInfinity();
@@ -121,13 +121,13 @@ void GnMesh::Render()
 	glBindVertexArray(0);
 	glUseProgram(0);
 
-	if(draw_vertex_normals ||App->renderer3D->draw_vertex_normals)
+	if(draw_vertex_normals ||engine->renderer3D->draw_vertex_normals)
 		DrawVertexNormals();
 
-	if (draw_face_normals || App->renderer3D->draw_face_normals)
+	if (draw_face_normals || engine->renderer3D->draw_face_normals)
 		DrawFaceNormals();
 
-	//App->renderer3D->DrawAABB(_AABB);
+	//engine->renderer3D->DrawAABB(_AABB);
 
 	//clean buffers
 	glActiveTexture(GL_TEXTURE0);

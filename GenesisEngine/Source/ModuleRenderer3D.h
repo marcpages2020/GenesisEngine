@@ -29,9 +29,9 @@ public:
 
 	bool Init();
 	bool LoadConfig(GnJSONObj& config) override;
-	update_status PreUpdate(float dt) override;
-	update_status Update(float dt) override;
-	update_status PostUpdate(float dt) override;
+	update_status PreUpdate(float deltaTime) override;
+	update_status Update(float deltaTime) override;
+	update_status PostUpdate(float deltaTime) override;
 	bool CleanUp();
 	
 	void OnResize(int width, int height);
