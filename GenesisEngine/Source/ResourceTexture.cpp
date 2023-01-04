@@ -1,6 +1,6 @@
 #include "ResourceTexture.h"
 #include "GnJSON.h"
-#include "glew/include/glew.h"
+#include "glad/include/glad/glad.h"
 #include "Engine.h"
 
 ResourceTexture::ResourceTexture(uint UID) : Resource(UID, ResourceType::RESOURCE_TEXTURE),

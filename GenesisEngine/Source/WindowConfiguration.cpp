@@ -1,7 +1,7 @@
 #include "WindowConfiguration.h"
 #include "ImGui/imgui.h"
 #include "Engine.h"
-#include "glew/include/glew.h"
+#include "glad/include/glad/glad.h"
 #include "Camera.h"
 #include "Time.h"
 
@@ -304,10 +304,10 @@ void WindowConfiguration::GetMemoryStatistics(const char* gpu_brand, GLint& vram
 {
 	if (strcmp(gpu_brand, "NVIDIA Corporation") == 0)
 	{
-		glGetIntegerv(GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &vram_budget);
+		/*glGetIntegerv(GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &vram_budget);
 		glGetIntegerv(GL_GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX, &vram_usage);
 		glGetIntegerv(GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &vram_available);
-		glGetIntegerv(GL_GPU_MEMORY_INFO_EVICTED_MEMORY_NVX, &vram_reserved);
+		glGetIntegerv(GL_GPU_MEMORY_INFO_EVICTED_MEMORY_NVX, &vram_reserved);*/
 	}
 	else if (strcmp(gpu_brand, "ATI Technologies") == 0)
 	{
@@ -315,7 +315,7 @@ void WindowConfiguration::GetMemoryStatistics(const char* gpu_brand, GLint& vram
 		vram_budget = -1;
 		//glGetIntegerv(GL_GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX, &vram_usage);
 		vram_usage = -1;
-		glGetIntegerv(GL_VBO_FREE_MEMORY_ATI, &vram_available);
+		//glGetIntegerv(GL_VBO_FREE_MEMORY_ATI, &vram_available);
 		//glGetIntegerv(GL_GPU_MEMORY_INFO_EVICTED_MEMORY_NVX, &vram_reserved);
 		vram_reserved = -1;
 	}

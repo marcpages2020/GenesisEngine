@@ -1,5 +1,5 @@
 #include "ResourceMesh.h"
-#include "glew/include/glew.h"
+#include "glad/include/glad/glad.h"
 
 ResourceMesh::ResourceMesh(uint UID) : Resource(UID, ResourceType::RESOURCE_MESH),
  VBO(0), VAO(0), EBO(0), 

@@ -61,7 +61,7 @@ private:
 	bool show_game_buttons;
 
 	//menus
-	bool* open_dockspace;
+	bool open_dockspace;
 
 	int current_theme;
 

@@ -1,5 +1,5 @@
 #include "ResourceShader.h"
-#include "glew/include/glew.h"
+#include "glad/include/glad/glad.h"
 #include "Engine.h"
 #include "GameObject.h"
 #include "Transform.h"

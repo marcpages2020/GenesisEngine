@@ -14,7 +14,7 @@
 #include "ModuleWindow.h"
 #include "ModuleRenderer3D.h"
 
-#include "glew/include/glew.h"
+#include "glad/include/glad/glad.h"
 #include "SDL\include\SDL_opengl.h"
 #include <gl/GL.h>
 #include <gl/GLU.h>
@@ -23,10 +23,10 @@
 
 #pragma comment (lib, "glu32.lib")          /* link OpenGL Utility lib */
 #pragma comment (lib, "opengl32.lib")     /* link Microsoft OpenGL lib */
-#pragma comment (lib, "glew/libx86/glew32.lib")		  /* link glew lib */
 
-ModuleRenderer3D::ModuleRenderer3D(bool start_enabled) : Module(start_enabled), cull_editor_camera(true), context(nullptr), 
-_mainCamera(nullptr), colorTexture(0), draw_aabbs(false), draw_mouse_picking_ray(false), draw_vertex_normals(false), draw_face_normals(false),
+ModuleRenderer3D::ModuleRenderer3D(bool start_enabled) : Module(start_enabled),
+defaultShader(nullptr), context(nullptr), cull_editor_camera(true), _mainCamera(nullptr),
+ colorTexture(0), draw_aabbs(false), draw_mouse_picking_ray(false), draw_vertex_normals(false), draw_face_normals(false),
 frameBuffer(0), renderBuffer(0), depthTexture(0), depthRenderBuffer(0), display_mode(SOLID), vsync(false)
 {
 	name = "renderer";
@@ -46,22 +46,21 @@ bool ModuleRenderer3D::Init()
 
 	//Create context
 	context = SDL_GL_CreateContext(engine->window->window);
-	if (context == NULL)
-	{
+	if (context == NULL) {
 		LOG_ERROR("OpenGL context could not be created! SDL_Error: %s\n", SDL_GetError());
 		ret = false;
 	}
 
-	GLenum error = glewInit();
-
-	if (error != GL_NO_ERROR)
+	if (SDL_GL_MakeCurrent(engine->window->window, context) != 0)
 	{
-		LOG_ERROR("Error initializing glew library! %s", SDL_GetError());
+		LOG_ERROR("Failed to make OpenGL context current: %s", SDL_GetError());
+		SDL_GL_DeleteContext(context);
 		ret = false;
 	}
-	else
-	{
-		LOG("Using Glew %d.%d.%d", GLEW_VERSION_MAJOR, GLEW_VERSION_MINOR, GLEW_VERSION_MICRO);
+
+	if (!gladLoadGL()) {
+		LOG_ERROR("Failed to initialize OpenGL context\n");
+		ret = false;
 	}
 
 	if (ret == true)
@@ -428,6 +427,9 @@ void ModuleRenderer3D::GenerateBuffers()
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, engine->window->width, engine->window->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
 	//RenderBuffer

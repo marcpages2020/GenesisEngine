@@ -1,7 +1,7 @@
 #include "WindowAbout.h"
 #include "ImGui/imgui.h"
 #include "Engine.h"
-#include "glew/include/glew.h"
+#include "glad/include/glad/glad.h"
 #include "Assimp/Assimp/include/version.h"
 #include "FileSystem.h"
 
@@ -55,7 +55,7 @@ void WindowAbout::Draw()
 		ImGui::BulletText("ImGui %s", imgui_version);
 
 		//Glew
-		ImGui::BulletText("Glew %d.%d.%d", GLEW_VERSION_MAJOR, GLEW_VERSION_MINOR, GLEW_VERSION_MICRO);
+		//ImGui::BulletText("Glew %d.%d.%d", GLEW_VERSION_MAJOR, GLEW_VERSION_MINOR, GLEW_VERSION_MICRO);
 
 		ImGui::BulletText("DevIL 1.8.0");
 

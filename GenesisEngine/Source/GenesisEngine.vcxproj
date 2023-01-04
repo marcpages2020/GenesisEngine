@@ -57,7 +57,7 @@
       <SDLCheck>false</SDLCheck>
       <ExceptionHandling>false</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Source\Libs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Source\Libs\glad\include\;$(SolutionDir)\Source\Libs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalUsingDirectories>
       </AdditionalUsingDirectories>
       <StructMemberAlignment>Default</StructMemberAlignment>
@@ -66,7 +66,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
-      <AdditionalLibraryDirectories>$(SolutionDir)\Source\Libs</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\Source\Libs\glad\include\;$(SolutionDir)\Source\Libs</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -101,6 +101,8 @@
     <ClInclude Include="GnJSON.h" />
     <ClInclude Include="Importers.h" />
     <ClInclude Include="ImportingOptions.h" />
+    <ClInclude Include="Libs\glad\include\glad\glad.h" />
+    <ClInclude Include="Libs\glad\include\glad\khrplatform.h" />
     <ClInclude Include="Libs\ImGuizmo\ImGuizmo.h" />
     <ClInclude Include="Libs\MathGeoLib\include\Algorithm\Random\LCG.h" />
     <ClInclude Include="Libs\MathGeoLib\include\Geometry\AABB.h" />
@@ -170,10 +172,6 @@
     <ClInclude Include="ModuleEditor.h" />
     <ClInclude Include="glmath.h" />
     <ClInclude Include="Globals.h" />
-    <ClInclude Include="Libs\glew\include\eglew.h" />
-    <ClInclude Include="Libs\glew\include\glew.h" />
-    <ClInclude Include="Libs\glew\include\glxew.h" />
-    <ClInclude Include="Libs\glew\include\wglew.h" />
     <ClInclude Include="Libs\ImGui\imconfig.h" />
     <ClInclude Include="Libs\ImGui\imgui.h" />
     <ClInclude Include="Libs\ImGui\imgui_impl_opengl3.h" />
@@ -221,6 +219,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Color.cpp" />
     <ClCompile Include="Component.cpp" />
+    <ClCompile Include="Libs\glad\include\glad\glad.c" />
     <ClCompile Include="ModuleEditor.cpp" />
     <ClCompile Include="FileSystem.cpp" />
     <ClCompile Include="GameObject.cpp" />

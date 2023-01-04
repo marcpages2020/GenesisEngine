@@ -1,7 +1,7 @@
 #include "WindowScene.h"
 #include "ImGui/imgui.h"
 #include "Engine.h"
-#include "glew/include/glew.h"
+#include "glad/include/glad/glad.h"
 #include "WindowAssets.h"
 #include "Time.h"
 #include "GameObject.h"

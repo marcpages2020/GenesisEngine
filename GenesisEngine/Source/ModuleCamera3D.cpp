@@ -170,11 +170,13 @@ void ModuleCamera3D::FocusOnGameObject(GameObject* gameObjectToFocus)
 
 	float objectExtension = 0.0f;
 	gameObjectToFocus->GetMaxExtension(objectExtension);
+	objectExtension = 30.0f;
+	
+	LookAt(objectPosition);
 
 	float3 directionVector = (_position - objectPosition).Normalized();
-	SetPosition(objectPosition + directionVector * objectExtension);
-	LookAt(objectPosition);
-	SetReference(objectPosition);
+	float3 newPosition = objectPosition + directionVector * objectExtension;
+	//SetPosition(newPosition);
 }
 
 // -----------------------------------------------------------------

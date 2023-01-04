@@ -1,5 +1,4 @@
 #include "Engine.h"
-#include "glew/include/glew.h"
 #include "Globals.h"
 #include "FileSystem.h"
 #include "Time.h"
@@ -11,21 +10,20 @@ Engine::Engine(int argc, char* args[]) : argc(argc), args(args), want_to_save(fa
 {
 	window = new ModuleWindow(true);
 	input = new ModuleInput(true);
-	renderer3D = new ModuleRenderer3D(true);
-	camera = new ModuleCamera3D(true);
-	scene = new ModuleScene(true);
-	editor = new ModuleEditor(true);
 	resources = new ModuleResources(true);
+	scene = new ModuleScene(true);
+	camera = new ModuleCamera3D(true);
+	editor = new ModuleEditor(true);
+	renderer3D = new ModuleRenderer3D(true);
 
 	// Main Modules
 	AddModule(window);
-	AddModule(resources);
-	AddModule(camera);
 	AddModule(input);
+	AddModule(resources);
 	AddModule(scene);
-
-	// Renderer last!
+	AddModule(camera);
 	AddModule(editor);
+	// Renderer last!
 	AddModule(renderer3D);
 
 	int cap = 60;
@@ -249,8 +247,8 @@ HardwareSpecs Engine::GetHardware()
 
 	//GPU
 	//GLubyte* vendor = 
-	specs.gpu = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
-	specs.gpu_brand = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
+	//specs.gpu = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
+	//specs.gpu_brand = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
 
 	return specs;
 }

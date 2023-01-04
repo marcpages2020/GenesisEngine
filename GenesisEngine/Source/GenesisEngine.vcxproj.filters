@@ -245,6 +245,9 @@
     <ClCompile Include="WindowConsole.cpp">
       <Filter>EditorWindows</Filter>
     </ClCompile>
+    <ClCompile Include="Libs\glad\include\glad\glad.c">
+      <Filter>Libs\glad</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine.h" />
@@ -294,18 +297,6 @@
     </ClInclude>
     <ClInclude Include="Libs\ImGui\imstb_truetype.h">
       <Filter>Libs\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="Libs\glew\include\wglew.h">
-      <Filter>Libs\Glew</Filter>
-    </ClInclude>
-    <ClInclude Include="Libs\glew\include\eglew.h">
-      <Filter>Libs\Glew</Filter>
-    </ClInclude>
-    <ClInclude Include="Libs\glew\include\glew.h">
-      <Filter>Libs\Glew</Filter>
-    </ClInclude>
-    <ClInclude Include="Libs\glew\include\glxew.h">
-      <Filter>Libs\Glew</Filter>
     </ClInclude>
     <ClInclude Include="Libs\SDL\include\SDL.h">
       <Filter>Libs\SDL</Filter>
@@ -605,6 +596,12 @@
     <ClInclude Include="WindowConsole.h">
       <Filter>EditorWindows</Filter>
     </ClInclude>
+    <ClInclude Include="Libs\glad\include\glad\glad.h">
+      <Filter>Libs\glad</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\glad\include\glad\khrplatform.h">
+      <Filter>Libs\glad</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Modules">
@@ -615,9 +612,6 @@
     </Filter>
     <Filter Include="Libs">
       <UniqueIdentifier>{e5b92709-b597-4c4b-bf07-c6d0682bb2af}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Libs\Glew">
-      <UniqueIdentifier>{2e4c5722-ce7d-4d13-b63c-42035faf7849}</UniqueIdentifier>
     </Filter>
     <Filter Include="Libs\SDL">
       <UniqueIdentifier>{7bb8c861-6eba-490b-baff-8ddadc448f17}</UniqueIdentifier>
@@ -669,6 +663,9 @@
     </Filter>
     <Filter Include="Libs\TextEditor">
       <UniqueIdentifier>{88c0774a-c921-456d-81fe-a2300193a14e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libs\glad">
+      <UniqueIdentifier>{9076cca5-5c47-4b52-ba8d-7021e5ec905e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

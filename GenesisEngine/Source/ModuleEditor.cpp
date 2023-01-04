@@ -12,7 +12,7 @@
 #include <string>
 #include <algorithm>
 
-#include "glew/include/glew.h"
+#include "glad/include/glad/glad.h"
 #include "ImGui/imgui_impl_sdl.h"
 #include "ImGui/imgui_impl_opengl3.h"
 
@@ -35,7 +35,7 @@
 #define IM_NEWLINE  "\n"
 #endif
 
-ModuleEditor::ModuleEditor(bool start_enabled) : Module(start_enabled)
+ModuleEditor::ModuleEditor(bool start_enabled) : Module(start_enabled), open_dockspace(true), show_preferences_window(false), show_project_window(false)
 {
 	name = "editor";
 
@@ -65,6 +65,13 @@ ModuleEditor::~ModuleEditor() {}
 
 bool ModuleEditor::Init()
 {
+	return true;
+}
+
+bool ModuleEditor::Start()
+{
+	bool ret = true;
+
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
@@ -73,14 +80,7 @@ bool ModuleEditor::Init()
 	ImGui::StyleColorsDark();
 
 	ImGui_ImplSDL2_InitForOpenGL(engine->window->window, engine->renderer3D->context);
-	ImGui_ImplOpenGL3_Init("#version 330");
-
-	return true;
-}
-
-bool ModuleEditor::Start()
-{
-	bool ret = true;
+	ImGui_ImplOpenGL3_Init();
 
 	for (size_t i = 0; i < MAX_WINDOWS; i++)
 	{
@@ -104,7 +104,7 @@ update_status ModuleEditor::Draw()
 	ImGui_ImplSDL2_NewFrame(engine->window->window);
 	ImGui::NewFrame();
 
-	ShowDockSpace(open_dockspace);
+	ShowDockSpace(&open_dockspace);
 
 	for (size_t i = 0; i < MAX_WINDOWS; i++)
 	{

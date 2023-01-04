@@ -10,7 +10,7 @@
 #include "ResourceMesh.h"
 #include "ResourceShader.h"
 
-#include "glew/include/glew.h"
+#include "glad/include/glad/glad.h"
 #include "ImGui/imgui.h"
 
 // GnMesh =========================================================================================================================

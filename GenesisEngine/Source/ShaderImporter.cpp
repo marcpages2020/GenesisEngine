@@ -5,7 +5,7 @@
 #include "GnJSON.h"
 #include "WindowShaderEditor.h"
 
-#include "glew/include/glew.h"
+#include "glad/include/glad/glad.h"
 
 void ShaderImporter::Import(char* fileBuffer, ResourceShader* shader, const char* assets_path)
 {
