@@ -7,10 +7,13 @@
 
 #define MAX_LIGHTS 8
 
+typedef int GLint;
 typedef unsigned int GLuint;
 typedef unsigned int GLenum;
 typedef unsigned char GLubyte;
+
 typedef void* SDL_GLContext;
+
 class Camera;
 class GnMesh;
 class ResourceShader;
@@ -53,6 +56,8 @@ public:
 
 private:
 	void GenerateBuffers();
+	void GenerateColorTexture(GLuint& colorAttachmentHandle, vec2 displaySize, GLint internalFormat, GLuint glColorAttachment);
+	void GenerateDepthTexture(GLuint& newDepthAttachmentHandle, vec2 displaySize);
 	void DrawDirectModeCube();
 	void BeginDebugDraw();
 	void EndDebugDraw();
@@ -60,11 +65,14 @@ private:
 	GLuint frameBuffer;
 
 public:
-	GLuint colorTexture;
-	GLuint renderBuffer;
+	GLuint albedoAttachmentHandle;
+	GLuint normalsAttachmentHandle;
+	GLuint positionAttachmentHandle;
+	GLuint finalRenderAttachmentHandle;
+	GLuint depthAttachmentHandle;
 
+	GLuint renderBuffer;
 	GLuint depthRenderBuffer;
-	GLuint depthTexture;
 
 	Light lights[MAX_LIGHTS];
 	SDL_GLContext context;

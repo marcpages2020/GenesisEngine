@@ -26,8 +26,9 @@
 
 ModuleRenderer3D::ModuleRenderer3D(bool start_enabled) : Module(start_enabled),
 defaultShader(nullptr), context(nullptr), cull_editor_camera(true), _mainCamera(nullptr),
- colorTexture(0), draw_aabbs(false), draw_mouse_picking_ray(false), draw_vertex_normals(false), draw_face_normals(false),
-frameBuffer(0), renderBuffer(0), depthTexture(0), depthRenderBuffer(0), display_mode(SOLID), vsync(false)
+albedoAttachmentHandle(0u), normalsAttachmentHandle(0u), positionAttachmentHandle(0u), finalRenderAttachmentHandle(0u),
+draw_aabbs(false), draw_mouse_picking_ray(false), draw_vertex_normals(false), draw_face_normals(false),
+frameBuffer(0), renderBuffer(0), depthAttachmentHandle(0), depthRenderBuffer(0), display_mode(SOLID), vsync(false)
 {
 	name = "renderer";
 
@@ -227,7 +228,7 @@ bool ModuleRenderer3D::CleanUp()
 	LOG("Destroying 3D Renderer");
 
 	glDeleteFramebuffers(1, &frameBuffer);
-	glDeleteTextures(1, &colorTexture);
+	glDeleteTextures(1, &finalRenderAttachmentHandle);
 
 	SDL_GL_DeleteContext(context);
 	_mainCamera = nullptr;
@@ -241,7 +242,7 @@ void ModuleRenderer3D::OnResize(int width, int height)
 	glViewport(0, 0, width, height);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-	glBindTexture(GL_TEXTURE_2D, colorTexture);
+	glBindTexture(GL_TEXTURE_2D, finalRenderAttachmentHandle);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -417,20 +418,41 @@ void ModuleRenderer3D::DrawRay()
 
 void ModuleRenderer3D::GenerateBuffers()
 {
+
 	//FrameBuffer
 	glGenFramebuffers(1, &frameBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 
-	//Color Texture Buffer ===========================================================================================================
-	glGenTextures(1, &colorTexture);
-	glBindTexture(GL_TEXTURE_2D, colorTexture);
+	//Color Texture Buffers ===========================================================================================================
+	vec2 displaySize(engine->window->width, engine->window->height);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, engine->window->width, engine->window->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	GenerateColorTexture(albedoAttachmentHandle, displaySize, GL_RGBA8, GL_COLOR_ATTACHMENT0);
+	GenerateColorTexture(normalsAttachmentHandle, displaySize, GL_RGBA16F, GL_COLOR_ATTACHMENT1);
+	GenerateColorTexture(positionAttachmentHandle, displaySize, GL_RGBA16F, GL_COLOR_ATTACHMENT2);
+	GenerateColorTexture(finalRenderAttachmentHandle, displaySize, GL_RGBA16F, GL_COLOR_ATTACHMENT3);
+
+	//Depth buffer
+	GenerateDepthTexture(depthAttachmentHandle, displaySize);
+
+	GLenum buffers[] = { GL_COLOR_ATTACHMENT0,  GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3,};
+	glDrawBuffers(4, buffers);
+
+	GLenum framebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (framebufferStatus != GL_FRAMEBUFFER_COMPLETE)
+	{
+		switch (framebufferStatus)
+		{
+		case GL_FRAMEBUFFER_UNDEFINED:						LOG_ERROR("GL_FRAMEBUFFER_UNDEFINED"); break;
+		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:			LOG_ERROR("GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT"); break;
+		case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:	LOG_ERROR("GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT"); break;
+		case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:			LOG_ERROR("GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER"); break;
+		case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:			LOG_ERROR("GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER"); break;
+		case GL_FRAMEBUFFER_UNSUPPORTED:					LOG_ERROR("GL_FRAMEBUFFER_UNSUPPORTED"); break;
+		case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:			LOG_ERROR("GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE"); break;
+		case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:		LOG_ERROR("GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS"); break;
+		default:											LOG_ERROR("Unknown framebuffer status error") break;
+		}
+	}
 
 	//RenderBuffer
 	glGenRenderbuffers(1, &renderBuffer);
@@ -444,16 +466,9 @@ void ModuleRenderer3D::GenerateBuffers()
 	//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, engine->window->width, engine->window->height);
 	//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBuffer);
 
-	glGenTextures(1, &depthTexture);
-	glBindTexture(GL_TEXTURE_2D, depthTexture);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, engine->window->width, engine->window->height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
-
 	//==================================================================================================================================
 
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTexture, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, finalRenderAttachmentHandle, 0);
 	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
 
 	/*GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
@@ -463,6 +478,33 @@ void ModuleRenderer3D::GenerateBuffers()
 		LOG_ERROR("Famebuffer is not complete");
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void ModuleRenderer3D::GenerateColorTexture(GLuint& colorAttachmentHandle, vec2 displaySize, GLint internalFormat, GLuint glColorAttachment)
+{
+	glGenTextures(1, &colorAttachmentHandle);
+	glBindTexture(GL_TEXTURE_2D, colorAttachmentHandle);
+	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, displaySize.x, displaySize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, glColorAttachment, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void ModuleRenderer3D::GenerateDepthTexture(GLuint& newDepthAttachmentHandle, vec2 displaySize)
+{
+	glGenTextures(1, &newDepthAttachmentHandle);
+	glBindTexture(GL_TEXTURE_2D, newDepthAttachmentHandle);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, displaySize.x, displaySize.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
