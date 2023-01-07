@@ -13,7 +13,7 @@
 
 WindowShaderEditor::WindowShaderEditor() : EditorWindow(), text_size(14), vertex_shader_has_error(false), fragment_shader_has_error(false)
 {
-	type = WindowType::WINDOW_SHADER_EDITOR;
+	name = "Shader Editor";
 }
 
 WindowShaderEditor::~WindowShaderEditor()
@@ -88,7 +88,7 @@ void WindowShaderEditor::Open(const char* assets_file_path)
 
 void WindowShaderEditor::Draw()
 {
-	if (ImGui::Begin("Shader Editor", &visible), ImGuiWindowFlags_MenuBar)
+	if (ImGui::Begin(name, &visible), ImGuiWindowFlags_MenuBar)
 	{
 		focused = ImGui::IsWindowFocused();
 		if (ImGui::BeginTabBar("##TabBar"))

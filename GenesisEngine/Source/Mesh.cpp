@@ -121,17 +121,18 @@ void GnMesh::Render()
 	glBindVertexArray(0);
 	glUseProgram(0);
 
-	if(draw_vertex_normals ||engine->renderer3D->draw_vertex_normals)
-		DrawVertexNormals();
+	//if(draw_vertex_normals ||engine->renderer3D->draw_vertex_normals)
+	//	DrawVertexNormals();
 
-	if (draw_face_normals || engine->renderer3D->draw_face_normals)
-		DrawFaceNormals();
+	//if (draw_face_normals || engine->renderer3D->draw_face_normals)
+	//	DrawFaceNormals();
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+	//glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+	//glUnmapBuffer(GL_UNIFORM_BUFFER);
+	//glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 	//engine->renderer3D->DrawAABB(_AABB);
-
-	//clean buffers
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void GnMesh::OnEditor()
@@ -213,7 +214,7 @@ void GnMesh::DrawVertexNormals()
 	normalMatrix.Transpose();
 
 	//vertices normals
-	glBegin(GL_LINES);
+	//glBegin(GL_LINES);
 	for (size_t i = 0; i < _resource->vertices_amount; i++)
 	{
 
@@ -227,15 +228,15 @@ void GnMesh::DrawVertexNormals()
 
 		glColor3f(0.0f, 1.0f, 0.0f);
 
-		glVertex3f(vertex.x, vertex.y, vertex.z);
+		//glVertex3f(vertex.x, vertex.y, vertex.z);
 
-		glVertex3f(vertex.x + (normal.x * normal_lenght),
-				   vertex.y + (normal.y * normal_lenght),
-			       vertex.z + (normal.z * normal_lenght));
+		//glVertex3f(vertex.x + (normal.x * normal_lenght),
+		//		   vertex.y + (normal.y * normal_lenght),
+		//	       vertex.z + (normal.z * normal_lenght));
 	}
 	
 	glColor3f(1.0f, 1.0f, 1.0f);
-	glEnd();
+	//glEnd();
 }
 
 void GnMesh::DrawFaceNormals()
@@ -286,23 +287,23 @@ GnGrid::~GnGrid() {}
 
 void GnGrid::Render()
 {
-	glBegin(GL_LINES);
+	//glBegin(GL_LINES);
 
 	//Vertical Lines
 	for (float x = -size * 0.5f; x <= size * 0.5f; x++)
 	{	
-		glVertex3f(x, 0, -size * 0.5f);
-		glVertex3f(x, 0, size * 0.5f);
+		//glVertex3f(x, 0, -size * 0.5f);
+		//glVertex3f(x, 0, size * 0.5f);
 	}
 
 	//Hortiontal Lines
 	for (float z = -size * 0.5f; z <= size * 0.5f; z++)
 	{
-		glVertex3f(-size * 0.5f, 0, z);
-		glVertex3f(size * 0.5f, 0, z);
+/*		glVertex3f(-size * 0.5f, 0, z);
+		glVertex3f(size * 0.5f, 0, z)*/;
 	}
 
-	glEnd();
+	//glEnd();
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

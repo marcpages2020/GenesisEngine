@@ -5,7 +5,7 @@
 
 WindowInspector::WindowInspector() : EditorWindow()
 {
-	type = WindowType::WINDOW_INSPECTOR;
+	name = "Inspector";
 }
 
 WindowInspector::~WindowInspector()
@@ -14,7 +14,7 @@ WindowInspector::~WindowInspector()
 
 void WindowInspector::Draw()
 {
-	if (ImGui::Begin("Inspector", &visible))
+	if (ImGui::Begin(name, &visible))
 	{
 		focused = ImGui::IsWindowFocused();
 		if (engine->scene->selectedGameObject != nullptr)

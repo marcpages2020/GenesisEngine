@@ -498,7 +498,7 @@ void ModuleResources::CreateResourceData(uint UID, const char* name, const char*
 
 void ModuleResources::DragDropFile(const char* path)
 {
-	WindowImport* import_window = dynamic_cast<WindowImport*>(engine->editor->windows[WindowType::WINDOW_IMPORT]);
+	WindowImport* import_window = dynamic_cast<WindowImport*>(engine->editor->GetWindow("Import"));
 	import_window->Enable(path, GetTypeFromPath(path));
 }
 

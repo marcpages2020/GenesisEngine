@@ -5,7 +5,7 @@
 
 WindowConsole::WindowConsole() : show_normal_log(true), show_warnings(true), show_errors(true)
 {
-	type = WindowType::WINDOW_CONSOLE;
+	name = "Console";
 }
 
 WindowConsole::~WindowConsole()
@@ -15,7 +15,7 @@ WindowConsole::~WindowConsole()
 
 void WindowConsole::Draw()
 {
-	if (ImGui::Begin("Console", &visible, ImGuiWindowFlags_MenuBar)) {
+	if (ImGui::Begin(name, &visible, ImGuiWindowFlags_MenuBar)) {
 
 		if (ImGui::BeginMenuBar())
 		{

@@ -10,7 +10,7 @@
 
 WindowScene::WindowScene() : EditorWindow()
 {
-	type = WindowType::WINDOW_SCENE;
+	name = "Scene";
 }
 
 WindowScene::~WindowScene() {}
@@ -23,7 +23,7 @@ bool WindowScene::Init()
 void WindowScene::Draw()
 {
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-	if (ImGui::Begin("Scene", &visible, ImGuiWindowFlags_MenuBar))
+	if (ImGui::Begin(name, &visible, ImGuiWindowFlags_MenuBar))
 	{
 		focused = ImGui::IsWindowFocused();
 
@@ -80,14 +80,14 @@ void WindowScene::Draw()
 
 		ImGui::Image((ImTextureID)engine->renderer3D->finalRenderAttachmentHandle, engine->editor->image_size, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
 
-		ImGui::PushID(WINDOW_SCENE);
+		ImGui::PushID("Scene");
 		if (ImGui::BeginDragDropTarget())
 		{
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSETS"))
 			{
 				IM_ASSERT(payload->DataSize == sizeof(int));
 				int payload_n = *(const int*)payload->Data;
-				WindowAssets* assets_window = (WindowAssets*)engine->editor->windows[WINDOW_ASSETS];
+				WindowAssets* assets_window = (WindowAssets*)engine->editor->GetWindow("Scene");
 				std::string file = engine->resources->FindAsset(payload_n);
 				ApplyDroppedFile(file.c_str());
 			}

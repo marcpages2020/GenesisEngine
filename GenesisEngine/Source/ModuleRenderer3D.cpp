@@ -21,23 +21,36 @@
 
 #include "Devil/include/IL/il.h"
 
+#include "ResourceShader.h"
+
 #pragma comment (lib, "glu32.lib")          /* link OpenGL Utility lib */
 #pragma comment (lib, "opengl32.lib")     /* link Microsoft OpenGL lib */
 
 ModuleRenderer3D::ModuleRenderer3D(bool start_enabled) : Module(start_enabled),
-defaultShader(nullptr), context(nullptr), cull_editor_camera(true), _mainCamera(nullptr),
+defaultShader(nullptr), quadShader(nullptr), context(nullptr), cull_editor_camera(true), _mainCamera(nullptr),
 albedoAttachmentHandle(0u), normalsAttachmentHandle(0u), positionAttachmentHandle(0u), finalRenderAttachmentHandle(0u),
 draw_aabbs(false), draw_mouse_picking_ray(false), draw_vertex_normals(false), draw_face_normals(false),
 frameBuffer(0), renderBuffer(0), depthAttachmentHandle(0), depthRenderBuffer(0), display_mode(SOLID), vsync(false)
 {
 	name = "renderer";
-
 	_ray = LineSegment();
 }
 
 // Destructor
 ModuleRenderer3D::~ModuleRenderer3D()
 {}
+
+bool ModuleRenderer3D::LoadConfig(GnJSONObj& config)
+{
+	//debug = config.GetBool("debug");
+	vsync = config.GetBool("vsync");
+
+	draw_aabbs = config.GetBool("draw_aabbs");
+	draw_vertex_normals = config.GetBool("draw_vertex_normals");
+	draw_face_normals = config.GetBool("draw_face_normals");
+
+	return true;
+}
 
 // Called before render is available
 bool ModuleRenderer3D::Init()
@@ -52,6 +65,7 @@ bool ModuleRenderer3D::Init()
 		ret = false;
 	}
 
+	//Setup the context
 	if (SDL_GL_MakeCurrent(engine->window->window, context) != 0)
 	{
 		LOG_ERROR("Failed to make OpenGL context current: %s", SDL_GetError());
@@ -59,6 +73,7 @@ bool ModuleRenderer3D::Init()
 		ret = false;
 	}
 
+	//Load Glad
 	if (!gladLoadGL()) {
 		LOG_ERROR("Failed to initialize OpenGL context\n");
 		ret = false;
@@ -68,39 +83,20 @@ bool ModuleRenderer3D::Init()
 	{
 		//Use Vsync
 		if (vsync && SDL_GL_SetSwapInterval(1) < 0)
+		{
 			LOG_ERROR("Warning: Unable to set VSync! SDL Error: %s\n", SDL_GetError());
-
-		//Initialize Projection Matrix
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		glLoadMatrixf(engine->camera->GetProjectionMatrix());
+		}
 
 		//Check for error
 		GLenum error = glGetError();
 		if (error != GL_NO_ERROR)
 		{
 			LOG_ERROR("Error initializing OpenGL! %s\n", gluErrorString(error));
-			ret = false;
+			//ret = false;
 		}
-
-		//Initialize Modelview Matrix
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-		glLoadMatrixf(engine->camera->GetViewMatrix());		
-
-		//Check for error
-		error = glGetError();
-		if (error != GL_NO_ERROR)
-		{
-			LOG_ERROR("Error initializing OpenGL! %s\n", gluErrorString(error));
-			ret = false;
-		}
-
-		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-		glClearDepth(1.0f);
 
 		//Initialize clear color
-		glClearColor(0.f, 0.f, 0.f, 1.f);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.f);
 
 		//Check for error
 		error = glGetError();
@@ -110,33 +106,14 @@ bool ModuleRenderer3D::Init()
 			ret = false;
 		}
 
-		GLfloat LightModelAmbient[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-		glLightModelfv(GL_LIGHT_MODEL_AMBIENT, LightModelAmbient);
-
-		lights[0].ref = GL_LIGHT0;
-		lights[0].ambient.Set(0.25f, 0.25f, 0.25f, 1.0f);
-		lights[0].diffuse.Set(0.75f, 0.75f, 0.75f, 1.0f);
-		lights[0].SetPos(0.0f, 0.0f, 2.5f);
-		lights[0].Init();
-
-		GLfloat MaterialAmbient[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, MaterialAmbient);
-
-		GLfloat MaterialDiffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, MaterialDiffuse);
-
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
-		glEnable(GL_COLOR_MATERIAL);
-		glEnable(GL_TEXTURE_2D);
-		glEnable(GL_LIGHTING);
-		glEnable(GL_STENCIL_TEST);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		lights[0].Active(true);
+		//glEnable(GL_DEPTH_TEST);
+		//glEnable(GL_CULL_FACE);
+		//glEnable(GL_COLOR_MATERIAL);
+		//glEnable(GL_TEXTURE_2D);
+		//glEnable(GL_LIGHTING);
+		//glEnable(GL_STENCIL_TEST);
+		//glEnable(GL_BLEND);
 	}
 
 	LOG("Vendor: %s", glGetString(GL_VENDOR));
@@ -145,45 +122,15 @@ bool ModuleRenderer3D::Init()
 	LOG("GLSL: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
 	GenerateBuffers();
-
-	//GetDefaultShader();
+	GenerateQuad();
 
 	return ret;
-}
-
-bool ModuleRenderer3D::LoadConfig(GnJSONObj& config)
-{
-	//debug = config.GetBool("debug");
-	vsync = config.GetBool("vsync");
-
-	draw_aabbs = config.GetBool("draw_aabbs");
-	draw_vertex_normals = config.GetBool("draw_vertex_normals");
-	draw_face_normals = config.GetBool("draw_face_normals");
-
-	return true;
 }
 
 // PreUpdate: clear buffer
 update_status ModuleRenderer3D::PreUpdate(float deltaTime)
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-
-	Color c = engine->camera->background;
-	glClearColor(c.r, c.g, c.b, c.a);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glLoadMatrixf(engine->camera->GetViewMatrix());
-
-	//light 0 on cam pos
-	float3 cameraPosition = engine->camera->GetPosition();
-	lights[0].SetPos(cameraPosition.x, cameraPosition.y, cameraPosition.z);
-
-	blendedMeshes.clear();
-
-	for (uint i = 0; i < MAX_LIGHTS; ++i)
-		lights[i].Render();
+	sceneMeshes.clear();
 
 	return UPDATE_CONTINUE;
 }
@@ -192,23 +139,28 @@ update_status ModuleRenderer3D::Update(float deltaTime)
 {
 	update_status ret = UPDATE_CONTINUE;
 
-	//DrawDirectModeCube();
-	if(draw_mouse_picking_ray)
-		DrawRay();
-
-	for (std::map<float, GnMesh*>::reverse_iterator it = blendedMeshes.rbegin(); it != blendedMeshes.rend(); ++it)
-	{
-		it->second->Render();
-	}
-
 	return ret;
 }
 
 // PostUpdate present buffer to screen
 update_status ModuleRenderer3D::PostUpdate(float deltaTime)
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//Clear the buffer from color and depth
+	Color c = engine->camera->background;
+	glClearColor(c.r, c.g, c.b, c.a);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	glEnable(GL_DEPTH_TEST);
 
+	//if (draw_mouse_picking_ray)
+	//	DrawRay();
+
+	//Render all scene geometry into different textures
+	RenderSceneGeometry();
+
+	//Take the previous textures, apply lighting and set it into a quad
+	RenderQuad();
+
+	//Draw the editor
 	engine->editor->Draw();
 
 	SDL_GL_SwapWindow(engine->window->window);
@@ -227,10 +179,18 @@ bool ModuleRenderer3D::CleanUp()
 {
 	LOG("Destroying 3D Renderer");
 
+	//Delete the framebuffer
 	glDeleteFramebuffers(1, &frameBuffer);
+	
+	//Delete all the used textures
+	glDeleteTextures(1, &albedoAttachmentHandle);
+	glDeleteTextures(1, &normalsAttachmentHandle);
+	glDeleteTextures(1, &positionAttachmentHandle);
 	glDeleteTextures(1, &finalRenderAttachmentHandle);
 
+	//Delete the context
 	SDL_GL_DeleteContext(context);
+	
 	_mainCamera = nullptr;
 
 	return true;
@@ -250,21 +210,6 @@ void ModuleRenderer3D::OnResize(int width, int height)
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
-
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glLoadMatrixf(engine->camera->GetProjectionMatrix());
-}
-
-void ModuleRenderer3D::UpdateProjectionMatrix(float* projectionMatrix)
-{
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glLoadMatrixf(engine->camera->GetViewMatrix());
-
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glLoadMatrixf(engine->camera->GetProjectionMatrix());
 }
 
 void ModuleRenderer3D::DrawAABB(float3* cornerPoints)
@@ -272,9 +217,9 @@ void ModuleRenderer3D::DrawAABB(float3* cornerPoints)
 	if (draw_aabbs == false)
 		return;
 
-	glBegin(GL_LINES);
+	//glBegin(GL_LINES);
 
-	glVertex3f(cornerPoints[0].x, cornerPoints[0].y, cornerPoints[0].z);
+	/*glVertex3f(cornerPoints[0].x, cornerPoints[0].y, cornerPoints[0].z);
 	glVertex3f(cornerPoints[1].x, cornerPoints[1].y, cornerPoints[1].z);
 
 	glVertex3f(cornerPoints[0].x, cornerPoints[0].y, cornerPoints[0].z);
@@ -308,15 +253,15 @@ void ModuleRenderer3D::DrawAABB(float3* cornerPoints)
 	glVertex3f(cornerPoints[4].x, cornerPoints[4].y, cornerPoints[4].z);
 
 	glVertex3f(cornerPoints[7].x, cornerPoints[7].y, cornerPoints[7].z);
-	glVertex3f(cornerPoints[3].x, cornerPoints[3].y, cornerPoints[3].z);
+	glVertex3f(cornerPoints[3].x, cornerPoints[3].y, cornerPoints[3].z);*/
 
-	glEnd();
+	//glEnd();
 }
 
 DisplayMode ModuleRenderer3D::GetDisplayMode() { return display_mode; }
 
-void ModuleRenderer3D::SetDisplayMode(DisplayMode display) 
-{ 
+void ModuleRenderer3D::SetDisplayMode(DisplayMode display)
+{
 	GLenum face = GL_FRONT;
 
 	display_mode = display;
@@ -324,7 +269,7 @@ void ModuleRenderer3D::SetDisplayMode(DisplayMode display)
 	if (!glIsEnabled(GL_CULL_FACE_MODE))
 		face = GL_FRONT_AND_BACK;
 
-	if (display == SOLID) 
+	if (display == SOLID)
 	{
 		glPolygonMode(face, GL_FILL);
 	}
@@ -355,7 +300,7 @@ bool ModuleRenderer3D::IsInsideCameraView(AABB aabb)
 void ModuleRenderer3D::AddBlendedMesh(float3 position, GnMesh* mesh)
 {
 	float distance = engine->camera->GetPosition().Sub(position).Length();
-	blendedMeshes[distance] = mesh;
+	sceneMeshes[distance] = mesh;
 }
 
 ResourceShader* ModuleRenderer3D::GetDefaultShader()
@@ -403,22 +348,114 @@ void ModuleRenderer3D::SetVSYNC(bool enabled)
 			LOG("VSYNC disabled");
 		}
 	}
-
 }
 
 void ModuleRenderer3D::DrawRay()
 {
-	glBegin(GL_LINES);
-	glColor3f(0.0f, 0.85f, 0.85f);
-	glVertex3f(_ray.a.x, _ray.a.y, _ray.a.z);
-	glVertex3f(_ray.b.x, _ray.b.y, _ray.b.z);
-	glColor3f(1.0f, 1.0f, 1.0f);
-	glEnd();
+	//glBegin(GL_LINES);
+	//glColor3f(0.0f, 0.85f, 0.85f);
+	//glVertex3f(_ray.a.x, _ray.a.y, _ray.a.z);
+	//glVertex3f(_ray.b.x, _ray.b.y, _ray.b.z);
+	//glColor3f(1.0f, 1.0f, 1.0f);
+	//glEnd();
+}
+
+bool ModuleRenderer3D::RenderSceneGeometry()
+{
+	bool ret = true;
+
+	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Geometry Render");
+
+	//Bind buffer where we will draw
+	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+
+	for (std::map<float, GnMesh*>::reverse_iterator it = sceneMeshes.rbegin(); it != sceneMeshes.rend(); ++it)
+	{
+		it->second->Render();
+	}
+
+	//Bind to default buffer to avoid drawing on top of the geometry in other processes
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glPopDebugGroup();
+
+	return ret;
+}
+
+void ModuleRenderer3D::GenerateQuad()
+{
+	//Geometry
+	glGenBuffers(1, &quad.embeddedVertices);
+	glBindBuffer(GL_ARRAY_BUFFER, quad.embeddedVertices);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quad.vertices), quad.vertices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glGenBuffers(1, &quad.embeddedElements);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quad.embeddedElements);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(quad.indices), quad.indices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	//Attribute state
+	glGenVertexArrays(1, &quad.vao);
+	glBindVertexArray(quad.vao);
+	glBindBuffer(GL_ARRAY_BUFFER, quad.embeddedVertices);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexV3V2), (void*)0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexV3V2), (void*)12);
+	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quad.embeddedElements);
+	glBindVertexArray(0);
+}
+
+//TODO: Extract it into a Mesh Resource
+void ModuleRenderer3D::RenderQuad()
+{
+	if (!quadShader)
+	{
+		quadShader = (ResourceShader*)engine->resources->RequestResource(engine->resources->Find("Assets/Shaders/deferred_quad.vert"));
+	}
+
+	if (quadShader)
+	{
+		glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Quad Render");
+
+		glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glViewport(0, 0, engine->window->width, engine->window->height);
+
+		quadShader->Use();
+
+		//Set all textures
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, albedoAttachmentHandle);
+		GLuint colorTextureLocation = glGetUniformLocation(quadShader->GetHandle(), "uColor");
+		glUniform1i(colorTextureLocation, 0);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, normalsAttachmentHandle);
+		GLuint normalsTextureLocation = glGetUniformLocation(quadShader->GetHandle(), "uNormals");
+		glUniform1i(normalsTextureLocation, 1);
+
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, positionAttachmentHandle);
+		GLuint positionTextureLocation = glGetUniformLocation(quadShader->GetHandle(), "uPosition");
+		glUniform1i(positionTextureLocation, 2);
+
+		glBindVertexArray(quad.vao);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
+		glBindVertexArray(0);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+		//glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+		glUseProgram(0);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		glPopDebugGroup();
+	}
 }
 
 void ModuleRenderer3D::GenerateBuffers()
 {
-
 	//FrameBuffer
 	glGenFramebuffers(1, &frameBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
@@ -434,9 +471,16 @@ void ModuleRenderer3D::GenerateBuffers()
 	//Depth buffer
 	GenerateDepthTexture(depthAttachmentHandle, displaySize);
 
-	GLenum buffers[] = { GL_COLOR_ATTACHMENT0,  GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3,};
-	glDrawBuffers(4, buffers);
+	GLenum attachments[] = { GL_COLOR_ATTACHMENT0,  GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
+	glDrawBuffers(ARRAY_COUNT(attachments), attachments);
 
+	//RenderBuffer
+	glGenRenderbuffers(1, &renderBuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, engine->window->width, engine->window->height);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBuffer);
+
+	//Check for error
 	GLenum framebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	if (framebufferStatus != GL_FRAMEBUFFER_COMPLETE)
 	{
@@ -454,29 +498,6 @@ void ModuleRenderer3D::GenerateBuffers()
 		}
 	}
 
-	//RenderBuffer
-	glGenRenderbuffers(1, &renderBuffer);
-	glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, engine->window->width, engine->window->height);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBuffer);
-
-	//Depth RenderBuffer =============================================================================================================
-	//glGenRenderbuffers(1, &depthRenderBuffer);
-	//glBindRenderbuffer(GL_RENDERBUFFER, depthRenderBuffer);
-	//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, engine->window->width, engine->window->height);
-	//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBuffer);
-
-	//==================================================================================================================================
-
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, finalRenderAttachmentHandle, 0);
-	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
-
-	/*GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
-	glDrawBuffers(1, DrawBuffers);*/
-
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		LOG_ERROR("Famebuffer is not complete");
-
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
@@ -492,7 +513,7 @@ void ModuleRenderer3D::GenerateColorTexture(GLuint& colorAttachmentHandle, vec2 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, glColorAttachment, 0);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	//glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void ModuleRenderer3D::GenerateDepthTexture(GLuint& newDepthAttachmentHandle, vec2 displaySize)
@@ -505,137 +526,7 @@ void ModuleRenderer3D::GenerateDepthTexture(GLuint& newDepthAttachmentHandle, ve
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-void ModuleRenderer3D::DrawDirectModeCube()
-{
-	int CHECKERS_WIDTH = 64;
-	int CHECKERS_HEIGHT = 64;
-	GLubyte checkerImage[64][64][4];
-
-	for (int i = 0; i < CHECKERS_HEIGHT; i++) {
-		for (int j = 0; j < CHECKERS_WIDTH; j++) {
-			int c = ((((i & 0x8) == 0) ^ (((j & 0x8)) == 0))) * 255;
-			checkerImage[i][j][0] = (GLubyte)c;
-			checkerImage[i][j][1] = (GLubyte)c;
-			checkerImage[i][j][2] = (GLubyte)c;
-			checkerImage[i][j][3] = (GLubyte)255;
-		}
-	}
-
-	//GnTexture* Lenna = TextureImporter::LoadTexture("Assets/Textures/Lenna.png");
-
-	GLuint textureID;
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	glGenTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_2D, textureID);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, CHECKERS_WIDTH, CHECKERS_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, checkerImage);
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Lenna->width, Lenna->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, Lenna->data);
-
-	{
-		glBegin(GL_TRIANGLES);
-		//Bottom Face
-		glTexCoord2f(0.0f, 0.0f);
-		glVertex3f(0.f, 0.f, 0.f);
-		glTexCoord2f(1.0f, 0.0f);
-		glVertex3f(1.f, 0.f, 0.f);
-		glTexCoord2f(1.0f, 1.0f);
-		glVertex3f(1.f, 0.f, 1.f);
-
-		glTexCoord2f(1.0f, 1.0f);
-		glVertex3f(1.f, 0.f, 1.f);
-		glTexCoord2f(0.0f, 1.0f);
-		glVertex3f(0.f, 0.f, 1.f);
-		glTexCoord2f(0.0f, 0.0f);
-		glVertex3f(0.f, 0.f, 0.f);
-
-		//Front Face
-		glTexCoord2f(0.0f, 0.0f);
-		glVertex3f(0.f, 0.f, 1.f);
-		glTexCoord2f(1.0f, 0.0f);
-		glVertex3f(1.f, 0.f, 1.f);
-		glTexCoord2f(1.0f, 1.0f);
-		glVertex3f(1.f, 1.f, 1.f);
-
-		glTexCoord2f(1.0f, 1.0f);
-		glVertex3f(1.f, 1.f, 1.f);
-		glTexCoord2f(0.0f, 1.0f);
-		glVertex3f(0.f, 1.f, 1.f);
-		glTexCoord2f(0.0f, 0.0f);
-		glVertex3f(0.f, 0.f, 1.f);
-
-		//Left Face
-		glTexCoord2f(0.0f, 0.0f);
-		glVertex3f(0.f, 0.f, 0.f);
-		glTexCoord2f(1.0f, 0.0f);
-		glVertex3f(0.f, 0.f, 1.f);
-		glTexCoord2f(1.0f, 1.0f);
-		glVertex3f(0.f, 1.f, 1.f);
-
-		glTexCoord2f(1.0f, 1.0f);
-		glVertex3f(0.f, 1.f, 1.f);
-		glTexCoord2f(0.0f, 1.0f);
-		glVertex3f(0.f, 1.f, 0.f);
-		glTexCoord2f(0.0f, 0.0f);
-		glVertex3f(0.f, 0.f, 0.f);
-
-		//Right Face
-		glTexCoord2f(0.0f, 0.0f);
-		glVertex3f(1.f, 0.f, 0.f);
-		glTexCoord2f(1.0f, 0.0f);
-		glVertex3f(1.f, 1.f, 0.f);
-		glTexCoord2f(1.0f, 1.0f);
-		glVertex3f(1.f, 1.f, 1.f);
-
-		glTexCoord2f(1.0f, 1.0f);
-		glVertex3f(1.f, 1.f, 1.f);
-		glTexCoord2f(0.0f, 1.0f);
-		glVertex3f(1.f, 0.f, 1.f);
-		glTexCoord2f(0.0f, 0.0f);
-		glVertex3f(1.f, 0.f, 0.f);
-
-		//Back Face
-		glTexCoord2f(0.0f, 0.0f);
-		glVertex3f(0.f, 0.f, 0.f);
-		glTexCoord2f(1.0f, 0.0f);
-		glVertex3f(0.f, 1.f, 0.f);
-		glTexCoord2f(1.0f, 1.0f);
-		glVertex3f(1.f, 1.f, 0.f);
-
-		glTexCoord2f(1.0f, 1.0f);
-		glVertex3f(1.f, 1.f, 0.f);
-		glTexCoord2f(0.0f, 1.0f);
-		glVertex3f(1.f, 0.f, 0.f);
-		glTexCoord2f(0.0f, 0.0f);
-		glVertex3f(0.f, 0.f, 0.f);
-
-		//Top Face
-		glTexCoord2f(0.0f, 0.0f);
-		glVertex3f(0.f, 1.f, 0.f);
-		glTexCoord2f(1.0f, 0.0f);
-		glVertex3f(0.f, 1.f, 1.f);
-		glTexCoord2f(1.0f, 1.0f);
-		glVertex3f(1.f, 1.f, 1.f);
-
-		glTexCoord2f(1.0f, 1.0f);
-		glVertex3f(1.f, 1.f, 1.f);
-		glTexCoord2f(0.0f, 1.0f);
-		glVertex3f(1.f, 1.f, 0.f);
-		glTexCoord2f(0.0f, 0.0f);
-		glVertex3f(0.f, 1.f, 0.f);
-		glEnd();
-	}
-
-	glDeleteTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	ilBindImage(0);
-	//ilDeleteImages(1, &Lenna->id);
+	//glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void ModuleRenderer3D::BeginDebugDraw() {}

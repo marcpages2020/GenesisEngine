@@ -8,7 +8,7 @@
 
 WindowConfiguration::WindowConfiguration() : EditorWindow() 
 {
-	type = WindowType::WINDOW_CONFIGURATION;
+	name = "Configuration";
 
 	fps_log.resize(100, 0);
 	ms_log.resize(100, 0);
@@ -22,7 +22,7 @@ WindowConfiguration::~WindowConfiguration()
 
 void WindowConfiguration::Draw()
 {
-	if (ImGui::Begin("Configuration", &visible))
+	if (ImGui::Begin(name, &visible))
 	{
 		focused = ImGui::IsWindowFocused();
 		if (ImGui::CollapsingHeader("Engine"))
@@ -319,19 +319,6 @@ void WindowConfiguration::GetMemoryStatistics(const char* gpu_brand, GLint& vram
 		//glGetIntegerv(GL_GPU_MEMORY_INFO_EVICTED_MEMORY_NVX, &vram_reserved);
 		vram_reserved = -1;
 	}
-}
-
-void ModuleEditor::ShowPreferencesWindow()
-{
-	if (ImGui::Begin("Preferences", &show_preferences_window)) {
-		//Style
-		const char* items[] = { "Classic", "Dark", "Light" };
-		if (ImGui::Combo("Interface Style", &current_theme, items, IM_ARRAYSIZE(items)))
-		{
-			ChangeTheme(std::string(items[current_theme]));
-		}
-	}
-	ImGui::End();
 }
 
 

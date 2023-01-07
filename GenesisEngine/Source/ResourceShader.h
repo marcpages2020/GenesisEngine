@@ -78,6 +78,8 @@ public:
 	void SetMat3(const char* name, float* matrix);
 	void SetMat4(const char* name, float* matrix);
 
+	uint GetHandle();
+
 public:
 	uint vertexShader;
 	uint fragmentShader;

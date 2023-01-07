@@ -94,7 +94,7 @@ bool ShaderImporter::ShaderHasError(GLuint shader, ShaderType type)
 		else {
 			LOG_ERROR("Error compilating fragment shader: %s", infoLog);}
 
-		WindowShaderEditor* shader_editor = dynamic_cast<WindowShaderEditor*>(engine->editor->windows[WINDOW_SHADER_EDITOR]);
+		WindowShaderEditor* shader_editor = dynamic_cast<WindowShaderEditor*>(engine->editor->GetWindow("Shader Editor"));
 		shader_editor->SetErrorsOnScreen(infoLog, type);
 	}
 	else

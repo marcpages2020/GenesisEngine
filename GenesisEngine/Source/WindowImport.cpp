@@ -6,6 +6,7 @@
 
 WindowImport::WindowImport() : EditorWindow(), _currentResourceType(ResourceType::RESOURCE_UNKNOWN)
 {
+	name = "Import";
 	_fileToImport[0] = '\0';
 	_modelImportingOptions = ModelImportingOptions();
 	_textureImportingOptions = TextureImportingOptions();

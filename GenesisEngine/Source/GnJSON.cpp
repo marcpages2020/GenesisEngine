@@ -13,7 +13,7 @@ GnJSONObj::GnJSONObj(const char* buffer) : _object(nullptr)
 {
 	_root = json_parse_string(buffer);
 
-	if (_root != NULL)
+	if (_root != nullptr)
 	{
 		_object = json_value_get_object(_root);
 	}
@@ -23,8 +23,9 @@ GnJSONObj::GnJSONObj(const char* buffer) : _object(nullptr)
 	}
 }
 
-GnJSONObj::GnJSONObj(JSON_Object* object) : _root(nullptr)
+GnJSONObj::GnJSONObj(JSON_Object* object)
 {
+	_root = json_value_init_object();
 	_object = object;
 }
 
@@ -334,6 +335,8 @@ GnJSONObj GnJSONArray::GetObjectInArray(const char* name)
 	}
 
 	LOG_ERROR("JSON object %s could not be found", name);
+
+	return GnJSONObj();
 }
 
 GnJSONObj GnJSONArray::GetObjectAt(int index)

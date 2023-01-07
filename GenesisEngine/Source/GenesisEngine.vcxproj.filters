@@ -34,12 +34,6 @@
     <ClCompile Include="Libs\ImGui\imgui_draw.cpp">
       <Filter>Libs\ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="Libs\ImGui\imgui_impl_opengl3.cpp">
-      <Filter>Libs\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="Libs\ImGui\imgui_impl_sdl.cpp">
-      <Filter>Libs\ImGui</Filter>
-    </ClCompile>
     <ClCompile Include="Libs\ImGui\imgui_widgets.cpp">
       <Filter>Libs\ImGui</Filter>
     </ClCompile>
@@ -49,20 +43,8 @@
     <ClCompile Include="GameObject.cpp">
       <Filter>GameObjects &amp; Components</Filter>
     </ClCompile>
-    <ClCompile Include="Component.cpp">
-      <Filter>GameObjects &amp; Components</Filter>
-    </ClCompile>
-    <ClCompile Include="Transform.cpp">
-      <Filter>GameObjects &amp; Components</Filter>
-    </ClCompile>
     <ClCompile Include="ModuleScene.cpp">
       <Filter>Modules</Filter>
-    </ClCompile>
-    <ClCompile Include="Mesh.cpp">
-      <Filter>GameObjects &amp; Components</Filter>
-    </ClCompile>
-    <ClCompile Include="Material.cpp">
-      <Filter>GameObjects &amp; Components</Filter>
     </ClCompile>
     <ClCompile Include="Libs\MathGeoLib\include\Time\Clock.cpp">
       <Filter>Libs\MathGeoLib\Time</Filter>
@@ -184,9 +166,6 @@
     <ClCompile Include="ResourceMaterial.cpp">
       <Filter>Resources</Filter>
     </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>GameObjects &amp; Components</Filter>
-    </ClCompile>
     <ClCompile Include="Libs\ImGuizmo\ImGuizmo.cpp">
       <Filter>Libs\ImGuizmo</Filter>
     </ClCompile>
@@ -208,9 +187,6 @@
     </ClCompile>
     <ClCompile Include="WindowAssets.cpp">
       <Filter>EditorWindows</Filter>
-    </ClCompile>
-    <ClCompile Include="Light.cpp">
-      <Filter>GameObjects &amp; Components</Filter>
     </ClCompile>
     <ClCompile Include="WindowImport.cpp">
       <Filter>EditorWindows</Filter>
@@ -245,8 +221,35 @@
     <ClCompile Include="WindowConsole.cpp">
       <Filter>EditorWindows</Filter>
     </ClCompile>
+    <ClCompile Include="EditorWindow.cpp">
+      <Filter>EditorWindows</Filter>
+    </ClCompile>
     <ClCompile Include="Libs\glad\include\glad\glad.c">
       <Filter>Libs\glad</Filter>
+    </ClCompile>
+    <ClCompile Include="Libs\ImGui\imgui_impl_opengl3.cpp">
+      <Filter>Libs\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Libs\ImGui\imgui_impl_sdl.cpp">
+      <Filter>Libs\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>GameObjects &amp; Components\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Component.cpp">
+      <Filter>GameObjects &amp; Components\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Light.cpp">
+      <Filter>GameObjects &amp; Components\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Material.cpp">
+      <Filter>GameObjects &amp; Components\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>GameObjects &amp; Components\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Transform.cpp">
+      <Filter>GameObjects &amp; Components\Components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -280,12 +283,6 @@
     <ClInclude Include="Libs\ImGui\imgui.h">
       <Filter>Libs\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="Libs\ImGui\imgui_impl_opengl3.h">
-      <Filter>Libs\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="Libs\ImGui\imgui_impl_sdl.h">
-      <Filter>Libs\ImGui</Filter>
-    </ClInclude>
     <ClInclude Include="Libs\ImGui\imgui_internal.h">
       <Filter>Libs\ImGui</Filter>
     </ClInclude>
@@ -307,20 +304,8 @@
     <ClInclude Include="GameObject.h">
       <Filter>GameObjects &amp; Components</Filter>
     </ClInclude>
-    <ClInclude Include="Component.h">
-      <Filter>GameObjects &amp; Components</Filter>
-    </ClInclude>
-    <ClInclude Include="Transform.h">
-      <Filter>GameObjects &amp; Components</Filter>
-    </ClInclude>
     <ClInclude Include="ModuleScene.h">
       <Filter>Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>GameObjects &amp; Components</Filter>
-    </ClInclude>
-    <ClInclude Include="Material.h">
-      <Filter>GameObjects &amp; Components</Filter>
     </ClInclude>
     <ClInclude Include="Libs\MathGeoLib\include\MathBuildConfig.h">
       <Filter>Libs\MathGeoLib</Filter>
@@ -526,9 +511,6 @@
     <ClInclude Include="ResourceMaterial.h">
       <Filter>Resources</Filter>
     </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>GameObjects &amp; Components</Filter>
-    </ClInclude>
     <ClInclude Include="Libs\ImGuizmo\ImGuizmo.h">
       <Filter>Libs\ImGuizmo</Filter>
     </ClInclude>
@@ -553,9 +535,6 @@
     </ClInclude>
     <ClInclude Include="WindowAssets.h">
       <Filter>EditorWindows</Filter>
-    </ClInclude>
-    <ClInclude Include="Light.h">
-      <Filter>GameObjects &amp; Components</Filter>
     </ClInclude>
     <ClInclude Include="WindowImport.h">
       <Filter>EditorWindows</Filter>
@@ -601,6 +580,30 @@
     </ClInclude>
     <ClInclude Include="Libs\glad\include\glad\khrplatform.h">
       <Filter>Libs\glad</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\ImGui\imgui_impl_opengl3.h">
+      <Filter>Libs\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\ImGui\imgui_impl_sdl.h">
+      <Filter>Libs\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>GameObjects &amp; Components\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Component.h">
+      <Filter>GameObjects &amp; Components\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>GameObjects &amp; Components\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>GameObjects &amp; Components\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>GameObjects &amp; Components\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Transform.h">
+      <Filter>GameObjects &amp; Components\Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -666,6 +669,9 @@
     </Filter>
     <Filter Include="Libs\glad">
       <UniqueIdentifier>{9076cca5-5c47-4b52-ba8d-7021e5ec905e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObjects &amp; Components\Components">
+      <UniqueIdentifier>{33a32d9b-c6ce-4720-b978-6b819c97707e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

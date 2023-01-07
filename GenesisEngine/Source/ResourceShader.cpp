@@ -279,26 +279,32 @@ void ResourceShader::UpdateUniforms(Material* material, ResourceMaterial* resour
 			if (it->first == "model_matrix") {
 				SetMat4("model_matrix", globalTransform.Transposed().ptr());
 			}
-			else if (it->first == "projection") {
+			else if (it->first == "projection") 
+			{
 				SetMat4("projection", engine->camera->GetProjectionMatrixM().Transposed().ptr());
 			}
-			else if (it->first == "view") {
+			else if (it->first == "view") 
+			{
 				SetMat4("view", engine->camera->GetViewMatrixM().Transposed().ptr());
 			}
-			else if (it->first == "time") {
+			else if (it->first == "time") 
+			{
 				SetFloat("time", Time::realClock.timeSinceStartup());
 			}
-			else if (it->first == "normalMatrix") {
+			else if (it->first == "normalMatrix") 
+			{
 				float3x3 normalMatrix = globalTransform.Float3x3Part();
 				normalMatrix.Inverse();
 				normalMatrix.Transpose();
 				SetMat3("normalMatrix", normalMatrix.ptr());
 			}
-			else if (it->first == "cameraPosition") {
+			else if (it->first == "cameraPosition") 
+			{
 				float3 cameraPosition = engine->camera->GetPosition();
 				SetVec3("cameraPosition", cameraPosition.x, cameraPosition.y, cameraPosition.z);
 			} 
-			else if (it->first == "diffuseColor") {
+			else if (it->first == "diffuseColor") 
+			{
 				if (resourceMaterial != nullptr) {
 					SetVec4("diffuseColor", resourceMaterial->diffuseColor.r, resourceMaterial->diffuseColor.g, resourceMaterial->diffuseColor.b, resourceMaterial->diffuseColor.a);
 				}
@@ -399,6 +405,11 @@ void ResourceShader::SetMat4(const char* name, float* matrix)
 	GLint variableLoc = glGetUniformLocation(program_id, name);
 
 	glUniformMatrix4fv(variableLoc, 1, GL_FALSE, matrix);
+}
+
+uint ResourceShader::GetHandle()
+{
+	return program_id;
 }
 
 Uniform::Uniform()

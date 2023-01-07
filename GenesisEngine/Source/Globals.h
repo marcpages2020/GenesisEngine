@@ -38,6 +38,8 @@ enum update_status
 	UPDATE_ERROR
 };
 
+#define ARRAY_COUNT(array) (sizeof(array)/sizeof(array[0]))
+
 #define RELEASE( x )\
     {\
        if( x != nullptr )\

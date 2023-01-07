@@ -5,16 +5,16 @@
 #include "Assimp/Assimp/include/version.h"
 #include "FileSystem.h"
 
-WindowAbout::WindowAbout() : EditorWindow() 
+WindowAbout::WindowAbout() : EditorWindow()
 {
-	type = WindowType::WINDOW_ABOUT;
+	name = "About";
 }
 
 WindowAbout::~WindowAbout() {}
 
 void WindowAbout::Draw()
 {
-	if (ImGui::Begin("About", &visible))
+	if (ImGui::Begin(name, &visible))
 	{
 		focused = ImGui::IsWindowFocused();
 		ImGui::Text("%s v%s", engine->engine_name, engine->engine_version);

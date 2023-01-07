@@ -7,10 +7,10 @@
     },
     {
       "name": "camera",
-      "drag_speed": 0.75,
+      "drag_speed": 3.75,
       "move_speed": 5,
       "orbit_speed": 5,
-      "zoom_speed": 20,
+      "zoom_speed": 40,
       "sensitivity": 12.5
     },
     {

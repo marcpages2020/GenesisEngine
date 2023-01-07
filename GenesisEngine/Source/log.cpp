@@ -18,7 +18,7 @@ void log(LogType logType, const char file[], int line, const char* format, ...)
 
 	if (engine != nullptr)
 	{
-		WindowConsole* console = (WindowConsole*)engine->editor->GetWindow(WINDOW_CONSOLE);
+		WindowConsole* console = (WindowConsole*)engine->editor->GetWindow("Console");
 		if (console != nullptr)
 		{
 			console->AddConsoleLog(logType, tmp_string);

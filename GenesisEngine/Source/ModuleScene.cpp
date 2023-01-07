@@ -84,8 +84,11 @@ void ModuleScene::SetDemo()
 	AddGameObject(parent_water);
 	*/
 
-	GameObject* street_environment = engine->resources->RequestGameObject("Assets/Models/street/Street environment_V01.fbx");
-	AddGameObject(street_environment);
+	//GameObject* street_environment = engine->resources->RequestGameObject("Assets/Models/street/Street environment_V01.fbx");
+	//AddGameObject(street_environment);
+
+	GameObject* rayman = engine->resources->RequestGameObject("Assets/Models/Rayman/rayman.fbx");
+	AddGameObject(rayman);
 }
 
 // Update: draw background
@@ -107,7 +110,7 @@ update_status ModuleScene::Update(float deltaTime)
 void ModuleScene::HandleInput()
 {
 	if ((engine->input->GetKey(SDL_SCANCODE_DELETE) == KEY_DOWN) && (selectedGameObject != nullptr) && (selectedGameObject != root) 
-		&& (engine->editor->IsWindowFocused(WindowType::WINDOW_HIERARCHY) || engine->editor->IsWindowFocused(WindowType::WINDOW_SCENE)))
+		&& (engine->editor->IsWindowFocused("Hierarchy") || engine->editor->IsWindowFocused("Scene")))
 		selectedGameObject->to_delete = true;
 
 	if ((engine->input->GetKey(SDL_SCANCODE_W) == KEY_DOWN))

@@ -20,8 +20,8 @@ Light::~Light()
 
 void Light::Init()
 {
-	glLightfv(ref, GL_AMBIENT, &ambient);
-	glLightfv(ref, GL_DIFFUSE, &diffuse);
+	//glLightfv(ref, GL_AMBIENT, &ambient);
+	//glLightfv(ref, GL_DIFFUSE, &diffuse);
 }
 
 void Light::Update()
@@ -41,7 +41,7 @@ void Light::Render()
 	if(enabled)
 	{
 		float pos[] = {position.x, position.y, position.z, 1.0f};
-		glLightfv(ref, GL_POSITION, pos);
+		//glLightfv(ref, GL_POSITION, pos);
 	}
 }
 

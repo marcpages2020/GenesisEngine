@@ -19,8 +19,8 @@ ModuleCamera3D::ModuleCamera3D(bool start_enabled) : Module(start_enabled)
 	Z = float3(0.0f, 0.0f, 1.0f);
 
 	_camera = new Camera();
-	SetPosition(float3(60.5f, 40.5f, 90.5f));
-	LookAt(float3(0.0f, 0.0f, 0.0f));
+	SetPosition(float3(10.0f, 10.0f, 10.0f));
+	LookAt(float3(0.0f, 2.5f, 0.0f));
 
 	background = { 0.12f, 0.12f, 0.12f, 1.0f };
 }
@@ -69,8 +69,8 @@ void ModuleCamera3D::OnResize(int width, int height)
 // -----------------------------------------------------------------
 update_status ModuleCamera3D::Update(float deltaTime)
 {
-	if (!engine->editor->IsWindowFocused(WindowType::WINDOW_SCENE))
-		return UPDATE_CONTINUE;
+	//if (!engine->editor->IsWindowFocused(WindowType::WINDOW_SCENE))
+	//	return UPDATE_CONTINUE;
 
 	float3 newPos = float3::zero;
 	int speed_multiplier = 1;
@@ -106,11 +106,7 @@ update_status ModuleCamera3D::Update(float deltaTime)
 		newPos -= _camera->GetFrustum().WorldRight() * move_speed * speed_multiplier * deltaTime;
 
 	//Drag
-	if ((engine->input->GetMouseButton(SDL_BUTTON_MIDDLE) == KEY_REPEAT))
-	{
-		newPos -= _camera->GetFrustum().WorldRight() * engine->input->GetMouseXMotion() * drag_speed * deltaTime;
-		newPos += _camera->GetFrustum().up * engine->input->GetMouseYMotion() * drag_speed * deltaTime;
-	}
+
 
 	// Zoom 
 	if (engine->input->GetMouseZ() > 0)
@@ -125,11 +121,17 @@ update_status ModuleCamera3D::Update(float deltaTime)
 			newPos += _camera->GetFrustum().front * zoom_speed * 2.0 * engine->input->GetMouseXMotion() * deltaTime;
 		}
 
-		if ((engine->input->GetMouseButton(SDL_BUTTON_MIDDLE) == KEY_DOWN) && engine->scene->selectedGameObject) {
-			LookAt(engine->scene->selectedGameObject->GetTransform()->GetPosition());
+		if ((engine->input->GetMouseButton(SDL_BUTTON_MIDDLE) == KEY_REPEAT))
+		{
+			newPos -= _camera->GetFrustum().WorldRight() * engine->input->GetMouseXMotion() * drag_speed * deltaTime;
+			newPos += _camera->GetFrustum().up * engine->input->GetMouseYMotion() * drag_speed * deltaTime;
 		}
 
-		if (engine->input->GetMouseButton(SDL_BUTTON_MIDDLE) == KEY_REPEAT) {
+		/*if ((engine->input->GetMouseButton(SDL_BUTTON_MIDDLE) == KEY_DOWN) && engine->scene->selectedGameObject) {
+			LookAt(engine->scene->selectedGameObject->GetTransform()->GetPosition());
+		}*/
+
+		if (engine->input->GetMouseButton(SDL_BUTTON_LEFT) == KEY_REPEAT) {
 			Orbit(deltaTime);
 		}
 	}
@@ -334,13 +336,11 @@ float ModuleCamera3D::GetHorizontalFieldOfView()
 void ModuleCamera3D::SetVerticalFieldOfView(float verticalFOV, int screen_width, int screen_height)
 {
 	_camera->SetVerticalFieldOfView(verticalFOV, screen_width, screen_height);
-	engine->renderer3D->UpdateProjectionMatrix(_camera->GetProjectionMatrix());
 }
 
 void ModuleCamera3D::SetHorizontalFieldOfView(float horizontalFOV, int screen_width, int screen_height)
 {
 	_camera->SetHorizontalFieldOfView(horizontalFOV, screen_width, screen_height);
-	engine->renderer3D->UpdateProjectionMatrix(_camera->GetProjectionMatrix());
 }
 
 void ModuleCamera3D::Reset()

@@ -47,10 +47,13 @@ Material::Material(GameObject* gameObject) : Component(gameObject), checkers_ima
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	shader = dynamic_cast<ResourceShader*>(engine->resources->RequestResource(engine->resources->Find("Assets/Shaders/phong.vert")));
+	//shader = dynamic_cast<ResourceShader*>(engine->resources->RequestResource(engine->resources->Find("Assets/Shaders/phong.vert")));
+	shader = dynamic_cast<ResourceShader*>(engine->resources->RequestResource(engine->resources->Find("Assets/Shaders/deferred_geometry.vert")));
 
-	if (shader == nullptr)
+	if (shader == nullptr) 
+	{
 		shader = engine->renderer3D->GetDefaultShader();
+	}
 
 	shaderID = shader->GetUID();
 }
@@ -268,7 +271,7 @@ void Material::OnEditor()
 					SetShader(dynamic_cast<ResourceShader*>(engine->resources->RequestResource(UID)));
 
 					//Update shader
-					WindowShaderEditor* shaderEditor = dynamic_cast<WindowShaderEditor*>(engine->editor->windows[WINDOW_SHADER_EDITOR]);
+					WindowShaderEditor* shaderEditor = dynamic_cast<WindowShaderEditor*>(engine->editor->GetWindow("Shader Editor"));
 					if (shaderEditor->visible)
 						shaderEditor->Open(shader->assetsFile.c_str());
 				}
@@ -280,7 +283,7 @@ void Material::OnEditor()
 		ImGui::Spacing();
 
 		if(ImGui::Button("Open Shader editor")) {
-			WindowShaderEditor* shaderEditor = dynamic_cast<WindowShaderEditor*>(engine->editor->windows[WINDOW_SHADER_EDITOR]);
+			WindowShaderEditor* shaderEditor = dynamic_cast<WindowShaderEditor*>(engine->editor->GetWindow("Shader Editor"));
 			shaderEditor->Open(shader->assetsFile.c_str());
 		}
 
@@ -322,7 +325,7 @@ ResourceTexture* Material::DrawTextureInformation(ResourceTexture* texture, uint
 		{
 			IM_ASSERT(payload->DataSize == sizeof(int));
 			int payload_n = *(const int*)payload->Data;
-			WindowAssets* assets_window = (WindowAssets*)engine->editor->windows[WINDOW_ASSETS];
+			WindowAssets* assets_window = (WindowAssets*)engine->editor->GetWindow("Assets");
 			Resource* possible_texture = engine->resources->RequestResource(payload_n);
 
 			if (possible_texture->GetType() == ResourceType::RESOURCE_TEXTURE) {

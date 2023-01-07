@@ -38,12 +38,13 @@ bool ModuleWindow::Init()
 		//Create window
 		Uint32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
 
-		//Use OpenGL 2.1
-		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-		SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-		SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+		//SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+		//SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+		//SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+		// 
+		//Use OpenGL 4.3
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
 		if (fullscreen == true)
@@ -79,9 +80,7 @@ bool ModuleWindow::Init()
 		}
 		else
 		{
-			//Get window surface
 			screen_surface = SDL_GetWindowSurface(window);
-
 			context = SDL_GL_CreateContext(window);
 		}
 

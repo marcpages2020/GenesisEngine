@@ -12,6 +12,13 @@
 
 typedef int GLint;
 
+enum class EditorTheme
+{
+	LIGHT,
+	CLASSIC,
+	DARK
+};
+
 class ModuleEditor : public Module 
 {
 public:
@@ -25,9 +32,9 @@ public:
 	update_status Draw();
 	bool CleanUp();
 
-	bool IsWindowFocused(WindowType window);
+	bool IsWindowFocused(const char* windowName);
 	bool MouseOnScene();
-	EditorWindow* GetWindow(WindowType type);
+	EditorWindow* GetWindow(const char* windowName);
 
 	void OnResize(ImVec2 window_size);
 	void LoadFile(const char* filter_extension, const char* from_dir);
@@ -44,15 +51,17 @@ private:
 	//Windows
 	void ShowPreferencesWindow();
 
-	void ChangeTheme(std::string theme);
+	void ChangeTheme(EditorTheme newTheme);
 
 public:
 	ImVec2 image_size;
 	ImVec2 sceneWindowOrigin;
 	ImVec2 mouseScenePosition;
-	EditorWindow* windows[MAX_WINDOWS];
+	std::map<const char*, EditorWindow*> windows;
 
 private:
+
+	void AddWindow(EditorWindow* windowToAdd);
 
 	bool show_project_window;
 
@@ -63,7 +72,7 @@ private:
 	//menus
 	bool open_dockspace;
 
-	int current_theme;
+	EditorTheme currentTheme;
 
 	enum
 	{

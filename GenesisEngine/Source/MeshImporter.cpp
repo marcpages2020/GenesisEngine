@@ -53,64 +53,65 @@ void MeshImporter::Import(const aiMesh* aimesh, ResourceMesh* mesh)
 	//normals, color and texture coordinates
 	for (size_t v = 0; v < aimesh->mNumVertices; v++)
 	{
-		//vertices copying
-		mesh->vertices[v * VERTEX_ATTRIBUTES] = aimesh->mVertices[v].x;
-		mesh->vertices[v * VERTEX_ATTRIBUTES + 1] = aimesh->mVertices[v].y;
-		mesh->vertices[v * VERTEX_ATTRIBUTES + 2] = aimesh->mVertices[v].z;
+		//VERTICES
+		mesh->vertices[v * VERTEX_ATTRIBUTES + VERTEX_POSITION_OFFSET] = aimesh->mVertices[v].x;
+		mesh->vertices[v * VERTEX_ATTRIBUTES + VERTEX_POSITION_OFFSET + 1] = aimesh->mVertices[v].y;
+		mesh->vertices[v * VERTEX_ATTRIBUTES + VERTEX_POSITION_OFFSET + 2] = aimesh->mVertices[v].z;
 
-		//color copying
-		if (aimesh->HasVertexColors(v))
-		{
-			mesh->vertices[v * VERTEX_ATTRIBUTES + 3] = aimesh->mColors[v]->r;
-			mesh->vertices[v * VERTEX_ATTRIBUTES + 4] = aimesh->mColors[v]->g;
-			mesh->vertices[v * VERTEX_ATTRIBUTES + 5] = aimesh->mColors[v]->b;
-		}
-		else
-		{
-			mesh->vertices[v * VERTEX_ATTRIBUTES + 3] = 0.0f;
-			mesh->vertices[v * VERTEX_ATTRIBUTES + 4] = 0.0f;
-			mesh->vertices[v * VERTEX_ATTRIBUTES + 5] = 0.0f;
-		}
-
-		if (aimesh->mTextureCoords[0])
-		{
-			//texcoords copying
-			mesh->vertices[v * VERTEX_ATTRIBUTES + 6] = aimesh->mTextureCoords[0][v].x;
-			mesh->vertices[v * VERTEX_ATTRIBUTES + 7] = aimesh->mTextureCoords[0][v].y;
-
-			//tangets copying
-			if (aimesh->mTangents != nullptr)
-			{
-				mesh->vertices[v * VERTEX_ATTRIBUTES + 11] = aimesh->mTangents[v].x;
-				mesh->vertices[v * VERTEX_ATTRIBUTES + 12] = aimesh->mTangents[v].y;
-				mesh->vertices[v * VERTEX_ATTRIBUTES + 13] = aimesh->mTangents[v].z;
-			}
-		}
-		else
-		{
-			//texcoords copying
-			mesh->vertices[v * VERTEX_ATTRIBUTES + 6] = 0.0f;
-			mesh->vertices[v * VERTEX_ATTRIBUTES + 7] = 0.0f;
-
-			//tangets copying
-			mesh->vertices[v * VERTEX_ATTRIBUTES + 11] = 0.0f;
-			mesh->vertices[v * VERTEX_ATTRIBUTES + 12] = 0.0f;
-			mesh->vertices[v * VERTEX_ATTRIBUTES + 13] = 0.0f;
-		}
-
-		//normal copying
+		//NORMALS
 		if (aimesh->HasNormals())
 		{
 			//normal copying
-			mesh->vertices[v * VERTEX_ATTRIBUTES + 8] = aimesh->mNormals[v].x;
-			mesh->vertices[v * VERTEX_ATTRIBUTES + 9] = aimesh->mNormals[v].y;
-			mesh->vertices[v * VERTEX_ATTRIBUTES + 10] = aimesh->mNormals[v].z;
+			mesh->vertices[v * VERTEX_ATTRIBUTES + VERTEX_NORMALS_OFFSET] = aimesh->mNormals[v].x;
+			mesh->vertices[v * VERTEX_ATTRIBUTES + VERTEX_NORMALS_OFFSET + 1] = aimesh->mNormals[v].y;
+			mesh->vertices[v * VERTEX_ATTRIBUTES + VERTEX_NORMALS_OFFSET + 2] = aimesh->mNormals[v].z;
 		}
 		else
 		{
-			mesh->vertices[v * VERTEX_ATTRIBUTES + 8] = 0.0f;
-			mesh->vertices[v * VERTEX_ATTRIBUTES + 9] = 0.0f;
-			mesh->vertices[v * VERTEX_ATTRIBUTES + 10] = 0.0f;
+			mesh->vertices[v * VERTEX_ATTRIBUTES + VERTEX_NORMALS_OFFSET] = 0.0f;
+			mesh->vertices[v * VERTEX_ATTRIBUTES + VERTEX_NORMALS_OFFSET + 1] = 0.0f;
+			mesh->vertices[v * VERTEX_ATTRIBUTES + VERTEX_NORMALS_OFFSET + 2] = 0.0f;
+		}
+
+		//TEXCOORDS
+		if (aimesh->mTextureCoords[0])
+		{
+			mesh->vertices[v * VERTEX_ATTRIBUTES + VERTEX_TEXCOORDS_OFFSET] = aimesh->mTextureCoords[0][v].x;
+			mesh->vertices[v * VERTEX_ATTRIBUTES + VERTEX_TEXCOORDS_OFFSET + 1] = aimesh->mTextureCoords[0][v].y;
+		}
+		else
+		{
+			//texcoords copying
+			mesh->vertices[v * VERTEX_ATTRIBUTES + VERTEX_TEXCOORDS_OFFSET] = 0.0f;
+			mesh->vertices[v * VERTEX_ATTRIBUTES + VERTEX_TEXCOORDS_OFFSET + 1] = 0.0f;
+		}
+
+		//COLOR
+		if (aimesh->HasVertexColors(v))
+		{
+			mesh->vertices[v * VERTEX_ATTRIBUTES + VERTEX_COLOR_OFFSET] = aimesh->mColors[v]->r;
+			mesh->vertices[v * VERTEX_ATTRIBUTES + VERTEX_COLOR_OFFSET + 1] = aimesh->mColors[v]->g;
+			mesh->vertices[v * VERTEX_ATTRIBUTES + VERTEX_COLOR_OFFSET + 2] = aimesh->mColors[v]->b;
+		}
+		else
+		{
+			mesh->vertices[v * VERTEX_ATTRIBUTES + VERTEX_COLOR_OFFSET] = 0.0f;
+			mesh->vertices[v * VERTEX_ATTRIBUTES + VERTEX_COLOR_OFFSET + 1] = 0.0f;
+			mesh->vertices[v * VERTEX_ATTRIBUTES + VERTEX_COLOR_OFFSET + 2] = 0.0f;
+		}
+
+		//TANGENTS
+		if (aimesh->mTangents != nullptr)
+		{
+			mesh->vertices[v * VERTEX_ATTRIBUTES + VERTEX_TANGENTS_OFFSET] = aimesh->mTangents[v].x;
+			mesh->vertices[v * VERTEX_ATTRIBUTES + VERTEX_TANGENTS_OFFSET + 1] = aimesh->mTangents[v].y;
+			mesh->vertices[v * VERTEX_ATTRIBUTES + VERTEX_TANGENTS_OFFSET + 2] = aimesh->mTangents[v].z;
+		}
+		else
+		{
+			mesh->vertices[v * VERTEX_ATTRIBUTES + VERTEX_TANGENTS_OFFSET] = 0.0f;
+			mesh->vertices[v * VERTEX_ATTRIBUTES + VERTEX_TANGENTS_OFFSET + 1] = 0.0f;
+			mesh->vertices[v * VERTEX_ATTRIBUTES + VERTEX_TANGENTS_OFFSET + 2] = 0.0f;
 		}
 	}
 

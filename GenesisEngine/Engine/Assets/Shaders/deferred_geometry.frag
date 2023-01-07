@@ -29,6 +29,10 @@ uniform Light light;
 
 Material material;
 
+layout(location = 0) out vec4 albedoTexture; //Albedo 
+layout(location = 1) out vec4 normalsTexture; //Normals 
+layout(location = 2) out vec4 positionTexture; //Position 
+
 void main()
 {
     material.ambient = vec3(0.5, 0.5, 0.5);
@@ -58,7 +62,13 @@ void main()
     }
     
    color.rgb += diffuse + specular;
+   
+   albedoTexture = texture(diffuseMap, TexCoord);
+   normalsTexture = vec4(Normal, 1.0);
+   positionTexture = vec4(FragPos, 1.0);
 }
+
+
 
 
 

@@ -9,12 +9,12 @@
 
 WindowAssets::WindowAssets() : EditorWindow()
 {
-	type = WindowType::WINDOW_ASSETS;
+	name = "Assets";
 	current_folder = "Assets";
 	selectedItem[0] = '\0';
 }
 
-WindowAssets::~WindowAssets() 
+WindowAssets::~WindowAssets()
 {
 	current_folder.clear();
 }
@@ -30,12 +30,12 @@ bool WindowAssets::Init()
 
 void WindowAssets::Draw()
 {
-	if (ImGui::Begin("Assets", &visible)) 
-	{		
+	if (ImGui::Begin(name, &visible))
+	{
 		focused = ImGui::IsWindowFocused();
 		//Left window part ------------------------------------------------------------------------------------------------------------------------
-        ImGuiWindowFlags window_flags = ImGuiWindowFlags_AlwaysVerticalScrollbar;
-        ImGui::BeginChild("Tree", ImVec2(ImGui::GetWindowContentRegionWidth() * 0.15f, ImGui::GetContentRegionAvail().y), false, window_flags);
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_AlwaysVerticalScrollbar;
+		ImGui::BeginChild("Tree", ImVec2(ImGui::GetWindowContentRegionWidth() * 0.15f, ImGui::GetContentRegionAvail().y), false, window_flags);
 		if (ImGui::TreeNodeEx("Assets", ImGuiTreeNodeFlags_DefaultOpen)) {
 			if (ImGui::IsItemClicked())
 				current_folder = "Assets";
@@ -46,11 +46,11 @@ void WindowAssets::Draw()
 		ImGui::Spacing();
 		if (ImGui::Button("Reload", ImVec2(50, 16)))
 			engine->resources->CheckAssetsRecursive("Assets");
-        ImGui::EndChild();
+		ImGui::EndChild();
 
 		//Right window part ------------------------------------------------------------------------------------------------------------------------
 		ImGui::SameLine();
-        ImGui::BeginChild("Folder", ImVec2(0, ImGui::GetContentRegionAvail().y), true);
+		ImGui::BeginChild("Folder", ImVec2(0, ImGui::GetContentRegionAvail().y), true);
 		ImGui::Columns(1);
 
 		//Path Buttons
@@ -61,7 +61,7 @@ void WindowAssets::Draw()
 
 		//Current Folder
 		DrawCurrentFolder();
-        ImGui::EndChild();
+		ImGui::EndChild();
 	}
 	ImGui::End();
 }
@@ -80,7 +80,7 @@ void WindowAssets::DrawDirectoryRecursive(const char* directory, const char* fil
 	for (std::vector<std::string>::const_iterator it = dirs.begin(); it != dirs.end(); ++it)
 	{
 		bool open = ImGui::TreeNodeEx((dir + (*it)).c_str(), 0, "%s/", (*it).c_str(), tree_flags);
-		
+
 		if (ImGui::BeginPopupContextItem()) {
 			if (ImGui::Button("Delete"))
 			{
@@ -94,12 +94,12 @@ void WindowAssets::DrawDirectoryRecursive(const char* directory, const char* fil
 			current_folder = directory;
 			current_folder.append("/");
 			current_folder.append(*it).c_str();
-			if(open)
+			if (open)
 				ImGui::TreePop();
 			break;
 		}
 
-		if (open) 
+		if (open)
 		{
 			DrawDirectoryRecursive((dir + (*it)).c_str(), filter_extension);
 			ImGui::TreePop();
@@ -148,7 +148,7 @@ void WindowAssets::DrawCurrentFolder()
 
 	for (size_t i = 0; i < tmp_files.size(); ++i)
 	{
-		if (tmp_files[i].find(".meta") == std::string::npos) 
+		if (tmp_files[i].find(".meta") == std::string::npos)
 		{
 			if (engine->resources->GetTypeFromPath(tmp_files[i].c_str()) != ResourceType::RESOURCE_UNKNOWN)
 				files.push_back(tmp_files[i]);
@@ -176,7 +176,7 @@ void WindowAssets::DrawCurrentFolder()
 		ImGui::Columns(columns, 0, false);
 		for (size_t c = 0; c < columns && icons_drawn < total_icons && ret; c++)
 		{
-			if (dirs_drawn < dirs.size()) 
+			if (dirs_drawn < dirs.size())
 			{
 				std::string path = current_folder + "/" + dirs[dirs_drawn];
 				ret = DrawIcon(path.c_str(), icons_drawn, true);
@@ -203,7 +203,7 @@ void WindowAssets::DrawCurrentFolder()
 			{
 				static char material_buf[32] = "New Material";
 				static char shader_name[32] = "New Shader";
-	
+
 				/*
 				if (ImGui::BeginMenu("Material"))
 				{
@@ -217,7 +217,7 @@ void WindowAssets::DrawCurrentFolder()
 				}
 				*/
 
-				if (ImGui::BeginMenu("Shader")) 
+				if (ImGui::BeginMenu("Shader"))
 				{
 					ImGui::InputText("Name", shader_name, IM_ARRAYSIZE(shader_name));
 					ImGui::Text("Vertex Shader: %s/%s.vert", current_folder.c_str(), shader_name);
@@ -252,15 +252,18 @@ void WindowAssets::DrawCurrentFolder()
 bool WindowAssets::DrawIcon(const char* path, int id, bool isFolder)
 {
 	bool ret = true;
-	ImVec4 fileColor = ImVec4(0, 0, 0, 1);
 
+	ImVec4 fileColor = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
+	
 	if (strcmp(selectedItem, path) == 0)
-		fileColor = ImVec4(0, 0, 0, 0);
+	{
+		fileColor = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
+	}
 
 	if (isFolder)
 	{
 		ImGui::PushID(id);
-		if (ImGui::ImageButton((ImTextureID)icons.folder->GetGpuID(), ImVec2(70, 70), ImVec2(0, 1), ImVec2(1, 0), 0 , fileColor)) 
+		if (ImGui::ImageButton((ImTextureID)icons.folder->GetGpuID(), ImVec2(70, 70), ImVec2(0, 1), ImVec2(1, 0), 0, fileColor))
 		{
 			if (strcmp(selectedItem, path) == 0)
 			{
@@ -300,13 +303,13 @@ bool WindowAssets::DrawIcon(const char* path, int id, bool isFolder)
 		ResourceType type = engine->resources->GetTypeFromPath(path);
 		uint imageID = icons.model->GetGpuID();
 
-		if(type == ResourceType::RESOURCE_TEXTURE)
+		if (type == ResourceType::RESOURCE_TEXTURE)
 		{
 			ResourceTexture* preview = nullptr;
-			
+
 			for (std::map<std::string, ResourceTexture*>::iterator it = previews.begin(); it != previews.end(); it++)
 			{
-				if (it->first == file) 
+				if (it->first == file)
 					preview = it->second;
 			}
 
@@ -339,12 +342,12 @@ bool WindowAssets::DrawIcon(const char* path, int id, bool isFolder)
 		if (FileSystem::ToLower(file.c_str()).find(".fbx") != std::string::npos)
 		{
 			ImGui::SameLine();
-			if (ImGui::Button("->", ImVec2(20,20)))
+			if (ImGui::Button("->", ImVec2(20, 20)))
 				ImGui::OpenPopup("Meshes");
 
 			DrawModelInternalResources(file.c_str());
 		}
-		
+
 		if (file.size() > 14)
 		{
 			file.resize(14);
@@ -393,18 +396,18 @@ void WindowAssets::DrawPathButtons()
 		path = current_folder.c_str();
 
 	FileSystem::SplitFilePath(path, &splits);
-	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0,0,0,1));
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 1));
 
 	for (size_t i = 0; i < splits.size(); i++)
 	{
-		if(i < splits.size()- 1)
+		if (i < splits.size() - 1)
 		{
 			if (ImGui::Button(splits[i].append("/").c_str(), ImVec2(splits[i].size() * ImGui::GetFontSize() * 0.75f, 20))) {
 				for (size_t j = 1; j <= i; j++)
 				{
 					splits[0].append(splits[j]);
 				}
-				splits[0].erase(splits[0].end()-1);
+				splits[0].erase(splits[0].end() - 1);
 				current_folder = splits[0].c_str();
 				UnloadPreviews();
 				selectedItem[0] = '\0';
@@ -413,7 +416,7 @@ void WindowAssets::DrawPathButtons()
 		}
 		else
 		{
-			ImGui::Button(splits[i].c_str(), ImVec2(splits[i].size() * ImGui::GetFontSize() * 0.75f, 20)); 
+			ImGui::Button(splits[i].c_str(), ImVec2(splits[i].size() * ImGui::GetFontSize() * 0.75f, 20));
 		}
 		ImGui::SameLine();
 	}

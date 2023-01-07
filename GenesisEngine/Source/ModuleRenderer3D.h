@@ -24,6 +24,28 @@ enum DisplayMode
 	WIREFRAME
 };
 
+struct VertexV3V2
+{
+	vec3 pos;
+	vec2 uv;
+};
+
+struct Quad
+{
+	GLuint vao;
+
+	GLuint embeddedVertices;
+	GLuint embeddedElements;
+
+	VertexV3V2 vertices[4] = { vec3(-1.0f, -1.0f, 0.0f),  vec2(0.0f, 0.0f),
+							   vec3(1.0f, -1.0f, 0.0f),  vec2(1.0f, 0.0f),
+							   vec3(1.0f,  1.0f, 0.0f),  vec2(1.0f, 1.0f),
+							   vec3(-1.0f,  1.0f, 0.0f),  vec2(0.0f, 1.0f)
+	};
+
+	u16 indices[6] = { 0, 1, 2, 0, 2, 3 };
+};
+
 class ModuleRenderer3D : public Module
 {
 public:
@@ -38,7 +60,6 @@ public:
 	bool CleanUp();
 	
 	void OnResize(int width, int height);
-	void UpdateProjectionMatrix(float* projectionMatrix);
 
 	void DrawAABB(float3* aabb);
 	DisplayMode GetDisplayMode();
@@ -54,11 +75,14 @@ public:
 
 	void DrawRay();
 
+	bool RenderSceneGeometry();
+	void GenerateQuad();
+	void RenderQuad();
+
 private:
 	void GenerateBuffers();
 	void GenerateColorTexture(GLuint& colorAttachmentHandle, vec2 displaySize, GLint internalFormat, GLuint glColorAttachment);
 	void GenerateDepthTexture(GLuint& newDepthAttachmentHandle, vec2 displaySize);
-	void DrawDirectModeCube();
 	void BeginDebugDraw();
 	void EndDebugDraw();
 
@@ -82,6 +106,7 @@ public:
 
 	LineSegment _ray;
 	bool cull_editor_camera;
+	Quad quad;
 
 	bool draw_mouse_picking_ray;
 	bool draw_aabbs;
@@ -91,7 +116,11 @@ public:
 	bool vsync;
 	ResourceShader* defaultShader;
 
+	unsigned int quadVAO = 0;
+	unsigned int quadVBO;
+
 private: 
 	Camera* _mainCamera;
-	std::map<float, GnMesh*> blendedMeshes;
+	std::map<float, GnMesh*> sceneMeshes;
+	ResourceShader* quadShader;
 };

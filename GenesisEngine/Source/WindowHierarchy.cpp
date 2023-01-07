@@ -6,14 +6,14 @@
 
 WindowHierarchy::WindowHierarchy() : EditorWindow() 
 {
-	type = WindowType::WINDOW_HIERARCHY;
+	name = "Hierarchy";
 }
 
 WindowHierarchy::~WindowHierarchy() {}
 
 void WindowHierarchy::Draw()
 {
-	if (ImGui::Begin("Hierarchy", &visible))
+	if (ImGui::Begin(name, &visible))
 	{
 		focused = ImGui::IsWindowFocused();
 		GameObject* root = engine->scene->GetRoot();
