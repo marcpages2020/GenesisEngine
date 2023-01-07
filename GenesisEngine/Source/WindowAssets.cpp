@@ -6,6 +6,7 @@
 #include "ResourceTexture.h"
 
 #include <algorithm>
+#include "WindowShaderEditor.h"
 
 WindowAssets::WindowAssets() : EditorWindow()
 {
@@ -36,10 +37,12 @@ void WindowAssets::Draw()
 		//Left window part ------------------------------------------------------------------------------------------------------------------------
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_AlwaysVerticalScrollbar;
 		ImGui::BeginChild("Tree", ImVec2(ImGui::GetWindowContentRegionWidth() * 0.15f, ImGui::GetContentRegionAvail().y), false, window_flags);
-		if (ImGui::TreeNodeEx("Assets", ImGuiTreeNodeFlags_DefaultOpen)) {
+		if (ImGui::TreeNodeEx("Assets", ImGuiTreeNodeFlags_DefaultOpen))
+		{
 			if (ImGui::IsItemClicked())
+			{
 				current_folder = "Assets";
-
+			}
 			DrawDirectoryRecursive("Assets", nullptr);
 			ImGui::TreePop();
 		}
@@ -81,7 +84,8 @@ void WindowAssets::DrawDirectoryRecursive(const char* directory, const char* fil
 	{
 		bool open = ImGui::TreeNodeEx((dir + (*it)).c_str(), 0, "%s/", (*it).c_str(), tree_flags);
 
-		if (ImGui::BeginPopupContextItem()) {
+		if (ImGui::BeginPopupContextItem())
+		{
 			if (ImGui::Button("Delete"))
 			{
 				//gameObject->to_delete = true;
@@ -90,12 +94,15 @@ void WindowAssets::DrawDirectoryRecursive(const char* directory, const char* fil
 			ImGui::EndPopup();
 		}
 
-		if (ImGui::IsItemClicked()) {
+		if (ImGui::IsItemClicked())
+		{
 			current_folder = directory;
 			current_folder.append("/");
 			current_folder.append(*it).c_str();
 			if (open)
+			{
 				ImGui::TreePop();
+			}
 			break;
 		}
 
@@ -254,12 +261,13 @@ bool WindowAssets::DrawIcon(const char* path, int id, bool isFolder)
 	bool ret = true;
 
 	ImVec4 fileColor = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
-	
+
 	if (strcmp(selectedItem, path) == 0)
 	{
 		fileColor = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
 	}
 
+	//Folder
 	if (isFolder)
 	{
 		ImGui::PushID(id);
@@ -273,12 +281,15 @@ bool WindowAssets::DrawIcon(const char* path, int id, bool isFolder)
 				ret = false;
 			}
 			else
+			{
 				sprintf_s(selectedItem, path);
+			}
 		}
 
 		ImGui::Text("%s", FileSystem::GetFileName(path).c_str());
 		ImGui::PopID();
 	}
+	//File
 	else
 	{
 		std::string meta_file = engine->resources->GenerateMetaFile(path);
@@ -286,7 +297,8 @@ bool WindowAssets::DrawIcon(const char* path, int id, bool isFolder)
 
 		std::string file_path = path;
 
-		if (file_path.find(".frag") != std::string::npos) {
+		if (file_path.find(".frag") != std::string::npos)
+		{
 			file_path = FileSystem::GetFolder(path) + FileSystem::GetFileName(path);
 			file_path.append(".vert");
 		}
@@ -318,7 +330,25 @@ bool WindowAssets::DrawIcon(const char* path, int id, bool isFolder)
 		}
 
 		if (ImGui::ImageButton((ImTextureID)imageID, ImVec2(75, 70), ImVec2(0, 1), ImVec2(1, 0), 0, fileColor))
-			sprintf_s(selectedItem, 256, path);
+		{
+			//Double click
+			if (strcmp(selectedItem, path) == 0)
+			{
+				if (type == ResourceType::RESOURCE_SHADER)
+				{
+					WindowShaderEditor* shaderEditor = dynamic_cast<WindowShaderEditor*>(engine->editor->GetWindow("Shader Editor"));
+					if (file_path.find(".vert") != std::string::npos)
+					{
+						shaderEditor->Open(file_path.c_str());
+					}
+				}
+			}
+			else
+			{
+				sprintf_s(selectedItem, 256, path);
+			}
+
+		}
 
 		if (ImGui::BeginDragDropSource())
 		{

@@ -66,8 +66,10 @@ void GameObject::Update()
 					GnMesh* mesh = (GnMesh*)components[i];
 					GenerateAABB(mesh);
 
-					if(engine->renderer3D->IsInsideCameraView(_AABB))
+					if (engine->renderer3D->IsInsideCameraView(_AABB))
+					{
 						mesh->Update();
+					}
 				}
 				else
 				{

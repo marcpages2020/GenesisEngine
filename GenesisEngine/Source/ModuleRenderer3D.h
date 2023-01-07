@@ -60,6 +60,7 @@ public:
 	bool CleanUp();
 	
 	void OnResize(int width, int height);
+	void ResizeTexture(GLuint framebuffer, GLuint textureAttachmentHandle, vec2 newSize, GLuint internalFormat);
 
 	void DrawAABB(float3* aabb);
 	DisplayMode GetDisplayMode();
@@ -68,6 +69,7 @@ public:
 	Camera* GetMainCamera();
 	bool IsInsideCameraView(AABB aabb);
 	void AddBlendedMesh(float3 position, GnMesh* mesh);
+	void AddMeshToRender(GnMesh* mesh);
 	ResourceShader* GetDefaultShader();
 
 	void SetCapActive(GLenum cap, bool active);
@@ -79,14 +81,18 @@ public:
 	void GenerateQuad();
 	void RenderQuad();
 
+	bool CheckFramebufferStatus();
+
 private:
 	void GenerateBuffers();
-	void GenerateColorTexture(GLuint& colorAttachmentHandle, vec2 displaySize, GLint internalFormat, GLuint glColorAttachment);
+	void GenerateColorTexture(GLuint& textureAttachmentHandle, vec2 displaySize, GLint internalFormat, GLuint glColorAttachment);
 	void GenerateDepthTexture(GLuint& newDepthAttachmentHandle, vec2 displaySize);
 	void BeginDebugDraw();
 	void EndDebugDraw();
-
-	GLuint frameBuffer;
+	void TakeScreenshot(int sceneFramebuffer);
+	
+	GLuint sceneFramebuffer;
+	GLuint quadFramebuffer;
 
 public:
 	GLuint albedoAttachmentHandle;
@@ -122,5 +128,6 @@ public:
 private: 
 	Camera* _mainCamera;
 	std::map<float, GnMesh*> sceneMeshes;
+	std::vector<GnMesh*> meshesToRender;
 	ResourceShader* quadShader;
 };

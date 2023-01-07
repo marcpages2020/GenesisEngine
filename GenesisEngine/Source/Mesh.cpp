@@ -15,17 +15,17 @@
 
 // GnMesh =========================================================================================================================
 
-GnMesh::GnMesh() : Component(), 
+GnMesh::GnMesh() : Component(),
 name("No name"), path("No path"),
-draw_face_normals(false), draw_vertex_normals(false), 
+draw_face_normals(false), draw_vertex_normals(false),
 _resource(nullptr), blend(false)
 {
 	type = ComponentType::MESH;
 }
 
-GnMesh::~GnMesh() 
+GnMesh::~GnMesh()
 {
-	if (_resource != nullptr) 
+	if (_resource != nullptr)
 	{
 		engine->resources->ReleaseResource(_resource->GetUID());
 		_resource = nullptr;
@@ -58,7 +58,7 @@ void GnMesh::SetResourceUID(uint UID)
 	_resourceUID = UID;
 	_resource = (ResourceMesh*)engine->resources->RequestResource(_resourceUID);
 
-	if(_resource != nullptr)
+	if (_resource != nullptr)
 		GenerateAABB();
 }
 
@@ -72,7 +72,7 @@ void GnMesh::GenerateAABB()
 	_AABB.SetNegativeInfinity();
 
 	float3* vertices = new float3[_resource->vertices_amount];
-	
+
 	for (size_t i = 0; i < _resource->vertices_amount; i++)
 	{
 		vertices[i].x = _resource->vertices[i * VERTEX_ATTRIBUTES];
@@ -92,12 +92,14 @@ AABB GnMesh::GetAABB()
 
 void GnMesh::Update()
 {
-	if (!blend){
- 		Render();
-	}
-	else {
-		engine->renderer3D->AddBlendedMesh(_gameObject->GetTransform()->GetPosition(), this);
-	}
+	//if (!blend) {
+	//	Render();
+	//}
+	//else {
+	//}
+	//TODO: Render differently
+	//engine->renderer3D->AddBlendedMesh(_gameObject->GetTransform()->GetPosition(), this);
+	engine->renderer3D->AddMeshToRender(this);
 }
 
 void GnMesh::Render()
@@ -118,6 +120,7 @@ void GnMesh::Render()
 	//vertices
 	glBindVertexArray(_resource->VAO);
 	glDrawElements(GL_TRIANGLES, _resource->indices_amount, GL_UNSIGNED_INT, NULL);
+
 	glBindVertexArray(0);
 	glUseProgram(0);
 
@@ -127,7 +130,7 @@ void GnMesh::Render()
 	//if (draw_face_normals || engine->renderer3D->draw_face_normals)
 	//	DrawFaceNormals();
 
-	glBindTexture(GL_TEXTURE_2D, 0);
+	//glBindTexture(GL_TEXTURE_2D, 0);
 	//glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	//glUnmapBuffer(GL_UNIFORM_BUFFER);
 	//glBindBuffer(GL_UNIFORM_BUFFER, 0);
@@ -234,7 +237,7 @@ void GnMesh::DrawVertexNormals()
 		//		   vertex.y + (normal.y * normal_lenght),
 		//	       vertex.z + (normal.z * normal_lenght));
 	}
-	
+
 	glColor3f(1.0f, 1.0f, 1.0f);
 	//glEnd();
 }
@@ -263,8 +266,8 @@ void GnMesh::DrawFaceNormals()
 		glVertex3f(vx, vy, vz);
 
 		glVertex3f(vx + (_resource->normals[i] * normal_lenght),
-			       vy + (_resource->normals[i + 1] * normal_lenght),
-			       vz + (_resource->normals[i + 2]) * normal_lenght);
+				   vy + (_resource->normals[i + 1] * normal_lenght),
+				   vz + (_resource->normals[i + 2]) * normal_lenght);
 	}
 
 	glColor3f(1.0f, 1.0f, 1.0f);
@@ -275,7 +278,7 @@ void GnMesh::DrawFaceNormals()
 
 // GnGrid =========================================================================================================================
 
-GnGrid::GnGrid(int g_size) 
+GnGrid::GnGrid(int g_size)
 {
 	if ((g_size % 2) != 0)
 		g_size++;
@@ -291,7 +294,7 @@ void GnGrid::Render()
 
 	//Vertical Lines
 	for (float x = -size * 0.5f; x <= size * 0.5f; x++)
-	{	
+	{
 		//glVertex3f(x, 0, -size * 0.5f);
 		//glVertex3f(x, 0, size * 0.5f);
 	}
@@ -299,8 +302,8 @@ void GnGrid::Render()
 	//Hortiontal Lines
 	for (float z = -size * 0.5f; z <= size * 0.5f; z++)
 	{
-/*		glVertex3f(-size * 0.5f, 0, z);
-		glVertex3f(size * 0.5f, 0, z)*/;
+		/*		glVertex3f(-size * 0.5f, 0, z);
+				glVertex3f(size * 0.5f, 0, z)*/;
 	}
 
 	//glEnd();

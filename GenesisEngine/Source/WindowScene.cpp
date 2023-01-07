@@ -76,9 +76,11 @@ void WindowScene::Draw()
 			DrawGameTimeDataOverlay();
 
 		if (engine->editor->image_size.x != window_size.x || engine->editor->image_size.y != window_size.y)
+		{
 			engine->editor->OnResize(window_size);
+		}
 
-		ImGui::Image((ImTextureID)engine->renderer3D->finalRenderAttachmentHandle, engine->editor->image_size, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
+		ImGui::Image((ImTextureID)engine->renderer3D->finalRenderAttachmentHandle, window_size, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
 
 		ImGui::PushID("Scene");
 		if (ImGui::BeginDragDropTarget())

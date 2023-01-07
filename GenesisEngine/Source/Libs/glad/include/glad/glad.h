@@ -2526,36 +2526,36 @@ GLAPI PFNGLPOLYGONSTIPPLEPROC glad_glPolygonStipple;
 typedef void (APIENTRYP PFNGLSHADEMODELPROC)(GLenum mode);
 GLAPI PFNGLSHADEMODELPROC glad_glShadeModel;
 #define glShadeModel glad_glShadeModel
-typedef void (APIENTRYP PFNGLTEXENVFPROC)(GLenum target, GLenum pname, GLfloat param);
-GLAPI PFNGLTEXENVFPROC glad_glTexEnvf;
-#define glTexEnvf glad_glTexEnvf
-typedef void (APIENTRYP PFNGLTEXENVFVPROC)(GLenum target, GLenum pname, const GLfloat *params);
-GLAPI PFNGLTEXENVFVPROC glad_glTexEnvfv;
-#define glTexEnvfv glad_glTexEnvfv
+//typedef void (APIENTRYP PFNGLTEXENVFPROC)(GLenum target, GLenum pname, GLfloat param);
+//GLAPI PFNGLTEXENVFPROC glad_glTexEnvf;
+//#define glTexEnvf glad_glTexEnvf
+//typedef void (APIENTRYP PFNGLTEXENVFVPROC)(GLenum target, GLenum pname, const GLfloat *params);
+//GLAPI PFNGLTEXENVFVPROC glad_glTexEnvfv;
+//#define glTexEnvfv glad_glTexEnvfv
 //typedef void (APIENTRYP PFNGLTEXENVIPROC)(GLenum target, GLenum pname, GLint param);
 //GLAPI PFNGLTEXENVIPROC glad_glTexEnvi;
 //#define glTexEnvi glad_glTexEnvi
-typedef void (APIENTRYP PFNGLTEXENVIVPROC)(GLenum target, GLenum pname, const GLint *params);
-GLAPI PFNGLTEXENVIVPROC glad_glTexEnviv;
-#define glTexEnviv glad_glTexEnviv
-typedef void (APIENTRYP PFNGLTEXGENDPROC)(GLenum coord, GLenum pname, GLdouble param);
-GLAPI PFNGLTEXGENDPROC glad_glTexGend;
-#define glTexGend glad_glTexGend
-typedef void (APIENTRYP PFNGLTEXGENDVPROC)(GLenum coord, GLenum pname, const GLdouble *params);
-GLAPI PFNGLTEXGENDVPROC glad_glTexGendv;
-#define glTexGendv glad_glTexGendv
-typedef void (APIENTRYP PFNGLTEXGENFPROC)(GLenum coord, GLenum pname, GLfloat param);
-GLAPI PFNGLTEXGENFPROC glad_glTexGenf;
-#define glTexGenf glad_glTexGenf
-typedef void (APIENTRYP PFNGLTEXGENFVPROC)(GLenum coord, GLenum pname, const GLfloat *params);
-GLAPI PFNGLTEXGENFVPROC glad_glTexGenfv;
-#define glTexGenfv glad_glTexGenfv
-typedef void (APIENTRYP PFNGLTEXGENIPROC)(GLenum coord, GLenum pname, GLint param);
-GLAPI PFNGLTEXGENIPROC glad_glTexGeni;
-#define glTexGeni glad_glTexGeni
-typedef void (APIENTRYP PFNGLTEXGENIVPROC)(GLenum coord, GLenum pname, const GLint *params);
-GLAPI PFNGLTEXGENIVPROC glad_glTexGeniv;
-#define glTexGeniv glad_glTexGeniv
+//typedef void (APIENTRYP PFNGLTEXENVIVPROC)(GLenum target, GLenum pname, const GLint *params);
+//GLAPI PFNGLTEXENVIVPROC glad_glTexEnviv;
+//#define glTexEnviv glad_glTexEnviv
+//typedef void (APIENTRYP PFNGLTEXGENDPROC)(GLenum coord, GLenum pname, GLdouble param);
+//GLAPI PFNGLTEXGENDPROC glad_glTexGend;
+//#define glTexGend glad_glTexGend
+//typedef void (APIENTRYP PFNGLTEXGENDVPROC)(GLenum coord, GLenum pname, const GLdouble *params);
+//GLAPI PFNGLTEXGENDVPROC glad_glTexGendv;
+//#define glTexGendv glad_glTexGendv
+//typedef void (APIENTRYP PFNGLTEXGENFPROC)(GLenum coord, GLenum pname, GLfloat param);
+//GLAPI PFNGLTEXGENFPROC glad_glTexGenf;
+//#define glTexGenf glad_glTexGenf
+//typedef void (APIENTRYP PFNGLTEXGENFVPROC)(GLenum coord, GLenum pname, const GLfloat *params);
+//GLAPI PFNGLTEXGENFVPROC glad_glTexGenfv;
+//#define glTexGenfv glad_glTexGenfv
+//typedef void (APIENTRYP PFNGLTEXGENIPROC)(GLenum coord, GLenum pname, GLint param);
+//GLAPI PFNGLTEXGENIPROC glad_glTexGeni;
+//#define glTexGeni glad_glTexGeni
+//typedef void (APIENTRYP PFNGLTEXGENIVPROC)(GLenum coord, GLenum pname, const GLint *params);
+//GLAPI PFNGLTEXGENIVPROC glad_glTexGeniv;
+//#define glTexGeniv glad_glTexGeniv
 typedef void (APIENTRYP PFNGLFEEDBACKBUFFERPROC)(GLsizei size, GLenum type, GLfloat *buffer);
 GLAPI PFNGLFEEDBACKBUFFERPROC glad_glFeedbackBuffer;
 #define glFeedbackBuffer glad_glFeedbackBuffer

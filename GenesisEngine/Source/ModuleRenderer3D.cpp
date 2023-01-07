@@ -20,8 +20,10 @@
 #include <gl/GLU.h>
 
 #include "Devil/include/IL/il.h"
+#include "TextureImporter.h"
 
 #include "ResourceShader.h"
+#include <Devil/include/IL/ilut.h>
 
 #pragma comment (lib, "glu32.lib")          /* link OpenGL Utility lib */
 #pragma comment (lib, "opengl32.lib")     /* link Microsoft OpenGL lib */
@@ -30,7 +32,7 @@ ModuleRenderer3D::ModuleRenderer3D(bool start_enabled) : Module(start_enabled),
 defaultShader(nullptr), quadShader(nullptr), context(nullptr), cull_editor_camera(true), _mainCamera(nullptr),
 albedoAttachmentHandle(0u), normalsAttachmentHandle(0u), positionAttachmentHandle(0u), finalRenderAttachmentHandle(0u),
 draw_aabbs(false), draw_mouse_picking_ray(false), draw_vertex_normals(false), draw_face_normals(false),
-frameBuffer(0), renderBuffer(0), depthAttachmentHandle(0), depthRenderBuffer(0), display_mode(SOLID), vsync(false)
+sceneFramebuffer(0), renderBuffer(0), depthAttachmentHandle(0), depthRenderBuffer(0), display_mode(SOLID), vsync(false)
 {
 	name = "renderer";
 	_ray = LineSegment();
@@ -107,12 +109,12 @@ bool ModuleRenderer3D::Init()
 		}
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		//glEnable(GL_DEPTH_TEST);
-		//glEnable(GL_CULL_FACE);
-		//glEnable(GL_COLOR_MATERIAL);
-		//glEnable(GL_TEXTURE_2D);
-		//glEnable(GL_LIGHTING);
-		//glEnable(GL_STENCIL_TEST);
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+		glEnable(GL_COLOR_MATERIAL);
+		glEnable(GL_TEXTURE_2D);
+		glEnable(GL_LIGHTING);
+		glEnable(GL_STENCIL_TEST);
 		//glEnable(GL_BLEND);
 	}
 
@@ -131,6 +133,7 @@ bool ModuleRenderer3D::Init()
 update_status ModuleRenderer3D::PreUpdate(float deltaTime)
 {
 	sceneMeshes.clear();
+	meshesToRender.clear();
 
 	return UPDATE_CONTINUE;
 }
@@ -145,12 +148,6 @@ update_status ModuleRenderer3D::Update(float deltaTime)
 // PostUpdate present buffer to screen
 update_status ModuleRenderer3D::PostUpdate(float deltaTime)
 {
-	//Clear the buffer from color and depth
-	Color c = engine->camera->background;
-	glClearColor(c.r, c.g, c.b, c.a);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-	glEnable(GL_DEPTH_TEST);
-
 	//if (draw_mouse_picking_ray)
 	//	DrawRay();
 
@@ -159,6 +156,11 @@ update_status ModuleRenderer3D::PostUpdate(float deltaTime)
 
 	//Take the previous textures, apply lighting and set it into a quad
 	RenderQuad();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_DEPTH_TEST);
 
 	//Draw the editor
 	engine->editor->Draw();
@@ -180,7 +182,7 @@ bool ModuleRenderer3D::CleanUp()
 	LOG("Destroying 3D Renderer");
 
 	//Delete the framebuffer
-	glDeleteFramebuffers(1, &frameBuffer);
+	glDeleteFramebuffers(1, &sceneFramebuffer);
 	
 	//Delete all the used textures
 	glDeleteTextures(1, &albedoAttachmentHandle);
@@ -196,20 +198,30 @@ bool ModuleRenderer3D::CleanUp()
 	return true;
 }
 
-
 void ModuleRenderer3D::OnResize(int width, int height)
 {
 	glViewport(0, 0, width, height);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-	glBindTexture(GL_TEXTURE_2D, finalRenderAttachmentHandle);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//Scene textures
+	ResizeTexture(sceneFramebuffer, albedoAttachmentHandle, vec2(width, height), GL_RGBA8);
+	ResizeTexture(sceneFramebuffer, normalsAttachmentHandle, vec2(width, height), GL_RGBA16F);
+	ResizeTexture(sceneFramebuffer, positionAttachmentHandle, vec2(width, height), GL_RGBA16F);
+	
+	//Quad texture
+	ResizeTexture(quadFramebuffer, finalRenderAttachmentHandle, vec2(width, height), GL_RGBA16F);
 
-	glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	//glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
+	//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+	//glBindRenderbuffer(GL_RENDERBUFFER, 0);
+	//glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void ModuleRenderer3D::ResizeTexture(GLuint framebuffer, GLuint textureAttachmentHandle, vec2 newSize, GLuint internalFormat)
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+	glBindTexture(GL_TEXTURE_2D, textureAttachmentHandle);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, newSize.x, newSize.y, 0, internalFormat, GL_UNSIGNED_BYTE, NULL);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void ModuleRenderer3D::DrawAABB(float3* cornerPoints)
@@ -303,6 +315,11 @@ void ModuleRenderer3D::AddBlendedMesh(float3 position, GnMesh* mesh)
 	sceneMeshes[distance] = mesh;
 }
 
+void ModuleRenderer3D::AddMeshToRender(GnMesh* mesh)
+{
+	meshesToRender.push_back(mesh);
+}
+
 ResourceShader* ModuleRenderer3D::GetDefaultShader()
 {
 	ResourceShader* defaultShader = (ResourceShader*)engine->resources->RequestResource(engine->resources->Find("Assets/EngineAssets/default_shader.vert"));
@@ -367,15 +384,27 @@ bool ModuleRenderer3D::RenderSceneGeometry()
 	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Geometry Render");
 
 	//Bind buffer where we will draw
-	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, sceneFramebuffer);
 
-	for (std::map<float, GnMesh*>::reverse_iterator it = sceneMeshes.rbegin(); it != sceneMeshes.rend(); ++it)
+	//Clear the buffer from color and depth
+	Color backgroundColor = engine->camera->background;
+	glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_DEPTH_TEST);
+
+	/*for (std::map<float, GnMesh*>::reverse_iterator it = sceneMeshes.rbegin(); it != sceneMeshes.rend(); ++it)
 	{
 		it->second->Render();
+	}*/
+
+	for (size_t i = 0; i < meshesToRender.size(); ++i)
+	{
+		meshesToRender[i]->Render();
 	}
 
 	//Bind to default buffer to avoid drawing on top of the geometry in other processes
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glUseProgram(0);
 
 	glPopDebugGroup();
 
@@ -419,9 +448,14 @@ void ModuleRenderer3D::RenderQuad()
 	{
 		glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Quad Render");
 
-		glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
+		//Bind buffer where we will draw
+		glBindFramebuffer(GL_FRAMEBUFFER, quadFramebuffer);
+		
+		Color backgroundColor = engine->camera->background;
+		//glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
+		glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glViewport(0, 0, engine->window->width, engine->window->height);
+		glDisable(GL_DEPTH_TEST);
 
 		quadShader->Use();
 
@@ -446,7 +480,6 @@ void ModuleRenderer3D::RenderQuad()
 		glBindVertexArray(0);
 
 		glBindTexture(GL_TEXTURE_2D, 0);
-		//glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 		glUseProgram(0);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -456,29 +489,48 @@ void ModuleRenderer3D::RenderQuad()
 
 void ModuleRenderer3D::GenerateBuffers()
 {
-	//FrameBuffer
-	glGenFramebuffers(1, &frameBuffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+	//Scene FrameBuffer
+	glGenFramebuffers(1, &sceneFramebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, sceneFramebuffer);
 
-	//Color Texture Buffers ===========================================================================================================
 	vec2 displaySize(engine->window->width, engine->window->height);
 
-	GenerateColorTexture(albedoAttachmentHandle, displaySize, GL_RGBA8, GL_COLOR_ATTACHMENT0);
+	GenerateColorTexture(albedoAttachmentHandle, displaySize, GL_RGBA, GL_COLOR_ATTACHMENT0);
 	GenerateColorTexture(normalsAttachmentHandle, displaySize, GL_RGBA16F, GL_COLOR_ATTACHMENT1);
 	GenerateColorTexture(positionAttachmentHandle, displaySize, GL_RGBA16F, GL_COLOR_ATTACHMENT2);
-	GenerateColorTexture(finalRenderAttachmentHandle, displaySize, GL_RGBA16F, GL_COLOR_ATTACHMENT3);
 
 	//Depth buffer
 	GenerateDepthTexture(depthAttachmentHandle, displaySize);
 
-	GLenum attachments[] = { GL_COLOR_ATTACHMENT0,  GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
+	GLenum attachments[] = { GL_COLOR_ATTACHMENT0,  GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
 	glDrawBuffers(ARRAY_COUNT(attachments), attachments);
 
 	//RenderBuffer
-	glGenRenderbuffers(1, &renderBuffer);
-	glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, engine->window->width, engine->window->height);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBuffer);
+	//glGenRenderbuffers(1, &renderBuffer);
+	//glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
+	//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, engine->window->width, engine->window->height);
+	//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBuffer);
+
+	CheckFramebufferStatus();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	//Quad FrameBuffer
+	//Generate a framebuffer for the quad
+	glGenFramebuffers(1, &quadFramebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, quadFramebuffer);
+	//Generate a texture to draw the quad
+	GenerateColorTexture(finalRenderAttachmentHandle, displaySize, GL_RGBA16F, GL_COLOR_ATTACHMENT0);
+
+	CheckFramebufferStatus();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+bool ModuleRenderer3D::CheckFramebufferStatus()
+{
+	bool ret = true;
 
 	//Check for error
 	GLenum framebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -496,23 +548,24 @@ void ModuleRenderer3D::GenerateBuffers()
 		case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:		LOG_ERROR("GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS"); break;
 		default:											LOG_ERROR("Unknown framebuffer status error") break;
 		}
+
+		ret = false;
 	}
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	return ret;
 }
 
-void ModuleRenderer3D::GenerateColorTexture(GLuint& colorAttachmentHandle, vec2 displaySize, GLint internalFormat, GLuint glColorAttachment)
+void ModuleRenderer3D::GenerateColorTexture(GLuint& textureAttachmentHandle, vec2 displaySize, GLint internalFormat, GLuint glColorAttachment)
 {
-	glGenTextures(1, &colorAttachmentHandle);
-	glBindTexture(GL_TEXTURE_2D, colorAttachmentHandle);
-	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, displaySize.x, displaySize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glGenTextures(1, &textureAttachmentHandle);
+	glBindTexture(GL_TEXTURE_2D, textureAttachmentHandle);
+	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, displaySize.x, displaySize.y, 0, internalFormat, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, glColorAttachment, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, glColorAttachment, GL_TEXTURE_2D, textureAttachmentHandle, 0);
 	//glBindTexture(GL_TEXTURE_2D, 0);
 }
 
@@ -532,3 +585,17 @@ void ModuleRenderer3D::GenerateDepthTexture(GLuint& newDepthAttachmentHandle, ve
 void ModuleRenderer3D::BeginDebugDraw() {}
 
 void ModuleRenderer3D::EndDebugDraw() {}
+
+void ModuleRenderer3D::TakeScreenshot(int sceneFramebuffer)
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, sceneFramebuffer);
+
+	ILuint imageID = ilGenImage();
+	ilBindImage(imageID);
+	ilutGLScreen();
+	ilEnable(IL_FILE_OVERWRITE);
+	ilSaveImage("Screenshots/Screenshot.png");
+	ilDeleteImage(imageID);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
