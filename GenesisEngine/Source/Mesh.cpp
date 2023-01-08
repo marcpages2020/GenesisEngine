@@ -104,7 +104,8 @@ void GnMesh::Update()
 
 void GnMesh::Render()
 {
-	if (!engine->resources->Exists(_resourceUID)) {
+	if (!engine->resources->Exists(_resourceUID)) 
+	{
 		_resource = nullptr;
 		_resourceUID = 0u;
 		_AABB.SetNegativeInfinity();
@@ -120,9 +121,7 @@ void GnMesh::Render()
 	//vertices
 	glBindVertexArray(_resource->VAO);
 	glDrawElements(GL_TRIANGLES, _resource->indices_amount, GL_UNSIGNED_INT, NULL);
-
 	glBindVertexArray(0);
-	glUseProgram(0);
 
 	//if(draw_vertex_normals ||engine->renderer3D->draw_vertex_normals)
 	//	DrawVertexNormals();

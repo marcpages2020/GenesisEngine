@@ -80,6 +80,7 @@ public:
 	bool RenderSceneGeometry();
 	void GenerateQuad();
 	void RenderQuad();
+	void RenderEditor();
 
 	bool CheckFramebufferStatus();
 
@@ -89,7 +90,7 @@ private:
 	void GenerateDepthTexture(GLuint& newDepthAttachmentHandle, vec2 displaySize);
 	void BeginDebugDraw();
 	void EndDebugDraw();
-	void TakeScreenshot(int sceneFramebuffer);
+	void TakeScreenshot(int framebuffer, const char* name);
 	
 	GLuint sceneFramebuffer;
 	GLuint quadFramebuffer;
@@ -121,9 +122,7 @@ public:
 
 	bool vsync;
 	ResourceShader* defaultShader;
-
-	unsigned int quadVAO = 0;
-	unsigned int quadVBO;
+	vec2 imageSize;
 
 private: 
 	Camera* _mainCamera;

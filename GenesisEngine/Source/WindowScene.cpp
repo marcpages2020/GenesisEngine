@@ -73,7 +73,9 @@ void WindowScene::Draw()
 		engine->editor->mouseScenePosition.y = engine->input->GetMouseY() - engine->editor->sceneWindowOrigin.y;
 
 		if (engine->in_game)
+		{
 			DrawGameTimeDataOverlay();
+		}
 
 		if (engine->editor->image_size.x != window_size.x || engine->editor->image_size.y != window_size.y)
 		{

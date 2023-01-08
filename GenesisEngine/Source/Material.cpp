@@ -193,8 +193,10 @@ void Material::UseShader()
 		}
 
 	}
-	else {
-		shader->SetBool("hasNormalMap", false);}
+	else 
+	{
+		shader->SetBool("hasNormalMap", false);
+	}
 		
 }
 
